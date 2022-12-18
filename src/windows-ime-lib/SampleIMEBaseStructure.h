@@ -157,7 +157,7 @@ public:
 
     T* Append()
     {
-        T newT;
+        T newT = {};
         _innerVect.push_back(newT);
         T& backT = _innerVect.back();
 
@@ -235,7 +235,7 @@ struct CCandidateListItem
     CStringRange _ItemString;
     CStringRange _FindKeyCode;
 
-	CCandidateListItem& CCandidateListItem::operator =( const CCandidateListItem& rhs)
+	CCandidateListItem& operator =( const CCandidateListItem& rhs)
 	{
 		_ItemString = rhs._ItemString;
 		_FindKeyCode = rhs._FindKeyCode;

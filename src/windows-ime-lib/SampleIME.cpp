@@ -230,41 +230,43 @@ STDAPI CSampleIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, D
         goto ExitError;
     }
 
-    ITfDocumentMgr* pDocMgrFocus = nullptr;
-    if (SUCCEEDED(_pThreadMgr->GetFocus(&pDocMgrFocus)) && (pDocMgrFocus != nullptr))
     {
-        _InitTextEditSink(pDocMgrFocus);
-        pDocMgrFocus->Release();
-    }
+        ITfDocumentMgr* pDocMgrFocus = nullptr;
+        if (SUCCEEDED(_pThreadMgr->GetFocus(&pDocMgrFocus)) && (pDocMgrFocus != nullptr))
+        {
+            _InitTextEditSink(pDocMgrFocus);
+            pDocMgrFocus->Release();
+        }
 
-    if (!_InitKeyEventSink())
-    {
-        goto ExitError;
-    }
+        if (!_InitKeyEventSink())
+        {
+            goto ExitError;
+        }
 
-    if (!_InitActiveLanguageProfileNotifySink())
-    {
-        goto ExitError;
-    }
+        if (!_InitActiveLanguageProfileNotifySink())
+        {
+            goto ExitError;
+        }
 
-    if (!_InitThreadFocusSink())
-    {
-        goto ExitError;
-    }
+        if (!_InitThreadFocusSink())
+        {
+            goto ExitError;
+        }
 
-    if (!_InitDisplayAttributeGuidAtom())
-    {
-        goto ExitError;
-    }
+        if (!_InitDisplayAttributeGuidAtom())
+        {
+            goto ExitError;
+        }
 
-    if (!_InitFunctionProviderSink())
-    {
-        goto ExitError;
-    }
+        if (!_InitFunctionProviderSink())
+        {
+            goto ExitError;
+        }
 
-    if (!_AddTextProcessorEngine())
-    {
-        goto ExitError;
+        if (!_AddTextProcessorEngine())
+        {
+            goto ExitError;
+        }
     }
 
     return S_OK;

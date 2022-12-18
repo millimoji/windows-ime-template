@@ -89,8 +89,6 @@ private:
     void _DeleteShadowWnd();
     void _DeleteVScrollBarWnd();
 
-    friend COLORREF _AdjustTextColor(_In_ COLORREF crColor, _In_ COLORREF crBkColor);
-
 private:
     UINT _currentSelection;
     CSampleImeArray<CCandidateListItem> _candidateList;
@@ -116,3 +114,5 @@ private:
     BOOL _dontAdjustOnEmptyItemPage;
     BOOL _isStoreAppMode;
 };
+
+extern COLORREF _AdjustTextColor(_In_ COLORREF crColor, _In_ COLORREF crBkColor);

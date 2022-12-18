@@ -131,9 +131,9 @@ public:
     CCompositionProcessorEngine* GetCompositionProcessorEngine() { return (_pCompositionProcessorEngine); };
 
     // comless helpers
-    static HRESULT CSampleIME::CreateInstance(REFCLSID rclsid, REFIID riid, _Outptr_result_maybenull_ LPVOID* ppv, _Out_opt_ HINSTANCE* phInst, BOOL isComLessMode);
-    static HRESULT CSampleIME::ComLessCreateInstance(REFGUID rclsid, REFIID riid, _Outptr_result_maybenull_ void **ppv, _Out_opt_ HINSTANCE *phInst);
-    static HRESULT CSampleIME::GetComModuleName(REFGUID rclsid, _Out_writes_(cchPath)WCHAR* wchPath, DWORD cchPath);
+    static HRESULT CreateInstance(REFCLSID rclsid, REFIID riid, _Outptr_result_maybenull_ LPVOID* ppv, _Out_opt_ HINSTANCE* phInst, BOOL isComLessMode);
+    static HRESULT ComLessCreateInstance(REFGUID rclsid, REFIID riid, _Outptr_result_maybenull_ void **ppv, _Out_opt_ HINSTANCE *phInst);
+    static HRESULT GetComModuleName(REFGUID rclsid, _Out_writes_(cchPath)WCHAR* wchPath, DWORD cchPath);
 
 private:
     // functions for the composition object.
@@ -200,8 +200,8 @@ private:
 
 private:
     ITfThreadMgr* _pThreadMgr;
-    TfClientId _tfClientId;
-    DWORD _dwActivateFlags;
+    TfClientId _tfClientId = {};
+    DWORD _dwActivateFlags = {};
 
     // The cookie of ThreadMgrEventSink
     DWORD _threadMgrEventSinkCookie;
@@ -219,14 +219,14 @@ private:
     CCompositionProcessorEngine* _pCompositionProcessorEngine;
 
     // Language bar item object.
-    CLangBarItemButton* _pLangBarItem;
+    CLangBarItemButton* _pLangBarItem = {};
 
     // the current composition object.
     ITfComposition* _pComposition;
 
     // guidatom for the display attibute.
-    TfGuidAtom _gaDisplayAttributeInput;
-    TfGuidAtom _gaDisplayAttributeConverted;
+    TfGuidAtom _gaDisplayAttributeInput = {};
+    TfGuidAtom _gaDisplayAttributeConverted = {};
 
     CANDIDATE_MODE _candidateMode;
     CCandidateListUIPresenter *_pCandidateListUIPresenter;
@@ -244,5 +244,5 @@ private:
     LONG _refCount;
 
     // Support the search integration
-    ITfFnSearchCandidateProvider* _pITfFnSearchCandidateProvider;
+    ITfFnSearchCandidateProvider* _pITfFnSearchCandidateProvider = {};
 };

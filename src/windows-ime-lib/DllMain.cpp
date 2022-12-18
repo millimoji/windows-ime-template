@@ -7,6 +7,7 @@
 
 #include "Private.h"
 #include "Globals.h"
+#include "WindowsImeLib.h"
 
 //+---------------------------------------------------------------------------
 //
@@ -14,7 +15,7 @@
 //
 //----------------------------------------------------------------------------
 
-BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID pvReserved)
+BOOL WindowsImeLib_DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID pvReserved)
 {
 	pvReserved;
 

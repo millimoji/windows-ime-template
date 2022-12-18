@@ -103,8 +103,6 @@ private:
 
     static HRESULT _CandWndCallback(_In_ void *pv, _In_ enum CANDWND_ACTION action);
 
-    friend COLORREF _AdjustTextColor(_In_ COLORREF crColor, _In_ COLORREF crBkColor);
-
     HRESULT _UpdateUIElement();
 
     HRESULT ToShowCandidateWindow();

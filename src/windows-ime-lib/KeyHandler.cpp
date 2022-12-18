@@ -451,22 +451,24 @@ HRESULT CSampleIME::_HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext
     //
     // Add virtual key to composition processor engine
     //
-    CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine;
-
-    DWORD_PTR vKeyLen = pCompositionProcessorEngine->GetVirtualKeyLength();
-
-    if (vKeyLen)
     {
-        pCompositionProcessorEngine->RemoveVirtualKey(vKeyLen - 1);
+        CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
+        pCompositionProcessorEngine = _pCompositionProcessorEngine;
 
-        if (pCompositionProcessorEngine->GetVirtualKeyLength())
+        DWORD_PTR vKeyLen = pCompositionProcessorEngine->GetVirtualKeyLength();
+
+        if (vKeyLen)
         {
-            _HandleCompositionInputWorker(pCompositionProcessorEngine, ec, pContext);
-        }
-        else
-        {
-            _HandleCancel(ec, pContext);
+            pCompositionProcessorEngine->RemoveVirtualKey(vKeyLen - 1);
+
+            if (pCompositionProcessorEngine->GetVirtualKeyLength())
+            {
+                _HandleCompositionInputWorker(pCompositionProcessorEngine, ec, pContext);
+            }
+            else
+            {
+                _HandleCancel(ec, pContext);
+            }
         }
     }
 

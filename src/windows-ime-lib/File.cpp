@@ -202,40 +202,43 @@ VOID CFile::NextLine()
     {
         goto SetEOF;
     }
-    const WCHAR *pwch = GetBufferInWChar();
 
-    DWORD_PTR indexTrace = 0;       // in char
+    {
+        const WCHAR* pwch = GetBufferInWChar();
 
-    if (FindChar(L'\r', pwch, totalBufLen, &indexTrace) != S_OK)
-    {
-        goto SetEOF;
-    }
-    if (indexTrace >= DWORD_MAX -1)
-    {
-        goto SetEOF;
-    }
+        DWORD_PTR indexTrace = 0;       // in char
 
-    indexTrace++;  // skip CR
-    totalBufLen -= indexTrace;
-    if (totalBufLen == 0)
-    {
-        goto SetEOF;
-    }
+        if (FindChar(L'\r', pwch, totalBufLen, &indexTrace) != S_OK)
+        {
+            goto SetEOF;
+        }
+        if (indexTrace >= DWORD_MAX - 1)
+        {
+            goto SetEOF;
+        }
 
-    if (pwch[indexTrace] != L'\n')
-    {
+        indexTrace++;  // skip CR
+        totalBufLen -= indexTrace;
+        if (totalBufLen == 0)
+        {
+            goto SetEOF;
+        }
+
+        if (pwch[indexTrace] != L'\n')
+        {
+            _filePosPointer += (indexTrace * sizeof(WCHAR));
+            return;
+        }
+
+        indexTrace++;
+        totalBufLen--;
+        if (totalBufLen == 0)
+        {
+            goto SetEOF;
+        }
+
         _filePosPointer += (indexTrace * sizeof(WCHAR));
-        return;
     }
-
-    indexTrace++;
-    totalBufLen--;
-    if (totalBufLen == 0)
-    {
-        goto SetEOF;
-    }
-
-    _filePosPointer += (indexTrace * sizeof(WCHAR));
 
     return;
 

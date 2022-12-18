@@ -354,7 +354,7 @@ LRESULT CALLBACK CCandidateWindow::_WindowProcCallback(_In_ HWND wndHandle, UINT
     case WM_MBUTTONUP:
     case WM_RBUTTONUP:
         {
-            POINT point;
+            POINT point = {};
 
             POINTSTOPOINT(point, MAKEPOINTS(lParam));
 
@@ -613,7 +613,7 @@ void CCandidateWindow::_DrawList(_In_ HDC dcHandle, _In_ UINT iIndex, _In_ RECT 
     int cyLine = max(_cyRow, _TextMetric.tmHeight);
     int cyOffset = (cyLine == _cyRow ? (cyLine-_TextMetric.tmHeight)/2 : 0);
 
-    RECT rc;
+    RECT rc = {};
 
 	const size_t lenOfPageCount = 16;
     for (;
@@ -1035,7 +1035,7 @@ BOOL CCandidateWindow::_SetSelectionOffset(_In_ int offSet)
     if ((offSet == 1 || offSet == -1) &&
         fCurrentPageHasEmptyItems && _PageIndex.Count() > 1)
     {
-        int iPageIndex = *_PageIndex.GetAt(_PageIndex.Count() - 1);
+        int iPageIndex = *_PageIndex.GetAt(static_cast<size_t>(_PageIndex.Count() - 1));
         // Moving on the last page and last page has empty items.
         if (newOffset >= iPageIndex)
         {
@@ -1127,6 +1127,7 @@ HRESULT CCandidateWindow::_SetPageIndex(UINT *pIndex, _In_ UINT uPageCnt)
 HRESULT CCandidateWindow::_GetCurrentPage(_Inout_ UINT *pCurrentPage)
 {
     HRESULT hr = S_OK;
+    UINT i = 0;
 
     if (pCurrentPage == nullptr)
     {
@@ -1148,7 +1149,6 @@ HRESULT CCandidateWindow::_GetCurrentPage(_Inout_ UINT *pCurrentPage)
          goto Exit;
     }
 
-    UINT i = 0;
     for (i = 1; i < _PageIndex.Count(); i++)
     {
         UINT uPageIndex = *_PageIndex.GetAt(i);
@@ -1382,35 +1382,37 @@ HRESULT CCandidateWindow::_AdjustPageIndex(_Inout_ UINT & currentPage, _Inout_ U
         goto Exit;
     }
 
-    UINT tempSelection = _currentSelection;
-
-    // Last page
-    UINT candNum = _candidateList.Count();
-    UINT pageNum = _PageIndex.Count();
-
-    if ((currentPageIndex > candNum - candidateListPageCnt) && (pageNum > 0) && (currentPage == (pageNum - 1)))
     {
-        _currentSelection = candNum - candidateListPageCnt;
+        UINT tempSelection = _currentSelection;
 
-        _AdjustPageIndexForSelection();
+        // Last page
+        UINT candNum = _candidateList.Count();
+        UINT pageNum = _PageIndex.Count();
 
-        _currentSelection = tempSelection;
-
-        if (FAILED(_GetCurrentPage(&currentPage)))
+        if ((currentPageIndex > candNum - candidateListPageCnt) && (pageNum > 0) && (currentPage == (pageNum - 1)))
         {
-            goto Exit;
+            _currentSelection = candNum - candidateListPageCnt;
+
+            _AdjustPageIndexForSelection();
+
+            _currentSelection = tempSelection;
+
+            if (FAILED(_GetCurrentPage(&currentPage)))
+            {
+                goto Exit;
+            }
+
+            currentPageIndex = *_PageIndex.GetAt(currentPage);
         }
+        // First page
+        else if ((currentPageIndex < candidateListPageCnt) && (currentPage == 0))
+        {
+            _currentSelection = 0;
 
-        currentPageIndex = *_PageIndex.GetAt(currentPage);
-    }
-    // First page
-    else if ((currentPageIndex < candidateListPageCnt) && (currentPage == 0))
-    {
-        _currentSelection = 0;
+            _AdjustPageIndexForSelection();
 
-        _AdjustPageIndexForSelection();
-
-        _currentSelection = tempSelection;
+            _currentSelection = tempSelection;
+        }
     }
 
     _dontAdjustOnEmptyItemPage = FALSE;

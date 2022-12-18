@@ -85,7 +85,12 @@ HRESULT CSampleIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pCo
     const WCHAR* pCandidateString = nullptr;
     BSTR pbstr = nullptr;
     CStringRange candidateString;
+    BOOL fMakePhraseFromText = FALSE;
     CSampleImeArray<CCandidateListItem> candidatePhraseList;
+    CANDIDATE_MODE tempCandMode = CANDIDATE_NONE;
+    CCandidateListUIPresenter* pTempCandListUIPresenter = nullptr;
+    ITfDocumentMgr* pDocumentMgr = nullptr;
+    HRESULT hrStartCandidateList = E_FAIL;
 
     if (nullptr == _pCandidateListUIPresenter)
     {
@@ -102,7 +107,7 @@ HRESULT CSampleIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pCo
 
     candidateString.Set(pCandidateString, candidateLen);
 
-    BOOL fMakePhraseFromText = _pCompositionProcessorEngine->IsMakePhraseFromText();
+    fMakePhraseFromText = _pCompositionProcessorEngine->IsMakePhraseFromText();
     if (fMakePhraseFromText)
     {
         _pCompositionProcessorEngine->GetCandidateStringInConverted(candidateString, &candidatePhraseList);
@@ -113,8 +118,6 @@ HRESULT CSampleIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pCo
 
     // We have a candidate list if candidatePhraseList.Cnt is not 0
     // If we are showing reverse conversion, use CCandidateListUIPresenter
-    CANDIDATE_MODE tempCandMode = CANDIDATE_NONE;
-    CCandidateListUIPresenter* pTempCandListUIPresenter = nullptr;
     if (candidatePhraseList.Count())
     {
         tempCandMode = CANDIDATE_WITH_NEXT_COMPOSITION;
@@ -132,8 +135,6 @@ HRESULT CSampleIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pCo
 
     // call _Start*Line for CCandidateListUIPresenter or CReadingLine
     // we don't cache the document manager object so get it from pContext.
-    ITfDocumentMgr* pDocumentMgr = nullptr;
-    HRESULT hrStartCandidateList = E_FAIL;
     if (pContext->GetDocumentMgr(&pDocumentMgr) == S_OK)
     {
         ITfRange* pRange = nullptr;
@@ -1038,7 +1039,7 @@ HRESULT CCandidateListUIPresenter::_CandidateChangeNotification(_In_ enum CANDWN
     ITfDocumentMgr* pDocumentMgr = nullptr;
     ITfContext* pContext = nullptr;
 
-    _KEYSTROKE_STATE KeyState;
+    _KEYSTROKE_STATE KeyState = {};
     KeyState.Category = _Category;
     KeyState.Function = FUNCTION_FINALIZE_CANDIDATELIST;
 
@@ -1066,16 +1067,18 @@ HRESULT CCandidateListUIPresenter::_CandidateChangeNotification(_In_ enum CANDWN
         goto Exit;
     }
 
-    CKeyHandlerEditSession *pEditSession = new (std::nothrow) CKeyHandlerEditSession(_pTextService, pContext, 0, 0, KeyState);
-    if (nullptr != pEditSession)
     {
-        HRESULT hrSession = S_OK;
-        hr = pContext->RequestEditSession(tfClientId, pEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hrSession);
-        if (hrSession == TF_E_SYNCHRONOUS || hrSession == TS_E_READONLY)
+        CKeyHandlerEditSession* pEditSession = new (std::nothrow) CKeyHandlerEditSession(_pTextService, pContext, 0, 0, KeyState);
+        if (nullptr != pEditSession)
         {
-            hr = pContext->RequestEditSession(tfClientId, pEditSession, TF_ES_ASYNC | TF_ES_READWRITE, &hrSession);
+            HRESULT hrSession = S_OK;
+            hr = pContext->RequestEditSession(tfClientId, pEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hrSession);
+            if (hrSession == TF_E_SYNCHRONOUS || hrSession == TS_E_READONLY)
+            {
+                hr = pContext->RequestEditSession(tfClientId, pEditSession, TF_ES_ASYNC | TF_ES_READWRITE, &hrSession);
+            }
+            pEditSession->Release();
         }
-        pEditSession->Release();
     }
 
     pContext->Release();
@@ -1223,12 +1226,14 @@ HRESULT CCandidateListUIPresenter::BeginUIElement()
         goto Exit;
     }
 
-    ITfUIElementMgr* pUIElementMgr = nullptr;
-    hr = pThreadMgr->QueryInterface(IID_ITfUIElementMgr, (void **)&pUIElementMgr);
-    if (hr == S_OK)
     {
-        pUIElementMgr->BeginUIElement(this, &_isShowMode, &_uiElementId);
-        pUIElementMgr->Release();
+        ITfUIElementMgr* pUIElementMgr = nullptr;
+        hr = pThreadMgr->QueryInterface(IID_ITfUIElementMgr, (void**)&pUIElementMgr);
+        if (hr == S_OK)
+        {
+            pUIElementMgr->BeginUIElement(this, &_isShowMode, &_uiElementId);
+            pUIElementMgr->Release();
+        }
     }
 
 Exit:
@@ -1246,12 +1251,14 @@ HRESULT CCandidateListUIPresenter::EndUIElement()
         goto Exit;
     }
 
-    ITfUIElementMgr* pUIElementMgr = nullptr;
-    hr = pThreadMgr->QueryInterface(IID_ITfUIElementMgr, (void **)&pUIElementMgr);
-    if (hr == S_OK)
     {
-        pUIElementMgr->EndUIElement(_uiElementId);
-        pUIElementMgr->Release();
+        ITfUIElementMgr* pUIElementMgr = nullptr;
+        hr = pThreadMgr->QueryInterface(IID_ITfUIElementMgr, (void**)&pUIElementMgr);
+        if (hr == S_OK)
+        {
+            pUIElementMgr->EndUIElement(_uiElementId);
+            pUIElementMgr->Release();
+        }
     }
 
 Exit:
@@ -1274,17 +1281,19 @@ HRESULT CCandidateListUIPresenter::MakeCandidateWindow(_In_ ITfContext *pContext
         goto Exit;
     }
 
-    HWND parentWndHandle = nullptr;
-    ITfContextView* pView = nullptr;
-    if (SUCCEEDED(pContextDocument->GetActiveView(&pView)))
     {
-        pView->GetWnd(&parentWndHandle);
-    }
+        HWND parentWndHandle = nullptr;
+        ITfContextView* pView = nullptr;
+        if (SUCCEEDED(pContextDocument->GetActiveView(&pView)))
+        {
+            pView->GetWnd(&parentWndHandle);
+        }
 
-    if (!_pCandidateWnd->_Create(_atom, wndWidth, parentWndHandle))
-    {
-        hr = E_OUTOFMEMORY;
-        goto Exit;
+        if (!_pCandidateWnd->_Create(_atom, wndWidth, parentWndHandle))
+        {
+            hr = E_OUTOFMEMORY;
+            goto Exit;
+        }
     }
 
 Exit:

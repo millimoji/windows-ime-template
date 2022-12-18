@@ -8,6 +8,7 @@
 #include "Private.h"
 #include "Globals.h"
 #include "SampleIME.h"
+#include "WindowsImeLib.h"
 
 // from Register.cpp
 BOOL RegisterProfiles();
@@ -49,7 +50,9 @@ void DllRelease(void)
         {
             FreeGlobalObjects();
         }
+        __pragma(warning(push)) __pragma(warning(disable:28112))
         assert(Global::dllRefCount == -1);
+        __pragma(warning(pop))
 
         LeaveCriticalSection(&Global::CS);
     }
@@ -136,10 +139,12 @@ STDAPI_(ULONG) CClassFactory::Release()
 //
 //----------------------------------------------------------------------------
 
+__pragma(warning(push)) __pragma(warning(disable:6388))
 STDAPI CClassFactory::CreateInstance(_In_opt_ IUnknown *pUnkOuter, _In_ REFIID riid, _COM_Outptr_ void **ppvObj)
 {
     return _pfnCreateInstance(pUnkOuter, riid, ppvObj);
 }
+__pragma(warning(pop))
 
 //+---------------------------------------------------------------------------
 //
@@ -197,11 +202,7 @@ void FreeGlobalObjects(void)
 //  DllGetClassObject
 //
 //----------------------------------------------------------------------------
-_Check_return_
-STDAPI  DllGetClassObject(
-	_In_ REFCLSID rclsid, 
-	_In_ REFIID riid, 
-	_Outptr_ void** ppv)
+HRESULT WindowsImeLib_DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ void** ppv)
 {
     if (classFactoryObjects[0] == nullptr)
     {
@@ -242,7 +243,7 @@ STDAPI  DllGetClassObject(
 //
 //----------------------------------------------------------------------------
 
-STDAPI DllCanUnloadNow(void)
+HRESULT WindowsImeLib_DllCanUnloadNow(void)
 {
     if (Global::dllRefCount >= 0)
     {
@@ -258,7 +259,7 @@ STDAPI DllCanUnloadNow(void)
 //
 //----------------------------------------------------------------------------
 
-STDAPI DllUnregisterServer(void)
+HRESULT WindowsImeLib_DllUnregisterServer(void)
 {
     UnregisterProfiles();
     UnregisterCategories();
@@ -273,7 +274,7 @@ STDAPI DllUnregisterServer(void)
 //
 //----------------------------------------------------------------------------
 
-STDAPI DllRegisterServer(void)
+HRESULT WindowsImeLib_DllRegisterServer(void)
 {
     if ((!RegisterServer()) || (!RegisterProfiles()) || (!RegisterCategories()))
     {
