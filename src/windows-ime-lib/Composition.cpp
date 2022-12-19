@@ -232,7 +232,7 @@ HRESULT CSampleIME::_SetInputString(TfEditCookie ec, _In_ ITfContext *pContext, 
     // update the selection, we'll make it an insertion point just past
     // the inserted text.
     ITfRange* pSelection = nullptr;
-    TF_SELECTION sel;
+    TF_SELECTION sel = {};
 
     if ((pRange != nullptr) && (pRange->Clone(&pSelection) == S_OK))
     {
@@ -358,15 +358,17 @@ BOOL CSampleIME::_SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pCont
         goto Exit;
     }
 
-    VARIANT var;
-    var.vt = VT_I4;   // we're going to set DWORD
-    var.lVal = langidProfile; 
-
-    hr = pLanguageProperty->SetValue(ec, pRangeComposition, &var);
-    if (FAILED(hr))
     {
-        ret = FALSE;
-        goto Exit;
+        VARIANT var = {};
+        var.vt = VT_I4;   // we're going to set DWORD
+        var.lVal = langidProfile;
+
+        hr = pLanguageProperty->SetValue(ec, pRangeComposition, &var);
+        if (FAILED(hr))
+        {
+            ret = FALSE;
+            goto Exit;
+        }
     }
 
     pLanguageProperty->Release();
