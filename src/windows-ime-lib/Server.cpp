@@ -8,7 +8,7 @@
 #include "Private.h"
 #include "Globals.h"
 #include "SampleIME.h"
-#include "WindowsImeLib.h"
+#include "../WindowsImeLib.h"
 
 // from Register.cpp
 BOOL RegisterProfiles();
@@ -202,7 +202,7 @@ void FreeGlobalObjects(void)
 //  DllGetClassObject
 //
 //----------------------------------------------------------------------------
-HRESULT WindowsImeLib_DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ void** ppv)
+HRESULT WindowsImeLib::DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ void** ppv)
 {
     if (classFactoryObjects[0] == nullptr)
     {
@@ -243,7 +243,7 @@ HRESULT WindowsImeLib_DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, 
 //
 //----------------------------------------------------------------------------
 
-HRESULT WindowsImeLib_DllCanUnloadNow(void)
+HRESULT WindowsImeLib::DllCanUnloadNow(void)
 {
     if (Global::dllRefCount >= 0)
     {
@@ -259,7 +259,7 @@ HRESULT WindowsImeLib_DllCanUnloadNow(void)
 //
 //----------------------------------------------------------------------------
 
-HRESULT WindowsImeLib_DllUnregisterServer(void)
+HRESULT WindowsImeLib::DllUnregisterServer(void)
 {
     UnregisterProfiles();
     UnregisterCategories();
@@ -274,7 +274,7 @@ HRESULT WindowsImeLib_DllUnregisterServer(void)
 //
 //----------------------------------------------------------------------------
 
-HRESULT WindowsImeLib_DllRegisterServer(void)
+HRESULT WindowsImeLib::DllRegisterServer(void)
 {
     if ((!RegisterServer()) || (!RegisterProfiles()) || (!RegisterCategories()))
     {

@@ -7,7 +7,6 @@
 
 #include "Private.h"
 #include "SampleIME.h"
-#include "CompositionProcessorEngine.h"
 #include "LanguageBar.h"
 #include "Globals.h"
 #include "Compartment.h"
@@ -61,29 +60,10 @@ void CSampleIME::_UpdateLanguageBarOnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus)
         }
     }
 
-    CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine;
+    WindowsImeLib::ICompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
+    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
 
     pCompositionProcessorEngine->SetLanguageBarStatus(TF_LBI_STATUS_DISABLED, needDisableButtons);
-}
-
-//+---------------------------------------------------------------------------
-//
-// CCompositionProcessorEngine::SetLanguageBarStatus
-//
-//----------------------------------------------------------------------------
-
-VOID CCompositionProcessorEngine::SetLanguageBarStatus(DWORD status, BOOL isSet)
-{
-    if (_pLanguageBar_IMEMode) {
-        _pLanguageBar_IMEMode->SetStatus(status, isSet);
-    }
-    if (_pLanguageBar_DoubleSingleByte) {
-        _pLanguageBar_DoubleSingleByte->SetStatus(status, isSet);
-    }
-    if (_pLanguageBar_Punctuation) {
-        _pLanguageBar_Punctuation->SetStatus(status, isSet);
-    }
 }
 
 //+---------------------------------------------------------------------------

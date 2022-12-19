@@ -9,7 +9,6 @@
 #include "KeyHandlerEditSession.h"
 #include "EditSession.h"
 #include "SampleIME.h"
-#include "CompositionProcessorEngine.h"
 #include "KeyStateCategory.h"
 
 //////////////////////////////////////////////////////////////////////

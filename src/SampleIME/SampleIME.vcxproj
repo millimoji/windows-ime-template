@@ -27,7 +27,23 @@
     <None Include="SampleIME.def" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BaseDictionaryEngine.cpp" />
+    <ClCompile Include="CompositionProcessorEngine.cpp" />
+    <ClCompile Include="DictionaryParser.cpp" />
+    <ClCompile Include="DictionarySearch.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="File.cpp" />
+    <ClCompile Include="FileMapping.cpp" />
+    <ClCompile Include="TableDictionaryEngine.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BaseDictionaryEngine.h" />
+    <ClInclude Include="CompositionProcessorEngine.h" />
+    <ClInclude Include="DictionaryParser.h" />
+    <ClInclude Include="DictionarySearch.h" />
+    <ClInclude Include="File.h" />
+    <ClInclude Include="FileMapping.h" />
+    <ClInclude Include="TableDictionaryEngine.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

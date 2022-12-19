@@ -7,6 +7,7 @@
 
 
 #pragma once
+#include <msctf.h>
 
 class CSampleIME;
 

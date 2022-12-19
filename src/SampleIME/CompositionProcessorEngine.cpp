@@ -18,74 +18,6 @@
 
 //////////////////////////////////////////////////////////////////////
 //
-// CSampleIME implementation.
-//
-//////////////////////////////////////////////////////////////////////
-
-//+---------------------------------------------------------------------------
-//
-// _AddTextProcessorEngine
-//
-//----------------------------------------------------------------------------
-
-BOOL CSampleIME::_AddTextProcessorEngine()
-{
-    LANGID langid = 0;
-    CLSID clsid = GUID_NULL;
-    GUID guidProfile = GUID_NULL;
-
-    // Get default profile.
-    CTfInputProcessorProfile profile;
-
-    if (FAILED(profile.CreateInstance()))
-    {
-        return FALSE;
-    }
-
-    if (FAILED(profile.GetCurrentLanguage(&langid)))
-    {
-        return FALSE;
-    }
-
-    if (FAILED(profile.GetDefaultLanguageProfile(langid, GUID_TFCAT_TIP_KEYBOARD, &clsid, &guidProfile)))
-    {
-        return FALSE;
-    }
-
-    // Is this already added?
-    if (_pCompositionProcessorEngine != nullptr)
-    {
-        LANGID langidProfile = 0;
-        GUID guidLanguageProfile = GUID_NULL;
-
-        guidLanguageProfile = _pCompositionProcessorEngine->GetLanguageProfile(&langidProfile);
-        if ((langid == langidProfile) && IsEqualGUID(guidProfile, guidLanguageProfile))
-        {
-            return TRUE;
-        }
-    }
-
-    // Create composition processor engine
-    if (_pCompositionProcessorEngine == nullptr)
-    {
-        _pCompositionProcessorEngine = new (std::nothrow) CCompositionProcessorEngine();
-    }
-    if (!_pCompositionProcessorEngine)
-    {
-        return FALSE;
-    }
-
-    // setup composition processor engine
-    if (FALSE == _pCompositionProcessorEngine->SetupLanguageProfile(langid, guidProfile, _GetThreadMgr(), _GetClientId(), _IsSecureMode(), _IsComLess()))
-    {
-        return FALSE;
-    }
-
-    return TRUE;
-}
-
-//////////////////////////////////////////////////////////////////////
-//
 // CompositionProcessorEngine implementation.
 //
 //////////////////////////////////////////////////////////////////////
@@ -695,17 +627,17 @@ void CCompositionProcessorEngine::SetKeystrokeTable(_Inout_ CSampleImeArray<_KEY
 
 void CCompositionProcessorEngine::SetupPreserved(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId)
 {
-    TF_PRESERVEDKEY preservedKeyImeMode;
+    TF_PRESERVEDKEY preservedKeyImeMode = {};
     preservedKeyImeMode.uVKey = VK_SHIFT;
     preservedKeyImeMode.uModifiers = _TF_MOD_ON_KEYUP_SHIFT_ONLY;
     SetPreservedKey(Global::SampleIMEGuidImeModePreserveKey, preservedKeyImeMode, Global::ImeModeDescription, &_PreservedKey_IMEMode);
 
-    TF_PRESERVEDKEY preservedKeyDoubleSingleByte;
+    TF_PRESERVEDKEY preservedKeyDoubleSingleByte = {};
     preservedKeyDoubleSingleByte.uVKey = VK_SPACE;
     preservedKeyDoubleSingleByte.uModifiers = TF_MOD_SHIFT;
     SetPreservedKey(Global::SampleIMEGuidDoubleSingleBytePreserveKey, preservedKeyDoubleSingleByte, Global::DoubleSingleByteDescription, &_PreservedKey_DoubleSingleByte);
 
-    TF_PRESERVEDKEY preservedKeyPunctuation;
+    TF_PRESERVEDKEY preservedKeyPunctuation = {};
     preservedKeyPunctuation.uVKey = VK_OEM_PERIOD;
     preservedKeyPunctuation.uModifiers = TF_MOD_CONTROL;
     SetPreservedKey(Global::SampleIMEGuidPunctuationPreserveKey, preservedKeyPunctuation, Global::PunctuationDescription, &_PreservedKey_Punctuation);
@@ -1539,7 +1471,7 @@ void CCompositionProcessorEngine::SetDefaultCandidateTextFont()
         Global::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, fontName);
         if (!Global::defaultlFontHandle)
         {
-			LOGFONT lf;
+            LOGFONT lf = {};
 			SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
             // Fall back to the default GUI font on failure.
             Global::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, lf.lfFaceName);
@@ -1938,3 +1870,23 @@ BOOL CCompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_
     }
     return FALSE;
 }
+
+//+---------------------------------------------------------------------------
+//
+// CCompositionProcessorEngine::SetLanguageBarStatus
+//
+//----------------------------------------------------------------------------
+
+VOID CCompositionProcessorEngine::SetLanguageBarStatus(DWORD status, BOOL isSet)
+{
+    if (_pLanguageBar_IMEMode) {
+        _pLanguageBar_IMEMode->SetStatus(status, isSet);
+    }
+    if (_pLanguageBar_DoubleSingleByte) {
+        _pLanguageBar_DoubleSingleByte->SetStatus(status, isSet);
+    }
+    if (_pLanguageBar_Punctuation) {
+        _pLanguageBar_Punctuation->SetStatus(status, isSet);
+    }
+}
+

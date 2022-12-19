@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "../WindowsImeLib.h"
 #include "sal.h"
 #include "TableDictionaryEngine.h"
 #include "KeyHandlerEditSession.h"
@@ -15,70 +16,74 @@
 #include "FileMapping.h"
 #include "Compartment.h"
 #include "define.h"
+#include "LanguageBar.h"
 
-class CCompositionProcessorEngine
+class CCompositionProcessorEngine : public std::enable_shared_from_this<CCompositionProcessorEngine>, public WindowsImeLib::ICompositionProcessorEngine
 {
 public:
     CCompositionProcessorEngine(void);
     ~CCompositionProcessorEngine(void);
 
-    BOOL SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode);
+    BOOL SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode) override;
 
     // Get language profile.
-    GUID GetLanguageProfile(LANGID *plangid)
+    GUID GetLanguageProfile(LANGID *plangid) override
     {
         *plangid = _langid;
         return _guidProfile;
     }
     // Get locale
-    LCID GetLocale()
+    LCID GetLocale() override
     {
         return MAKELCID(_langid, SORT_DEFAULT);
     }
 
-    BOOL IsVirtualKeyNeed(UINT uCode, _In_reads_(1) WCHAR *pwch, BOOL fComposing, CANDIDATE_MODE candidateMode, BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
+    BOOL IsVirtualKeyNeed(UINT uCode, _In_reads_(1) WCHAR *pwch, BOOL fComposing, CANDIDATE_MODE candidateMode, BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState) override;
 
-    BOOL AddVirtualKey(WCHAR wch);
-    void RemoveVirtualKey(DWORD_PTR dwIndex);
-    void PurgeVirtualKey();
+    BOOL AddVirtualKey(WCHAR wch) override;
+    void RemoveVirtualKey(DWORD_PTR dwIndex) override;
+    void PurgeVirtualKey() override;
 
-    DWORD_PTR GetVirtualKeyLength() { return _keystrokeBuffer.GetLength(); }
-    WCHAR GetVirtualKey(DWORD_PTR dwIndex);
+    DWORD_PTR GetVirtualKeyLength()  override { return _keystrokeBuffer.GetLength(); }
 
-    void GetReadingStrings(_Inout_ CSampleImeArray<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded);
-    void GetCandidateList(_Inout_ CSampleImeArray<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch);
-    void GetCandidateStringInConverted(CStringRange &searchString, _In_ CSampleImeArray<CCandidateListItem> *pCandidateList);
+    void GetReadingStrings(_Inout_ CSampleImeArray<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded) override;
+    void GetCandidateList(_Inout_ CSampleImeArray<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) override;
+    void GetCandidateStringInConverted(CStringRange &searchString, _In_ CSampleImeArray<CCandidateListItem> *pCandidateList) override;
 
     // Preserved key handler
-    void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
+    void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
 
     // Punctuation
-    BOOL IsPunctuation(WCHAR wch);
-    WCHAR GetPunctuation(WCHAR wch);
+    BOOL IsPunctuation(WCHAR wch) override;
+    WCHAR GetPunctuation(WCHAR wch) override;
 
-    BOOL IsDoubleSingleByte(WCHAR wch);
+    BOOL IsDoubleSingleByte(WCHAR wch) override;
+    BOOL IsMakePhraseFromText()  override { return _hasMakePhraseFromText; }
+
+    // Language bar control
+    void SetLanguageBarStatus(DWORD status, BOOL isSet) override;
+
+    void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) override;
+
+    void ShowAllLanguageBarIcons() override;
+    void HideAllLanguageBarIcons() override;
+
+    inline CCandidateRange *GetCandidateListIndexRange()  override { return &_candidateListIndexRange; }
+    inline UINT GetCandidateWindowWidth()  override { return _candidateWndWidth; }
+
+private:
+    WCHAR GetVirtualKey(DWORD_PTR dwIndex);
     BOOL IsWildcard() { return _isWildcard; }
     BOOL IsDisableWildcardAtFirst() { return _isDisableWildcardAtFirst; }
     BOOL IsWildcardChar(WCHAR wch) { return ((IsWildcardOneChar(wch) || IsWildcardAllChar(wch)) ? TRUE : FALSE); }
-    BOOL IsWildcardOneChar(WCHAR wch) { return (wch==L'?' ? TRUE : FALSE); }
-    BOOL IsWildcardAllChar(WCHAR wch) { return (wch==L'*' ? TRUE : FALSE); }
-    BOOL IsMakePhraseFromText() { return _hasMakePhraseFromText; }
+    BOOL IsWildcardOneChar(WCHAR wch) { return (wch == L'?' ? TRUE : FALSE); }
+    BOOL IsWildcardAllChar(WCHAR wch) { return (wch == L'*' ? TRUE : FALSE); }
     BOOL IsKeystrokeSort() { return _isKeystrokeSort; }
 
     // Dictionary engine
     BOOL IsDictionaryAvailable() { return (_pTableDictionaryEngine ? TRUE : FALSE); }
 
-    // Language bar control
-    void SetLanguageBarStatus(DWORD status, BOOL isSet);
-
-    void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr);
-
-    void ShowAllLanguageBarIcons();
-    void HideAllLanguageBarIcons();
-
-    inline CCandidateRange *GetCandidateListIndexRange() { return &_candidateListIndexRange; }
     inline UINT GetCandidateListPhraseModifier() { return _candidateListPhraseModifier; }
-    inline UINT GetCandidateWindowWidth() { return _candidateWndWidth; }
 
 private:
     void InitKeyStrokeTable();

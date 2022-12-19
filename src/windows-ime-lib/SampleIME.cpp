@@ -9,8 +9,8 @@
 #include "globals.h"
 #include "SampleIME.h"
 #include "CandidateListUIPresenter.h"
-#include "CompositionProcessorEngine.h"
 #include "Compartment.h"
+#include "TfInputProcessorProfile.h"
 
 //+---------------------------------------------------------------------------
 //
@@ -286,8 +286,7 @@ STDAPI CSampleIME::Deactivate()
 {
     if (_pCompositionProcessorEngine)
     {
-        delete _pCompositionProcessorEngine;
-        _pCompositionProcessorEngine = nullptr;
+        _pCompositionProcessorEngine.reset();
     }
 
     ITfContext* pContext = _pContext;
@@ -431,4 +430,72 @@ HRESULT CSampleIME::GetLayout(_Out_ TKBLayoutType *ptkblayoutType, _Out_ WORD *p
         hr = S_OK;
     }
     return hr;
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// CSampleIME implementation.
+//
+//////////////////////////////////////////////////////////////////////
+
+//+---------------------------------------------------------------------------
+//
+// _AddTextProcessorEngine
+//
+//----------------------------------------------------------------------------
+
+BOOL CSampleIME::_AddTextProcessorEngine()
+{
+    LANGID langid = 0;
+    CLSID clsid = GUID_NULL;
+    GUID guidProfile = GUID_NULL;
+
+    // Get default profile.
+    CTfInputProcessorProfile profile;
+
+    if (FAILED(profile.CreateInstance()))
+    {
+        return FALSE;
+    }
+
+    if (FAILED(profile.GetCurrentLanguage(&langid)))
+    {
+        return FALSE;
+    }
+
+    if (FAILED(profile.GetDefaultLanguageProfile(langid, GUID_TFCAT_TIP_KEYBOARD, &clsid, &guidProfile)))
+    {
+        return FALSE;
+    }
+
+    // Is this already added?
+    if (_pCompositionProcessorEngine != nullptr)
+    {
+        LANGID langidProfile = 0;
+        GUID guidLanguageProfile = GUID_NULL;
+
+        guidLanguageProfile = _pCompositionProcessorEngine->GetLanguageProfile(&langidProfile);
+        if ((langid == langidProfile) && IsEqualGUID(guidProfile, guidLanguageProfile))
+        {
+            return TRUE;
+        }
+    }
+
+    // Create composition processor engine
+    if (_pCompositionProcessorEngine == nullptr)
+    {
+        _pCompositionProcessorEngine = WindowsImeLib::g_processorFactory->CreateCompositionProcessorEngine();
+    }
+    if (!_pCompositionProcessorEngine)
+    {
+        return FALSE;
+    }
+
+    // setup composition processor engine
+    if (FALSE == _pCompositionProcessorEngine->SetupLanguageProfile(langid, guidProfile, _GetThreadMgr(), _GetClientId(), _IsSecureMode(), _IsComLess()))
+    {
+        return FALSE;
+    }
+
+    return TRUE;
 }

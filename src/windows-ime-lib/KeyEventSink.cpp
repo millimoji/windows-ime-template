@@ -9,7 +9,6 @@
 #include "Globals.h"
 #include "SampleIME.h"
 #include "CandidateListUIPresenter.h"
-#include "CompositionProcessorEngine.h"
 #include "KeyHandlerEditSession.h"
 #include "Compartment.h"
 
@@ -122,8 +121,8 @@ BOOL CSampleIME::_IsKeyEaten(_In_ ITfContext *pContext, UINT codeIn, _Out_ UINT 
     //
     // Get composition engine
     //
-    CCompositionProcessorEngine *pCompositionProcessorEngine;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine;
+    WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine;
+    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
 
     if (isOpen)
     {
@@ -132,7 +131,7 @@ BOOL CSampleIME::_IsKeyEaten(_In_ ITfContext *pContext, UINT codeIn, _Out_ UINT 
         //
         // eat only keys that CKeyHandlerEditSession can handles.
         //
-        if (pCompositionProcessorEngine->IsVirtualKeyNeed(*pCodeOut, pwch, _IsComposing(), _candidateMode, _isCandidateWithWildcard, pKeyState))
+        if (_pCompositionProcessorEngine->IsVirtualKeyNeed(*pCodeOut, pwch, _IsComposing(), _candidateMode, _isCandidateWithWildcard, pKeyState))
         {
             return TRUE;
         }
@@ -141,7 +140,7 @@ BOOL CSampleIME::_IsKeyEaten(_In_ ITfContext *pContext, UINT codeIn, _Out_ UINT 
     //
     // Punctuation
     //
-    if (pCompositionProcessorEngine->IsPunctuation(wch))
+    if (_pCompositionProcessorEngine->IsPunctuation(wch))
     {
         if ((_candidateMode == CANDIDATE_NONE) && isPunctuation)
         {
@@ -157,7 +156,7 @@ BOOL CSampleIME::_IsKeyEaten(_In_ ITfContext *pContext, UINT codeIn, _Out_ UINT 
     //
     // Double/Single byte
     //
-    if (isDoubleSingleByte && pCompositionProcessorEngine->IsDoubleSingleByte(wch))
+    if (isDoubleSingleByte && _pCompositionProcessorEngine->IsDoubleSingleByte(wch))
     {
         if (_candidateMode == CANDIDATE_NONE)
         {
@@ -403,10 +402,7 @@ STDAPI CSampleIME::OnPreservedKey(ITfContext *pContext, REFGUID rguid, BOOL *pIs
 {
 	pContext;
 
-    CCompositionProcessorEngine *pCompositionProcessorEngine;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine;
-
-    pCompositionProcessorEngine->OnPreservedKey(rguid, pIsEaten, _GetThreadMgr(), _GetClientId());
+    _pCompositionProcessorEngine->OnPreservedKey(rguid, pIsEaten, _GetThreadMgr(), _GetClientId());
 
     return S_OK;
 }

@@ -8,7 +8,6 @@
 #include "Private.h"
 #include "Globals.h"
 #include "SampleIME.h"
-#include "CompositionProcessorEngine.h"
 
 BOOL CSampleIME::VerifySampleIMECLSID(_In_ REFCLSID clsid)
 {

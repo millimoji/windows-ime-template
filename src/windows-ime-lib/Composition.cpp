@@ -8,7 +8,6 @@
 #include "Private.h"
 #include "Globals.h"
 #include "SampleIME.h"
-#include "CompositionProcessorEngine.h"
 
 //+---------------------------------------------------------------------------
 //
@@ -333,11 +332,8 @@ BOOL CSampleIME::_SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pCont
     HRESULT hr = S_OK;
     BOOL ret = TRUE;
 
-    CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine;
-
     LANGID langidProfile = 0;
-    pCompositionProcessorEngine->GetLanguageProfile(&langidProfile);
+    _pCompositionProcessorEngine->GetLanguageProfile(&langidProfile);
 
     ITfRange* pRangeComposition = nullptr;
     ITfProperty* pLanguageProperty = nullptr;
