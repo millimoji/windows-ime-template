@@ -9,7 +9,7 @@
 #pragma once
 
 #include "File.h"
-#include "SampleIMEBaseStructure.h"
+#include "../SampleIMEBaseStructure.h"
 
 class CBaseDictionaryEngine
 {

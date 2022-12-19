@@ -7,9 +7,9 @@
 
 #include "Private.h"
 #include "SampleIME.h"
-#include "LanguageBar.h"
-#include "Globals.h"
-#include "Compartment.h"
+#include "../LanguageBar.h"
+#include "../Globals.h"
+#include "../Compartment.h"
 
 //+---------------------------------------------------------------------------
 //

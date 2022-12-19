@@ -6,10 +6,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #include "Private.h"
-#include "resource.h"
+#include "../resource.h"
 #include "BaseWindow.h"
-#include "define.h"
-#include "SampleIMEBaseStructure.h"
+#include "../define.h"
+#include "../SampleIMEBaseStructure.h"
 
 namespace Global {
 HINSTANCE dllInstanceHandle;

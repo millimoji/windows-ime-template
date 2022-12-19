@@ -7,8 +7,7 @@
 
 #pragma once
 
-#include "../WindowsImeLib.h"
-#include "stdafx.h"
+#include "WindowsImeLib.h"
 #include <vector>
 #include "assert.h"
 #include <iostream>

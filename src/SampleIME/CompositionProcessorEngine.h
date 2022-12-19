@@ -8,15 +8,16 @@
 
 #pragma once
 
+#include "pch.h"
 #include "../WindowsImeLib.h"
 #include "sal.h"
 #include "TableDictionaryEngine.h"
-#include "KeyHandlerEditSession.h"
-#include "SampleIMEBaseStructure.h"
+// #include "KeyHandlerEditSession.h"
+#include "../SampleIMEBaseStructure.h"
 #include "FileMapping.h"
-#include "Compartment.h"
-#include "define.h"
-#include "LanguageBar.h"
+#include "../Compartment.h"
+#include "../define.h"
+#include "../LanguageBar.h"
 
 class CCompositionProcessorEngine : public std::enable_shared_from_this<CCompositionProcessorEngine>, public WindowsImeLib::ICompositionProcessorEngine
 {
@@ -113,7 +114,6 @@ private:
     static HRESULT CompartmentCallback(_In_ void *pv, REFGUID guidCompartment);
     void PrivateCompartmentsUpdated(_In_ ITfThreadMgr *pThreadMgr);
     void KeyboardOpenCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr);
-
     
     BOOL SetupDictionaryFile();
     CFile* GetDictionaryFile();

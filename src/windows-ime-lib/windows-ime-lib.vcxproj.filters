@@ -142,12 +142,6 @@
     <ClInclude Include="CandidateWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Compartment.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Define.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DisplayAttributeInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -166,22 +160,13 @@
     <ClInclude Include="GetTextExtentEditSession.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Globals.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="KeyHandlerEditSession.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KeyStateCategory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LanguageBar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RegKey.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SampleIME.h">
@@ -221,5 +206,14 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\WindowsImeLib.h" />
+    <ClInclude Include="..\Define.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Globals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

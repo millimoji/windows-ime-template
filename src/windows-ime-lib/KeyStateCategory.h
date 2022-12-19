@@ -6,7 +6,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #pragma once
-#include "Globals.h"
+#include "../Globals.h"
 #include "Private.h"
 #include "SampleIME.h"
 

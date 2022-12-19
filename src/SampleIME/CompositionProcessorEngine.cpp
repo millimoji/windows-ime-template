@@ -5,16 +5,16 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-#include "Private.h"
-#include "SampleIME.h"
+#include "pch.h"
+// #include "SampleIME.h"
 #include "CompositionProcessorEngine.h"
 #include "TableDictionaryEngine.h"
 #include "DictionarySearch.h"
-#include "TfInputProcessorProfile.h"
-#include "Globals.h"
-#include "Compartment.h"
-#include "LanguageBar.h"
-#include "RegKey.h"
+// #include "TfInputProcessorProfile.h"
+#include "../Globals.h"
+#include "../Compartment.h"
+#include "../LanguageBar.h"
+// #include "RegKey.h"
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -928,7 +928,7 @@ BOOL CCompositionProcessorEngine::SetupDictionaryFile()
         WCHAR wszChar = wszFileName[cchA];
         if (wszChar == '\\' || wszChar == '/')
         {
-            StringCchCopyN(pwszFileName, iDicFileNameLen + 1, wszFileName, cchA + 1);
+            StringCchCopyN(pwszFileName, iDicFileNameLen + 1, wszFileName, static_cast<size_t>(cchA) + 1);
             StringCchCatN(pwszFileName, iDicFileNameLen + 1, TEXTSERVICE_DIC, wcslen(TEXTSERVICE_DIC));
             break;
         }
@@ -1284,140 +1284,6 @@ CCompositionProcessorEngine::XPreservedKey::~XPreservedKey()
     {
         delete [] Description;
     }
-}
-//+---------------------------------------------------------------------------
-//
-// CSampleIME::CreateInstance 
-//
-//----------------------------------------------------------------------------
-
-HRESULT CSampleIME::CreateInstance(REFCLSID rclsid, REFIID riid, _Outptr_result_maybenull_ LPVOID* ppv, _Out_opt_ HINSTANCE* phInst, BOOL isComLessMode)
-{
-    HRESULT hr = S_OK;
-    if (phInst == nullptr)
-    {
-        return E_INVALIDARG;
-    }
-
-    *phInst = nullptr;
-
-    if (!isComLessMode)
-    {
-        hr = ::CoCreateInstance(rclsid, 
-            NULL, 
-            CLSCTX_INPROC_SERVER,
-            riid,
-            ppv);
-    }
-    else
-    {
-        hr = CSampleIME::ComLessCreateInstance(rclsid, riid, ppv, phInst);
-    }
-
-    return hr;
-}
-
-//+---------------------------------------------------------------------------
-//
-// CSampleIME::ComLessCreateInstance
-//
-//----------------------------------------------------------------------------
-
-HRESULT CSampleIME::ComLessCreateInstance(REFGUID rclsid, REFIID riid, _Outptr_result_maybenull_ void **ppv, _Out_opt_ HINSTANCE *phInst)
-{
-    HRESULT hr = S_OK;
-    HINSTANCE sampleIMEDllHandle = nullptr;
-    WCHAR wchPath[MAX_PATH] = {'\0'};
-    WCHAR szExpandedPath[MAX_PATH] = {'\0'};
-    DWORD dwCnt = 0;
-    *ppv = nullptr;
-
-    hr = phInst ? S_OK : E_FAIL;
-    if (SUCCEEDED(hr))
-    {
-        *phInst = nullptr;
-        hr = CSampleIME::GetComModuleName(rclsid, wchPath, ARRAYSIZE(wchPath));
-        if (SUCCEEDED(hr))
-        {
-            dwCnt = ExpandEnvironmentStringsW(wchPath, szExpandedPath, ARRAYSIZE(szExpandedPath));
-            hr = (0 < dwCnt && dwCnt <= ARRAYSIZE(szExpandedPath)) ? S_OK : E_FAIL;
-            if (SUCCEEDED(hr))
-            {
-                sampleIMEDllHandle = LoadLibraryEx(szExpandedPath, NULL, 0);
-                hr = sampleIMEDllHandle ? S_OK : E_FAIL;
-                if (SUCCEEDED(hr))
-                {
-                    *phInst = sampleIMEDllHandle;
-                    FARPROC pfn = GetProcAddress(sampleIMEDllHandle, "DllGetClassObject");
-                    hr = pfn ? S_OK : E_FAIL;
-                    if (SUCCEEDED(hr))
-                    {
-                        IClassFactory *pClassFactory = nullptr;
-                        hr = ((HRESULT (STDAPICALLTYPE *)(REFCLSID rclsid, REFIID riid, LPVOID *ppv))(pfn))(rclsid, IID_IClassFactory, (void **)&pClassFactory);
-                        if (SUCCEEDED(hr) && pClassFactory)
-                        {
-                            hr = pClassFactory->CreateInstance(NULL, riid, ppv);
-                            pClassFactory->Release();
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (!SUCCEEDED(hr) && phInst && *phInst)
-    {
-        FreeLibrary(*phInst);
-        *phInst = 0;
-    }
-    return hr;
-}
-
-//+---------------------------------------------------------------------------
-//
-// CSampleIME::GetComModuleName
-//
-//----------------------------------------------------------------------------
-
-HRESULT CSampleIME::GetComModuleName(REFGUID rclsid, _Out_writes_(cchPath)WCHAR* wchPath, DWORD cchPath)
-{
-    HRESULT hr = S_OK;
-
-    CRegKey key;
-    WCHAR wchClsid[CLSID_STRLEN + 1];
-    hr = CLSIDToString(rclsid, wchClsid) ? S_OK : E_FAIL;
-    if (SUCCEEDED(hr))
-    {
-        WCHAR wchKey[MAX_PATH];
-        hr = StringCchPrintfW(wchKey, ARRAYSIZE(wchKey), L"CLSID\\%s\\InProcServer32", wchClsid);
-        if (SUCCEEDED(hr))
-        {
-            hr = (key.Open(HKEY_CLASSES_ROOT, wchKey, KEY_READ) == ERROR_SUCCESS) ? S_OK : E_FAIL;
-            if (SUCCEEDED(hr))
-            {
-                WCHAR wszModel[MAX_PATH];
-                ULONG cch = ARRAYSIZE(wszModel);
-                hr = (key.QueryStringValue(L"ThreadingModel", wszModel, &cch) == ERROR_SUCCESS) ? S_OK : E_FAIL;
-                if (SUCCEEDED(hr))
-                {
-                    if (CompareStringOrdinal(wszModel, 
-                        -1, 
-                        L"Apartment", 
-                        -1,
-                        TRUE) == CSTR_EQUAL)
-                    {
-                        hr = (key.QueryStringValue(NULL, wchPath, &cchPath) == ERROR_SUCCESS) ? S_OK : E_FAIL;
-                    }
-                    else
-                    {
-                        hr = E_FAIL;
-                    }
-                }
-            }
-        }
-    }
-
-    return hr;
 }
 
 void CCompositionProcessorEngine::InitKeyStrokeTable()

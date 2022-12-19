@@ -5,9 +5,9 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-#include "Private.h"
+#include "pch.h"
 #include "DictionarySearch.h"
-#include "SampleIMEBaseStructure.h"
+#include "../SampleIMEBaseStructure.h"
 
 //+---------------------------------------------------------------------------
 //

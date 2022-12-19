@@ -60,26 +60,24 @@
     <ClCompile Include="TipCandidateString.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Define.h" />
+    <ClInclude Include="..\Globals.h" />
+    <ClInclude Include="..\resource.h" />
     <ClInclude Include="..\WindowsImeLib.h" />
     <ClInclude Include="BaseWindow.h" />
     <ClInclude Include="ButtonWindow.h" />
     <ClInclude Include="CandidateListUIPresenter.h" />
     <ClInclude Include="CandidateWindow.h" />
-    <ClInclude Include="Compartment.h" />
-    <ClInclude Include="Define.h" />
     <ClInclude Include="DisplayAttributeInfo.h" />
     <ClInclude Include="DisplayString.h" />
     <ClInclude Include="EditSession.h" />
     <ClInclude Include="EnumDisplayAttributeInfo.h" />
     <ClInclude Include="EnumTfCandidates.h" />
     <ClInclude Include="GetTextExtentEditSession.h" />
-    <ClInclude Include="Globals.h" />
     <ClInclude Include="KeyHandlerEditSession.h" />
     <ClInclude Include="KeyStateCategory.h" />
-    <ClInclude Include="LanguageBar.h" />
     <ClInclude Include="Private.h" />
     <ClInclude Include="RegKey.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="SampleIME.h" />
     <ClInclude Include="SampleIMEBaseStructure.h" />
     <ClInclude Include="SampleIMEStructureArray.h" />
@@ -148,11 +146,12 @@
     <ClCompile>
       <WarningLevel>Level2</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -171,6 +170,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -184,11 +184,12 @@
     <ClCompile>
       <WarningLevel>Level2</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -207,6 +208,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>

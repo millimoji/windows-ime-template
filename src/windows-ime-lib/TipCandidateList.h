@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "SampleIMEBaseStructure.h"
+#include "../SampleIMEBaseStructure.h"
 
 //
 // CTipCandidateList

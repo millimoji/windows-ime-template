@@ -6,7 +6,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #include "Private.h"
-#include "Globals.h"
+#include "../Globals.h"
 #include "EditSession.h"
 #include "SampleIME.h"
 
@@ -60,7 +60,7 @@ STDAPI CStartCompositionEditSession::DoEditSession(TfEditCookie ec)
         _pTextService->_SetComposition(pComposition);
 
         // set selection to the adjusted range
-        TF_SELECTION tfSelection;
+        TF_SELECTION tfSelection = {};
         tfSelection.range = pRangeInsert;
         tfSelection.style.ase = TF_AE_NONE;
         tfSelection.style.fInterimChar = FALSE;

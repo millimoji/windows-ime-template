@@ -15,11 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="SampleIME.def">
-      <Filter>Source Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -67,5 +62,33 @@
     <ClInclude Include="BaseDictionaryEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="image\DoubleSingleByteOff.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="image\DoubleSingleByteOn.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="image\ImeModeOff.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="image\ImeModeOn.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="image\PunctuationOff.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="image\PunctuationOn.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="image\SampleIme.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="SampleIME.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

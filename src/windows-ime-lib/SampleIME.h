@@ -9,7 +9,7 @@
 
 #include "../WindowsImeLib.h"
 #include "KeyHandlerEditSession.h"
-#include "SampleIMEBaseStructure.h"
+#include "../SampleIMEBaseStructure.h"
 
 class CLangBarItemButton;
 class CCandidateListUIPresenter;

@@ -9,7 +9,7 @@
 #include "SampleIME.h"
 #include "CandidateWindow.h"
 #include "CandidateListUIPresenter.h"
-#include "SampleIMEBaseStructure.h"
+#include "../SampleIMEBaseStructure.h"
 
 //////////////////////////////////////////////////////////////////////
 //
