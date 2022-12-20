@@ -31,6 +31,8 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="File.cpp" />
     <ClCompile Include="FileMapping.cpp" />
+    <ClCompile Include="SampleIMEBaseStructure.cpp" />
+    <ClCompile Include="SampleIMEGlobals.cpp" />
     <ClCompile Include="TableDictionaryEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -40,6 +42,10 @@
     <ClInclude Include="DictionarySearch.h" />
     <ClInclude Include="File.h" />
     <ClInclude Include="FileMapping.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="SampleIMEDefine.h" />
+    <ClInclude Include="SampleIMEGlobals.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="TableDictionaryEngine.h" />
   </ItemGroup>
   <ItemGroup>
@@ -100,6 +106,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -120,6 +127,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -140,6 +148,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -161,6 +170,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

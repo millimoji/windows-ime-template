@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../Globals.h"
+#include "Globals.h"
 
 class CEnumTfCandidates : public IEnumTfCandidates
 {

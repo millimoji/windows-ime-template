@@ -7,7 +7,7 @@
 
 #include "pch.h"
 #include "FileMapping.h"
-#include "../Globals.h"
+#include "SampleIMEGlobals.h"
 
 //---------------------------------------------------------------------
 //

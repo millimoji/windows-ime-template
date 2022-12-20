@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "../WindowsImeLib.h"
+#include "SampleIMEDefine.h"
 #include "CompositionProcessorEngine.h"
 
 BOOL APIENTRY DllMain( HMODULE hModule,
@@ -32,12 +33,12 @@ STDAPI DllCanUnloadNow(void)
 
 STDAPI DllUnregisterServer(void)
 {
-    return WindowsImeLib::DllUnregisterServer();
+    return WindowsImeLib::DllUnregisterServer(TEXTSERVICE_LANGID);
 }
 
 STDAPI DllRegisterServer(void)
 {
-    return WindowsImeLib::DllRegisterServer();
+    return WindowsImeLib::DllRegisterServer(TEXTSERVICE_LANGID, TEXTSERVICE_ICON_INDEX);
 }
 
 namespace WindowsImeLib

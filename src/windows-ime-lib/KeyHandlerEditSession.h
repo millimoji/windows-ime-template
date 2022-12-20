@@ -8,7 +8,7 @@
 #pragma once
 
 #include "EditSession.h"
-#include "../Globals.h"
+#include "Globals.h"
 
 class CKeyHandlerEditSession : public CEditSessionBase
 {

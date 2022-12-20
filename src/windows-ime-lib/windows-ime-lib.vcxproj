@@ -45,7 +45,7 @@
     <ClCompile Include="Register.cpp" />
     <ClCompile Include="RegKey.cpp" />
     <ClCompile Include="SampleIME.cpp" />
-    <ClCompile Include="SampleIMEBaseStructure.cpp" />
+    <ClCompile Include="BaseStructure.cpp" />
     <ClCompile Include="ScrollBarWindow.cpp" />
     <ClCompile Include="SearchCandidateProvider.cpp" />
     <ClCompile Include="Server.cpp" />
@@ -60,9 +60,8 @@
     <ClCompile Include="TipCandidateString.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Define.h" />
+    <ClInclude Include="Define.h" />
     <ClInclude Include="..\Globals.h" />
-    <ClInclude Include="..\resource.h" />
     <ClInclude Include="..\WindowsImeLib.h" />
     <ClInclude Include="BaseWindow.h" />
     <ClInclude Include="ButtonWindow.h" />
@@ -79,7 +78,7 @@
     <ClInclude Include="Private.h" />
     <ClInclude Include="RegKey.h" />
     <ClInclude Include="SampleIME.h" />
-    <ClInclude Include="SampleIMEBaseStructure.h" />
+    <ClInclude Include="BaseStructure.h" />
     <ClInclude Include="SampleIMEStructureArray.h" />
     <ClInclude Include="ScrollBarWindow.h" />
     <ClInclude Include="SearchCandidateProvider.h" />
@@ -152,6 +151,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -171,6 +171,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -190,6 +191,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -209,6 +211,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>

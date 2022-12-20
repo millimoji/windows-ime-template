@@ -1,7 +1,7 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
 // Used by SampleIME.rc
-//
+
 #define SUBLANG_ENGLISH_US              0x01
 #define LANG_ENGLISH                    0x09
 #define IDIS_SAMPLEIME                  12

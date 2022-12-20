@@ -221,6 +221,13 @@ typedef /* [uuid] */  DECLSPEC_UUID("de403c21-89fd-4f85-8b87-64584d063fbc") DWOR
 namespace WindowsImeLib
 {
 
+inline HINSTANCE dllInstanceHandle;
+inline HFONT defaultlFontHandle;  // Global font object we use everywhere
+inline USHORT ModifiersValue = 0;
+inline BOOL   IsShiftKeyDownOnly = FALSE;
+inline BOOL   IsControlKeyDownOnly = FALSE;
+inline BOOL   IsAltKeyDownOnly = FALSE;
+
 struct ICompositionProcessorEngine
 {
 	virtual ~ICompositionProcessorEngine() {}
@@ -280,7 +287,13 @@ extern std::shared_ptr<IProcessorFactory> g_processorFactory;
 extern BOOL DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID pvReserved);
 extern HRESULT DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ void** ppv);
 extern HRESULT DllCanUnloadNow(void);
-extern HRESULT DllUnregisterServer(void);
-extern HRESULT DllRegisterServer(void);
+extern HRESULT DllUnregisterServer(LANGID langId);
+extern HRESULT DllRegisterServer(LANGID langId, int textServiceIconIndex);
 
+}
+
+namespace Global
+{
+extern const GUID SampleIMEGuidCompartmentDoubleSingleByte;
+extern const GUID SampleIMEGuidCompartmentPunctuation;
 }

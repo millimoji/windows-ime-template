@@ -10,7 +10,7 @@
 
 #include "File.h"
 #include "DictionaryParser.h"
-#include "../SampleIMEBaseStructure.h"
+#include "SampleIMEBaseStructure.h"
 
 class CDictionaryResult;
 

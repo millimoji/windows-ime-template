@@ -89,7 +89,7 @@
     <ClCompile Include="SampleIME.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SampleIMEBaseStructure.cpp">
+    <ClCompile Include="BaseStructure.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ScrollBarWindow.cpp">
@@ -172,7 +172,7 @@
     <ClInclude Include="SampleIME.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SampleIMEBaseStructure.h">
+    <ClInclude Include="BaseStructure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SampleIMEStructureArray.h">
@@ -206,13 +206,10 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\WindowsImeLib.h" />
-    <ClInclude Include="..\Define.h">
+    <ClInclude Include="Define.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Globals.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

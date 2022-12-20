@@ -6,7 +6,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #include "Private.h"
-#include "../Globals.h"
+#include "Globals.h"
 #include "../WindowsImeLib.h"
 
 //+---------------------------------------------------------------------------
@@ -23,7 +23,7 @@ BOOL WindowsImeLib::DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID pvReserv
     {
     case DLL_PROCESS_ATTACH:
 
-        Global::dllInstanceHandle = hInstance;
+        WindowsImeLib::dllInstanceHandle = hInstance;
 
         if (!InitializeCriticalSectionAndSpinCount(&Global::CS, 0))
         {

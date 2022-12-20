@@ -13,10 +13,10 @@
 #include "sal.h"
 #include "TableDictionaryEngine.h"
 // #include "KeyHandlerEditSession.h"
-#include "../SampleIMEBaseStructure.h"
+#include "SampleIMEBaseStructure.h"
 #include "FileMapping.h"
 #include "../Compartment.h"
-#include "../define.h"
+#include "SampleIMEDefine.h"
 #include "../LanguageBar.h"
 
 class CCompositionProcessorEngine : public std::enable_shared_from_this<CCompositionProcessorEngine>, public WindowsImeLib::ICompositionProcessorEngine

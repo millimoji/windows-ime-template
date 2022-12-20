@@ -7,7 +7,7 @@
 
 #include "Private.h"
 #include "../Compartment.h"
-#include "../Globals.h"
+#include "Globals.h"
 
 //////////////////////////////////////////////////////////////////////
 //

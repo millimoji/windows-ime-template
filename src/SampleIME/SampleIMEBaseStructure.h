@@ -7,25 +7,25 @@
 
 #pragma once
 
-#include "WindowsImeLib.h"
+#include "../WindowsImeLib.h"
 #include <vector>
 #include "assert.h"
 #include <iostream>
 
-using std::cout;
-using std::endl;
-
-//---------------------------------------------------------------------
-// defined keyword
-//---------------------------------------------------------------------
-template<class VALUE>
-struct _DEFINED_KEYWORD
-{
-    LPCWSTR _pwszKeyword;
-    VALUE _value;
-};
-
-BOOL CLSIDToString(REFGUID refGUID, _Out_writes_ (39) WCHAR *pCLSIDString);
+// using std::cout;
+// using std::endl;
+// 
+// //---------------------------------------------------------------------
+// // defined keyword
+// //---------------------------------------------------------------------
+// template<class VALUE>
+// struct _DEFINED_KEYWORD
+// {
+//     LPCWSTR _pwszKeyword;
+//     VALUE _value;
+// };
+// 
+// BOOL CLSIDToString(REFGUID refGUID, _Out_writes_ (39) WCHAR *pCLSIDString);
 
 HRESULT SkipWhiteSpace(LCID locale, _In_ LPCWSTR pwszBuffer, DWORD_PTR dwBufLen, _Out_ DWORD_PTR *pdwIndex);
 HRESULT FindChar(WCHAR wch, _In_ LPCWSTR pwszBuffer, DWORD_PTR dwBufLen, _Out_ DWORD_PTR *pdwIndex);

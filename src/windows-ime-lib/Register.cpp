@@ -6,7 +6,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #include "Private.h"
-#include "../Globals.h"
+#include "Define.h"
+#include "Globals.h"
 
 static const WCHAR RegInfo_Prefix_CLSID[] = L"CLSID\\";
 static const WCHAR RegInfo_Key_InProSvr32[] = L"InProcServer32";
@@ -30,7 +31,7 @@ static const GUID SupportCategories[] = {
 //
 //----------------------------------------------------------------------------
 
-BOOL RegisterProfiles()
+BOOL RegisterProfiles(LANGID langId, int textServiceIconIndex)
 {
     HRESULT hr = S_FALSE;
 
@@ -44,7 +45,7 @@ BOOL RegisterProfiles()
 
     WCHAR achIconFile[MAX_PATH] = {'\0'};
     DWORD cchA = 0;
-    cchA = GetModuleFileName(Global::dllInstanceHandle, achIconFile, MAX_PATH);
+    cchA = GetModuleFileName(WindowsImeLib::dllInstanceHandle, achIconFile, MAX_PATH);
     cchA = cchA >= MAX_PATH ? (MAX_PATH - 1) : cchA;
     achIconFile[cchA] = '\0';
 
@@ -55,13 +56,13 @@ BOOL RegisterProfiles()
         goto Exit;
     }
     hr = pITfInputProcessorProfileMgr->RegisterProfile(Global::SampleIMECLSID,
-        TEXTSERVICE_LANGID,
+        langId,
         Global::SampleIMEGuidProfile,
         TEXTSERVICE_DESC,
         static_cast<ULONG>(lenOfDesc),
         achIconFile,
         cchA,
-        (UINT)TEXTSERVICE_ICON_INDEX, NULL, 0, TRUE, 0);
+        (UINT)textServiceIconIndex, NULL, 0, TRUE, 0);
 
     if (FAILED(hr))
     {
@@ -83,7 +84,7 @@ Exit:
 //
 //----------------------------------------------------------------------------
 
-void UnregisterProfiles()
+void UnregisterProfiles(LANGID langId)
 {
     HRESULT hr = S_OK;
 
@@ -95,7 +96,7 @@ void UnregisterProfiles()
         goto Exit;
     }
 
-    hr = pITfInputProcessorProfileMgr->UnregisterProfile(Global::SampleIMECLSID, TEXTSERVICE_LANGID, Global::SampleIMEGuidProfile, 0);
+    hr = pITfInputProcessorProfileMgr->UnregisterProfile(Global::SampleIMECLSID, langId, Global::SampleIMEGuidProfile, 0);
     if (FAILED(hr))
     {
         goto Exit;
@@ -232,7 +233,7 @@ BOOL RegisterServer()
 
         if (RegCreateKeyEx(regKeyHandle, RegInfo_Key_InProSvr32, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &regSubkeyHandle, &copiedStringLen) == ERROR_SUCCESS)
         {
-            copiedStringLen = GetModuleFileNameW(Global::dllInstanceHandle, achFileName, ARRAYSIZE(achFileName));
+            copiedStringLen = GetModuleFileNameW(WindowsImeLib::dllInstanceHandle, achFileName, ARRAYSIZE(achFileName));
             copiedStringLen = (copiedStringLen >= (MAX_PATH - 1)) ? MAX_PATH : (++copiedStringLen);
             if (RegSetValueEx(regSubkeyHandle, NULL, 0, REG_SZ, (const BYTE *)achFileName, (copiedStringLen)*sizeof(WCHAR)) != ERROR_SUCCESS)
             {

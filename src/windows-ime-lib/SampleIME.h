@@ -9,7 +9,7 @@
 
 #include "../WindowsImeLib.h"
 #include "KeyHandlerEditSession.h"
-#include "../SampleIMEBaseStructure.h"
+#include "BaseStructure.h"
 
 class CLangBarItemButton;
 class CCandidateListUIPresenter;
@@ -219,7 +219,7 @@ private:
     std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> _pCompositionProcessorEngine;
 
     // Language bar item object.
-    CLangBarItemButton* _pLangBarItem = {};
+    // CLangBarItemButton* _pLangBarItem = {};
 
     // the current composition object.
     ITfComposition* _pComposition;

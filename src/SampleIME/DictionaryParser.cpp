@@ -7,7 +7,7 @@
 
 #include "pch.h"
 #include "DictionaryParser.h"
-#include "../SampleIMEBaseStructure.h"
+#include "SampleIMEBaseStructure.h"
 
 //---------------------------------------------------------------------
 //

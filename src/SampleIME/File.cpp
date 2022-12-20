@@ -7,7 +7,7 @@
 
 #include "pch.h"
 #include "File.h"
-#include "../SampleIMEBaseStructure.h"
+#include "SampleIMEBaseStructure.h"
 
 //---------------------------------------------------------------------
 //

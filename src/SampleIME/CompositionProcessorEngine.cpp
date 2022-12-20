@@ -11,7 +11,7 @@
 #include "TableDictionaryEngine.h"
 #include "DictionarySearch.h"
 // #include "TfInputProcessorProfile.h"
-#include "../Globals.h"
+#include "SampleIMEGlobals.h"
 #include "../Compartment.h"
 #include "../LanguageBar.h"
 // #include "RegKey.h"
@@ -161,8 +161,8 @@ BOOL CCompositionProcessorEngine::SetupLanguageProfile(LANGID langid, REFGUID gu
     _guidProfile = guidLanguageProfile;
     _tfClientId = tfClientId;
 
-    SetupPreserved(pThreadMgr, tfClientId);	
-	InitializeSampleIMECompartment(pThreadMgr, tfClientId);
+    SetupPreserved(pThreadMgr, tfClientId); 
+    InitializeSampleIMECompartment(pThreadMgr, tfClientId);
     SetupPunctuationPair();
     SetupLanguageBar(pThreadMgr, tfClientId, isSecureMode);
     SetupKeystroke();
@@ -446,8 +446,8 @@ void CCompositionProcessorEngine::GetCandidateStringInConverted(CStringRange &se
     StringCchCat(pwch, srgKeystrokeBufLen, L"*");
 
     // add wildcard char
-	size_t len = 0;
-	if (StringCchLength(pwch, STRSAFE_MAX_CCH, &len) != S_OK)
+    size_t len = 0;
+    if (StringCchLength(pwch, STRSAFE_MAX_CCH, &len) != S_OK)
     {
         return;
     }
@@ -666,8 +666,8 @@ void CCompositionProcessorEngine::SetPreservedKey(const CLSID clsid, TF_PRESERVE
     }
     *ptfPsvKey1 = tfPreservedKey;
 
-	size_t srgKeystrokeBufLen = 0;
-	if (StringCchLength(pwszDescription, STRSAFE_MAX_CCH, &srgKeystrokeBufLen) != S_OK)
+    size_t srgKeystrokeBufLen = 0;
+    if (StringCchLength(pwszDescription, STRSAFE_MAX_CCH, &srgKeystrokeBufLen) != S_OK)
     {
         return;
     }
@@ -708,8 +708,8 @@ BOOL CCompositionProcessorEngine::InitPreservedKey(_In_ XPreservedKey *pXPreserv
         TF_PRESERVEDKEY preservedKey = *pXPreservedKey->TSFPreservedKeyTable.GetAt(i);
         preservedKey.uModifiers &= 0xffff;
 
-		size_t lenOfDesc = 0;
-		if (StringCchLength(pXPreservedKey->Description, STRSAFE_MAX_CCH, &lenOfDesc) != S_OK)
+        size_t lenOfDesc = 0;
+        if (StringCchLength(pXPreservedKey->Description, STRSAFE_MAX_CCH, &lenOfDesc) != S_OK)
         {
             return FALSE;
         }
@@ -733,9 +733,9 @@ BOOL CCompositionProcessorEngine::CheckShiftKeyOnly(_In_ CSampleImeArray<TF_PRES
     {
         TF_PRESERVEDKEY *ptfPsvKey = pTSFPreservedKeyTable->GetAt(i);
 
-        if (((ptfPsvKey->uModifiers & (_TF_MOD_ON_KEYUP_SHIFT_ONLY & 0xffff0000)) && !Global::IsShiftKeyDownOnly) ||
-            ((ptfPsvKey->uModifiers & (_TF_MOD_ON_KEYUP_CONTROL_ONLY & 0xffff0000)) && !Global::IsControlKeyDownOnly) ||
-            ((ptfPsvKey->uModifiers & (_TF_MOD_ON_KEYUP_ALT_ONLY & 0xffff0000)) && !Global::IsAltKeyDownOnly)         )
+        if (((ptfPsvKey->uModifiers & (_TF_MOD_ON_KEYUP_SHIFT_ONLY & 0xffff0000)) && !WindowsImeLib::IsShiftKeyDownOnly) ||
+            ((ptfPsvKey->uModifiers & (_TF_MOD_ON_KEYUP_CONTROL_ONLY & 0xffff0000)) && !WindowsImeLib::IsControlKeyDownOnly) ||
+            ((ptfPsvKey->uModifiers & (_TF_MOD_ON_KEYUP_ALT_ONLY & 0xffff0000)) && !WindowsImeLib::IsAltKeyDownOnly)         )
         {
             return FALSE;
         }
@@ -871,7 +871,7 @@ void CCompositionProcessorEngine::SetupLanguageBar(_In_ ITfThreadMgr *pThreadMgr
 
 void CCompositionProcessorEngine::CreateLanguageBarButton(DWORD dwEnable, GUID guidLangBar, _In_z_ LPCWSTR pwszDescriptionValue, _In_z_ LPCWSTR pwszTooltipValue, DWORD dwOnIconIndex, DWORD dwOffIconIndex, _Outptr_result_maybenull_ CLangBarItemButton **ppLangBarItemButton, BOOL isSecureMode)
 {
-	dwEnable;
+    dwEnable;
 
     if (ppLangBarItemButton)
     {
@@ -909,11 +909,11 @@ BOOL CCompositionProcessorEngine::InitLanguageBar(_In_ CLangBarItemButton *pLang
 //----------------------------------------------------------------------------
 
 BOOL CCompositionProcessorEngine::SetupDictionaryFile()
-{	
+{   
     // Not yet registered
     // Register CFileMapping
     WCHAR wszFileName[MAX_PATH] = {'\0'};
-    DWORD cchA = GetModuleFileName(Global::dllInstanceHandle, wszFileName, ARRAYSIZE(wszFileName));
+    DWORD cchA = GetModuleFileName(WindowsImeLib::dllInstanceHandle, wszFileName, ARRAYSIZE(wszFileName));
     size_t iDicFileNameLen = cchA + wcslen(TEXTSERVICE_DIC);
     WCHAR *pwszFileName = new (std::nothrow) WCHAR[iDicFileNameLen + 1];
     if (!pwszFileName)
@@ -1008,7 +1008,7 @@ void CCompositionProcessorEngine::SetupPunctuationPair()
 
 void CCompositionProcessorEngine::InitializeSampleIMECompartment(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId)
 {
-	// set initial mode
+    // set initial mode
     CCompartment CompartmentKeyboardOpen(pThreadMgr, tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
     CompartmentKeyboardOpen._SetCompartmentBOOL(TRUE);
 
@@ -1330,17 +1330,17 @@ void CCompositionProcessorEngine::SetInitialCandidateListRange()
 void CCompositionProcessorEngine::SetDefaultCandidateTextFont()
 {
     // Candidate Text Font
-    if (Global::defaultlFontHandle == nullptr)
+    if (WindowsImeLib::defaultlFontHandle == nullptr)
     {
-		WCHAR fontName[50] = {'\0'}; 
-		LoadString(Global::dllInstanceHandle, IDS_DEFAULT_FONT, fontName, 50);
-        Global::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, fontName);
-        if (!Global::defaultlFontHandle)
+        WCHAR fontName[50] = {'\0'}; 
+        LoadString(WindowsImeLib::dllInstanceHandle, IDS_DEFAULT_FONT, fontName, 50);
+        WindowsImeLib::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, fontName);
+        if (!WindowsImeLib::defaultlFontHandle)
         {
             LOGFONT lf = {};
-			SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
+            SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
             // Fall back to the default GUI font on failure.
-            Global::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, lf.lfFaceName);
+            WindowsImeLib::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, lf.lfFaceName);
         }
     }
 }
@@ -1627,7 +1627,7 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyKeystrokeComposition(UINT uCode, _
 
         pKeystroke = _KeystrokeComposition.GetAt(i);
 
-        if ((pKeystroke->VirtualKey == uCode) && Global::CheckModifiers(Global::ModifiersValue, pKeystroke->Modifiers))
+        if ((pKeystroke->VirtualKey == uCode) && Global::CheckModifiers(WindowsImeLib::ModifiersValue, pKeystroke->Modifiers))
         {
             if (function == FUNCTION_NONE)
             {
@@ -1667,7 +1667,7 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyKeystrokeCandidate(UINT uCode, _In
 
         pKeystroke = pKeystrokeMetric->GetAt(i);
 
-        if ((pKeystroke->VirtualKey == uCode) && Global::CheckModifiers(Global::ModifiersValue, pKeystroke->Modifiers))
+        if ((pKeystroke->VirtualKey == uCode) && Global::CheckModifiers(WindowsImeLib::ModifiersValue, pKeystroke->Modifiers))
         {
             *pfRetCode = TRUE;
             if (pKeyState)
@@ -1705,8 +1705,8 @@ BOOL CCompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_
         if (candidateMode == CANDIDATE_PHRASE)
         {
             // Candidate phrase could specify modifier
-            if ((GetCandidateListPhraseModifier() == 0 && Global::ModifiersValue == 0) ||
-                (GetCandidateListPhraseModifier() != 0 && Global::CheckModifiers(Global::ModifiersValue, GetCandidateListPhraseModifier())))
+            if ((GetCandidateListPhraseModifier() == 0 && WindowsImeLib::ModifiersValue == 0) ||
+                (GetCandidateListPhraseModifier() != 0 && Global::CheckModifiers(WindowsImeLib::ModifiersValue, GetCandidateListPhraseModifier())))
             {
                 pKeyState->Category = CATEGORY_PHRASE; pKeyState->Function = FUNCTION_SELECT_BY_NUMBER;
                 return TRUE;
@@ -1720,8 +1720,8 @@ BOOL CCompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_
         else if (candidateMode == CANDIDATE_WITH_NEXT_COMPOSITION)
         {
             // Candidate phrase could specify modifier
-            if ((GetCandidateListPhraseModifier() == 0 && Global::ModifiersValue == 0) ||
-                (GetCandidateListPhraseModifier() != 0 && Global::CheckModifiers(Global::ModifiersValue, GetCandidateListPhraseModifier())))
+            if ((GetCandidateListPhraseModifier() == 0 && WindowsImeLib::ModifiersValue == 0) ||
+                (GetCandidateListPhraseModifier() != 0 && Global::CheckModifiers(WindowsImeLib::ModifiersValue, GetCandidateListPhraseModifier())))
             {
                 pKeyState->Category = CATEGORY_CANDIDATE; pKeyState->Function = FUNCTION_SELECT_BY_NUMBER;
                 return TRUE;

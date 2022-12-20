@@ -6,7 +6,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #include "Private.h"
-#include "../Globals.h"
+#include "Globals.h"
 #include "EditSession.h"
 #include "SampleIME.h"
 

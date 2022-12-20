@@ -7,7 +7,7 @@
 
 #include "pch.h"
 #include "BaseDictionaryEngine.h"
-#include "../Globals.h"
+#include "SampleIMEGlobals.h"
 
 //+---------------------------------------------------------------------------
 // ctor

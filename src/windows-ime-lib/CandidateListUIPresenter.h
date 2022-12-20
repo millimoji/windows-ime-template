@@ -12,7 +12,7 @@
 #include "CandidateWindow.h"
 #include "TfTextLayoutSink.h"
 #include "SampleIME.h"
-#include "../SampleIMEBaseStructure.h"
+#include "BaseStructure.h"
 
 class CReadingLine;
 

@@ -5,7 +5,7 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-#include "../Globals.h"
+#include "Globals.h"
 
 //---------------------------------------------------------------------
 //
@@ -53,26 +53,26 @@ BOOL CLSIDToString(REFGUID refGUID, _Out_writes_(39) WCHAR *pCLSIDString)
 //
 //---------------------------------------------------------------------
 
-HRESULT SkipWhiteSpace(LCID locale, _In_ LPCWSTR pwszBuffer, DWORD_PTR dwBufLen, _Out_ DWORD_PTR *pdwIndex)
-{
-    DWORD_PTR index = 0;
-
-    *pdwIndex = 0;
-    while (*pwszBuffer && IsSpace(locale, *pwszBuffer) && dwBufLen)
-    {
-        dwBufLen--;
-        pwszBuffer++;
-        index++;
-    }
-
-    if (*pwszBuffer && dwBufLen)
-    {
-        *pdwIndex = index;
-        return S_OK;
-    }
-
-    return E_FAIL;
-}
+// HRESULT SkipWhiteSpace(LCID locale, _In_ LPCWSTR pwszBuffer, DWORD_PTR dwBufLen, _Out_ DWORD_PTR *pdwIndex)
+// {
+//     DWORD_PTR index = 0;
+// 
+//     *pdwIndex = 0;
+//     while (*pwszBuffer && IsSpace(locale, *pwszBuffer) && dwBufLen)
+//     {
+//         dwBufLen--;
+//         pwszBuffer++;
+//         index++;
+//     }
+// 
+//     if (*pwszBuffer && dwBufLen)
+//     {
+//         *pdwIndex = index;
+//         return S_OK;
+//     }
+// 
+//     return E_FAIL;
+// }
 
 //---------------------------------------------------------------------
 //
@@ -82,26 +82,26 @@ HRESULT SkipWhiteSpace(LCID locale, _In_ LPCWSTR pwszBuffer, DWORD_PTR dwBufLen,
 //
 //---------------------------------------------------------------------
 
-HRESULT FindChar(WCHAR wch, _In_ LPCWSTR pwszBuffer, DWORD_PTR dwBufLen, _Out_ DWORD_PTR *pdwIndex)
-{
-    DWORD_PTR index = 0;
-
-    *pdwIndex = 0;
-    while (*pwszBuffer && (*pwszBuffer != wch) && dwBufLen)
-    {
-        dwBufLen--;
-        pwszBuffer++;
-        index++;
-    }
-
-    if (*pwszBuffer && dwBufLen)
-    {
-        *pdwIndex = index;
-        return S_OK;
-    }
-
-    return E_FAIL;
-}
+// HRESULT FindChar(WCHAR wch, _In_ LPCWSTR pwszBuffer, DWORD_PTR dwBufLen, _Out_ DWORD_PTR *pdwIndex)
+// {
+//     DWORD_PTR index = 0;
+// 
+//     *pdwIndex = 0;
+//     while (*pwszBuffer && (*pwszBuffer != wch) && dwBufLen)
+//     {
+//         dwBufLen--;
+//         pwszBuffer++;
+//         index++;
+//     }
+// 
+//     if (*pwszBuffer && dwBufLen)
+//     {
+//         *pdwIndex = index;
+//         return S_OK;
+//     }
+// 
+//     return E_FAIL;
+// }
 
 //---------------------------------------------------------------------
 //
@@ -109,13 +109,13 @@ HRESULT FindChar(WCHAR wch, _In_ LPCWSTR pwszBuffer, DWORD_PTR dwBufLen, _Out_ D
 //
 //---------------------------------------------------------------------
 
-BOOL IsSpace(LCID locale, WCHAR wch)
-{
-    WORD wCharType = 0;
-
-    GetStringTypeEx(locale, CT_CTYPE1, &wch, 1, &wCharType);
-    return (wCharType & C1_SPACE);
-}
+// BOOL IsSpace(LCID locale, WCHAR wch)
+// {
+//     WORD wCharType = 0;
+// 
+//     GetStringTypeEx(locale, CT_CTYPE1, &wch, 1, &wCharType);
+//     return (wCharType & C1_SPACE);
+// }
 
 CStringRange::CStringRange()
 {
@@ -280,46 +280,46 @@ int CCandidateRange::GetIndex(UINT vKey)
     return -1;
 }
 
-CPunctuationPair::CPunctuationPair()
-{
-    _punctuation._Code = 0;
-    _punctuation._Punctuation = 0;
-    _pairPunctuation = 0;
-    _isPairToggle = FALSE;
-}
-
-CPunctuationPair::CPunctuationPair(WCHAR code, WCHAR punctuation, WCHAR pair)
-{
-    _punctuation._Code = code;
-    _punctuation._Punctuation = punctuation;
-    _pairPunctuation = pair;
-    _isPairToggle = FALSE;
-}
-
-CPunctuationNestPair::CPunctuationNestPair()
-{
-    _punctuation_begin._Code = 0;
-    _punctuation_begin._Punctuation = 0;
-    _pairPunctuation_begin = 0;
-
-    _punctuation_end._Code = 0;
-    _punctuation_end._Punctuation = 0;
-    _pairPunctuation_end = 0;
-
-    _nestCount = 0;
-}
-
-CPunctuationNestPair::CPunctuationNestPair(WCHAR codeBegin, WCHAR punctuationBegin, WCHAR pairBegin,
-    WCHAR codeEnd,   WCHAR punctuationEnd,   WCHAR pairEnd)
-{
-	pairEnd;punctuationEnd;
-    _punctuation_begin._Code = codeBegin;
-    _punctuation_begin._Punctuation = punctuationBegin;
-    _pairPunctuation_begin = pairBegin;
-
-    _punctuation_end._Code = codeEnd;
-    _punctuation_end._Punctuation = punctuationBegin;
-    _pairPunctuation_end = pairBegin;
-
-    _nestCount  = 0;
-}
+// CPunctuationPair::CPunctuationPair()
+// {
+//     _punctuation._Code = 0;
+//     _punctuation._Punctuation = 0;
+//     _pairPunctuation = 0;
+//     _isPairToggle = FALSE;
+// }
+// 
+// CPunctuationPair::CPunctuationPair(WCHAR code, WCHAR punctuation, WCHAR pair)
+// {
+//     _punctuation._Code = code;
+//     _punctuation._Punctuation = punctuation;
+//     _pairPunctuation = pair;
+//     _isPairToggle = FALSE;
+// }
+// 
+// CPunctuationNestPair::CPunctuationNestPair()
+// {
+//     _punctuation_begin._Code = 0;
+//     _punctuation_begin._Punctuation = 0;
+//     _pairPunctuation_begin = 0;
+// 
+//     _punctuation_end._Code = 0;
+//     _punctuation_end._Punctuation = 0;
+//     _pairPunctuation_end = 0;
+// 
+//     _nestCount = 0;
+// }
+// 
+// CPunctuationNestPair::CPunctuationNestPair(WCHAR codeBegin, WCHAR punctuationBegin, WCHAR pairBegin,
+//     WCHAR codeEnd,   WCHAR punctuationEnd,   WCHAR pairEnd)
+// {
+// 	pairEnd;punctuationEnd;
+//     _punctuation_begin._Code = codeBegin;
+//     _punctuation_begin._Punctuation = punctuationBegin;
+//     _pairPunctuation_begin = pairBegin;
+// 
+//     _punctuation_end._Code = codeEnd;
+//     _punctuation_end._Punctuation = punctuationBegin;
+//     _pairPunctuation_end = pairBegin;
+// 
+//     _nestCount  = 0;
+// }

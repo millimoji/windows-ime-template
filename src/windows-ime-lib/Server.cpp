@@ -6,13 +6,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #include "Private.h"
-#include "../Globals.h"
+#include "Globals.h"
 #include "SampleIME.h"
 #include "../WindowsImeLib.h"
 
 // from Register.cpp
-BOOL RegisterProfiles();
-void UnregisterProfiles();
+BOOL RegisterProfiles(LANGID langId, int textServiceIconIndex);
+void UnregisterProfiles(LANGID langId);
 BOOL RegisterCategories();
 void UnregisterCategories();
 BOOL RegisterServer();
@@ -194,7 +194,7 @@ void FreeGlobalObjects(void)
         }
     }
 
-    DeleteObject(Global::defaultlFontHandle);
+    DeleteObject(WindowsImeLib::defaultlFontHandle);
 }
 
 //+---------------------------------------------------------------------------
@@ -259,9 +259,9 @@ HRESULT WindowsImeLib::DllCanUnloadNow(void)
 //
 //----------------------------------------------------------------------------
 
-HRESULT WindowsImeLib::DllUnregisterServer(void)
+HRESULT WindowsImeLib::DllUnregisterServer(LANGID langId)
 {
-    UnregisterProfiles();
+    UnregisterProfiles(langId);
     UnregisterCategories();
     UnregisterServer();
 
@@ -274,11 +274,11 @@ HRESULT WindowsImeLib::DllUnregisterServer(void)
 //
 //----------------------------------------------------------------------------
 
-HRESULT WindowsImeLib::DllRegisterServer(void)
+HRESULT WindowsImeLib::DllRegisterServer(LANGID langId, int textServiceIconIndex)
 {
-    if ((!RegisterServer()) || (!RegisterProfiles()) || (!RegisterCategories()))
+    if ((!RegisterServer()) || (!RegisterProfiles(langId, textServiceIconIndex)) || (!RegisterCategories()))
     {
-        DllUnregisterServer();
+        DllUnregisterServer(langId);
         return E_FAIL;
     }
     return S_OK;
