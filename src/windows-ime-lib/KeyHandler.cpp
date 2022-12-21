@@ -54,8 +54,8 @@ VOID CSampleIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContex
 {
     isForce;pContext;
 
-    WindowsImeLib::ICompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+    CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
+    pCompositionProcessorEngine = _pCompositionProcessorEngine;
     pCompositionProcessorEngine->PurgeVirtualKey();
 
     if (_pCandidateListUIPresenter)
@@ -115,8 +115,8 @@ HRESULT CSampleIME::_HandleCompositionInput(TfEditCookie ec, _In_ ITfContext *pC
     ULONG fetched = 0;
     BOOL isCovered = TRUE;
 
-    WindowsImeLib::ICompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+    CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
+    pCompositionProcessorEngine = _pCompositionProcessorEngine;
 
     if ((_pCandidateListUIPresenter != nullptr) && (_candidateMode != CANDIDATE_INCREMENTAL))
     {
@@ -166,7 +166,7 @@ Exit:
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_HandleCompositionInputWorker(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CSampleIME::_HandleCompositionInputWorker(_In_ CCompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
 {
     HRESULT hr = S_OK;
     CSampleImeArray<CStringRange> readingStrings;
@@ -222,7 +222,7 @@ HRESULT CSampleIME::_HandleCompositionInputWorker(_In_ WindowsImeLib::ICompositi
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CSampleIME::_CreateAndStartCandidate(_In_ CCompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
 {
     HRESULT hr = S_OK;
 
@@ -349,8 +349,8 @@ HRESULT CSampleIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext *
     //
     // Get candidate string from composition processor engine
     //
-    WindowsImeLib::ICompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+    CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
+    pCompositionProcessorEngine = _pCompositionProcessorEngine;
     pCompositionProcessorEngine->GetCandidateList(&candidateList, FALSE, isWildcardSearch);
 
     // If there is no candlidate listin the current reading string, we don't do anything. Just wait for
@@ -451,8 +451,8 @@ HRESULT CSampleIME::_HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext
     // Add virtual key to composition processor engine
     //
     {
-        WindowsImeLib::ICompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-        pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+        CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
+        pCompositionProcessorEngine = _pCompositionProcessorEngine;
 
         DWORD_PTR vKeyLen = pCompositionProcessorEngine->GetVirtualKeyLength();
 
@@ -547,8 +547,8 @@ HRESULT CSampleIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfConte
     //
     // Get punctuation char from composition processor engine
     //
-    WindowsImeLib::ICompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+    CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
+    pCompositionProcessorEngine = _pCompositionProcessorEngine;
 
     WCHAR punctuation = pCompositionProcessorEngine->GetPunctuation(wch);
 

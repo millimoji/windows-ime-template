@@ -19,11 +19,11 @@
 #include "SampleIMEDefine.h"
 #include "../LanguageBar.h"
 
-class CCompositionProcessorEngine : public std::enable_shared_from_this<CCompositionProcessorEngine>, public WindowsImeLib::ICompositionProcessorEngine
+class CompositionProcessorEngine : public std::enable_shared_from_this<CompositionProcessorEngine>, public WindowsImeLib::ICompositionProcessorEngine
 {
 public:
-    CCompositionProcessorEngine(void);
-    ~CCompositionProcessorEngine(void);
+    CompositionProcessorEngine(void);
+    ~CompositionProcessorEngine(void);
 
     BOOL SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode) override;
 

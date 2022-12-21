@@ -287,7 +287,8 @@ STDAPI CSampleIME::Deactivate()
 {
     if (_pCompositionProcessorEngine)
     {
-        _pCompositionProcessorEngine.reset();
+        delete _pCompositionProcessorEngine;
+        _pCompositionProcessorEngine = nullptr;
     }
 
     ITfContext* pContext = _pContext;
@@ -485,7 +486,7 @@ BOOL CSampleIME::_AddTextProcessorEngine()
     // Create composition processor engine
     if (_pCompositionProcessorEngine == nullptr)
     {
-        _pCompositionProcessorEngine = WindowsImeLib::g_processorFactory->CreateCompositionProcessorEngine();
+        _pCompositionProcessorEngine = new CCompositionProcessorEngine();
     }
     if (!_pCompositionProcessorEngine)
     {

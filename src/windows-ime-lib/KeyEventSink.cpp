@@ -121,8 +121,8 @@ BOOL CSampleIME::_IsKeyEaten(_In_ ITfContext *pContext, UINT codeIn, _Out_ UINT 
     //
     // Get composition engine
     //
-    WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+    CCompositionProcessorEngine *pCompositionProcessorEngine;
+    pCompositionProcessorEngine = _pCompositionProcessorEngine;
 
     if (isOpen)
     {

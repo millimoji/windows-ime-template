@@ -1,7 +1,7 @@
 #include <windows.h>
 #include "../WindowsImeLib.h"
 #include "SampleIMEDefine.h"
-#include "CompositionProcessorEngine.h"
+#include "ProcessorEngine.h"
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
@@ -49,7 +49,7 @@ namespace WindowsImeLib
     public:
         std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine() override
         {
-            return std::make_shared<CCompositionProcessorEngine>();
+            return std::make_shared<CompositionProcessorEngine>();
         }
     };
 

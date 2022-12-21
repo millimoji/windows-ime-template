@@ -25,19 +25,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseDictionaryEngine.cpp" />
-    <ClCompile Include="CompositionProcessorEngine.cpp" />
     <ClCompile Include="DictionaryParser.cpp" />
     <ClCompile Include="DictionarySearch.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="File.cpp" />
     <ClCompile Include="FileMapping.cpp" />
+    <ClCompile Include="ProcessorEngine.cpp" />
     <ClCompile Include="SampleIMEBaseStructure.cpp" />
     <ClCompile Include="SampleIMEGlobals.cpp" />
     <ClCompile Include="TableDictionaryEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseDictionaryEngine.h" />
-    <ClInclude Include="CompositionProcessorEngine.h" />
     <ClInclude Include="DictionaryParser.h" />
     <ClInclude Include="DictionarySearch.h" />
     <ClInclude Include="File.h" />
