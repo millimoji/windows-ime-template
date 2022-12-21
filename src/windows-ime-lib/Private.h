@@ -22,3 +22,10 @@
 #include "ctffunc.h"
 
 #include <memory>
+
+#pragma warning(push)
+#pragma warning(disable: 6001)
+#pragma warning(disable: 6387)
+#include <wil/com.h>
+#include <wil/resource.h>
+#pragma warning(pop)
