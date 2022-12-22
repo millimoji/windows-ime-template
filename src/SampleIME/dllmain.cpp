@@ -1,4 +1,4 @@
-#include <windows.h>
+#include "pch.h"
 #include "../WindowsImeLib.h"
 #include "SampleIMEDefine.h"
 #include "ProcessorEngine.h"
@@ -47,9 +47,9 @@ namespace WindowsImeLib
     class ProcessorFactory : public std::enable_shared_from_this<ProcessorFactory>, public IProcessorFactory
     {
     public:
-        std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine() override
+        std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(const std::weak_ptr<ICompositionProcessorEngineOwner>& owner) override
         {
-            return std::make_shared<CompositionProcessorEngine>();
+            return std::make_shared<CompositionProcessorEngine>(owner);
         }
     };
 

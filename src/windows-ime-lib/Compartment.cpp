@@ -6,8 +6,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #include "Private.h"
-#include "../Compartment.h"
 #include "Globals.h"
+#include "Compartment.h"
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -99,7 +99,7 @@ HRESULT CCompartment::_SetCompartmentBOOL(_In_ BOOL flag)
     hr = _GetCompartment(&pCompartment);
     if (SUCCEEDED(hr))
     {
-        VARIANT var;
+        VARIANT var = {};
         var.vt = VT_I4;
         var.lVal = flag;
         hr = pCompartment->SetValue(_tfClientId, &var);
@@ -152,7 +152,7 @@ HRESULT CCompartment::_SetCompartmentDWORD(_In_ DWORD dw)
     hr = _GetCompartment(&pCompartment);
     if (SUCCEEDED(hr))
     {
-        VARIANT var;
+        VARIANT var = {};
         var.vt = VT_I4;
         var.lVal = dw;
         hr = pCompartment->SetValue(_tfClientId, &var);

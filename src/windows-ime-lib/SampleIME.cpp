@@ -9,7 +9,7 @@
 #include "Globals.h"
 #include "SampleIME.h"
 #include "CandidateListUIPresenter.h"
-#include "../Compartment.h"
+#include "Compartment.h"
 #include "TfInputProcessorProfile.h"
 #include "RegKey.h"
 
@@ -287,8 +287,7 @@ STDAPI CSampleIME::Deactivate()
 {
     if (_pCompositionProcessorEngine)
     {
-        delete _pCompositionProcessorEngine;
-        _pCompositionProcessorEngine = nullptr;
+        _pCompositionProcessorEngine.reset();
     }
 
     ITfContext* pContext = _pContext;
@@ -486,7 +485,8 @@ BOOL CSampleIME::_AddTextProcessorEngine()
     // Create composition processor engine
     if (_pCompositionProcessorEngine == nullptr)
     {
-        _pCompositionProcessorEngine = new CCompositionProcessorEngine();
+        _pCompositionProcessorEngine = std::make_shared<CCompositionProcessorEngine>();
+        _pCompositionProcessorEngine->Initialize();
     }
     if (!_pCompositionProcessorEngine)
     {

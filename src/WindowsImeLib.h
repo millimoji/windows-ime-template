@@ -228,6 +228,27 @@ inline BOOL   IsShiftKeyDownOnly = FALSE;
 inline BOOL   IsControlKeyDownOnly = FALSE;
 inline BOOL   IsAltKeyDownOnly = FALSE;
 
+struct LanguageBarButtonProperty
+{
+	GUID id;
+	GUID compartmentId;
+	LPCWSTR langBarDescription;
+	LPCWSTR description;
+	int onIconResourceIndex;
+	int offIconResourceIndex;
+};
+
+struct ICompositionProcessorEngineOwner
+{
+	virtual ~ICompositionProcessorEngineOwner() {}
+
+	virtual void SetupLanguageBar(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, _In_reads_(countButtons) const LanguageBarButtonProperty* properties, UINT countButtons) = 0;
+    virtual BOOL GetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) = 0;
+    virtual void SetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, BOOL value) = 0;
+    virtual DWORD GetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) = 0;
+    virtual void SetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, DWORD value) = 0;
+};
+
 struct ICompositionProcessorEngine
 {
 	virtual ~ICompositionProcessorEngine() {}
@@ -262,22 +283,20 @@ struct ICompositionProcessorEngine
     virtual BOOL IsMakePhraseFromText() = 0;
 
     // Language bar control
-    virtual void SetLanguageBarStatus(DWORD status, BOOL isSet) = 0;
-
     virtual void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) = 0;
-
-    virtual void ShowAllLanguageBarIcons() = 0;
-    virtual void HideAllLanguageBarIcons() = 0;
 
     virtual CCandidateRange *GetCandidateListIndexRange() = 0;
     virtual UINT GetCandidateWindowWidth() = 0;
+
+    // Compartment
+    virtual HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept = 0;
 };
 
 struct IProcessorFactory
 {
 	virtual ~IProcessorFactory() {}
 
-	virtual std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine() = 0;
+	virtual std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(const std::weak_ptr<ICompositionProcessorEngineOwner>& owner) = 0;
 };
 
 // TODO: re-design how to inject factory

@@ -129,7 +129,7 @@ public:
     BOOL _IsComLess(void) { return (_dwActivateFlags & TF_TMAE_COMLESS) ? TRUE : FALSE; }
     BOOL _IsStoreAppMode(void) { return (_dwActivateFlags & TF_TMF_IMMERSIVEMODE) ? TRUE : FALSE; };
 
-    CCompositionProcessorEngine* GetCompositionProcessorEngine() { return (_pCompositionProcessorEngine); };
+    std::shared_ptr<CCompositionProcessorEngine> GetCompositionProcessorEngine() { return (_pCompositionProcessorEngine); };
 
     // comless helpers
     static HRESULT CreateInstance(REFCLSID rclsid, REFIID riid, _Outptr_result_maybenull_ LPVOID* ppv, _Out_opt_ HINSTANCE* phInst, BOOL isComLessMode);
@@ -217,7 +217,7 @@ private:
     DWORD _dwThreadFocusSinkCookie;
 
     // Composition Processor Engine object.
-    CCompositionProcessorEngine* _pCompositionProcessorEngine;
+    std::shared_ptr<CCompositionProcessorEngine> _pCompositionProcessorEngine;
 
     // Language bar item object.
     // CLangBarItemButton* _pLangBarItem = {};

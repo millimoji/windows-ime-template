@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "stdafx.h"
+#include <windows.h>
 #include "sal.h"
 
 #include <combaseapi.h>
@@ -22,6 +22,7 @@
 #include "ctffunc.h"
 
 #include <memory>
+#include <vector>
 
 #pragma warning(push)
 #pragma warning(disable: 6001)

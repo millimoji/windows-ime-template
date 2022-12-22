@@ -6,10 +6,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #include "Private.h"
-#include "SampleIME.h"
-#include "../LanguageBar.h"
 #include "Globals.h"
-#include "../Compartment.h"
+#include "SampleIME.h"
+#include "LanguageBar.h"
+#include "Compartment.h"
 
 //+---------------------------------------------------------------------------
 //
@@ -61,7 +61,7 @@ void CSampleIME::_UpdateLanguageBarOnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus)
     }
 
     CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine;
+    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
 
     pCompositionProcessorEngine->SetLanguageBarStatus(TF_LBI_STATUS_DISABLED, needDisableButtons);
 }

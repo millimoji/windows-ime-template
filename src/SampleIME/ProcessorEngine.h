@@ -10,19 +10,17 @@
 
 #include "pch.h"
 #include "../WindowsImeLib.h"
-#include "sal.h"
 #include "TableDictionaryEngine.h"
-// #include "KeyHandlerEditSession.h"
 #include "SampleIMEBaseStructure.h"
 #include "FileMapping.h"
-#include "../Compartment.h"
 #include "SampleIMEDefine.h"
-#include "../LanguageBar.h"
 
-class CompositionProcessorEngine : public std::enable_shared_from_this<CompositionProcessorEngine>, public WindowsImeLib::ICompositionProcessorEngine
+class CompositionProcessorEngine :
+	public WindowsImeLib::ICompositionProcessorEngine,
+	public std::enable_shared_from_this<CompositionProcessorEngine>
 {
 public:
-    CompositionProcessorEngine(void);
+    CompositionProcessorEngine(const std::weak_ptr<WindowsImeLib::ICompositionProcessorEngineOwner>& owner);
     ~CompositionProcessorEngine(void);
 
     BOOL SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode) override;
@@ -62,15 +60,12 @@ public:
     BOOL IsMakePhraseFromText()  override { return _hasMakePhraseFromText; }
 
     // Language bar control
-    void SetLanguageBarStatus(DWORD status, BOOL isSet) override;
-
     void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) override;
-
-    void ShowAllLanguageBarIcons() override;
-    void HideAllLanguageBarIcons() override;
 
     inline CCandidateRange *GetCandidateListIndexRange()  override { return &_candidateListIndexRange; }
     inline UINT GetCandidateWindowWidth()  override { return _candidateWndWidth; }
+
+    HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept override;
 
 private:
     WCHAR GetVirtualKey(DWORD_PTR dwIndex);
@@ -88,7 +83,7 @@ private:
 
 private:
     void InitKeyStrokeTable();
-    BOOL InitLanguageBar(_In_ CLangBarItemButton *pLanguageBar, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment);
+//    BOOL InitLanguageBar(_In_ CLangBarItemButton *pLanguageBar, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment);
 
     struct _KEYSTROKE;
     BOOL IsVirtualKeyKeystrokeComposition(UINT uCode, _Out_opt_ _KEYSTROKE_STATE *pKeyState, KEYSTROKE_FUNCTION function);
@@ -101,7 +96,7 @@ private:
     void SetupLanguageBar(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode);
     void SetKeystrokeTable(_Inout_ CSampleImeArray<_KEYSTROKE> *pKeystroke);
     void SetupPunctuationPair();
-    void CreateLanguageBarButton(DWORD dwEnable, GUID guidLangBar, _In_z_ LPCWSTR pwszDescriptionValue, _In_z_ LPCWSTR pwszTooltipValue, DWORD dwOnIconIndex, DWORD dwOffIconIndex, _Outptr_result_maybenull_ CLangBarItemButton **ppLangBarItemButton, BOOL isSecureMode);
+//    void CreateLanguageBarButton(DWORD dwEnable, GUID guidLangBar, _In_z_ LPCWSTR pwszDescriptionValue, _In_z_ LPCWSTR pwszTooltipValue, DWORD dwOnIconIndex, DWORD dwOffIconIndex, _Outptr_result_maybenull_ CLangBarItemButton **ppLangBarItemButton, BOOL isSecureMode);
     void SetInitialCandidateListRange();
     void SetDefaultCandidateTextFont();
 	void InitializeSampleIMECompartment(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
@@ -111,7 +106,6 @@ private:
     BOOL InitPreservedKey(_In_ XPreservedKey *pXPreservedKey, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
     BOOL CheckShiftKeyOnly(_In_ CSampleImeArray<TF_PRESERVEDKEY> *pTSFPreservedKeyTable);
 
-    static HRESULT CompartmentCallback(_In_ void *pv, REFGUID guidCompartment);
     void PrivateCompartmentsUpdated(_In_ ITfThreadMgr *pThreadMgr);
     void KeyboardOpenCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr);
     
@@ -119,6 +113,8 @@ private:
     CFile* GetDictionaryFile();
 
 private:
+	std::weak_ptr<WindowsImeLib::ICompositionProcessorEngineOwner> m_owner;
+
     struct _KEYSTROKE
     {
         UINT VirtualKey;
@@ -172,16 +168,16 @@ private:
     CSampleImeArray<CPunctuationNestPair> _PunctuationNestPair;
 
     // Language bar data
-    CLangBarItemButton* _pLanguageBar_IMEMode;
-    CLangBarItemButton* _pLanguageBar_DoubleSingleByte;
-    CLangBarItemButton* _pLanguageBar_Punctuation;
+//    CLangBarItemButton* _pLanguageBar_IMEMode;
+//    CLangBarItemButton* _pLanguageBar_DoubleSingleByte;
+//    CLangBarItemButton* _pLanguageBar_Punctuation;
 
     // Compartment
-    CCompartment* _pCompartmentConversion;
-    CCompartmentEventSink* _pCompartmentConversionEventSink;
-    CCompartmentEventSink* _pCompartmentKeyboardOpenEventSink;
-    CCompartmentEventSink* _pCompartmentDoubleSingleByteEventSink;
-    CCompartmentEventSink* _pCompartmentPunctuationEventSink;
+//    CCompartment* _pCompartmentConversion;
+//    CCompartmentEventSink* _pCompartmentConversionEventSink;
+//    CCompartmentEventSink* _pCompartmentKeyboardOpenEventSink;
+//    CCompartmentEventSink* _pCompartmentDoubleSingleByteEventSink;
+//    CCompartmentEventSink* _pCompartmentPunctuationEventSink;
 
     // Configuration data
     BOOL _isWildcard : 1;

@@ -5,6 +5,7 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
+#include "Private.h"
 #include "Globals.h"
 
 //---------------------------------------------------------------------

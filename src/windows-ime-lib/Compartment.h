@@ -52,8 +52,8 @@ public:
     HRESULT _Unadvise();
 
 private:
-    ITfCompartment *_pCompartment;
-    DWORD _dwCookie;
+    ITfCompartment* _pCompartment = {};
+    DWORD _dwCookie = {};
     CESCALLBACK _pfnCallback;
     void *_pv;
 

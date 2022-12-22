@@ -55,7 +55,7 @@ VOID CSampleIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContex
     isForce;pContext;
 
     CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine;
+    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
     pCompositionProcessorEngine->PurgeVirtualKey();
 
     if (_pCandidateListUIPresenter)
@@ -116,7 +116,7 @@ HRESULT CSampleIME::_HandleCompositionInput(TfEditCookie ec, _In_ ITfContext *pC
     BOOL isCovered = TRUE;
 
     CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine;
+    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
 
     if ((_pCandidateListUIPresenter != nullptr) && (_candidateMode != CANDIDATE_INCREMENTAL))
     {
@@ -350,7 +350,7 @@ HRESULT CSampleIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext *
     // Get candidate string from composition processor engine
     //
     CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine;
+    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
     pCompositionProcessorEngine->GetCandidateList(&candidateList, FALSE, isWildcardSearch);
 
     // If there is no candlidate listin the current reading string, we don't do anything. Just wait for
@@ -452,7 +452,7 @@ HRESULT CSampleIME::_HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext
     //
     {
         CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-        pCompositionProcessorEngine = _pCompositionProcessorEngine;
+        pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
 
         DWORD_PTR vKeyLen = pCompositionProcessorEngine->GetVirtualKeyLength();
 
@@ -548,7 +548,7 @@ HRESULT CSampleIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfConte
     // Get punctuation char from composition processor engine
     //
     CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine;
+    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
 
     WCHAR punctuation = pCompositionProcessorEngine->GetPunctuation(wch);
 
