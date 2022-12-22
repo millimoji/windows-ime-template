@@ -100,8 +100,17 @@ BOOL CSampleIME::_IsKeyEaten(_In_ ITfContext *pContext, UINT codeIn, _Out_ UINT 
 
     if (pCompositionProcessorEngine)
     {
+        *pwch = wch;
         BOOL isEaten = pCompositionProcessorEngine->IsKeyEaten(_pThreadMgr, _tfClientId, *pCodeOut, pwch, _IsComposing(), _candidateMode, _candidateMode, pKeyState);
-        return isEaten || isTouchKeyboardSpecialKeys;
+        if (isEaten || isTouchKeyboardSpecialKeys)
+        {
+            return TRUE;
+        }
+        else
+        {
+            *pwch = L'\0';
+            return FALSE;
+        }
     }
 
     return isTouchKeyboardSpecialKeys;
