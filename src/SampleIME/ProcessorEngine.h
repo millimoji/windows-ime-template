@@ -39,7 +39,6 @@ public:
 
     BOOL IsKeyEaten(_In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId, UINT code, _Inout_updates_(1) WCHAR *pwch,
         BOOL isComposing, CANDIDATE_MODE candidateMode, BOOL isCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState) override;
-    BOOL IsVirtualKeyNeed(UINT uCode, _In_reads_(1) WCHAR *pwch, BOOL fComposing, CANDIDATE_MODE candidateMode, BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState) override;
 
     BOOL AddVirtualKey(WCHAR wch) override;
     void RemoveVirtualKey(DWORD_PTR dwIndex) override;
@@ -71,6 +70,7 @@ public:
     void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
 
 private:
+    BOOL IsVirtualKeyNeed(UINT uCode, _In_reads_(1) WCHAR *pwch, BOOL fComposing, CANDIDATE_MODE candidateMode, BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
     WCHAR GetVirtualKey(DWORD_PTR dwIndex);
     BOOL IsWildcard() { return _isWildcard; }
     BOOL IsDisableWildcardAtFirst() { return _isDisableWildcardAtFirst; }

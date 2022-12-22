@@ -192,9 +192,9 @@ BOOL CCompositionProcessorEngine::IsKeyEaten(
 //     If engine need this virtual key code, returns true. Otherwise returns false.
 //----------------------------------------------------------------------------
 
-BOOL CCompositionProcessorEngine::IsVirtualKeyNeed(UINT uCode, _In_reads_(1) WCHAR *pwch, BOOL fComposing, CANDIDATE_MODE candidateMode, BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState)
-{
-    return processorEngine->IsVirtualKeyNeed(uCode, pwch, fComposing, candidateMode, hasCandidateWithWildcard, pKeyState);
+//BOOL CCompositionProcessorEngine::IsVirtualKeyNeed(UINT uCode, _In_reads_(1) WCHAR *pwch, BOOL fComposing, CANDIDATE_MODE candidateMode, BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState)
+//{
+//    return processorEngine->IsVirtualKeyNeed(uCode, pwch, fComposing, candidateMode, hasCandidateWithWildcard, pKeyState);
 //    if (pKeyState)
 //    {
 //        pKeyState->Category = CATEGORY_NONE;
@@ -430,7 +430,7 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyNeed(UINT uCode, _In_reads_(1) WCH
 //    }
 //
 //    return FALSE;
-}
+//}
 
 //+---------------------------------------------------------------------------
 //

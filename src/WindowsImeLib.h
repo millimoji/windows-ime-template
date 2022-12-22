@@ -257,7 +257,6 @@ struct ICompositionProcessorEngine
 
     virtual BOOL IsKeyEaten(_In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId, UINT code, _Inout_updates_(1) WCHAR *pwch,
         BOOL isComposing, CANDIDATE_MODE candidateMode, BOOL isCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState) = 0;
-    virtual BOOL IsVirtualKeyNeed(UINT uCode, _In_reads_(1) WCHAR *pwch, BOOL fComposing, CANDIDATE_MODE candidateMode, BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState) = 0;
 
     virtual BOOL AddVirtualKey(WCHAR wch) = 0;
     virtual void RemoveVirtualKey(DWORD_PTR dwIndex) = 0;
