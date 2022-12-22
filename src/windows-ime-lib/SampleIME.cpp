@@ -287,6 +287,7 @@ STDAPI CSampleIME::Deactivate()
 {
     if (_pCompositionProcessorEngine)
     {
+        _pCompositionProcessorEngine->ClearCompartment(_pThreadMgr, _tfClientId);
         _pCompositionProcessorEngine.reset();
     }
 
@@ -321,14 +322,14 @@ STDAPI CSampleIME::Deactivate()
 
     _UninitThreadMgrEventSink();
 
-    CCompartment CompartmentKeyboardOpen(_pThreadMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
-    CompartmentKeyboardOpen._ClearCompartment();
-
-    CCompartment CompartmentDoubleSingleByte(_pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentDoubleSingleByte);
-    CompartmentDoubleSingleByte._ClearCompartment();
-
-    CCompartment CompartmentPunctuation(_pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentPunctuation);
-    CompartmentDoubleSingleByte._ClearCompartment();
+//    CCompartment CompartmentKeyboardOpen(_pThreadMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
+//    CompartmentKeyboardOpen._ClearCompartment();
+//
+//    CCompartment CompartmentDoubleSingleByte(_pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentDoubleSingleByte);
+//    CompartmentDoubleSingleByte._ClearCompartment();
+//
+//    CCompartment CompartmentPunctuation(_pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentPunctuation);
+//    CompartmentDoubleSingleByte._ClearCompartment();
 
     if (_pThreadMgr != nullptr)
     {

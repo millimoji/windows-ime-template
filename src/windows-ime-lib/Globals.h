@@ -53,7 +53,8 @@ inline BOOL IsTooSimilar(COLORREF cr1, COLORREF cr2)
 //---------------------------------------------------------------------
 // extern
 //---------------------------------------------------------------------
-// extern HINSTANCE dllInstanceHandle;
+extern HINSTANCE dllInstanceHandle;
+extern HFONT defaultlFontHandle;				// Global font object we use everywhere
 
 extern ATOM AtomCandidateWindow;
 extern ATOM AtomShadowWindow;

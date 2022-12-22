@@ -23,6 +23,8 @@ extern const struct _PUNCTUATION PunctuationTable[14];
 
 extern const GUID SampleIMEGuidLangBarDoubleSingleByte;
 extern const GUID SampleIMEGuidLangBarPunctuation;
+extern const GUID SampleIMEGuidCompartmentDoubleSingleByte;
+extern const GUID SampleIMEGuidCompartmentPunctuation;
 
 extern const WCHAR UnicodeByteOrderMark;
 extern const WCHAR KeywordDelimiter;

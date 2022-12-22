@@ -25,7 +25,7 @@ enum KEYSTROKE_CATEGORY
     CATEGORY_COMPOSING,
     CATEGORY_CANDIDATE,
     CATEGORY_PHRASE,
-    CATEGORY_PHRASEFROMKEYSTROKE,
+    // CATEGORY_PHRASEFROMKEYSTROKE,
     CATEGORY_INVOKE_COMPOSITION_EDIT_SESSION
 };
 
@@ -66,12 +66,6 @@ struct _KEYSTROKE_STATE
 {
     KEYSTROKE_CATEGORY Category;
     KEYSTROKE_FUNCTION Function;
-};
-
-struct _PUNCTUATION
-{
-    WCHAR _Code;
-    WCHAR _Punctuation;
 };
 
 template<class T>
@@ -199,20 +193,20 @@ protected:
 
 //---------------------------------------------------------------------
 // CCandidateListItem
-//	_ItemString - candidate string
-//	_FindKeyCode - tailing string
+//  _ItemString - candidate string
+//  _FindKeyCode - tailing string
 //---------------------------------------------------------------------
 struct CCandidateListItem
 {
     CStringRange _ItemString;
     CStringRange _FindKeyCode;
 
-	CCandidateListItem& operator =( const CCandidateListItem& rhs)
-	{
-		_ItemString = rhs._ItemString;
-		_FindKeyCode = rhs._FindKeyCode;
-		return *this;
-	}
+    CCandidateListItem& operator =( const CCandidateListItem& rhs)
+    {
+        _ItemString = rhs._ItemString;
+        _FindKeyCode = rhs._FindKeyCode;
+        return *this;
+    }
 };
 
 struct ITfThreadMgr;
@@ -221,8 +215,6 @@ typedef /* [uuid] */  DECLSPEC_UUID("de403c21-89fd-4f85-8b87-64584d063fbc") DWOR
 namespace WindowsImeLib
 {
 
-inline HINSTANCE dllInstanceHandle;
-inline HFONT defaultlFontHandle;  // Global font object we use everywhere
 inline USHORT ModifiersValue = 0;
 inline BOOL   IsShiftKeyDownOnly = FALSE;
 inline BOOL   IsControlKeyDownOnly = FALSE;
@@ -230,28 +222,31 @@ inline BOOL   IsAltKeyDownOnly = FALSE;
 
 struct LanguageBarButtonProperty
 {
-	GUID id;
-	GUID compartmentId;
-	LPCWSTR langBarDescription;
-	LPCWSTR description;
-	int onIconResourceIndex;
-	int offIconResourceIndex;
+    GUID id;
+    GUID compartmentId;
+    LPCWSTR langBarDescription;
+    LPCWSTR description;
+    int onIconResourceIndex;
+    int offIconResourceIndex;
 };
 
 struct ICompositionProcessorEngineOwner
 {
-	virtual ~ICompositionProcessorEngineOwner() {}
+    virtual ~ICompositionProcessorEngineOwner() {}
 
-	virtual void SetupLanguageBar(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, _In_reads_(countButtons) const LanguageBarButtonProperty* properties, UINT countButtons) = 0;
+    virtual void SetDefaultCandidateTextFont(int idsDefaultFont) = 0;
+
+    virtual void SetupLanguageBar(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, _In_reads_(countButtons) const LanguageBarButtonProperty* properties, UINT countButtons) = 0;
     virtual BOOL GetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) = 0;
     virtual void SetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, BOOL value) = 0;
     virtual DWORD GetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) = 0;
     virtual void SetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, DWORD value) = 0;
+    virtual void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) = 0;
 };
 
 struct ICompositionProcessorEngine
 {
-	virtual ~ICompositionProcessorEngine() {}
+    virtual ~ICompositionProcessorEngine() {}
 
     // Get language profile.
     virtual GUID GetLanguageProfile(LANGID *plangid) = 0;
@@ -260,6 +255,8 @@ struct ICompositionProcessorEngine
     virtual BOOL SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode) = 0;
     virtual LCID GetLocale() = 0;
 
+    virtual BOOL IsKeyEaten(_In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId, UINT code, _Inout_updates_(1) WCHAR *pwch,
+        BOOL isComposing, CANDIDATE_MODE candidateMode, BOOL isCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState) = 0;
     virtual BOOL IsVirtualKeyNeed(UINT uCode, _In_reads_(1) WCHAR *pwch, BOOL fComposing, CANDIDATE_MODE candidateMode, BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState) = 0;
 
     virtual BOOL AddVirtualKey(WCHAR wch) = 0;
@@ -290,13 +287,14 @@ struct ICompositionProcessorEngine
 
     // Compartment
     virtual HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept = 0;
+    virtual void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) = 0;
 };
 
 struct IProcessorFactory
 {
-	virtual ~IProcessorFactory() {}
+    virtual ~IProcessorFactory() {}
 
-	virtual std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(const std::weak_ptr<ICompositionProcessorEngineOwner>& owner) = 0;
+    virtual std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(const std::weak_ptr<ICompositionProcessorEngineOwner>& owner) = 0;
 };
 
 // TODO: re-design how to inject factory
@@ -309,10 +307,4 @@ extern HRESULT DllCanUnloadNow(void);
 extern HRESULT DllUnregisterServer(LANGID langId);
 extern HRESULT DllRegisterServer(LANGID langId, int textServiceIconIndex);
 
-}
-
-namespace Global
-{
-extern const GUID SampleIMEGuidCompartmentDoubleSingleByte;
-extern const GUID SampleIMEGuidCompartmentPunctuation;
 }

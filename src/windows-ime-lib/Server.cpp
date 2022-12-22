@@ -194,7 +194,7 @@ void FreeGlobalObjects(void)
         }
     }
 
-    DeleteObject(WindowsImeLib::defaultlFontHandle);
+    DeleteObject(Global::defaultlFontHandle);
 }
 
 //+---------------------------------------------------------------------------

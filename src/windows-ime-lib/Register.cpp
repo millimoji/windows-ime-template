@@ -45,7 +45,7 @@ BOOL RegisterProfiles(LANGID langId, int textServiceIconIndex)
 
     WCHAR achIconFile[MAX_PATH] = {'\0'};
     DWORD cchA = 0;
-    cchA = GetModuleFileName(WindowsImeLib::dllInstanceHandle, achIconFile, MAX_PATH);
+    cchA = GetModuleFileName(Global::dllInstanceHandle, achIconFile, MAX_PATH);
     cchA = cchA >= MAX_PATH ? (MAX_PATH - 1) : cchA;
     achIconFile[cchA] = '\0';
 
@@ -233,7 +233,7 @@ BOOL RegisterServer()
 
         if (RegCreateKeyEx(regKeyHandle, RegInfo_Key_InProSvr32, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &regSubkeyHandle, &copiedStringLen) == ERROR_SUCCESS)
         {
-            copiedStringLen = GetModuleFileNameW(WindowsImeLib::dllInstanceHandle, achFileName, ARRAYSIZE(achFileName));
+            copiedStringLen = GetModuleFileNameW(Global::dllInstanceHandle, achFileName, ARRAYSIZE(achFileName));
             copiedStringLen = (copiedStringLen >= (MAX_PATH - 1)) ? MAX_PATH : (++copiedStringLen);
             if (RegSetValueEx(regSubkeyHandle, NULL, 0, REG_SZ, (const BYTE *)achFileName, (copiedStringLen)*sizeof(WCHAR)) != ERROR_SUCCESS)
             {

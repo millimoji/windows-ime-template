@@ -12,12 +12,13 @@
 #include "../WindowsImeLib.h"
 
 namespace Global {
-// HINSTANCE dllInstanceHandle;
+
+HINSTANCE dllInstanceHandle;
 
 LONG dllRefCount = -1;
 
 CRITICAL_SECTION CS;
-// HFONT defaultlFontHandle;				// Global font object we use everywhere
+HFONT defaultlFontHandle;				// Global font object we use everywhere
 
 //---------------------------------------------------------------------
 // SampleIME CLSID
@@ -44,26 +45,6 @@ extern const GUID SampleIMEGuidProfile = {
 //---------------------------------------------------------------------
 // PreserveKey GUID
 //---------------------------------------------------------------------
-
-//---------------------------------------------------------------------
-// Compartments
-//---------------------------------------------------------------------
-// {101011C5-CF72-4F0C-A515-153019593F10}
-extern const GUID SampleIMEGuidCompartmentDoubleSingleByte = {
-    0x101011c5,
-    0xcf72,
-    0x4f0c,
-    { 0xa5, 0x15, 0x15, 0x30, 0x19, 0x59, 0x3f, 0x10 }
-};
-
-// {DD321BCC-A7F8-4561-9B61-9B3508C9BA97}
-extern const GUID SampleIMEGuidCompartmentPunctuation = {
-    0xdd321bcc,
-    0xa7f8,
-    0x4561,
-    { 0x9b, 0x61, 0x9b, 0x35, 0x8, 0xc9, 0xba, 0x97 }
-};
-
 
 //---------------------------------------------------------------------
 // LanguageBars

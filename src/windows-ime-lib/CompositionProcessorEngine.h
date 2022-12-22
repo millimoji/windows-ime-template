@@ -27,6 +27,7 @@ public:
     ~CCompositionProcessorEngine(void);
 
     void Initialize();
+    void ClearCompartment(_In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId);
 
     BOOL SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode);
 
@@ -36,6 +37,8 @@ public:
     // Get locale
     LCID GetLocale();
 
+    BOOL IsKeyEaten(_In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId, UINT code, _Inout_updates_(1) WCHAR *pwch,
+        BOOL isComposing, CANDIDATE_MODE candidateMode, BOOL isCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
     BOOL IsVirtualKeyNeed(UINT uCode, _In_reads_(1) WCHAR *pwch, BOOL fComposing, CANDIDATE_MODE candidateMode, BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
 
     BOOL AddVirtualKey(WCHAR wch);
@@ -72,10 +75,12 @@ public:
 private:
     void SetupLanguageBar(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode,
         _In_reads_(countButtons) const WindowsImeLib::LanguageBarButtonProperty* properties, UINT countButtons) override;
+    void SetDefaultCandidateTextFont(int idsDefaultFont) override;
     BOOL GetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) override;
     void SetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, BOOL value) override;
     DWORD GetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) override;
     void SetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, DWORD value) override;
+    void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) override;
 
 private:
 	std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> processorEngine;
@@ -110,7 +115,6 @@ private:
 //    void SetupPunctuationPair();
 	void CreateLanguageBarButton(DWORD dwEnable, GUID guidLangBar, _In_z_ LPCWSTR pwszDescriptionValue, _In_z_ LPCWSTR pwszTooltipValue, DWORD dwOnIconIndex, DWORD dwOffIconIndex, _Outptr_result_maybenull_ CLangBarItemButton **ppLangBarItemButton, BOOL isSecureMode);
 //    void SetInitialCandidateListRange();
-//    void SetDefaultCandidateTextFont();
 //	void InitializeSampleIMECompartment(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
 //
 //    class XPreservedKey;

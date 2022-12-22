@@ -37,6 +37,8 @@ public:
         return MAKELCID(_langid, SORT_DEFAULT);
     }
 
+    BOOL IsKeyEaten(_In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId, UINT code, _Inout_updates_(1) WCHAR *pwch,
+        BOOL isComposing, CANDIDATE_MODE candidateMode, BOOL isCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState) override;
     BOOL IsVirtualKeyNeed(UINT uCode, _In_reads_(1) WCHAR *pwch, BOOL fComposing, CANDIDATE_MODE candidateMode, BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState) override;
 
     BOOL AddVirtualKey(WCHAR wch) override;
@@ -66,6 +68,7 @@ public:
     inline UINT GetCandidateWindowWidth()  override { return _candidateWndWidth; }
 
     HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept override;
+    void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
 
 private:
     WCHAR GetVirtualKey(DWORD_PTR dwIndex);

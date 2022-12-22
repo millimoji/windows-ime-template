@@ -23,7 +23,7 @@ BOOL WindowsImeLib::DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID pvReserv
     {
     case DLL_PROCESS_ATTACH:
 
-        WindowsImeLib::dllInstanceHandle = hInstance;
+        Global::dllInstanceHandle = hInstance;
 
         if (!InitializeCriticalSectionAndSpinCount(&Global::CS, 0))
         {

@@ -240,7 +240,7 @@ LRESULT CALLBACK CCandidateWindow::_WindowProcCallback(_In_ HWND wndHandle, UINT
             dcHandle = GetDC(wndHandle);
             if (dcHandle)
             {
-                HFONT hFontOld = (HFONT)SelectObject(dcHandle, WindowsImeLib::defaultlFontHandle);
+                HFONT hFontOld = (HFONT)SelectObject(dcHandle, Global::defaultlFontHandle);
                 GetTextMetrics(dcHandle, &_TextMetric);
 
                 _cxTitle = _TextMetric.tmMaxCharWidth * _wndWidth;
@@ -419,7 +419,7 @@ void CCandidateWindow::_OnPaint(_In_ HDC dcHandle, _In_ PAINTSTRUCT *pPaintStruc
 {
     SetBkMode(dcHandle, TRANSPARENT);
 
-    HFONT hFontOld = (HFONT)SelectObject(dcHandle, WindowsImeLib::defaultlFontHandle);
+    HFONT hFontOld = (HFONT)SelectObject(dcHandle, Global::defaultlFontHandle);
 
     FillRect(dcHandle, &pPaintStruct->rcPaint, _brshBkColor);
 

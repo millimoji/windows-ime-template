@@ -27,6 +27,16 @@
 // 
 // BOOL CLSIDToString(REFGUID refGUID, _Out_writes_ (39) WCHAR *pCLSIDString);
 
+//---------------------------------------------------------------------
+// structure
+//---------------------------------------------------------------------
+struct _PUNCTUATION
+{
+    WCHAR _Code;
+    WCHAR _Punctuation;
+};
+
+
 HRESULT SkipWhiteSpace(LCID locale, _In_ LPCWSTR pwszBuffer, DWORD_PTR dwBufLen, _Out_ DWORD_PTR *pdwIndex);
 HRESULT FindChar(WCHAR wch, _In_ LPCWSTR pwszBuffer, DWORD_PTR dwBufLen, _Out_ DWORD_PTR *pdwIndex);
 

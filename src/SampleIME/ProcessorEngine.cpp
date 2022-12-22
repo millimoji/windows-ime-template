@@ -750,6 +750,7 @@ BOOL CompositionProcessorEngine::CheckShiftKeyOnly(_In_ CSampleImeArray<TF_PRESE
 
 void CompositionProcessorEngine::OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId)
 {
+    *pIsEaten = FALSE;
 	const auto owner = m_owner.lock();
 	if (!owner)
 	{
@@ -938,12 +939,28 @@ void CompositionProcessorEngine::SetupLanguageBar(_In_ ITfThreadMgr *pThreadMgr,
 //
 //----------------------------------------------------------------------------
 
+HMODULE GetThisModuleHandle()
+{
+	static HMODULE module = nullptr;
+
+	if (!module)
+	{
+		LOG_IF_WIN32_ERROR(GetModuleHandleEx(
+			GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+			reinterpret_cast<LPCWSTR>(GetThisModuleHandle),
+			&module));
+	}
+
+	return module;
+}
+
+
 BOOL CompositionProcessorEngine::SetupDictionaryFile()
 {   
     // Not yet registered
     // Register CFileMapping
     WCHAR wszFileName[MAX_PATH] = {'\0'};
-    DWORD cchA = GetModuleFileName(WindowsImeLib::dllInstanceHandle, wszFileName, ARRAYSIZE(wszFileName));
+    DWORD cchA = GetModuleFileName(GetThisModuleHandle(), wszFileName, ARRAYSIZE(wszFileName));
     size_t iDicFileNameLen = cchA + wcslen(TEXTSERVICE_DIC);
     WCHAR *pwszFileName = new (std::nothrow) WCHAR[iDicFileNameLen + 1];
     if (!pwszFileName)
@@ -1309,20 +1326,25 @@ void CompositionProcessorEngine::SetInitialCandidateListRange()
 
 void CompositionProcessorEngine::SetDefaultCandidateTextFont()
 {
-    // Candidate Text Font
-    if (WindowsImeLib::defaultlFontHandle == nullptr)
+    if (const auto owner = m_owner.lock())
     {
-        WCHAR fontName[50] = {'\0'}; 
-        LoadString(WindowsImeLib::dllInstanceHandle, IDS_DEFAULT_FONT, fontName, 50);
-        WindowsImeLib::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, fontName);
-        if (!WindowsImeLib::defaultlFontHandle)
-        {
-            LOGFONT lf = {};
-            SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
-            // Fall back to the default GUI font on failure.
-            WindowsImeLib::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, lf.lfFaceName);
-        }
-    }
+		owner->SetDefaultCandidateTextFont(IDS_DEFAULT_FONT);
+	}
+
+//    // Candidate Text Font
+//    if (WindowsImeLib::defaultlFontHandle == nullptr)
+//    {
+//        WCHAR fontName[50] = {'\0'}; 
+//        LoadString(WindowsImeLib::dllInstanceHandle, IDS_DEFAULT_FONT, fontName, 50);
+//        WindowsImeLib::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, fontName);
+//        if (!WindowsImeLib::defaultlFontHandle)
+//        {
+//            LOGFONT lf = {};
+//            SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
+//            // Fall back to the default GUI font on failure.
+//            WindowsImeLib::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, lf.lfFaceName);
+//        }
+//    }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1330,6 +1352,85 @@ void CompositionProcessorEngine::SetDefaultCandidateTextFont()
 //    CompositionProcessorEngine
 //
 //////////////////////////////////////////////////////////////////////
+
+BOOL CompositionProcessorEngine::IsKeyEaten(
+    _In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId, UINT code, _Inout_updates_(1) WCHAR *pwch,
+    BOOL isComposing, CANDIDATE_MODE candidateMode, BOOL isCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState)
+{
+    if (pKeyState)
+    {
+        pKeyState->Category = CATEGORY_NONE;
+        pKeyState->Function = FUNCTION_NONE;
+    }
+
+    const auto owner = m_owner.lock();
+    if (!owner)
+    {
+        return  FALSE;
+    }
+
+    BOOL isOpen = owner->GetCompartmentBool(pThreadMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
+    BOOL isDoubleSingleByte = owner->GetCompartmentBool(pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentDoubleSingleByte);
+    BOOL isPunctuation = owner->GetCompartmentBool(pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentPunctuation);
+
+    // if the keyboard is closed, we don't eat keys, with the exception of the touch keyboard specials keys
+    if (!isOpen && !isDoubleSingleByte && !isPunctuation)
+    {
+        *pwch = L'\0';
+        return FALSE;
+    }
+
+    //
+    // Get composition engine
+    //
+
+    if (isOpen)
+    {
+        //
+        // The candidate or phrase list handles the keys through ITfKeyEventSink.
+        //
+        // eat only keys that CKeyHandlerEditSession can handles.
+        //
+        if (IsVirtualKeyNeed(code, pwch, isComposing, candidateMode, isCandidateWithWildcard, pKeyState))
+        {
+            return TRUE;
+        }
+    }
+
+    //
+    // Punctuation
+    //
+    if (IsPunctuation(*pwch))
+    {
+        if ((candidateMode == CANDIDATE_NONE) && isPunctuation)
+        {
+            if (pKeyState)
+            {
+                pKeyState->Category = CATEGORY_COMPOSING;
+                pKeyState->Function = FUNCTION_PUNCTUATION;
+            }
+            return TRUE;
+        }
+    }
+
+    //
+    // Double/Single byte
+    //
+    if (isDoubleSingleByte && IsDoubleSingleByte(*pwch))
+    {
+        if (candidateMode == CANDIDATE_NONE)
+        {
+            if (pKeyState)
+            {
+                pKeyState->Category = CATEGORY_COMPOSING;
+                pKeyState->Function = FUNCTION_DOUBLE_SINGLE_BYTE;
+            }
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
 
 //+---------------------------------------------------------------------------
 //
@@ -1715,4 +1816,17 @@ BOOL CompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_S
         }
     }
     return FALSE;
+}
+
+void CompositionProcessorEngine::ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId)
+{
+	const auto owner = m_owner.lock();
+	if (!owner)
+	{
+		return;
+	}
+
+	owner->ClearCompartment(pThreadMgr, tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
+	owner->ClearCompartment(pThreadMgr, tfClientId, Global::SampleIMEGuidCompartmentDoubleSingleByte);
+	owner->ClearCompartment(pThreadMgr, tfClientId, Global::SampleIMEGuidCompartmentPunctuation);
 }

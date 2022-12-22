@@ -7,9 +7,8 @@
 
 #include "Private.h"
 #include "../WindowsImeLib.h"
-// #include "SampleIME.h"
+#include "Globals.h"
 #include "CompositionProcessorEngine.h"
-// #include "TfInputProcessorProfile.h"
 #include "Compartment.h"
 #include "LanguageBar.h"
 
@@ -70,14 +69,13 @@ void CCompositionProcessorEngine::Initialize()
 //
 //----------------------------------------------------------------------------
 
+void CCompositionProcessorEngine::ClearCompartment(ITfThreadMgr* pThreadMgr, TfClientId tfClientId)
+{
+    processorEngine->ClearCompartment(pThreadMgr, tfClientId);
+}
+
 CCompositionProcessorEngine::~CCompositionProcessorEngine()
 {
-//    if (_pTableDictionaryEngine)
-//    {
-//        delete _pTableDictionaryEngine;
-//        _pTableDictionaryEngine = nullptr;
-//    }
-
     if (_pCompartmentConversion)
     {
         _pCompartmentConversion.reset();
@@ -87,7 +85,6 @@ CCompositionProcessorEngine::~CCompositionProcessorEngine()
         _pCompartmentConversionEventSink->_Unadvise();
         _pCompartmentConversionEventSink.reset();
     }
-
 
     for (auto&& langBarButton: m_langaugeBarButtons)
     {
@@ -171,6 +168,13 @@ LCID CCompositionProcessorEngine::GetLocale()
 {
     return processorEngine->GetLocale();
     // return MAKELCID(_langid, SORT_DEFAULT);
+}
+
+BOOL CCompositionProcessorEngine::IsKeyEaten(
+    _In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId, UINT code, _Inout_updates_(1) WCHAR *pwch,
+    BOOL isComposing, CANDIDATE_MODE candidateMode, BOOL isCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState)
+{
+    return processorEngine->IsKeyEaten(pThreadMgr, tfClientId, code, pwch, isComposing, candidateMode, isCandidateWithWildcard, pKeyState);
 }
 
 //+---------------------------------------------------------------------------
@@ -1880,7 +1884,7 @@ BOOL CCompositionProcessorEngine::InitLanguageBar(_In_ CLangBarItemButton *pLang
 //    // Not yet registered
 //    // Register CFileMapping
 //    WCHAR wszFileName[MAX_PATH] = {'\0'};
-//    DWORD cchA = GetModuleFileName(WindowsImeLib::dllInstanceHandle, wszFileName, ARRAYSIZE(wszFileName));
+//    DWORD cchA = GetModuleFileName(Global::dllInstanceHandle, wszFileName, ARRAYSIZE(wszFileName));
 //    size_t iDicFileNameLen = cchA + wcslen(TEXTSERVICE_DIC);
 //    WCHAR *pwszFileName = new (std::nothrow) WCHAR[iDicFileNameLen + 1];
 //    if (!pwszFileName)
@@ -2287,25 +2291,25 @@ HRESULT CCompositionProcessorEngine::CompartmentCallback(_In_ void *pv, REFGUID 
 //        }
 //    }
 //}
-//
-//void CompositionProcessorEngine::SetDefaultCandidateTextFont()
-//{
-//    // Candidate Text Font
-//    if (WindowsImeLib::defaultlFontHandle == nullptr)
-//    {
-//        WCHAR fontName[50] = {'\0'}; 
-//        LoadString(WindowsImeLib::dllInstanceHandle, IDS_DEFAULT_FONT, fontName, 50);
-//        WindowsImeLib::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, fontName);
-//        if (!WindowsImeLib::defaultlFontHandle)
-//        {
-//            LOGFONT lf = {};
-//            SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
-//            // Fall back to the default GUI font on failure.
-//            WindowsImeLib::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, lf.lfFaceName);
-//        }
-//    }
-//}
-//
+
+void CCompositionProcessorEngine::SetDefaultCandidateTextFont(int idsDefaultFont)
+{
+    // Candidate Text Font
+    if (Global::defaultlFontHandle == nullptr)
+    {
+        WCHAR fontName[50] = {'\0'}; 
+        LoadString(Global::dllInstanceHandle, idsDefaultFont, fontName, 50);
+        Global::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, fontName);
+        if (!Global::defaultlFontHandle)
+        {
+            LOGFONT lf = {};
+            SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
+            // Fall back to the default GUI font on failure.
+            Global::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, lf.lfFaceName);
+        }
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////
 ////
 ////    CompositionProcessorEngine
@@ -2725,4 +2729,10 @@ void CCompositionProcessorEngine::SetCompartmentDword(ITfThreadMgr *pThreadMgr, 
 {
     CCompartment compartment(pThreadMgr, tfClientId, guidCompartment);
     LOG_IF_FAILED(compartment._SetCompartmentDWORD(value));
+}
+
+void CCompositionProcessorEngine::ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment)
+{
+    CCompartment compartment(pThreadMgr, tfClientId, guidCompartment);
+    LOG_IF_FAILED(compartment._ClearCompartment());
 }

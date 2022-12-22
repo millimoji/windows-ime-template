@@ -60,7 +60,7 @@ BOOL CBaseWindow::_InitWindowClass(_In_ LPCWSTR lpwszClassName, _Out_ ATOM *pato
     wc.lpfnWndProc   = CBaseWindow::_WindowProc;
     wc.cbClsExtra    = 0;
     wc.cbWndExtra    = 0;
-    wc.hInstance     = WindowsImeLib::dllInstanceHandle;
+    wc.hInstance     = Global::dllInstanceHandle;
     wc.hIcon         = nullptr;
     wc.hCursor       = LoadCursor(nullptr, IDC_ARROW);
     wc.hbrBackground = (HBRUSH)GetStockObject(LTGRAY_BRUSH);
@@ -83,7 +83,7 @@ void CBaseWindow::_UninitWindowClass(ATOM atom)
 {
     if (atom != 0)
     {
-        UnregisterClass((LPCTSTR)atom, WindowsImeLib::dllInstanceHandle);
+        UnregisterClass((LPCTSTR)atom, Global::dllInstanceHandle);
     }
 }
 
@@ -109,7 +109,7 @@ BOOL CBaseWindow::_Create(ATOM atom, DWORD dwExStyle, DWORD dwStyle, _In_opt_ CB
             wndWidth, wndHeight,
             _pParentWnd ? _pParentWnd->_GetWnd() : parentWndHandle,    // parentWndHandle
             NULL,
-            WindowsImeLib::dllInstanceHandle,
+            Global::dllInstanceHandle,
             this);   // lpParam
 
         if (!_wndHandle)

@@ -414,16 +414,16 @@ STDAPI CLangBarItemButton::GetIcon(_Out_ HICON *phIcon)
 
     if (isOn && !(status & TF_LBI_STATUS_DISABLED))
     {
-        if (WindowsImeLib::dllInstanceHandle)
+        if (Global::dllInstanceHandle)
         {
-            *phIcon = reinterpret_cast<HICON>(LoadImage(WindowsImeLib::dllInstanceHandle, MAKEINTRESOURCE(_onIconIndex), IMAGE_ICON, desiredSize, desiredSize, 0));
+            *phIcon = reinterpret_cast<HICON>(LoadImage(Global::dllInstanceHandle, MAKEINTRESOURCE(_onIconIndex), IMAGE_ICON, desiredSize, desiredSize, 0));
         }
     }
     else
     {
-        if (WindowsImeLib::dllInstanceHandle)
+        if (Global::dllInstanceHandle)
         {
-            *phIcon = reinterpret_cast<HICON>(LoadImage(WindowsImeLib::dllInstanceHandle, MAKEINTRESOURCE(_offIconIndex), IMAGE_ICON, desiredSize, desiredSize, 0));
+            *phIcon = reinterpret_cast<HICON>(LoadImage(Global::dllInstanceHandle, MAKEINTRESOURCE(_offIconIndex), IMAGE_ICON, desiredSize, desiredSize, 0));
         }
     }
 
