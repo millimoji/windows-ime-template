@@ -8,10 +8,11 @@
 #include "Private.h"
 #include "Globals.h"
 #include "SampleIME.h"
+#include "../WindowsImeLib.h"
 
-BOOL CSampleIME::VerifySampleIMECLSID(_In_ REFCLSID clsid)
+BOOL CSampleIME::VerifyIMECLSID(_In_ REFCLSID clsid)
 {
-    if (IsEqualCLSID(clsid, Global::SampleIMECLSID))
+    if (IsEqualCLSID(clsid, WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID()))
     {
         return TRUE;
     }
@@ -29,7 +30,7 @@ STDAPI CSampleIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID guidProfile, _I
 {
 	guidProfile;
 
-    if (FALSE == VerifySampleIMECLSID(clsid))
+    if (FALSE == VerifyIMECLSID(clsid))
     {
         return S_OK;
     }

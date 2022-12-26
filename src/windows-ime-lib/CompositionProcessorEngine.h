@@ -10,12 +10,8 @@
 
 #include "Private.h"
 #include "../WindowsImeLib.h"
-#include "sal.h"
-//#include "TableDictionaryEngine.h"
 #include "BaseStructure.h"
-//#include "FileMapping.h"
 #include "Compartment.h"
-//#include "SampleIMEDefine.h"
 #include "LanguageBar.h"
 
 class CCompositionProcessorEngine :

@@ -7,25 +7,31 @@
 
 #pragma once
 
-#include <windows.h>
-#include "sal.h"
-
-#include <combaseapi.h>
-#include <olectl.h>
-#include <assert.h>
-
-#include <strsafe.h>
-#include <intsafe.h>
-
-#include "initguid.h"
-#include "msctf.h"
-#include "ctffunc.h"
-
-#include <memory>
-
 #pragma warning(push)
 #pragma warning(disable: 6001)
 #pragma warning(disable: 6387)
+#pragma warning(disable: 26439)
+#pragma warning(disable: 26451)
+#pragma warning(disable: 26495)
+
+#include <windows.h>
+#include <combaseapi.h>
+#include <ctffunc.h>
+#include <initguid.h>
+#include <intsafe.h>
+#include <msctf.h>
+#include <olectl.h>
+#include <sal.h>
+#include <strsafe.h>
+
+#include <memory>
+#include <cassert>
+
 #include <wil/com.h>
 #include <wil/resource.h>
+
+#include "SampleIMETelemetry.h"
+
 #pragma warning(pop)
+
+#pragma warning(disable: 4463)

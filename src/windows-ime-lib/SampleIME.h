@@ -194,7 +194,7 @@ private:
 
     BOOL _AddTextProcessorEngine();
 
-    BOOL VerifySampleIMECLSID(_In_ REFCLSID clsid);
+    BOOL VerifyIMECLSID(_In_ REFCLSID clsid);
 
     friend LRESULT CALLBACK CSampleIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
 

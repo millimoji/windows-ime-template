@@ -79,7 +79,7 @@ CLangBarItemButton::CLangBarItemButton(REFGUID guidLangBar, LPCWSTR description,
     DllAddRef();
 
     // initialize TF_LANGBARITEMINFO structure.
-    _tfLangBarItemInfo.clsidService = Global::SampleIMECLSID;												    // This LangBarItem belongs to this TextService.
+    _tfLangBarItemInfo.clsidService = WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID();		// This LangBarItem belongs to this TextService.
     _tfLangBarItemInfo.guidItem = guidLangBar;															        // GUID of this LangBarItem.
     _tfLangBarItemInfo.dwStyle = (TF_LBI_STYLE_BTN_BUTTON | TF_LBI_STYLE_SHOWNINTRAY);						    // This LangBar is a button type.
     _tfLangBarItemInfo.ulSort = 0;																			    // The position of this LangBar Item is not specified.

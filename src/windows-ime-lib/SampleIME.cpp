@@ -357,7 +357,7 @@ HRESULT CSampleIME::GetType(__RPC__out GUID *pguid)
     HRESULT hr = E_INVALIDARG;
     if (pguid)
     {
-        *pguid = Global::SampleIMECLSID;
+        *pguid = WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID();
         hr = S_OK;
     }
     return hr;

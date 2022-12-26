@@ -96,13 +96,17 @@ BOOL CSampleIME::_InitDisplayAttributeGuidAtom()
     }
 
     // register the display attribute for input text.
-    hr = pCategoryMgr->RegisterGUID(Global::SampleIMEGuidDisplayAttributeInput, &_gaDisplayAttributeInput);
-	if (FAILED(hr))
+    hr = pCategoryMgr->RegisterGUID(
+        WindowsImeLib::g_processorFactory->GetConstantProvider()->DisplayAttributeInput(),
+        &_gaDisplayAttributeInput);
+    if (FAILED(hr))
     {
         goto Exit;
     }
     // register the display attribute for the converted text.
-    hr = pCategoryMgr->RegisterGUID(Global::SampleIMEGuidDisplayAttributeConverted, &_gaDisplayAttributeConverted);
+    hr = pCategoryMgr->RegisterGUID(
+        WindowsImeLib::g_processorFactory->GetConstantProvider()->DisplayAttributeConverted(),
+        &_gaDisplayAttributeConverted);
 	if (FAILED(hr))
     {
         goto Exit;

@@ -1,4 +1,4 @@
-// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+g// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 // ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
 // THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
 // PARTICULAR PURPOSE.
@@ -21,28 +21,6 @@ CRITICAL_SECTION CS;
 HFONT defaultlFontHandle;				// Global font object we use everywhere
 
 //---------------------------------------------------------------------
-// SampleIME CLSID
-//---------------------------------------------------------------------
-// {D2291A80-84D8-4641-9AB2-BDD1472C846B}
-extern const CLSID SampleIMECLSID = { 
-    0xd2291a80,
-    0x84d8,
-    0x4641,
-    { 0x9a, 0xb2, 0xbd, 0xd1, 0x47, 0x2c, 0x84, 0x6b }
-};
-
-//---------------------------------------------------------------------
-// Profile GUID
-//---------------------------------------------------------------------
-// {83955C0E-2C09-47a5-BCF3-F2B98E11EE8B}
-extern const GUID SampleIMEGuidProfile = { 
-    0x83955c0e,
-    0x2c09,
-    0x47a5,
-    { 0xbc, 0xf3, 0xf2, 0xb9, 0x8e, 0x11, 0xee, 0x8b }
-};
-
-//---------------------------------------------------------------------
 // PreserveKey GUID
 //---------------------------------------------------------------------
 
@@ -50,34 +28,9 @@ extern const GUID SampleIMEGuidProfile = {
 // LanguageBars
 //---------------------------------------------------------------------
 
-// {4C802E2C-8140-4436-A5E5-F7C544EBC9CD}
-extern const GUID SampleIMEGuidDisplayAttributeInput = {
-    0x4c802e2c,
-    0x8140,
-    0x4436,
-    { 0xa5, 0xe5, 0xf7, 0xc5, 0x44, 0xeb, 0xc9, 0xcd }
-};
-
-// {9A1CC683-F2A7-4701-9C6E-2DA69A5CD474}
-extern const GUID SampleIMEGuidDisplayAttributeConverted = {
-    0x9a1cc683,
-    0xf2a7,
-    0x4701,
-    { 0x9c, 0x6e, 0x2d, 0xa6, 0x9a, 0x5c, 0xd4, 0x74 }
-};
-
-
 //---------------------------------------------------------------------
 // UI element
 //---------------------------------------------------------------------
-
-// {84B0749F-8DE7-4732-907A-3BCB150A01A8}
-extern const GUID SampleIMEGuidCandUIElement = {
-    0x84b0749f,
-    0x8de7,
-    0x4732,
-    { 0x90, 0x7a, 0x3b, 0xcb, 0x15, 0xa, 0x1, 0xa8 }
-};
 
 //---------------------------------------------------------------------
 // windows class / titile / atom

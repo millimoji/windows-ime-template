@@ -9,6 +9,12 @@
 #include "Globals.h"
 #include "SampleIME.h"
 #include "../WindowsImeLib.h"
+#include "SingletonEngineHost.h"
+
+namespace wrl
+{
+    using namespace Microsoft::WRL;
+}
 
 // from Register.cpp
 BOOL RegisterProfiles(LANGID langId, int textServiceIconIndex);
@@ -174,7 +180,9 @@ STDAPI CClassFactory::LockServer(BOOL fLock)
 
 void BuildGlobalObjects(void)
 {
-    classFactoryObjects[0] = new (std::nothrow) CClassFactory(Global::SampleIMECLSID, CSampleIME::CreateInstance);
+    classFactoryObjects[0] = new (std::nothrow) CClassFactory(
+    	WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID(),
+    	CSampleIME::CreateInstance);
 }
 
 //+---------------------------------------------------------------------------
@@ -204,6 +212,11 @@ void FreeGlobalObjects(void)
 //----------------------------------------------------------------------------
 HRESULT WindowsImeLib::DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ void** ppv)
 {
+    if (wrl::Module<wrl::InProc>::GetModule().GetClassObject(rclsid, riid, ppv) == S_OK)
+    {
+        return S_OK;
+    }
+
     if (classFactoryObjects[0] == nullptr)
     {
         EnterCriticalSection(&Global::CS);
@@ -250,7 +263,7 @@ HRESULT WindowsImeLib::DllCanUnloadNow(void)
         return S_FALSE;
     }
 
-    return S_OK;
+    return wrl::Module<wrl::InProc>::GetModule().Terminate() ? S_OK : S_FALSE;
 }
 
 //+---------------------------------------------------------------------------

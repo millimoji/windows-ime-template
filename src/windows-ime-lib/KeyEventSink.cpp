@@ -57,7 +57,7 @@ __inline UINT VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch)
 //
 //----------------------------------------------------------------------------
 
-BOOL CSampleIME::_IsKeyEaten(_In_ ITfContext *pContext, UINT codeIn, _Out_ UINT *pCodeOut, _Out_writes_(1) WCHAR *pwch, _Out_opt_ _KEYSTROKE_STATE *pKeyState)
+BOOL CSampleIME::_IsKeyEaten(_In_ ITfContext*, UINT codeIn, _Out_ UINT *pCodeOut, _Out_writes_(1) WCHAR *pwch, _Out_opt_ _KEYSTROKE_STATE *pKeyState)
 {
     *pCodeOut = codeIn;
 

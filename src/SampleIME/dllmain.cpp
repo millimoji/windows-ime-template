@@ -1,7 +1,10 @@
 #include "pch.h"
 #include "../WindowsImeLib.h"
 #include "SampleIMEDefine.h"
+#include "SampleIMEGlobals.h"
 #include "ProcessorEngine.h"
+
+#pragma comment(lib, "RuntimeObject.lib")
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
@@ -11,6 +14,8 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
+        wil::SetResultTelemetryFallback(SampleIMETelemetry::FallbackTelemetryCallback);
+        break;
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
     case DLL_PROCESS_DETACH:
@@ -50,6 +55,12 @@ namespace WindowsImeLib
         std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(const std::weak_ptr<ICompositionProcessorEngineOwner>& owner) override
         {
             return std::make_shared<CompositionProcessorEngine>(owner);
+        }
+
+        std::shared_ptr<IConstantProvider> GetConstantProvider() override
+        {
+            static std::shared_ptr<IConstantProvider> constantProvider = std::make_shared<Global::ConstantProvider>();
+            return constantProvider;
         }
     };
 

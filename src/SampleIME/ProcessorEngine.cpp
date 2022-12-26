@@ -1354,7 +1354,7 @@ void CompositionProcessorEngine::SetDefaultCandidateTextFont()
 //////////////////////////////////////////////////////////////////////
 
 BOOL CompositionProcessorEngine::IsKeyEaten(
-    _In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId, UINT code, _Inout_updates_(1) WCHAR *pwch,
+    _In_ ITfThreadMgr* pThreadMgr, TfClientId, UINT code, _Inout_updates_(1) WCHAR *pwch,
     BOOL isComposing, CANDIDATE_MODE candidateMode, BOOL isCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState)
 {
     if (pKeyState)

@@ -55,9 +55,10 @@ BOOL RegisterProfiles(LANGID langId, int textServiceIconIndex)
     {
         goto Exit;
     }
-    hr = pITfInputProcessorProfileMgr->RegisterProfile(Global::SampleIMECLSID,
+    hr = pITfInputProcessorProfileMgr->RegisterProfile(
+        WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID(),
         langId,
-        Global::SampleIMEGuidProfile,
+        WindowsImeLib::g_processorFactory->GetConstantProvider()->IMEProfileGuid(),
         TEXTSERVICE_DESC,
         static_cast<ULONG>(lenOfDesc),
         achIconFile,
@@ -96,7 +97,11 @@ void UnregisterProfiles(LANGID langId)
         goto Exit;
     }
 
-    hr = pITfInputProcessorProfileMgr->UnregisterProfile(Global::SampleIMECLSID, langId, Global::SampleIMEGuidProfile, 0);
+    hr = pITfInputProcessorProfileMgr->UnregisterProfile(
+    	WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID(),
+        langId,
+        WindowsImeLib::g_processorFactory->GetConstantProvider()->IMEProfileGuid(),
+        0);
     if (FAILED(hr))
     {
         goto Exit;
@@ -130,7 +135,10 @@ BOOL RegisterCategories()
 
     for (const GUID& guid: SupportCategories)
     {
-        hr = pCategoryMgr->RegisterCategory(Global::SampleIMECLSID, guid, Global::SampleIMECLSID);
+        hr = pCategoryMgr->RegisterCategory(
+        		WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID(),
+        		guid,
+        		WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID());
     }
 
     pCategoryMgr->Release();
@@ -157,7 +165,10 @@ void UnregisterCategories()
 
     for (const GUID& guid: SupportCategories)
     {
-        pCategoryMgr->UnregisterCategory(Global::SampleIMECLSID, guid, Global::SampleIMECLSID);
+        pCategoryMgr->UnregisterCategory(
+        	WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID(),
+        	guid,
+        	WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID());
     }
   
     pCategoryMgr->Release();
@@ -217,7 +228,7 @@ BOOL RegisterServer()
     WCHAR achIMEKey[ARRAYSIZE(RegInfo_Prefix_CLSID) + CLSID_STRLEN] = {'\0'};
     WCHAR achFileName[MAX_PATH] = {'\0'};
 
-    if (!CLSIDToString(Global::SampleIMECLSID, achIMEKey + ARRAYSIZE(RegInfo_Prefix_CLSID) - 1))
+    if (!CLSIDToString(WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID(), achIMEKey + ARRAYSIZE(RegInfo_Prefix_CLSID) - 1))
     {
         return FALSE;
     }
@@ -273,7 +284,7 @@ void UnregisterServer()
 {
     WCHAR achIMEKey[ARRAYSIZE(RegInfo_Prefix_CLSID) + CLSID_STRLEN] = {'\0'};
 
-    if (!CLSIDToString(Global::SampleIMECLSID, achIMEKey + ARRAYSIZE(RegInfo_Prefix_CLSID) - 1))
+    if (!CLSIDToString(WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID(), achIMEKey + ARRAYSIZE(RegInfo_Prefix_CLSID) - 1))
     {
         return;
     }

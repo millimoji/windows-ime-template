@@ -55,7 +55,7 @@ STDAPI CSampleIME::GetDisplayAttributeInfo(__RPC__in REFGUID guidInfo, __RPC__de
     *ppInfo = nullptr;
 
     // Which display attribute GUID?
-    if (IsEqualGUID(guidInfo, Global::SampleIMEGuidDisplayAttributeInput))
+    if (IsEqualGUID(guidInfo, WindowsImeLib::g_processorFactory->GetConstantProvider()->DisplayAttributeInput()))
     {
         *ppInfo = new (std::nothrow) CDisplayAttributeInfoInput();
         if ((*ppInfo) == nullptr)
@@ -63,7 +63,7 @@ STDAPI CSampleIME::GetDisplayAttributeInfo(__RPC__in REFGUID guidInfo, __RPC__de
             return E_OUTOFMEMORY;
         }
     }
-    else if (IsEqualGUID(guidInfo, Global::SampleIMEGuidDisplayAttributeConverted))
+    else if (IsEqualGUID(guidInfo, WindowsImeLib::g_processorFactory->GetConstantProvider()->DisplayAttributeConverted()))
     {
         *ppInfo = new (std::nothrow) CDisplayAttributeInfoConverted();
         if ((*ppInfo) == nullptr)

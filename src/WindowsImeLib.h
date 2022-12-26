@@ -289,11 +289,22 @@ struct ICompositionProcessorEngine
     virtual void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) = 0;
 };
 
+struct IConstantProvider
+{
+    // GUIDs
+    virtual const CLSID& IMECLSID() noexcept = 0;
+    virtual const GUID& IMEProfileGuid() noexcept = 0;
+    virtual const GUID& DisplayAttributeInput() noexcept = 0;
+    virtual const GUID& DisplayAttributeConverted() noexcept = 0;
+    virtual const GUID& CandUIElement() noexcept = 0;
+};
+
 struct IProcessorFactory
 {
     virtual ~IProcessorFactory() {}
 
     virtual std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(const std::weak_ptr<ICompositionProcessorEngineOwner>& owner) = 0;
+    virtual std::shared_ptr<IConstantProvider> GetConstantProvider() = 0;
 };
 
 // TODO: re-design how to inject factory

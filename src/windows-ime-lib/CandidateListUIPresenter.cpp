@@ -454,7 +454,7 @@ STDAPI CCandidateListUIPresenter::GetDescription(BSTR *pbstr)
 
 STDAPI CCandidateListUIPresenter::GetGUID(GUID *pguid)
 {
-    *pguid = Global::SampleIMEGuidCandUIElement;
+    *pguid = WindowsImeLib::g_processorFactory->GetConstantProvider()->CandUIElement();
     return S_OK;
 }
 

@@ -66,16 +66,8 @@ extern LONG dllRefCount;
 
 extern CRITICAL_SECTION CS;
 
-extern const CLSID SampleIMECLSID;
-extern const CLSID SampleIMEGuidProfile;
-
 BOOL UpdateModifiers(WPARAM wParam, LPARAM lParam);
 
 extern const WCHAR FullWidthCharTable[];
-
-extern const GUID SampleIMEGuidDisplayAttributeInput;
-extern const GUID SampleIMEGuidDisplayAttributeConverted;
-
-extern const GUID SampleIMEGuidCandUIElement;
 
 }
