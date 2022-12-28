@@ -16,9 +16,9 @@ class CLangBarItemButton;
 class CCandidateListUIPresenter;
 
 const DWORD WM_CheckGlobalCompartment = WM_USER;
-LRESULT CALLBACK CSampleIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK CWindowsIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-class CSampleIME : public ITfTextInputProcessorEx,
+class CWindowsIME : public ITfTextInputProcessorEx,
     public ITfThreadMgrEventSink,
     public ITfTextEditSink,
     public ITfKeyEventSink,
@@ -29,9 +29,9 @@ class CSampleIME : public ITfTextInputProcessorEx,
     public ITfFunctionProvider,
     public ITfFnGetPreferredTouchKeyboardLayout
 {
-public:
-    CSampleIME();
-    ~CSampleIME();
+public: 
+    CWindowsIME();
+    ~CWindowsIME();
 
     // IUnknown
     STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);
@@ -196,7 +196,7 @@ private:
 
     BOOL VerifyIMECLSID(_In_ REFCLSID clsid);
 
-    friend LRESULT CALLBACK CSampleIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
+    friend LRESULT CALLBACK CWindowsIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 private:
     ITfThreadMgr* _pThreadMgr;

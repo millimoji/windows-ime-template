@@ -50,7 +50,7 @@
     <ClCompile Include="LanguageBar.cpp" />
     <ClCompile Include="Register.cpp" />
     <ClCompile Include="RegKey.cpp" />
-    <ClCompile Include="SampleIME.cpp" />
+    <ClCompile Include="WindowsIME.cpp" />
     <ClCompile Include="BaseStructure.cpp" />
     <ClCompile Include="ScrollBarWindow.cpp" />
     <ClCompile Include="SearchCandidateProvider.cpp" />
@@ -84,9 +84,8 @@
     <ClInclude Include="KeyStateCategory.h" />
     <ClInclude Include="Private.h" />
     <ClInclude Include="RegKey.h" />
-    <ClInclude Include="SampleIME.h" />
+    <ClInclude Include="WindowsIME.h" />
     <ClInclude Include="BaseStructure.h" />
-    <ClInclude Include="SampleIMEStructureArray.h" />
     <ClInclude Include="ScrollBarWindow.h" />
     <ClInclude Include="SearchCandidateProvider.h" />
     <ClInclude Include="ShadowWindow.h" />

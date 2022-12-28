@@ -7,10 +7,10 @@
 
 #include "Private.h"
 #include "Globals.h"
-#include "SampleIME.h"
+#include "WindowsIME.h"
 #include "../WindowsImeLib.h"
 
-BOOL CSampleIME::VerifyIMECLSID(_In_ REFCLSID clsid)
+BOOL CWindowsIME::VerifyIMECLSID(_In_ REFCLSID clsid)
 {
     if (IsEqualCLSID(clsid, WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID()))
     {
@@ -26,7 +26,7 @@ BOOL CSampleIME::VerifyIMECLSID(_In_ REFCLSID clsid)
 // Sink called by the framework when changes activate language profile.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID guidProfile, _In_ BOOL isActivated)
+STDAPI CWindowsIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID guidProfile, _In_ BOOL isActivated)
 {
 	guidProfile;
 
@@ -68,7 +68,7 @@ STDAPI CSampleIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID guidProfile, _I
 // Advise a active language profile notify sink.
 //----------------------------------------------------------------------------
 
-BOOL CSampleIME::_InitActiveLanguageProfileNotifySink()
+BOOL CWindowsIME::_InitActiveLanguageProfileNotifySink()
 {
     ITfSource* pSource = nullptr;
     BOOL ret = FALSE;
@@ -98,7 +98,7 @@ Exit:
 // Unadvise a active language profile notify sink.  Assumes we have advised one already.
 //----------------------------------------------------------------------------
 
-void CSampleIME::_UninitActiveLanguageProfileNotifySink()
+void CWindowsIME::_UninitActiveLanguageProfileNotifySink()
 {
     ITfSource* pSource = nullptr;
 

@@ -7,7 +7,7 @@
 
 #include "Private.h"
 #include "Globals.h"
-#include "SampleIME.h"
+#include "WindowsIME.h"
 #include "CandidateListUIPresenter.h"
 #include "Compartment.h"
 #include "TfInputProcessorProfile.h"
@@ -20,9 +20,9 @@
 //----------------------------------------------------------------------------
 
 /* static */
-HRESULT CSampleIME::CreateInstance(_In_ IUnknown *pUnkOuter, REFIID riid, _Outptr_ void **ppvObj)
+HRESULT CWindowsIME::CreateInstance(_In_ IUnknown *pUnkOuter, REFIID riid, _Outptr_ void **ppvObj)
 {
-    CSampleIME* pSampleIME = nullptr;
+    CWindowsIME* imeInstance = nullptr;
     HRESULT hr = S_OK;
 
     if (ppvObj == nullptr)
@@ -37,15 +37,15 @@ HRESULT CSampleIME::CreateInstance(_In_ IUnknown *pUnkOuter, REFIID riid, _Outpt
         return CLASS_E_NOAGGREGATION;
     }
 
-    pSampleIME = new (std::nothrow) CSampleIME();
-    if (pSampleIME == nullptr)
+    imeInstance = new (std::nothrow) CWindowsIME();
+    if (imeInstance == nullptr)
     {
         return E_OUTOFMEMORY;
     }
 
-    hr = pSampleIME->QueryInterface(riid, ppvObj);
+    hr = imeInstance->QueryInterface(riid, ppvObj);
 
-    pSampleIME->Release();
+    imeInstance->Release();
 
     return hr;
 }
@@ -56,7 +56,7 @@ HRESULT CSampleIME::CreateInstance(_In_ IUnknown *pUnkOuter, REFIID riid, _Outpt
 //
 //----------------------------------------------------------------------------
 
-CSampleIME::CSampleIME()
+CWindowsIME::CWindowsIME()
 {
     DllAddRef();
 
@@ -96,7 +96,7 @@ CSampleIME::CSampleIME()
 //
 //----------------------------------------------------------------------------
 
-CSampleIME::~CSampleIME()
+CWindowsIME::~CWindowsIME()
 {
     if (_pCandidateListUIPresenter)
     {
@@ -112,7 +112,7 @@ CSampleIME::~CSampleIME()
 //
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::QueryInterface(REFIID riid, _Outptr_ void **ppvObj)
+STDAPI CWindowsIME::QueryInterface(REFIID riid, _Outptr_ void **ppvObj)
 {
     if (ppvObj == nullptr)
     {
@@ -187,7 +187,7 @@ STDAPI CSampleIME::QueryInterface(REFIID riid, _Outptr_ void **ppvObj)
 //
 //----------------------------------------------------------------------------
 
-STDAPI_(ULONG) CSampleIME::AddRef()
+STDAPI_(ULONG) CWindowsIME::AddRef()
 {
     return ++_refCount;
 }
@@ -198,7 +198,7 @@ STDAPI_(ULONG) CSampleIME::AddRef()
 //
 //----------------------------------------------------------------------------
 
-STDAPI_(ULONG) CSampleIME::Release()
+STDAPI_(ULONG) CWindowsIME::Release()
 {
     LONG cr = --_refCount;
 
@@ -218,7 +218,7 @@ STDAPI_(ULONG) CSampleIME::Release()
 //
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, DWORD dwFlags)
+STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, DWORD dwFlags)
 {
     _pThreadMgr = pThreadMgr;
     _pThreadMgr->AddRef();
@@ -283,7 +283,7 @@ ExitError:
 //
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::Deactivate()
+STDAPI CWindowsIME::Deactivate()
 {
     if (_pCompositionProcessorEngine)
     {
@@ -352,7 +352,7 @@ STDAPI CSampleIME::Deactivate()
 // ITfFunctionProvider::GetType
 //
 //----------------------------------------------------------------------------
-HRESULT CSampleIME::GetType(__RPC__out GUID *pguid)
+HRESULT CWindowsIME::GetType(__RPC__out GUID *pguid)
 {
     HRESULT hr = E_INVALIDARG;
     if (pguid)
@@ -368,7 +368,7 @@ HRESULT CSampleIME::GetType(__RPC__out GUID *pguid)
 // ITfFunctionProvider::::GetDescription
 //
 //----------------------------------------------------------------------------
-HRESULT CSampleIME::GetDescription(__RPC__deref_out_opt BSTR *pbstrDesc)
+HRESULT CWindowsIME::GetDescription(__RPC__deref_out_opt BSTR *pbstrDesc)
 {
     HRESULT hr = E_INVALIDARG;
     if (pbstrDesc != nullptr)
@@ -384,7 +384,7 @@ HRESULT CSampleIME::GetDescription(__RPC__deref_out_opt BSTR *pbstrDesc)
 // ITfFunctionProvider::::GetFunction
 //
 //----------------------------------------------------------------------------
-HRESULT CSampleIME::GetFunction(__RPC__in REFGUID rguid, __RPC__in REFIID riid, __RPC__deref_out_opt IUnknown **ppunk)
+HRESULT CWindowsIME::GetFunction(__RPC__in REFGUID rguid, __RPC__in REFIID riid, __RPC__deref_out_opt IUnknown **ppunk)
 {
     HRESULT hr = E_NOINTERFACE;
 
@@ -406,7 +406,7 @@ HRESULT CSampleIME::GetFunction(__RPC__in REFGUID rguid, __RPC__in REFIID riid, 
 // ITfFunction::GetDisplayName
 //
 //----------------------------------------------------------------------------
-HRESULT CSampleIME::GetDisplayName(_Out_ BSTR *pbstrDisplayName)
+HRESULT CWindowsIME::GetDisplayName(_Out_ BSTR *pbstrDisplayName)
 {
     HRESULT hr = E_INVALIDARG;
     if (pbstrDisplayName != nullptr)
@@ -422,7 +422,7 @@ HRESULT CSampleIME::GetDisplayName(_Out_ BSTR *pbstrDisplayName)
 // ITfFnGetPreferredTouchKeyboardLayout::GetLayout
 // The tkblayout will be Optimized layout.
 //----------------------------------------------------------------------------
-HRESULT CSampleIME::GetLayout(_Out_ TKBLayoutType *ptkblayoutType, _Out_ WORD *pwPreferredLayoutId)
+HRESULT CWindowsIME::GetLayout(_Out_ TKBLayoutType *ptkblayoutType, _Out_ WORD *pwPreferredLayoutId)
 {
     HRESULT hr = E_INVALIDARG;
     if ((ptkblayoutType != nullptr) && (pwPreferredLayoutId != nullptr))
@@ -436,7 +436,7 @@ HRESULT CSampleIME::GetLayout(_Out_ TKBLayoutType *ptkblayoutType, _Out_ WORD *p
 
 //////////////////////////////////////////////////////////////////////
 //
-// CSampleIME implementation.
+// CWindowsIME implementation.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -446,7 +446,7 @@ HRESULT CSampleIME::GetLayout(_Out_ TKBLayoutType *ptkblayoutType, _Out_ WORD *p
 //
 //----------------------------------------------------------------------------
 
-BOOL CSampleIME::_AddTextProcessorEngine()
+BOOL CWindowsIME::_AddTextProcessorEngine()
 {
     LANGID langid = 0;
     CLSID clsid = GUID_NULL;
@@ -505,11 +505,11 @@ BOOL CSampleIME::_AddTextProcessorEngine()
 
 //+---------------------------------------------------------------------------
 //
-// CSampleIME::CreateInstance 
+// CWindowsIME::CreateInstance 
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::CreateInstance(REFCLSID rclsid, REFIID riid, _Outptr_result_maybenull_ LPVOID* ppv, _Out_opt_ HINSTANCE* phInst, BOOL isComLessMode)
+HRESULT CWindowsIME::CreateInstance(REFCLSID rclsid, REFIID riid, _Outptr_result_maybenull_ LPVOID* ppv, _Out_opt_ HINSTANCE* phInst, BOOL isComLessMode)
 {
     HRESULT hr = S_OK;
     if (phInst == nullptr)
@@ -529,7 +529,7 @@ HRESULT CSampleIME::CreateInstance(REFCLSID rclsid, REFIID riid, _Outptr_result_
     }
     else
     {
-        hr = CSampleIME::ComLessCreateInstance(rclsid, riid, ppv, phInst);
+        hr = CWindowsIME::ComLessCreateInstance(rclsid, riid, ppv, phInst);
     }
 
     return hr;
@@ -537,11 +537,11 @@ HRESULT CSampleIME::CreateInstance(REFCLSID rclsid, REFIID riid, _Outptr_result_
 
 //+---------------------------------------------------------------------------
 //
-// CSampleIME::ComLessCreateInstance
+// CWindowsIME::ComLessCreateInstance
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::ComLessCreateInstance(REFGUID rclsid, REFIID riid, _Outptr_result_maybenull_ void **ppv, _Out_opt_ HINSTANCE *phInst)
+HRESULT CWindowsIME::ComLessCreateInstance(REFGUID rclsid, REFIID riid, _Outptr_result_maybenull_ void **ppv, _Out_opt_ HINSTANCE *phInst)
 {
     HRESULT hr = S_OK;
     HINSTANCE sampleIMEDllHandle = nullptr;
@@ -554,7 +554,7 @@ HRESULT CSampleIME::ComLessCreateInstance(REFGUID rclsid, REFIID riid, _Outptr_r
     if (SUCCEEDED(hr))
     {
         *phInst = nullptr;
-        hr = CSampleIME::GetComModuleName(rclsid, wchPath, ARRAYSIZE(wchPath));
+        hr = CWindowsIME::GetComModuleName(rclsid, wchPath, ARRAYSIZE(wchPath));
         if (SUCCEEDED(hr))
         {
             dwCnt = ExpandEnvironmentStringsW(wchPath, szExpandedPath, ARRAYSIZE(szExpandedPath));
@@ -593,11 +593,11 @@ HRESULT CSampleIME::ComLessCreateInstance(REFGUID rclsid, REFIID riid, _Outptr_r
 
 //+---------------------------------------------------------------------------
 //
-// CSampleIME::GetComModuleName
+// CWindowsIME::GetComModuleName
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::GetComModuleName(REFGUID rclsid, _Out_writes_(cchPath)WCHAR* wchPath, DWORD cchPath)
+HRESULT CWindowsIME::GetComModuleName(REFGUID rclsid, _Out_writes_(cchPath)WCHAR* wchPath, DWORD cchPath)
 {
     HRESULT hr = S_OK;
 

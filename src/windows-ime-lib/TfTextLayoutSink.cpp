@@ -7,10 +7,10 @@
 
 #include "Private.h"
 #include "TfTextLayoutSink.h"
-#include "SampleIME.h"
+#include "WindowsIME.h"
 #include "GetTextExtentEditSession.h"
 
-CTfTextLayoutSink::CTfTextLayoutSink(_In_ CSampleIME *pTextService)
+CTfTextLayoutSink::CTfTextLayoutSink(_In_ CWindowsIME *pTextService)
 {
     _pTextService = pTextService;
     _pTextService->AddRef();

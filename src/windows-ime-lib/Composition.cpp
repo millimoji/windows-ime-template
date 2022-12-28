@@ -7,7 +7,7 @@
 
 #include "Private.h"
 #include "Globals.h"
-#include "SampleIME.h"
+#include "WindowsIME.h"
 
 //+---------------------------------------------------------------------------
 //
@@ -17,7 +17,7 @@
 // someone other than this service ends a composition.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfComposition *pComposition)
+STDAPI CWindowsIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfComposition *pComposition)
 {
     // Clear dummy composition
     _RemoveDummyCompositionForComposing(ecWrite, pComposition);
@@ -48,7 +48,7 @@ STDAPI CSampleIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfComposi
 //
 //----------------------------------------------------------------------------
 
-BOOL CSampleIME::_IsComposing()
+BOOL CWindowsIME::_IsComposing()
 {
     return _pComposition != nullptr;
 }
@@ -59,7 +59,7 @@ BOOL CSampleIME::_IsComposing()
 //
 //----------------------------------------------------------------------------
 
-void CSampleIME::_SetComposition(_In_ ITfComposition *pComposition)
+void CWindowsIME::_SetComposition(_In_ ITfComposition *pComposition)
 {
     _pComposition = pComposition;
 }
@@ -70,7 +70,7 @@ void CSampleIME::_SetComposition(_In_ ITfComposition *pComposition)
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString)
+HRESULT CWindowsIME::_AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString)
 {
     HRESULT hr = S_OK;
 
@@ -118,7 +118,7 @@ HRESULT CSampleIME::_AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pCont
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString)
+HRESULT CWindowsIME::_AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString)
 {
     HRESULT hr = E_FAIL;
 
@@ -150,7 +150,7 @@ HRESULT CSampleIME::_AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pConte
 //
 //----------------------------------------------------------------------------
 
-BOOL CSampleIME::_FindComposingRange(TfEditCookie ec, _In_ ITfContext *pContext, _In_ ITfRange *pSelection, _Outptr_result_maybenull_ ITfRange **ppRange)
+BOOL CWindowsIME::_FindComposingRange(TfEditCookie ec, _In_ ITfContext *pContext, _In_ ITfRange *pSelection, _Outptr_result_maybenull_ ITfRange **ppRange)
 {
     if (ppRange == nullptr)
     {
@@ -207,7 +207,7 @@ BOOL CSampleIME::_FindComposingRange(TfEditCookie ec, _In_ ITfContext *pContext,
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_SetInputString(TfEditCookie ec, _In_ ITfContext *pContext, _Out_opt_ ITfRange *pRange, _In_ CStringRange *pstrAddString, BOOL exist_composing)
+HRESULT CWindowsIME::_SetInputString(TfEditCookie ec, _In_ ITfContext *pContext, _Out_opt_ ITfRange *pRange, _In_ CStringRange *pstrAddString, BOOL exist_composing)
 {
     ITfRange* pRangeInsert = nullptr;
     if (!exist_composing)
@@ -259,7 +259,7 @@ HRESULT CSampleIME::_SetInputString(TfEditCookie ec, _In_ ITfContext *pContext, 
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_InsertAtSelection(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString, _Outptr_ ITfRange **ppCompRange)
+HRESULT CWindowsIME::_InsertAtSelection(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString, _Outptr_ ITfRange **ppCompRange)
 {
     ITfRange* rangeInsert = nullptr;
     ITfInsertAtSelection* pias = nullptr;
@@ -302,7 +302,7 @@ Exit:
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition)
+HRESULT CWindowsIME::_RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition)
 {
     HRESULT hr = S_OK;
 
@@ -327,7 +327,7 @@ HRESULT CSampleIME::_RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ IT
 //
 //----------------------------------------------------------------------------
 
-BOOL CSampleIME::_SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pContext)
+BOOL CWindowsIME::_SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pContext)
 {
     HRESULT hr = S_OK;
     BOOL ret = TRUE;

@@ -7,7 +7,7 @@
 
 #include "Private.h"
 #include "Globals.h"
-#include "SampleIME.h"
+#include "WindowsIME.h"
 #include "CandidateListUIPresenter.h"
 #include "KeyHandlerEditSession.h"
 #include "Compartment.h"
@@ -57,7 +57,7 @@ __inline UINT VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch)
 //
 //----------------------------------------------------------------------------
 
-BOOL CSampleIME::_IsKeyEaten(_In_ ITfContext*, UINT codeIn, _Out_ UINT *pCodeOut, _Out_writes_(1) WCHAR *pwch, _Out_opt_ _KEYSTROKE_STATE *pKeyState)
+BOOL CWindowsIME::_IsKeyEaten(_In_ ITfContext*, UINT codeIn, _Out_ UINT *pCodeOut, _Out_writes_(1) WCHAR *pwch, _Out_opt_ _KEYSTROKE_STATE *pKeyState)
 {
     *pCodeOut = codeIn;
 
@@ -234,7 +234,7 @@ BOOL CSampleIME::_IsKeyEaten(_In_ ITfContext*, UINT codeIn, _Out_ UINT *pCodeOut
 //
 //----------------------------------------------------------------------------
 
-WCHAR CSampleIME::ConvertVKey(UINT code)
+WCHAR CWindowsIME::ConvertVKey(UINT code)
 {
     //
     // Map virtual key to scan code
@@ -269,7 +269,7 @@ WCHAR CSampleIME::ConvertVKey(UINT code)
 //
 //----------------------------------------------------------------------------
 
-BOOL CSampleIME::_IsKeyboardDisabled()
+BOOL CWindowsIME::_IsKeyboardDisabled()
 {
     ITfDocumentMgr* pDocMgrFocus = nullptr;
     ITfContext* pContext = nullptr;
@@ -317,7 +317,7 @@ BOOL CSampleIME::_IsKeyboardDisabled()
 // Called by the system whenever this service gets the keystroke device focus.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnSetFocus(BOOL fForeground)
+STDAPI CWindowsIME::OnSetFocus(BOOL fForeground)
 {
 	fForeground;
 
@@ -331,7 +331,7 @@ STDAPI CSampleIME::OnSetFocus(BOOL fForeground)
 // Called by the system to query this service wants a potential keystroke.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
+STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
     Global::UpdateModifiers(wParam, lParam);
 
@@ -361,7 +361,7 @@ STDAPI CSampleIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lPa
 // on exit, the application will not handle the keystroke.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
+STDAPI CWindowsIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
     Global::UpdateModifiers(wParam, lParam);
 
@@ -410,7 +410,7 @@ STDAPI CSampleIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam,
 // Called by the system to query this service wants a potential keystroke.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
+STDAPI CWindowsIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
     if (pIsEaten == nullptr)
     {
@@ -435,7 +435,7 @@ STDAPI CSampleIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lPara
 // on exit, the application will not handle the keystroke.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
+STDAPI CWindowsIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
     Global::UpdateModifiers(wParam, lParam);
 
@@ -454,7 +454,7 @@ STDAPI CSampleIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, B
 // Called when a hotkey (registered by us, or by the system) is typed.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnPreservedKey(ITfContext *pContext, REFGUID rguid, BOOL *pIsEaten)
+STDAPI CWindowsIME::OnPreservedKey(ITfContext *pContext, REFGUID rguid, BOOL *pIsEaten)
 {
 	pContext;
 
@@ -470,7 +470,7 @@ STDAPI CSampleIME::OnPreservedKey(ITfContext *pContext, REFGUID rguid, BOOL *pIs
 // Advise a keystroke sink.
 //----------------------------------------------------------------------------
 
-BOOL CSampleIME::_InitKeyEventSink()
+BOOL CWindowsIME::_InitKeyEventSink()
 {
     ITfKeystrokeMgr* pKeystrokeMgr = nullptr;
     HRESULT hr = S_OK;
@@ -494,7 +494,7 @@ BOOL CSampleIME::_InitKeyEventSink()
 // Unadvise a keystroke sink.  Assumes we have advised one already.
 //----------------------------------------------------------------------------
 
-void CSampleIME::_UninitKeyEventSink()
+void CWindowsIME::_UninitKeyEventSink()
 {
     ITfKeystrokeMgr* pKeystrokeMgr = nullptr;
 

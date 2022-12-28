@@ -7,7 +7,7 @@
 
 #include "Private.h"
 #include "Globals.h"
-#include "SampleIME.h"
+#include "WindowsIME.h"
 #include "../WindowsImeLib.h"
 #include "SingletonEngineHost.h"
 
@@ -182,7 +182,7 @@ void BuildGlobalObjects(void)
 {
     classFactoryObjects[0] = new (std::nothrow) CClassFactory(
     	WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID(),
-    	CSampleIME::CreateInstance);
+    	CWindowsIME::CreateInstance);
 }
 
 //+---------------------------------------------------------------------------

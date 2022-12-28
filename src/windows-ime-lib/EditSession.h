@@ -8,12 +8,12 @@
 
 #pragma once
 
-class CSampleIME;
+class CWindowsIME;
 
 class CEditSessionBase : public ITfEditSession
 {
 public:
-    CEditSessionBase(_In_ CSampleIME *pTextService, _In_ ITfContext *pContext);
+    CEditSessionBase(_In_ CWindowsIME *pTextService, _In_ ITfContext *pContext);
     virtual ~CEditSessionBase();
 
     // IUnknown
@@ -26,7 +26,7 @@ public:
 
 protected:
     ITfContext *_pContext;
-    CSampleIME *_pTextService;
+    CWindowsIME *_pTextService;
 
 private:
     LONG _refCount;     // COM ref count

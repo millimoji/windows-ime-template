@@ -7,7 +7,7 @@
 
 #include "Private.h"
 #include "Globals.h"
-#include "SampleIME.h"
+#include "WindowsIME.h"
 #include "DisplayAttributeInfo.h"
 #include "EnumDisplayAttributeInfo.h"
 
@@ -17,7 +17,7 @@
 //
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::EnumDisplayAttributeInfo(__RPC__deref_out_opt IEnumTfDisplayAttributeInfo **ppEnum)
+STDAPI CWindowsIME::EnumDisplayAttributeInfo(__RPC__deref_out_opt IEnumTfDisplayAttributeInfo **ppEnum)
 {
     CEnumDisplayAttributeInfo* pAttributeEnum = nullptr;
 
@@ -45,7 +45,7 @@ STDAPI CSampleIME::EnumDisplayAttributeInfo(__RPC__deref_out_opt IEnumTfDisplayA
 //
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::GetDisplayAttributeInfo(__RPC__in REFGUID guidInfo, __RPC__deref_out_opt ITfDisplayAttributeInfo **ppInfo)
+STDAPI CWindowsIME::GetDisplayAttributeInfo(__RPC__in REFGUID guidInfo, __RPC__deref_out_opt ITfDisplayAttributeInfo **ppInfo)
 {
     if (ppInfo == nullptr)
     {

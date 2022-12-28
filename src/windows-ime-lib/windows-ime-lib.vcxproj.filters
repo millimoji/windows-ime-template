@@ -86,7 +86,7 @@
     <ClCompile Include="RegKey.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SampleIME.cpp">
+    <ClCompile Include="WindowsIME.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BaseStructure.cpp">
@@ -175,13 +175,10 @@
     <ClInclude Include="RegKey.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SampleIME.h">
+    <ClInclude Include="WindowsIME.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BaseStructure.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SampleIMEStructureArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ScrollBarWindow.h">

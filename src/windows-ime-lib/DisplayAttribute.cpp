@@ -7,7 +7,7 @@
 
 #include "Private.h"
 #include "Globals.h"
-#include "SampleIME.h"
+#include "WindowsIME.h"
 
 //+---------------------------------------------------------------------------
 //
@@ -15,7 +15,7 @@
 //
 //----------------------------------------------------------------------------
 
-void CSampleIME::_ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext)
+void CWindowsIME::_ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext)
 {
     ITfRange* pRangeComposition = nullptr;
     ITfProperty* pDisplayAttributeProperty = nullptr;
@@ -44,7 +44,7 @@ void CSampleIME::_ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfCon
 //
 //----------------------------------------------------------------------------
 
-BOOL CSampleIME::_SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute)
+BOOL CWindowsIME::_SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute)
 {
     ITfRange* pRangeComposition = nullptr;
     ITfProperty* pDisplayAttributeProperty = nullptr;
@@ -85,7 +85,7 @@ BOOL CSampleIME::_SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfConte
 // TfGuidAtom, we do it once when Activate is called.
 //----------------------------------------------------------------------------
 
-BOOL CSampleIME::_InitDisplayAttributeGuidAtom()
+BOOL CWindowsIME::_InitDisplayAttributeGuidAtom()
 {
     ITfCategoryMgr* pCategoryMgr = nullptr;
     HRESULT hr = CoCreateInstance(CLSID_TF_CategoryMgr, nullptr, CLSCTX_INPROC_SERVER, IID_ITfCategoryMgr, (void**)&pCategoryMgr);

@@ -7,17 +7,17 @@
 
 #include "Private.h"
 #include "Globals.h"
-#include "SampleIME.h"
+#include "WindowsIME.h"
 #include "LanguageBar.h"
 #include "Compartment.h"
 
 //+---------------------------------------------------------------------------
 //
-// CSampleIME::_UpdateLanguageBarOnSetFocus
+// CWindowsIME::_UpdateLanguageBarOnSetFocus
 //
 //----------------------------------------------------------------------------
 
-void CSampleIME::_UpdateLanguageBarOnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus)
+void CWindowsIME::_UpdateLanguageBarOnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus)
 {
     BOOL needDisableButtons = FALSE;
 

@@ -11,7 +11,7 @@
 #include "KeyHandlerEditSession.h"
 #include "CandidateWindow.h"
 #include "TfTextLayoutSink.h"
-#include "SampleIME.h"
+#include "WindowsIME.h"
 #include "BaseStructure.h"
 
 class CReadingLine;
@@ -31,7 +31,7 @@ class CCandidateListUIPresenter : public CTfTextLayoutSink,
     public ITfIntegratableCandidateListUIElement
 {
 public:
-    CCandidateListUIPresenter(_In_ CSampleIME *pTextService, ATOM atom,
+    CCandidateListUIPresenter(_In_ CWindowsIME *pTextService, ATOM atom,
         KEYSTROKE_CATEGORY Category,
         _In_ CCandidateRange *pIndexRange,
         BOOL hideWindow);
@@ -132,6 +132,6 @@ private:
     KEYSTROKE_CATEGORY _Category;
     DWORD _updatedFlags;
     DWORD _uiElementId;
-    CSampleIME* _pTextService;
+    CWindowsIME* _pTextService;
     LONG _refCount;
 };

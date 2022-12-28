@@ -8,12 +8,12 @@
 #include "Private.h"
 #include "Globals.h"
 #include "EditSession.h"
-#include "SampleIME.h"
+#include "WindowsIME.h"
 #include "CandidateListUIPresenter.h"
 
 //////////////////////////////////////////////////////////////////////
 //
-// CSampleIME class
+// CWindowsIME class
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -25,7 +25,7 @@
 //
 //----------------------------------------------------------------------------
 
-BOOL CSampleIME::_IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover)
+BOOL CWindowsIME::_IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover)
 {
     LONG lResult = 0;;
 
@@ -50,7 +50,7 @@ BOOL CSampleIME::_IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In
 //
 //----------------------------------------------------------------------------
 
-VOID CSampleIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext)
+VOID CWindowsIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext)
 {
     isForce;pContext;
 
@@ -73,7 +73,7 @@ VOID CSampleIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContex
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CWindowsIME::_HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext)
 {
     _DeleteCandidateList(FALSE, pContext);
 
@@ -89,7 +89,7 @@ HRESULT CSampleIME::_HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext)
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_HandleCancel(TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CWindowsIME::_HandleCancel(TfEditCookie ec, _In_ ITfContext *pContext)
 {
     _RemoveDummyCompositionForComposing(ec, _pComposition);
 
@@ -108,7 +108,7 @@ HRESULT CSampleIME::_HandleCancel(TfEditCookie ec, _In_ ITfContext *pContext)
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_HandleCompositionInput(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch)
+HRESULT CWindowsIME::_HandleCompositionInput(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch)
 {
     ITfRange* pRangeComposition = nullptr;
     TF_SELECTION tfSelection;
@@ -166,7 +166,7 @@ Exit:
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_HandleCompositionInputWorker(_In_ CCompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CWindowsIME::_HandleCompositionInputWorker(_In_ CCompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
 {
     HRESULT hr = S_OK;
     CSampleImeArray<CStringRange> readingStrings;
@@ -222,7 +222,7 @@ HRESULT CSampleIME::_HandleCompositionInputWorker(_In_ CCompositionProcessorEngi
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_CreateAndStartCandidate(_In_ CCompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CWindowsIME::_CreateAndStartCandidate(_In_ CCompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
 {
     HRESULT hr = S_OK;
 
@@ -276,7 +276,7 @@ HRESULT CSampleIME::_CreateAndStartCandidate(_In_ CCompositionProcessorEngine *p
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCandidateList)
+HRESULT CWindowsIME::_HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCandidateList)
 {
     HRESULT hr = S_OK;
 
@@ -340,7 +340,7 @@ HRESULT CSampleIME::_HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext 
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isWildcardSearch)
+HRESULT CWindowsIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isWildcardSearch)
 {
     HRESULT hr = S_OK;
 
@@ -415,7 +415,7 @@ HRESULT CSampleIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext *
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CWindowsIME::_HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext *pContext)
 {
     ITfRange* pRangeComposition = nullptr;
     TF_SELECTION tfSelection;
@@ -484,7 +484,7 @@ Exit:
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, KEYSTROKE_FUNCTION keyFunction)
+HRESULT CWindowsIME::_HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, KEYSTROKE_FUNCTION keyFunction)
 {
     ITfRange* pRangeComposition = nullptr;
     TF_SELECTION tfSelection;
@@ -525,7 +525,7 @@ Exit:
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch)
+HRESULT CWindowsIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch)
 {
     HRESULT hr = S_OK;
 
@@ -573,7 +573,7 @@ HRESULT CSampleIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfConte
 //
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch)
+HRESULT CWindowsIME::_HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch)
 {
     HRESULT hr = S_OK;
 
@@ -608,7 +608,7 @@ HRESULT CSampleIME::_HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITf
 //    [in] dwKeyFunction - Function regarding virtual key
 //----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_InvokeKeyHandler(_In_ ITfContext *pContext, UINT code, WCHAR wch, DWORD flags, _KEYSTROKE_STATE keyState)
+HRESULT CWindowsIME::_InvokeKeyHandler(_In_ ITfContext *pContext, UINT code, WCHAR wch, DWORD flags, _KEYSTROKE_STATE keyState)
 {
     flags;
 
