@@ -68,107 +68,108 @@ struct _KEYSTROKE_STATE
     KEYSTROKE_FUNCTION Function;
 };
 
-template<class T>
-class CSampleImeArray
-{
-    typedef typename std::vector<T> CSampleImeInnerArray;
-    typedef typename std::vector<T>::iterator CSampleImeInnerIter;
+// template<class T>
+// class CSampleImeArray
+// {
+//     typedef typename std::vector<T> CSampleImeInnerArray;
+//     typedef typename std::vector<T>::iterator CSampleImeInnerIter;
+// 
+// public:
+//     CSampleImeArray(): _innerVect()
+//     {
+//     }
+// 
+//     explicit CSampleImeArray(size_t count): _innerVect(count)
+//     {
+//     }
+// 
+//     virtual ~CSampleImeArray()
+//     {
+//     }
+// 
+//     inline T* GetAt(size_t index)
+//     {
+//         assert(index >= 0);
+//         assert(index < _innerVect.size());
+// 
+//         T& curT = _innerVect.at(index);
+// 
+//         return &(curT);
+//     }
+// 
+//     inline const T* GetAt(size_t index) const
+//     {
+//         assert(index >= 0);
+//         assert(index < _innerVect.size());
+// 
+//         T& curT = _innerVect.at(index);
+// 
+//         return &(curT);
+//     }
+// 
+//     void RemoveAt(size_t index)
+//     {
+//         assert(index >= 0);
+//         assert(index < _innerVect.size());
+// 
+//         CSampleImeInnerIter iter = _innerVect.begin();
+//         _innerVect.erase(iter + index);
+//     }
+// 
+//     UINT Count() const 
+//     { 
+//         return static_cast<UINT>(_innerVect.size());
+//     }
+// 
+//     T* Append()
+//     {
+//         T newT = {};
+//         _innerVect.push_back(newT);
+//         T& backT = _innerVect.back();
+// 
+//         return &(backT);
+//     }
+// 
+//     void reserve(size_t Count)
+//     {
+//         _innerVect.reserve(Count);
+//     }
+// 
+//     void Clear()
+//     {
+//         _innerVect.clear();
+//     }
+// 
+// private:
+//     CSampleImeInnerArray _innerVect;
+// };
 
-public:
-    CSampleImeArray(): _innerVect()
-    {
-    }
-
-    explicit CSampleImeArray(size_t count): _innerVect(count)
-    {
-    }
-
-    virtual ~CSampleImeArray()
-    {
-    }
-
-    inline T* GetAt(size_t index)
-    {
-        assert(index >= 0);
-        assert(index < _innerVect.size());
-
-        T& curT = _innerVect.at(index);
-
-        return &(curT);
-    }
-
-    inline const T* GetAt(size_t index) const
-    {
-        assert(index >= 0);
-        assert(index < _innerVect.size());
-
-        T& curT = _innerVect.at(index);
-
-        return &(curT);
-    }
-
-    void RemoveAt(size_t index)
-    {
-        assert(index >= 0);
-        assert(index < _innerVect.size());
-
-        CSampleImeInnerIter iter = _innerVect.begin();
-        _innerVect.erase(iter + index);
-    }
-
-    UINT Count() const 
-    { 
-        return static_cast<UINT>(_innerVect.size());
-    }
-
-    T* Append()
-    {
-        T newT = {};
-        _innerVect.push_back(newT);
-        T& backT = _innerVect.back();
-
-        return &(backT);
-    }
-
-    void reserve(size_t Count)
-    {
-        _innerVect.reserve(Count);
-    }
-
-    void Clear()
-    {
-        _innerVect.clear();
-    }
-
-private:
-    CSampleImeInnerArray _innerVect;
-};
-
-class CCandidateRange
-{
-public:
-    CCandidateRange(void);
-    ~CCandidateRange(void);
-
-    BOOL IsRange(UINT vKey);
-    int GetIndex(UINT vKey);
-
-    inline int Count() const 
-    { 
-        return _CandidateListIndexRange.Count(); 
-    }
-    inline DWORD *GetAt(int index) 
-    { 
-        return _CandidateListIndexRange.GetAt(index); 
-    }
-    inline DWORD *Append() 
-    { 
-        return _CandidateListIndexRange.Append(); 
-    }
-
-private:
-    CSampleImeArray<DWORD> _CandidateListIndexRange;
-};
+// class CCandidateRange
+// {
+// public:
+//     CCandidateRange(void);
+//     ~CCandidateRange(void);
+// 
+//     BOOL IsRange(UINT vKey);
+//     int GetIndex(UINT vKey);
+// 
+//     inline int Count() const 
+//     { 
+//         return static_cast<int>(_CandidateListIndexRange.size()); 
+//     }
+//     inline DWORD *GetAt(int index) 
+//     { 
+//         return &_CandidateListIndexRange.at(index); 
+//     }
+//     inline DWORD *Append() 
+//     {
+//         _CandidateListIndexRange.emplace_back(0);
+//         return &_CandidateListIndexRange.back();
+//     }
+// 
+// private:
+//     std::vector<DWORD> _CandidateListIndexRange;
+// };
 
 class CStringRange
 {
@@ -264,9 +265,9 @@ struct ICompositionProcessorEngine
 
     virtual DWORD_PTR GetVirtualKeyLength() = 0;
 
-    virtual void GetReadingStrings(_Inout_ CSampleImeArray<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded) = 0;
-    virtual void GetCandidateList(_Inout_ CSampleImeArray<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) = 0;
-    virtual void GetCandidateStringInConverted(CStringRange &searchString, _In_ CSampleImeArray<CCandidateListItem> *pCandidateList) = 0;
+    virtual void GetReadingStrings(_Inout_ std::vector<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded) = 0;
+    virtual void GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) = 0;
+    virtual void GetCandidateStringInConverted(CStringRange &searchString, _In_ std::vector<CCandidateListItem> *pCandidateList) = 0;
 
     // Preserved key handler
     virtual void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId) = 0;
@@ -281,7 +282,7 @@ struct ICompositionProcessorEngine
     // Language bar control
     virtual void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) = 0;
 
-    virtual CCandidateRange *GetCandidateListIndexRange() = 0;
+    virtual std::vector<DWORD>* GetCandidateListIndexRange() = 0;
     virtual UINT GetCandidateWindowWidth() = 0;
 
     // Compartment

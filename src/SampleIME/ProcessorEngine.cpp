@@ -274,17 +274,18 @@ WCHAR CompositionProcessorEngine::GetVirtualKey(DWORD_PTR dwIndex)
 //
 //----------------------------------------------------------------------------
 
-void CompositionProcessorEngine::GetReadingStrings(_Inout_ CSampleImeArray<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded)
+void CompositionProcessorEngine::GetReadingStrings(_Inout_ std::vector<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded)
 {
     CStringRange oneKeystroke;
 
     _hasWildcardIncludedInKeystrokeBuffer = FALSE;
 
-    if (pReadingStrings->Count() == 0 && _keystrokeBuffer.GetLength())
+    if (pReadingStrings->size() == 0 && _keystrokeBuffer.GetLength())
     {
         CStringRange* pNewString = nullptr;
 
-        pNewString = pReadingStrings->Append();
+        pReadingStrings->push_back(CStringRange());
+        pNewString = &pReadingStrings->back();
         if (pNewString)
         {
             *pNewString = _keystrokeBuffer;
@@ -310,7 +311,7 @@ void CompositionProcessorEngine::GetReadingStrings(_Inout_ CSampleImeArray<CStri
 //
 //----------------------------------------------------------------------------
 
-void CompositionProcessorEngine::GetCandidateList(_Inout_ CSampleImeArray<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch)
+void CompositionProcessorEngine::GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch)
 {
     if (!IsDictionaryAvailable())
     {
@@ -363,7 +364,7 @@ void CompositionProcessorEngine::GetCandidateList(_Inout_ CSampleImeArray<CCandi
 
         _pTableDictionaryEngine->CollectWordForWildcard(&wildcardSearch, pCandidateList);
 
-        if (0 >= pCandidateList->Count())
+        if (0 >= pCandidateList->size())
         {
             return;
         }
@@ -375,9 +376,9 @@ void CompositionProcessorEngine::GetCandidateList(_Inout_ CSampleImeArray<CCandi
 
         // Incremental search would show keystroke data from all candidate list items
         // but wont show identical keystroke data for user inputted.
-        for (UINT index = 0; index < pCandidateList->Count(); index++)
+        for (UINT index = 0; index < pCandidateList->size(); index++)
         {
-            CCandidateListItem *pLI = pCandidateList->GetAt(index);
+            CCandidateListItem *pLI = &pCandidateList->at(index);
             DWORD_PTR keystrokeBufferLen = 0;
 
             if (IsWildcard())
@@ -405,9 +406,9 @@ void CompositionProcessorEngine::GetCandidateList(_Inout_ CSampleImeArray<CCandi
         _pTableDictionaryEngine->CollectWord(&_keystrokeBuffer, pCandidateList);
     }
 
-    for (UINT index = 0; index < pCandidateList->Count();)
+    for (UINT index = 0; index < pCandidateList->size();)
     {
-        CCandidateListItem *pLI = pCandidateList->GetAt(index);
+        CCandidateListItem *pLI = &pCandidateList->at(index);
         CStringRange startItemString;
         CStringRange endItemString;
 
@@ -424,7 +425,7 @@ void CompositionProcessorEngine::GetCandidateList(_Inout_ CSampleImeArray<CCandi
 //
 //----------------------------------------------------------------------------
 
-void CompositionProcessorEngine::GetCandidateStringInConverted(CStringRange &searchString, _In_ CSampleImeArray<CCandidateListItem> *pCandidateList)
+void CompositionProcessorEngine::GetCandidateStringInConverted(CStringRange &searchString, _In_ std::vector<CCandidateListItem> *pCandidateList)
 {
     if (!IsDictionaryAvailable())
     {
@@ -478,9 +479,9 @@ BOOL CompositionProcessorEngine::IsPunctuation(WCHAR wch)
         }
     }
 
-    for (UINT j = 0; j < _PunctuationPair.Count(); j++)
+    for (UINT j = 0; j < _PunctuationPair.size(); j++)
     {
-        CPunctuationPair* pPuncPair = _PunctuationPair.GetAt(j);
+        CPunctuationPair* pPuncPair = &_PunctuationPair.at(j);
 
         if (pPuncPair->_punctuation._Code == wch)
         {
@@ -488,9 +489,9 @@ BOOL CompositionProcessorEngine::IsPunctuation(WCHAR wch)
         }
     }
 
-    for (UINT k = 0; k < _PunctuationNestPair.Count(); k++)
+    for (UINT k = 0; k < _PunctuationNestPair.size(); k++)
     {
-        CPunctuationNestPair* pPuncNestPair = _PunctuationNestPair.GetAt(k);
+        CPunctuationNestPair* pPuncNestPair = &_PunctuationNestPair.at(k);
 
         if (pPuncNestPair->_punctuation_begin._Code == wch)
         {
@@ -520,9 +521,9 @@ WCHAR CompositionProcessorEngine::GetPunctuation(WCHAR wch)
         }
     }
 
-    for (UINT j = 0; j < _PunctuationPair.Count(); j++)
+    for (UINT j = 0; j < _PunctuationPair.size(); j++)
     {
-        CPunctuationPair* pPuncPair = _PunctuationPair.GetAt(j);
+        CPunctuationPair* pPuncPair = &_PunctuationPair.at(j);
 
         if (pPuncPair->_punctuation._Code == wch)
         {
@@ -539,9 +540,9 @@ WCHAR CompositionProcessorEngine::GetPunctuation(WCHAR wch)
         }
     }
 
-    for (UINT k = 0; k < _PunctuationNestPair.Count(); k++)
+    for (UINT k = 0; k < _PunctuationNestPair.size(); k++)
     {
-        CPunctuationNestPair* pPuncNestPair = _PunctuationNestPair.GetAt(k);
+        CPunctuationNestPair* pPuncNestPair = &_PunctuationNestPair.at(k);
 
         if (pPuncNestPair->_punctuation_begin._Code == wch)
         {
@@ -602,13 +603,14 @@ void CompositionProcessorEngine::SetupKeystroke()
 //
 //----------------------------------------------------------------------------
 
-void CompositionProcessorEngine::SetKeystrokeTable(_Inout_ CSampleImeArray<_KEYSTROKE> *pKeystroke)
+void CompositionProcessorEngine::SetKeystrokeTable(_Inout_ std::vector<_KEYSTROKE> *pKeystroke)
 {
     for (int i = 0; i < 26; i++)
     {
         _KEYSTROKE* pKS = nullptr;
 
-        pKS = pKeystroke->Append();
+        pKeystroke->push_back(_KEYSTROKE());
+        pKS = &pKeystroke->back();
         if (!pKS)
         {
             break;
@@ -657,7 +659,8 @@ void CompositionProcessorEngine::SetPreservedKey(const CLSID clsid, TF_PRESERVED
 {
     pXPreservedKey->Guid = clsid;
 
-    TF_PRESERVEDKEY *ptfPsvKey1 = pXPreservedKey->TSFPreservedKeyTable.Append();
+    pXPreservedKey->TSFPreservedKeyTable.push_back(TF_PRESERVEDKEY());
+    TF_PRESERVEDKEY *ptfPsvKey1 = &pXPreservedKey->TSFPreservedKeyTable.back();
     if (!ptfPsvKey1)
     {
         return;
@@ -701,9 +704,9 @@ BOOL CompositionProcessorEngine::InitPreservedKey(_In_ XPreservedKey *pXPreserve
         return FALSE;
     }
 
-    for (UINT i = 0; i < pXPreservedKey->TSFPreservedKeyTable.Count(); i++)
+    for (UINT i = 0; i < pXPreservedKey->TSFPreservedKeyTable.size(); i++)
     {
-        TF_PRESERVEDKEY preservedKey = *pXPreservedKey->TSFPreservedKeyTable.GetAt(i);
+        TF_PRESERVEDKEY preservedKey = pXPreservedKey->TSFPreservedKeyTable.at(i);
         preservedKey.uModifiers &= 0xffff;
 
         size_t lenOfDesc = 0;
@@ -725,11 +728,11 @@ BOOL CompositionProcessorEngine::InitPreservedKey(_In_ XPreservedKey *pXPreserve
 //
 //----------------------------------------------------------------------------
 
-BOOL CompositionProcessorEngine::CheckShiftKeyOnly(_In_ CSampleImeArray<TF_PRESERVEDKEY> *pTSFPreservedKeyTable)
+BOOL CompositionProcessorEngine::CheckShiftKeyOnly(_In_ std::vector<TF_PRESERVEDKEY> *pTSFPreservedKeyTable)
 {
-    for (UINT i = 0; i < pTSFPreservedKeyTable->Count(); i++)
+    for (UINT i = 0; i < pTSFPreservedKeyTable->size(); i++)
     {
-        TF_PRESERVEDKEY *ptfPsvKey = pTSFPreservedKeyTable->GetAt(i);
+        TF_PRESERVEDKEY *ptfPsvKey = &pTSFPreservedKeyTable->at(i);
 
         if (((ptfPsvKey->uModifiers & (_TF_MOD_ON_KEYUP_SHIFT_ONLY & 0xffff0000)) && !WindowsImeLib::IsShiftKeyDownOnly) ||
             ((ptfPsvKey->uModifiers & (_TF_MOD_ON_KEYUP_CONTROL_ONLY & 0xffff0000)) && !WindowsImeLib::IsControlKeyDownOnly) ||
@@ -1042,14 +1045,16 @@ void CompositionProcessorEngine::SetupPunctuationPair()
 
     for (int i = 0; i < pair_count; ++i)
     {
-        CPunctuationPair *pPuncPair = _PunctuationPair.Append();
+        _PunctuationPair.push_back(CPunctuationPair());
+        CPunctuationPair *pPuncPair = &_PunctuationPair.back();
         *pPuncPair = puncPairs[i];
     }
 
     // Punctuation nest pair
     CPunctuationNestPair punc_angle_bracket(L'<', 0x300A, 0x3008, L'>', 0x300B, 0x3009);
 
-    CPunctuationNestPair* pPuncNestPair = _PunctuationNestPair.Append();
+    _PunctuationNestPair.push_back(CPunctuationNestPair());
+    CPunctuationNestPair* pPuncNestPair = &_PunctuationNestPair.back();
     *pPuncNestPair = punc_angle_bracket;
 }
 
@@ -1256,9 +1261,9 @@ BOOL CompositionProcessorEngine::XPreservedKey::UninitPreservedKey(_In_ ITfThrea
         return FALSE;
     }
 
-    for (UINT i = 0; i < TSFPreservedKeyTable.Count(); i++)
+    for (UINT i = 0; i < TSFPreservedKeyTable.size(); i++)
     {
-        TF_PRESERVEDKEY pPreservedKey = *TSFPreservedKeyTable.GetAt(i);
+        TF_PRESERVEDKEY pPreservedKey = TSFPreservedKeyTable.at(i);
         pPreservedKey.uModifiers &= 0xffff;
 
         pKeystrokeMgr->UnpreserveKey(Guid, &pPreservedKey);
@@ -1307,9 +1312,9 @@ void CompositionProcessorEngine::SetInitialCandidateListRange()
 {
     for (DWORD i = 1; i <= 10; i++)
     {
-        DWORD* pNewIndexRange = nullptr;
+        _candidateListIndexRange.push_back(0);
+        DWORD* pNewIndexRange = &_candidateListIndexRange.back();
 
-        pNewIndexRange = _candidateListIndexRange.Append();
         if (pNewIndexRange != nullptr)
         {
             if (i != 10)
@@ -1702,11 +1707,11 @@ BOOL CompositionProcessorEngine::IsVirtualKeyKeystrokeComposition(UINT uCode, _O
     pKeyState->Category = CATEGORY_NONE;
     pKeyState->Function = FUNCTION_NONE;
 
-    for (UINT i = 0; i < _KeystrokeComposition.Count(); i++)
+    for (UINT i = 0; i < _KeystrokeComposition.size(); i++)
     {
         _KEYSTROKE *pKeystroke = nullptr;
 
-        pKeystroke = _KeystrokeComposition.GetAt(i);
+        pKeystroke = &_KeystrokeComposition.at(i);
 
         if ((pKeystroke->VirtualKey == uCode) && Global::CheckModifiers(WindowsImeLib::ModifiersValue, pKeystroke->Modifiers))
         {
@@ -1734,7 +1739,7 @@ BOOL CompositionProcessorEngine::IsVirtualKeyKeystrokeComposition(UINT uCode, _O
 //
 //----------------------------------------------------------------------------
 
-BOOL CompositionProcessorEngine::IsVirtualKeyKeystrokeCandidate(UINT uCode, _In_ _KEYSTROKE_STATE *pKeyState, CANDIDATE_MODE candidateMode, _Out_ BOOL *pfRetCode, _In_ CSampleImeArray<_KEYSTROKE> *pKeystrokeMetric)
+BOOL CompositionProcessorEngine::IsVirtualKeyKeystrokeCandidate(UINT uCode, _In_ _KEYSTROKE_STATE *pKeyState, CANDIDATE_MODE candidateMode, _Out_ BOOL *pfRetCode, _In_ std::vector<_KEYSTROKE> *pKeystrokeMetric)
 {
     if (pfRetCode == nullptr)
     {
@@ -1742,11 +1747,11 @@ BOOL CompositionProcessorEngine::IsVirtualKeyKeystrokeCandidate(UINT uCode, _In_
     }
     *pfRetCode = FALSE;
 
-    for (UINT i = 0; i < pKeystrokeMetric->Count(); i++)
+    for (UINT i = 0; i < pKeystrokeMetric->size(); i++)
     {
         _KEYSTROKE *pKeystroke = nullptr;
 
-        pKeystroke = pKeystrokeMetric->GetAt(i);
+        pKeystroke = &pKeystrokeMetric->at(i);
 
         if ((pKeystroke->VirtualKey == uCode) && Global::CheckModifiers(WindowsImeLib::ModifiersValue, pKeystroke->Modifiers))
         {
@@ -1771,6 +1776,20 @@ BOOL CompositionProcessorEngine::IsVirtualKeyKeystrokeCandidate(UINT uCode, _In_
 //
 //----------------------------------------------------------------------------
 
+inline int FindVkInVector(const std::vector<DWORD>& srcVkList, UINT vk)
+{
+    bool isVkNumpad = (VK_NUMPAD0 <= vk) && (vk <= VK_NUMPAD9);
+
+    for (auto it = srcVkList.begin(); it != srcVkList.end(); ++it)
+    {
+        if ((*it == vk) || (isVkNumpad && (*it == (vk - VK_NUMPAD0))))
+        {
+            return static_cast<int>(std::distance(srcVkList.begin(), it));
+        }
+    }
+    return -1;
+}
+
 BOOL CompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_STATE *pKeyState, CANDIDATE_MODE candidateMode)
 {
     if (pKeyState == nullptr)
@@ -1781,7 +1800,7 @@ BOOL CompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_S
     pKeyState->Category = CATEGORY_NONE;
     pKeyState->Function = FUNCTION_NONE;
 
-    if (_candidateListIndexRange.IsRange(uCode))
+    if (FindVkInVector(_candidateListIndexRange, uCode) != -1)
     {
         if (candidateMode == CANDIDATE_PHRASE)
         {

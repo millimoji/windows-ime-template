@@ -24,7 +24,7 @@ typedef HRESULT (*CANDWNDCALLBACK)(void *pv, enum CANDWND_ACTION action);
 class CCandidateWindow : public CBaseWindow
 {
 public:
-    CCandidateWindow(_In_ CANDWNDCALLBACK pfnCallback, _In_ void *pv, _In_ CCandidateRange *pIndexRange, _In_ BOOL isStoreAppMode);
+    CCandidateWindow(_In_ CANDWNDCALLBACK pfnCallback, _In_ void *pv, _In_ std::vector<DWORD> *pIndexRange, _In_ BOOL isStoreAppMode);
     virtual ~CCandidateWindow();
 
     BOOL _Create(ATOM atom, _In_ UINT wndWidth, _In_opt_ HWND parentWndHandle);
@@ -46,7 +46,7 @@ public:
     void _ClearList();
     UINT _GetCount()
     {
-        return _candidateList.Count();
+        return static_cast<UINT>(_candidateList.size());
     }
     UINT _GetSelection()
     {
@@ -91,8 +91,8 @@ private:
 
 private:
     UINT _currentSelection;
-    CSampleImeArray<CCandidateListItem> _candidateList;
-    CSampleImeArray<UINT> _PageIndex;
+    std::vector<CCandidateListItem> _candidateList;
+    std::vector<UINT> _PageIndex;
 
     COLORREF _crTextColor;
     COLORREF _crBkColor;
@@ -103,7 +103,7 @@ private:
     int _cxTitle;
     UINT _wndWidth;
 
-    CCandidateRange* _pIndexRange;
+    std::vector<DWORD>* _pIndexRange;
 
     CANDWNDCALLBACK _pfnCallback;
     void* _pObj;

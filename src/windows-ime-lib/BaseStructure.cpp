@@ -229,57 +229,57 @@ BOOL CStringRange::WildcardCompare(LCID locale, _In_ CStringRange* stringWithWil
         (isSurrogate2 ? 2 : 1)) == CSTR_EQUAL) && WildcardCompare(locale, &stringWithWildcard_next, &targetString_next));
 }
 
-CCandidateRange::CCandidateRange(void)
-{
-}
-
-
-CCandidateRange::~CCandidateRange(void)
-{
-}
-
-
-BOOL CCandidateRange::IsRange(UINT vKey)
-{
-    DWORD value = vKey - L'0';
-
-    for (UINT i = 0; i < _CandidateListIndexRange.Count(); i++)
-    {
-        if (value == *_CandidateListIndexRange.GetAt(i))
-        {
-            return TRUE;
-        }
-        else if ((VK_NUMPAD0 <= vKey) && (vKey <= VK_NUMPAD9))
-        {
-            if ((vKey-VK_NUMPAD0) == *_CandidateListIndexRange.GetAt(i))
-            {
-                return TRUE;
-            }
-        }
-    }
-    return FALSE;
-}
-
-int CCandidateRange::GetIndex(UINT vKey)
-{
-    DWORD value = vKey - L'0';
-
-    for (UINT i = 0; i < _CandidateListIndexRange.Count(); i++)
-    {
-        if (value == *_CandidateListIndexRange.GetAt(i))
-        {
-            return i;
-        }
-        else if ((VK_NUMPAD0 <= vKey) && (vKey <= VK_NUMPAD9))
-        {
-            if ((vKey-VK_NUMPAD0) == *_CandidateListIndexRange.GetAt(i))
-            {
-                return i;
-            }
-        }
-    }
-    return -1;
-}
+//CCandidateRange::CCandidateRange(void)
+//{
+//}
+//
+//
+//CCandidateRange::~CCandidateRange(void)
+//{
+//}
+//
+//
+//BOOL CCandidateRange::IsRange(UINT vKey)
+//{
+//    DWORD value = vKey - L'0';
+//
+//    for (UINT i = 0; i < _CandidateListIndexRange.size(); i++)
+//    {
+//        if (value == _CandidateListIndexRange.at(i))
+//        {
+//            return TRUE;
+//        }
+//        else if ((VK_NUMPAD0 <= vKey) && (vKey <= VK_NUMPAD9))
+//        {
+//            if ((vKey-VK_NUMPAD0) == _CandidateListIndexRange.at(i))
+//            {
+//                return TRUE;
+//            }
+//        }
+//    }
+//    return FALSE;
+//}
+//
+//int CCandidateRange::GetIndex(UINT vKey)
+//{
+//    DWORD value = vKey - L'0';
+//
+//    for (UINT i = 0; i < _CandidateListIndexRange.size(); i++)
+//    {
+//        if (value == _CandidateListIndexRange.at(i))
+//        {
+//            return i;
+//        }
+//        else if ((VK_NUMPAD0 <= vKey) && (vKey <= VK_NUMPAD9))
+//        {
+//            if ((vKey-VK_NUMPAD0) == _CandidateListIndexRange.at(i))
+//            {
+//                return i;
+//            }
+//        }
+//    }
+//    return -1;
+//}
 
 // CPunctuationPair::CPunctuationPair()
 // {

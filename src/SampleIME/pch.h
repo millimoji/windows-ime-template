@@ -25,6 +25,7 @@
 #include <strsafe.h>
 
 #include <memory>
+#include <vector>
 #include <cassert>
 
 #include <wil/com.h>

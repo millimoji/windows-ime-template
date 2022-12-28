@@ -132,7 +132,7 @@ TryAgain:
         else
         {
             // Compare Dictionary converted string and input string
-            CSampleImeArray<CParserStringRange> convertedStrings;
+            std::vector<CParserStringRange> convertedStrings;
             if (!ParseLine(&pwch[indexTrace], bufLenOneLine, &keyword, &convertedStrings))
             {
                 if (bufLen)
@@ -141,9 +141,9 @@ TryAgain:
                 }
                 return FALSE;
             }
-            if (convertedStrings.Count() == 1)
+            if (convertedStrings.size() == 1)
             {
-                CStringRange* pTempString = convertedStrings.GetAt(0);
+                CStringRange* pTempString = &convertedStrings.at(0);
 
                 if (!isWildcardSearch)
                 {
@@ -191,7 +191,7 @@ TryAgain:
             return FALSE;
         }
 
-        CSampleImeArray<CParserStringRange> valueStrings;
+        std::vector<CParserStringRange> valueStrings;
         if (!ParseLine(&pwch[indexTrace], bufLenOneLine, &keyword, &valueStrings))
         {
             if (*ppdret)
@@ -205,12 +205,13 @@ TryAgain:
         (*ppdret)->_FindKeyCode = keyword;
         (*ppdret)->_SearchKeyCode = *_pSearchKeyCode;
 
-        for (UINT i = 0; i < valueStrings.Count(); i++)
+        for (UINT i = 0; i < valueStrings.size(); i++)
         {
-            CStringRange* findPhrase = (*ppdret)->_FindPhraseList.Append();
+            (*ppdret)->_FindPhraseList.push_back(CStringRange());
+            CStringRange* findPhrase = &(*ppdret)->_FindPhraseList.back();
             if (findPhrase)
             {
-                *findPhrase = *valueStrings.GetAt(i);
+                *findPhrase = valueStrings.at(i);
             }
         }
 

@@ -169,7 +169,7 @@ Exit:
 HRESULT CWindowsIME::_HandleCompositionInputWorker(_In_ CCompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
 {
     HRESULT hr = S_OK;
-    CSampleImeArray<CStringRange> readingStrings;
+    std::vector<CStringRange> readingStrings;
     BOOL isWildcardIncluded = TRUE;
 
     //
@@ -177,9 +177,9 @@ HRESULT CWindowsIME::_HandleCompositionInputWorker(_In_ CCompositionProcessorEng
     //
     pCompositionProcessorEngine->GetReadingStrings(&readingStrings, &isWildcardIncluded);
 
-    for (UINT index = 0; index < readingStrings.Count(); index++)
+    for (UINT index = 0; index < readingStrings.size(); index++)
     {
-        hr = _AddComposingAndChar(ec, pContext, readingStrings.GetAt(index));
+        hr = _AddComposingAndChar(ec, pContext, &readingStrings.at(index));
         if (FAILED(hr))
         {
             return hr;
@@ -189,11 +189,11 @@ HRESULT CWindowsIME::_HandleCompositionInputWorker(_In_ CCompositionProcessorEng
     //
     // Get candidate string from composition processor engine
     //
-    CSampleImeArray<CCandidateListItem> candidateList;
+    std::vector<CCandidateListItem> candidateList;
 
     pCompositionProcessorEngine->GetCandidateList(&candidateList, TRUE, FALSE);
 
-    if ((candidateList.Count()))
+    if ((candidateList.size()))
     {
         hr = _CreateAndStartCandidate(pCompositionProcessorEngine, ec, pContext);
         if (SUCCEEDED(hr))
@@ -206,7 +206,7 @@ HRESULT CWindowsIME::_HandleCompositionInputWorker(_In_ CCompositionProcessorEng
     {
         _pCandidateListUIPresenter->_ClearList();
     }
-    else if (readingStrings.Count() && isWildcardIncluded)
+    else if (readingStrings.size() && isWildcardIncluded)
     {
         hr = _CreateAndStartCandidate(pCompositionProcessorEngine, ec, pContext);
         if (SUCCEEDED(hr))
@@ -344,7 +344,7 @@ HRESULT CWindowsIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext 
 {
     HRESULT hr = S_OK;
 
-    CSampleImeArray<CCandidateListItem> candidateList;
+    std::vector<CCandidateListItem> candidateList;
 
     //
     // Get candidate string from composition processor engine
@@ -355,7 +355,7 @@ HRESULT CWindowsIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext 
 
     // If there is no candlidate listin the current reading string, we don't do anything. Just wait for
     // next char to be ready for the conversion with it.
-    int nCount = candidateList.Count();
+    int nCount = static_cast<int>(candidateList.size());
     if (nCount)
     {
         if (_pCandidateListUIPresenter)

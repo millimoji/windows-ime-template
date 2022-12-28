@@ -43,9 +43,9 @@ public:
 
     DWORD_PTR GetVirtualKeyLength();
 
-    void GetReadingStrings(_Inout_ CSampleImeArray<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded);
-    void GetCandidateList(_Inout_ CSampleImeArray<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch);
-    void GetCandidateStringInConverted(CStringRange &searchString, _In_ CSampleImeArray<CCandidateListItem> *pCandidateList);
+    void GetReadingStrings(_Inout_ std::vector<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded);
+    void GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch);
+    void GetCandidateStringInConverted(CStringRange &searchString, _In_ std::vector<CCandidateListItem> *pCandidateList);
 
     // Preserved key handler
     void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
@@ -65,7 +65,7 @@ public:
     void ShowAllLanguageBarIcons();
     void HideAllLanguageBarIcons();
 
-    CCandidateRange *GetCandidateListIndexRange();
+    std::vector<DWORD> *GetCandidateListIndexRange();
     UINT GetCandidateWindowWidth();
 
 private:
@@ -101,13 +101,13 @@ private:
 //
 //    struct _KEYSTROKE;
 //    BOOL IsVirtualKeyKeystrokeComposition(UINT uCode, _Out_opt_ _KEYSTROKE_STATE *pKeyState, KEYSTROKE_FUNCTION function);
-//    BOOL IsVirtualKeyKeystrokeCandidate(UINT uCode, _In_ _KEYSTROKE_STATE *pKeyState, CANDIDATE_MODE candidateMode, _Out_ BOOL *pfRetCode, _In_ CSampleImeArray<_KEYSTROKE> *pKeystrokeMetric);
+//    BOOL IsVirtualKeyKeystrokeCandidate(UINT uCode, _In_ _KEYSTROKE_STATE *pKeyState, CANDIDATE_MODE candidateMode, _Out_ BOOL *pfRetCode, _In_ std::vector<_KEYSTROKE> *pKeystrokeMetric);
 //    BOOL IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_STATE *pKeyState, CANDIDATE_MODE candidateMode);
 //
 //    void SetupKeystroke();
 //    void SetupPreserved(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
 //    void SetupConfiguration();
-//    void SetKeystrokeTable(_Inout_ CSampleImeArray<_KEYSTROKE> *pKeystroke);
+//    void SetKeystrokeTable(_Inout_ std::vector<_KEYSTROKE> *pKeystroke);
 //    void SetupPunctuationPair();
 	void CreateLanguageBarButton(DWORD dwEnable, GUID guidLangBar, _In_z_ LPCWSTR pwszDescriptionValue, _In_z_ LPCWSTR pwszTooltipValue, DWORD dwOnIconIndex, DWORD dwOffIconIndex, _Outptr_result_maybenull_ CLangBarItemButton **ppLangBarItemButton, BOOL isSecureMode);
 //    void SetInitialCandidateListRange();
@@ -116,7 +116,7 @@ private:
 //    class XPreservedKey;
 //    void SetPreservedKey(const CLSID clsid, TF_PRESERVEDKEY & tfPreservedKey, _In_z_ LPCWSTR pwszDescription, _Out_ XPreservedKey *pXPreservedKey);
 //    BOOL InitPreservedKey(_In_ XPreservedKey *pXPreservedKey, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
-//    BOOL CheckShiftKeyOnly(_In_ CSampleImeArray<TF_PRESERVEDKEY> *pTSFPreservedKeyTable);
+//    BOOL CheckShiftKeyOnly(_In_ std::vector<TF_PRESERVEDKEY> *pTSFPreservedKeyTable);
 //
     static HRESULT CompartmentCallback(_In_ void *pv, REFGUID guidCompartment);
 //    void PrivateCompartmentsUpdated(_In_ ITfThreadMgr *pThreadMgr);
@@ -150,11 +150,11 @@ private:
 //    GUID _guidProfile;
 //    TfClientId  _tfClientId;
 //
-//    CSampleImeArray<_KEYSTROKE> _KeystrokeComposition;
-//    CSampleImeArray<_KEYSTROKE> _KeystrokeCandidate;
-//    CSampleImeArray<_KEYSTROKE> _KeystrokeCandidateWildcard;
-//    CSampleImeArray<_KEYSTROKE> _KeystrokeCandidateSymbol;
-//    CSampleImeArray<_KEYSTROKE> _KeystrokeSymbol;
+//    std::vector<_KEYSTROKE> _KeystrokeComposition;
+//    std::vector<_KEYSTROKE> _KeystrokeCandidate;
+//    std::vector<_KEYSTROKE> _KeystrokeCandidateWildcard;
+//    std::vector<_KEYSTROKE> _KeystrokeCandidateSymbol;
+//    std::vector<_KEYSTROKE> _KeystrokeSymbol;
 //
 //    // Preserved key data
 //    class XPreservedKey
@@ -165,7 +165,7 @@ private:
 //        BOOL UninitPreservedKey(_In_ ITfThreadMgr *pThreadMgr);
 //
 //    public:
-//        CSampleImeArray<TF_PRESERVEDKEY> TSFPreservedKeyTable;
+//        std::vector<TF_PRESERVEDKEY> TSFPreservedKeyTable;
 //        GUID Guid;
 //        LPCWSTR Description;
 //    };
@@ -175,8 +175,8 @@ private:
 //    XPreservedKey _PreservedKey_Punctuation;
 //
 //    // Punctuation data
-//    CSampleImeArray<CPunctuationPair> _PunctuationPair;
-//    CSampleImeArray<CPunctuationNestPair> _PunctuationNestPair;
+//    std::vector<CPunctuationPair> _PunctuationPair;
+//    std::vector<CPunctuationNestPair> _PunctuationNestPair;
 
     // Language bar data
     std::vector<wil::com_ptr<CLangBarItemButton>> m_langaugeBarButtons;
@@ -194,7 +194,7 @@ private:
 //    BOOL _hasMakePhraseFromText : 1;
 //    BOOL _isKeystrokeSort : 1;
 //    BOOL _isComLessMode : 1;
-//    CCandidateRange _candidateListIndexRange;
+//    std::vector<DWORD> _candidateListIndexRange;
 //    UINT _candidateListPhraseModifier;
 //    UINT _candidateWndWidth;
 //

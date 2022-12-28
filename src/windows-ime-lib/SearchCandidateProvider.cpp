@@ -166,10 +166,10 @@ STDMETHODIMP CSearchCandidateProvider::GetSearchCandidates(BSTR bstrQuery, BSTR 
         return hr;
     }
 
-    CSampleImeArray<CCandidateListItem> candidateList;
+    std::vector<CCandidateListItem> candidateList;
     pCompositionProcessorEngine->GetCandidateList(&candidateList, TRUE, FALSE);
 
-    int cCand = min(candidateList.Count(), FAKECANDIDATENUMBER);
+    int cCand = min(static_cast<int>(candidateList.size()), FAKECANDIDATENUMBER);
     if (0 < cCand)
     {
         hr = CTipCandidateList::CreateInstance(pplist, cCand);
@@ -183,7 +183,7 @@ STDMETHODIMP CSearchCandidateProvider::GetSearchCandidates(BSTR bstrQuery, BSTR 
             CTipCandidateString::CreateInstance(IID_ITfCandidateString, (void**)&pCandStr);
 
             ((CTipCandidateString*)pCandStr)->SetIndex(iCand);
-            ((CTipCandidateString*)pCandStr)->SetString(candidateList.GetAt(iCand)->_ItemString.Get(), candidateList.GetAt(iCand)->_ItemString.GetLength());
+            ((CTipCandidateString*)pCandStr)->SetString(candidateList.at(iCand)._ItemString.Get(), candidateList.at(iCand)._ItemString.GetLength());
 
             ((CTipCandidateList*)(*pplist))->SetCandidate(&pCandStr);
         }

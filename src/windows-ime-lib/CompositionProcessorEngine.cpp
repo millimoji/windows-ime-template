@@ -547,7 +547,7 @@ DWORD_PTR CCompositionProcessorEngine::GetVirtualKeyLength()
 //
 //----------------------------------------------------------------------------
 
-void CCompositionProcessorEngine::GetReadingStrings(_Inout_ CSampleImeArray<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded)
+void CCompositionProcessorEngine::GetReadingStrings(_Inout_ std::vector<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded)
 {
     return processorEngine->GetReadingStrings(pReadingStrings, pIsWildcardIncluded);
 //     CStringRange oneKeystroke;
@@ -584,7 +584,7 @@ void CCompositionProcessorEngine::GetReadingStrings(_Inout_ CSampleImeArray<CStr
 //
 //----------------------------------------------------------------------------
 
-void CCompositionProcessorEngine::GetCandidateList(_Inout_ CSampleImeArray<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch)
+void CCompositionProcessorEngine::GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch)
 {
     return processorEngine->GetCandidateList(pCandidateList, isIncrementalWordSearch, isWildcardSearch);
 
@@ -700,7 +700,7 @@ void CCompositionProcessorEngine::GetCandidateList(_Inout_ CSampleImeArray<CCand
 //
 //----------------------------------------------------------------------------
 
-void CCompositionProcessorEngine::GetCandidateStringInConverted(CStringRange &searchString, _In_ CSampleImeArray<CCandidateListItem> *pCandidateList)
+void CCompositionProcessorEngine::GetCandidateStringInConverted(CStringRange &searchString, _In_ std::vector<CCandidateListItem> *pCandidateList)
 {
     return processorEngine->GetCandidateStringInConverted(searchString, pCandidateList);
 
@@ -1021,7 +1021,7 @@ void CCompositionProcessorEngine::HideAllLanguageBarIcons()
 	SetLanguageBarStatus(TF_LBI_STATUS_HIDDEN, TRUE);
 }
 
-CCandidateRange* CCompositionProcessorEngine::GetCandidateListIndexRange()
+std::vector<DWORD>* CCompositionProcessorEngine::GetCandidateListIndexRange()
 {
     return processorEngine->GetCandidateListIndexRange();
 }
@@ -1250,7 +1250,7 @@ UINT CCompositionProcessorEngine::GetCandidateWindowWidth()
 ////
 ////----------------------------------------------------------------------------
 //
-//void CompositionProcessorEngine::GetReadingStrings(_Inout_ CSampleImeArray<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded)
+//void CompositionProcessorEngine::GetReadingStrings(_Inout_ std::vector<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded)
 //{
 //    CStringRange oneKeystroke;
 //
@@ -1286,7 +1286,7 @@ UINT CCompositionProcessorEngine::GetCandidateWindowWidth()
 ////
 ////----------------------------------------------------------------------------
 //
-//void CompositionProcessorEngine::GetCandidateList(_Inout_ CSampleImeArray<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch)
+//void CompositionProcessorEngine::GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch)
 //{
 //    if (!IsDictionaryAvailable())
 //    {
@@ -1400,7 +1400,7 @@ UINT CCompositionProcessorEngine::GetCandidateWindowWidth()
 ////
 ////----------------------------------------------------------------------------
 //
-//void CompositionProcessorEngine::GetCandidateStringInConverted(CStringRange &searchString, _In_ CSampleImeArray<CCandidateListItem> *pCandidateList)
+//void CompositionProcessorEngine::GetCandidateStringInConverted(CStringRange &searchString, _In_ std::vector<CCandidateListItem> *pCandidateList)
 //{
 //    if (!IsDictionaryAvailable())
 //    {
@@ -1578,7 +1578,7 @@ UINT CCompositionProcessorEngine::GetCandidateWindowWidth()
 ////
 ////----------------------------------------------------------------------------
 //
-//void CompositionProcessorEngine::SetKeystrokeTable(_Inout_ CSampleImeArray<_KEYSTROKE> *pKeystroke)
+//void CompositionProcessorEngine::SetKeystrokeTable(_Inout_ std::vector<_KEYSTROKE> *pKeystroke)
 //{
 //    for (int i = 0; i < 26; i++)
 //    {
@@ -1701,7 +1701,7 @@ UINT CCompositionProcessorEngine::GetCandidateWindowWidth()
 ////
 ////----------------------------------------------------------------------------
 //
-//BOOL CompositionProcessorEngine::CheckShiftKeyOnly(_In_ CSampleImeArray<TF_PRESERVEDKEY> *pTSFPreservedKeyTable)
+//BOOL CompositionProcessorEngine::CheckShiftKeyOnly(_In_ std::vector<TF_PRESERVEDKEY> *pTSFPreservedKeyTable)
 //{
 //    for (UINT i = 0; i < pTSFPreservedKeyTable->Count(); i++)
 //    {
@@ -2618,7 +2618,7 @@ void CCompositionProcessorEngine::SetDefaultCandidateTextFont(int idsDefaultFont
 ////
 ////----------------------------------------------------------------------------
 //
-//BOOL CompositionProcessorEngine::IsVirtualKeyKeystrokeCandidate(UINT uCode, _In_ _KEYSTROKE_STATE *pKeyState, CANDIDATE_MODE candidateMode, _Out_ BOOL *pfRetCode, _In_ CSampleImeArray<_KEYSTROKE> *pKeystrokeMetric)
+//BOOL CompositionProcessorEngine::IsVirtualKeyKeystrokeCandidate(UINT uCode, _In_ _KEYSTROKE_STATE *pKeyState, CANDIDATE_MODE candidateMode, _Out_ BOOL *pfRetCode, _In_ std::vector<_KEYSTROKE> *pKeystrokeMetric)
 //{
 //    if (pfRetCode == nullptr)
 //    {

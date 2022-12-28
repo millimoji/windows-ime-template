@@ -85,7 +85,7 @@ HRESULT CWindowsIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pC
     BSTR pbstr = nullptr;
     CStringRange candidateString;
     BOOL fMakePhraseFromText = FALSE;
-    CSampleImeArray<CCandidateListItem> candidatePhraseList;
+    std::vector<CCandidateListItem> candidatePhraseList;
     CANDIDATE_MODE tempCandMode = CANDIDATE_NONE;
     CCandidateListUIPresenter* pTempCandListUIPresenter = nullptr;
     ITfDocumentMgr* pDocumentMgr = nullptr;
@@ -117,7 +117,7 @@ HRESULT CWindowsIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pC
 
     // We have a candidate list if candidatePhraseList.Cnt is not 0
     // If we are showing reverse conversion, use CCandidateListUIPresenter
-    if (candidatePhraseList.Count())
+    if (candidatePhraseList.size() > 0)
     {
         tempCandMode = CANDIDATE_WITH_NEXT_COMPOSITION;
 
@@ -215,9 +215,24 @@ HRESULT CWindowsIME::_HandleCandidateArrowKey(TfEditCookie ec, _In_ ITfContext *
 //
 //----------------------------------------------------------------------------
 
+inline int FindVkInVector(const std::vector<DWORD>& srcVkList, UINT vk)
+{
+    bool isVkNumpad = (VK_NUMPAD0 <= vk) && (vk <= VK_NUMPAD9);
+
+    for (auto it = srcVkList.begin(); it != srcVkList.end(); ++it)
+    {
+        if ((*it == vk) || (isVkNumpad && (*it == (vk - VK_NUMPAD0))))
+        {
+            return static_cast<int>(std::distance(srcVkList.begin(), it));
+        }
+    }
+    return -1;
+}
+
 HRESULT CWindowsIME::_HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode)
 {
-    int iSelectAsNumber = _pCompositionProcessorEngine->GetCandidateListIndexRange()->GetIndex(uCode);
+    int iSelectAsNumber = FindVkInVector(*_pCompositionProcessorEngine->GetCandidateListIndexRange(), uCode);
+
     if (iSelectAsNumber == -1)
     {
         return S_FALSE;
@@ -289,7 +304,7 @@ HRESULT CWindowsIME::_HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext *pCo
 
 HRESULT CWindowsIME::_HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode)
 {
-    int iSelectAsNumber = _pCompositionProcessorEngine->GetCandidateListIndexRange()->GetIndex(uCode);
+    int iSelectAsNumber = FindVkInVector(*_pCompositionProcessorEngine->GetCandidateListIndexRange(), uCode);
     if (iSelectAsNumber == -1)
     {
         return S_FALSE;
@@ -318,7 +333,7 @@ HRESULT CWindowsIME::_HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContex
 //
 //----------------------------------------------------------------------------
 
-CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ CWindowsIME *pTextService, ATOM atom, KEYSTROKE_CATEGORY Category, _In_ CCandidateRange *pIndexRange, BOOL hideWindow) : CTfTextLayoutSink(pTextService)
+CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ CWindowsIME *pTextService, ATOM atom, KEYSTROKE_CATEGORY Category, _In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) : CTfTextLayoutSink(pTextService)
 {
     _atom = atom;
 
@@ -818,7 +833,7 @@ void CCandidateListUIPresenter::_EndCandidateList()
 //
 //----------------------------------------------------------------------------
 
-void CCandidateListUIPresenter::_SetText(_In_ CSampleImeArray<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode)
+void CCandidateListUIPresenter::_SetText(_In_ std::vector<CCandidateListItem>* pCandidateList, BOOL isAddFindKeyCode)
 {
     AddCandidateToCandidateListUI(pCandidateList, isAddFindKeyCode);
 
@@ -839,18 +854,18 @@ void CCandidateListUIPresenter::_SetText(_In_ CSampleImeArray<CCandidateListItem
     }
 }
 
-void CCandidateListUIPresenter::AddCandidateToCandidateListUI(_In_ CSampleImeArray<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode)
+void CCandidateListUIPresenter::AddCandidateToCandidateListUI(_In_ std::vector<CCandidateListItem>* pCandidateList, BOOL isAddFindKeyCode)
 {
-    for (UINT index = 0; index < pCandidateList->Count(); index++)
+    for (UINT index = 0; index < pCandidateList->size(); index++)
     {
-        _pCandidateWnd->_AddString(pCandidateList->GetAt(index), isAddFindKeyCode);
+        _pCandidateWnd->_AddString(&pCandidateList->at(index), isAddFindKeyCode);
     }
 }
 
-void CCandidateListUIPresenter::SetPageIndexWithScrollInfo(_In_ CSampleImeArray<CCandidateListItem> *pCandidateList)
+void CCandidateListUIPresenter::SetPageIndexWithScrollInfo(_In_ std::vector<CCandidateListItem>* pCandidateList)
 {
-    UINT candCntInPage = _pIndexRange->Count();
-    UINT bufferSize = pCandidateList->Count() / candCntInPage + 1;
+    UINT candCntInPage = static_cast<UINT>(_pIndexRange->size());
+    UINT bufferSize = static_cast<UINT>(pCandidateList->size() / candCntInPage + 1);
     UINT* puPageIndex = new (std::nothrow) UINT[ bufferSize ];
     if (puPageIndex != nullptr)
     {
@@ -862,7 +877,7 @@ void CCandidateListUIPresenter::SetPageIndexWithScrollInfo(_In_ CSampleImeArray<
         _pCandidateWnd->_SetPageIndex(puPageIndex, bufferSize);
         delete [] puPageIndex;
     }
-    _pCandidateWnd->_SetScrollInfo(pCandidateList->Count(), candCntInPage);  // nMax:range of max, nPage:number of items in page
+    _pCandidateWnd->_SetScrollInfo(static_cast<int>(pCandidateList->size()), candCntInPage);  // nMax:range of max, nPage:number of items in page
 
 }
 //+---------------------------------------------------------------------------
@@ -1159,15 +1174,15 @@ HRESULT CCandidateListUIPresenter::OnKillThreadFocus()
     return S_OK;
 }
 
-void CCandidateListUIPresenter::RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ CSampleImeArray<CCandidateListItem> &candidateList, _In_ CStringRange &candidateString)
+void CCandidateListUIPresenter::RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, _In_ CStringRange &candidateString)
 {
-    for (UINT index = 0; index < candidateList.Count();)
+    for (UINT index = 0; index < candidateList.size();)
     {
-        CCandidateListItem* pLI = candidateList.GetAt(index);
+        CCandidateListItem* pLI = &candidateList.at(index);
 
         if (CStringRange::Compare(Locale, &candidateString, &pLI->_ItemString) == CSTR_EQUAL)
         {
-            candidateList.RemoveAt(index);
+            candidateList.erase(candidateList.begin() + index);
             continue;
         }
 
