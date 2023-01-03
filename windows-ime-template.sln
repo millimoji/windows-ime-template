@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "windows-ime-lib", "src\wind
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SampleIME", "src\SampleIME\SampleIME.vcxproj", "{CB0A0C28-F4D3-45A2-A941-4F68777BA030}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RibbonIME", "src\RibbonIME\RibbonIME.vcxproj", "{5E951B06-C82F-4599-BE4C-882900A5D68F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{CB0A0C28-F4D3-45A2-A941-4F68777BA030}.Release|x64.Build.0 = Release|x64
 		{CB0A0C28-F4D3-45A2-A941-4F68777BA030}.Release|x86.ActiveCfg = Release|Win32
 		{CB0A0C28-F4D3-45A2-A941-4F68777BA030}.Release|x86.Build.0 = Release|Win32
+		{5E951B06-C82F-4599-BE4C-882900A5D68F}.Debug|x64.ActiveCfg = Debug|x64
+		{5E951B06-C82F-4599-BE4C-882900A5D68F}.Debug|x64.Build.0 = Debug|x64
+		{5E951B06-C82F-4599-BE4C-882900A5D68F}.Debug|x86.ActiveCfg = Debug|Win32
+		{5E951B06-C82F-4599-BE4C-882900A5D68F}.Debug|x86.Build.0 = Debug|Win32
+		{5E951B06-C82F-4599-BE4C-882900A5D68F}.Release|x64.ActiveCfg = Release|x64
+		{5E951B06-C82F-4599-BE4C-882900A5D68F}.Release|x64.Build.0 = Release|x64
+		{5E951B06-C82F-4599-BE4C-882900A5D68F}.Release|x86.ActiveCfg = Release|Win32
+		{5E951B06-C82F-4599-BE4C-882900A5D68F}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

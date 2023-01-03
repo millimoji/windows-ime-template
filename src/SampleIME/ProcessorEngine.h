@@ -26,7 +26,7 @@ public:
     BOOL SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode) override;
 
     // Get language profile.
-    GUID GetLanguageProfile(LANGID *plangid) override
+    const GUID& GetLanguageProfile(LANGID *plangid) override
     {
         *plangid = _langid;
         return _guidProfile;

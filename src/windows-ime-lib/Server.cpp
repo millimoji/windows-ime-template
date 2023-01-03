@@ -272,8 +272,10 @@ HRESULT WindowsImeLib::DllCanUnloadNow(void)
 //
 //----------------------------------------------------------------------------
 
-HRESULT WindowsImeLib::DllUnregisterServer(LANGID langId)
+HRESULT WindowsImeLib::DllUnregisterServer()
 {
+    const auto langId = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLangID();
+
     UnregisterProfiles(langId);
     UnregisterCategories();
     UnregisterServer();
@@ -287,11 +289,13 @@ HRESULT WindowsImeLib::DllUnregisterServer(LANGID langId)
 //
 //----------------------------------------------------------------------------
 
-HRESULT WindowsImeLib::DllRegisterServer(LANGID langId, int textServiceIconIndex)
+HRESULT WindowsImeLib::DllRegisterServer(int textServiceIconIndex)
 {
+    const auto langId = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLangID();
+
     if ((!RegisterServer()) || (!RegisterProfiles(langId, textServiceIconIndex)) || (!RegisterCategories()))
     {
-        DllUnregisterServer(langId);
+        DllUnregisterServer();
         return E_FAIL;
     }
     return S_OK;

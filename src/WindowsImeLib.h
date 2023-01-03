@@ -250,7 +250,7 @@ struct ICompositionProcessorEngine
     virtual ~ICompositionProcessorEngine() {}
 
     // Get language profile.
-    virtual GUID GetLanguageProfile(LANGID *plangid) = 0;
+    virtual const GUID& GetLanguageProfile(LANGID *plangid) = 0;
 
     // Get locale
     virtual BOOL SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode) = 0;
@@ -298,6 +298,7 @@ struct IConstantProvider
     virtual const GUID& DisplayAttributeInput() noexcept = 0;
     virtual const GUID& DisplayAttributeConverted() noexcept = 0;
     virtual const GUID& CandUIElement() noexcept = 0;
+    virtual const LANGID GetLangID() noexcept = 0;
 };
 
 struct IProcessorFactory
@@ -315,7 +316,7 @@ extern std::shared_ptr<IProcessorFactory> g_processorFactory;
 extern BOOL DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID pvReserved);
 extern HRESULT DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ void** ppv);
 extern HRESULT DllCanUnloadNow(void);
-extern HRESULT DllUnregisterServer(LANGID langId);
-extern HRESULT DllRegisterServer(LANGID langId, int textServiceIconIndex);
+extern HRESULT DllUnregisterServer(void);
+extern HRESULT DllRegisterServer(int textServiceIconIndex);
 
 }

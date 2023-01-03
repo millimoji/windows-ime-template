@@ -156,7 +156,7 @@ BOOL CCompositionProcessorEngine::SetupLanguageProfile(LANGID langid, REFGUID gu
 }
 
 // Get language profile.
-GUID CCompositionProcessorEngine::GetLanguageProfile(LANGID *plangid)
+const GUID& CCompositionProcessorEngine::GetLanguageProfile(LANGID *plangid)
 {
     return processorEngine->GetLanguageProfile(plangid);
 //  *plangid = _langid;

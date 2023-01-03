@@ -1,20 +1,20 @@
+// dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
+#include "resource.h"
 #include "../WindowsImeLib.h"
-#include "SampleIMEDefine.h"
-#include "SampleIMEGlobals.h"
-#include "ProcessorEngine.h"
+#include "RibbonIMECore.h"
 
 #pragma comment(lib, "RuntimeObject.lib")
 
-BOOL APIENTRY DllMain( HMODULE hModule,
-                       DWORD  ul_reason_for_call,
-                       LPVOID lpReserved
-                     )
+BOOL APIENTRY DllMain(HMODULE hModule,
+    DWORD  ul_reason_for_call,
+    LPVOID lpReserved
+)
 {
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
-        wil::SetResultTelemetryFallback(SampleIMETelemetry::FallbackTelemetryCallback);
+        // wil::SetResultTelemetryFallback(SampleIMETelemetry::FallbackTelemetryCallback);
         break;
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
@@ -43,7 +43,7 @@ STDAPI DllUnregisterServer(void)
 
 STDAPI DllRegisterServer(void)
 {
-    return WindowsImeLib::DllRegisterServer(TEXTSERVICE_ICON_INDEX);
+    return WindowsImeLib::DllRegisterServer(-IDI_RIBBON_IME);
 }
 
 namespace WindowsImeLib
@@ -54,15 +54,17 @@ namespace WindowsImeLib
     public:
         std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(const std::weak_ptr<ICompositionProcessorEngineOwner>& owner) override
         {
-            return std::make_shared<CompositionProcessorEngine>(owner);
+            std::shared_ptr<ICompositionProcessorEngine> engine = std::make_shared<RibbonIMECore>(owner);
+            return engine;
         }
 
         std::shared_ptr<IConstantProvider> GetConstantProvider() override
         {
-            static std::shared_ptr<IConstantProvider> constantProvider = std::make_shared<Global::ConstantProvider>();
+            static std::shared_ptr<IConstantProvider> constantProvider = std::make_shared<RibbonIMEConstants>();
             return constantProvider;
         }
     };
 
     std::shared_ptr<IProcessorFactory> g_processorFactory = std::static_pointer_cast<IProcessorFactory>(std::make_shared<ProcessorFactory>());
 }
+

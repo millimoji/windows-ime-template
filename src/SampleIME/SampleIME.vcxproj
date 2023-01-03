@@ -47,9 +47,12 @@
     <ClInclude Include="File.h" />
     <ClInclude Include="FileMapping.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="ProcessorEngine.h" />
+    <ClInclude Include="SampleIMEBaseStructure.h" />
     <ClInclude Include="SampleIMEDefine.h" />
     <ClInclude Include="SampleIMEGlobals.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SampleIMETelemetry.h" />
     <ClInclude Include="TableDictionaryEngine.h" />
   </ItemGroup>
   <ItemGroup>

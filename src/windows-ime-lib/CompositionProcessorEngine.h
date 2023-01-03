@@ -28,7 +28,7 @@ public:
     BOOL SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode);
 
     // Get language profile.
-    GUID GetLanguageProfile(LANGID *plangid);
+    const GUID& GetLanguageProfile(LANGID *plangid);
 
     // Get locale
     LCID GetLocale();

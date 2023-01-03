@@ -100,6 +100,10 @@ class ConstantProvider :
             { 0x90, 0x7a, 0x3b, 0xcb, 0x15, 0xa, 0x1, 0xa8 } };
         return SampleIMEGuidCandUIElement;
     }
+    const LANGID GetLangID() noexcept override
+    {
+        return MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
+    }
 };
 
 }
