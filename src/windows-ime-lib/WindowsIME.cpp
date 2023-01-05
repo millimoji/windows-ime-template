@@ -14,6 +14,11 @@
 #include "RegKey.h"
 #include "SingletonEngineBridge.h"
 
+namespace wrl
+{
+    using namespace Microsoft::WRL;
+}
+
 //+---------------------------------------------------------------------------
 //
 // CreateInstance
@@ -21,35 +26,51 @@
 //----------------------------------------------------------------------------
 
 /* static */
-HRESULT CWindowsIME::CreateInstance(_In_ IUnknown *pUnkOuter, REFIID riid, _Outptr_ void **ppvObj)
+HRESULT CWindowsIME::CreateInstance(_In_ IUnknown *pUnkOuter, REFIID riid, _Outptr_ void **ppvObj) try
 {
-    CWindowsIME* imeInstance = nullptr;
-    HRESULT hr = S_OK;
-
-    if (ppvObj == nullptr)
-    {
-        return E_INVALIDARG;
-    }
-
-    *ppvObj = nullptr;
-
-    if (nullptr != pUnkOuter)
+    if (pUnkOuter)
     {
         return CLASS_E_NOAGGREGATION;
     }
 
-    imeInstance = new (std::nothrow) CWindowsIME();
-    if (imeInstance == nullptr)
-    {
-        return E_OUTOFMEMORY;
-    }
+    wil::com_ptr<CWindowsIME> windowsIme;
 
-    hr = imeInstance->QueryInterface(riid, ppvObj);
+    RETURN_IF_FAILED(wrl::MakeAndInitialize<CWindowsIME>(&windowsIme));
 
-    imeInstance->Release();
+    RETURN_IF_FAILED(windowsIme->QueryInterface(riid, ppvObj));
 
-    return hr;
+    return S_OK;
 }
+CATCH_RETURN()
+
+// {
+//     CWindowsIME* imeInstance = nullptr;
+//     HRESULT hr = S_OK;
+// 
+//     if (ppvObj == nullptr)
+//     {
+//         return E_INVALIDARG;
+//     }
+// 
+//     *ppvObj = nullptr;
+// 
+//     if (nullptr != pUnkOuter)
+//     {
+//         return CLASS_E_NOAGGREGATION;
+//     }
+// 
+//     imeInstance = new (std::nothrow) CWindowsIME();
+//     if (imeInstance == nullptr)
+//     {
+//         return E_OUTOFMEMORY;
+//     }
+// 
+//     hr = imeInstance->QueryInterface(riid, ppvObj);
+// 
+//     imeInstance->Release();
+// 
+//     return hr;
+// }
 
 //+---------------------------------------------------------------------------
 //
@@ -88,7 +109,7 @@ CWindowsIME::CWindowsIME()
 
     _pContext = nullptr;
 
-    _refCount = 1;
+    // _refCount = 1;
 }
 
 //+---------------------------------------------------------------------------
@@ -115,6 +136,7 @@ CWindowsIME::~CWindowsIME()
 //
 //----------------------------------------------------------------------------
 
+#if 0
 STDAPI CWindowsIME::QueryInterface(REFIID riid, _Outptr_ void **ppvObj)
 {
     if (ppvObj == nullptr)
@@ -182,7 +204,7 @@ STDAPI CWindowsIME::QueryInterface(REFIID riid, _Outptr_ void **ppvObj)
 
     return E_NOINTERFACE;
 }
-
+#endif
 
 //+---------------------------------------------------------------------------
 //
@@ -190,10 +212,10 @@ STDAPI CWindowsIME::QueryInterface(REFIID riid, _Outptr_ void **ppvObj)
 //
 //----------------------------------------------------------------------------
 
-STDAPI_(ULONG) CWindowsIME::AddRef()
-{
-    return ++_refCount;
-}
+// STDAPI_(ULONG) CWindowsIME::AddRef()
+// {
+//     return ++_refCount;
+// }
 
 //+---------------------------------------------------------------------------
 //
@@ -201,19 +223,19 @@ STDAPI_(ULONG) CWindowsIME::AddRef()
 //
 //----------------------------------------------------------------------------
 
-STDAPI_(ULONG) CWindowsIME::Release()
-{
-    LONG cr = --_refCount;
-
-    assert(_refCount >= 0);
-
-    if (_refCount == 0)
-    {
-        delete this;
-    }
-
-    return cr;
-}
+// STDAPI_(ULONG) CWindowsIME::Release()
+// {
+//     LONG cr = --_refCount;
+// 
+//     assert(_refCount >= 0);
+// 
+//     if (_refCount == 0)
+//     {
+//         delete this;
+//     }
+// 
+//     return cr;
+// }
 
 //+---------------------------------------------------------------------------
 //

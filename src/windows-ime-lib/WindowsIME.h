@@ -19,25 +19,28 @@ struct SingletonEngineBridge;
 const DWORD WM_CheckGlobalCompartment = WM_USER;
 LRESULT CALLBACK CWindowsIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-class CWindowsIME : public ITfTextInputProcessorEx,
-    public ITfThreadMgrEventSink,
-    public ITfTextEditSink,
-    public ITfKeyEventSink,
-    public ITfCompositionSink,
-    public ITfDisplayAttributeProvider,
-    public ITfActiveLanguageProfileNotifySink,
-    public ITfThreadFocusSink,
-    public ITfFunctionProvider,
-    public ITfFnGetPreferredTouchKeyboardLayout
+class CWindowsIME :
+    public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
+                                        ITfTextInputProcessorEx,
+                                        ITfThreadMgrEventSink,
+                                        ITfTextEditSink,
+                                        ITfKeyEventSink,
+                                        ITfCompositionSink,
+                                        ITfDisplayAttributeProvider,
+                                        ITfActiveLanguageProfileNotifySink,
+                                        ITfThreadFocusSink,
+                                        ITfFunctionProvider,
+                                        ITfFnGetPreferredTouchKeyboardLayout,
+                                        Microsoft::WRL::FtmBase>
 {
 public: 
     CWindowsIME();
-    ~CWindowsIME();
+    virtual ~CWindowsIME();
 
     // IUnknown
-    STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);
-    STDMETHODIMP_(ULONG) AddRef(void);
-    STDMETHODIMP_(ULONG) Release(void);
+    // STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);
+    // STDMETHODIMP_(ULONG) AddRef(void);
+    // STDMETHODIMP_(ULONG) Release(void);
 
     // ITfTextInputProcessor
     STDMETHODIMP Activate(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) {
@@ -240,9 +243,9 @@ private:
     ITfCompartment* _pSIPIMEOnOffCompartment;
     DWORD _dwSIPIMEOnOffCompartmentSinkCookie;
 
-    HWND _msgWndHandle; 
+    HWND _msgWndHandle;
 
-    LONG _refCount;
+    // LONG _refCount;
 
     // Support the search integration
     ITfFnSearchCandidateProvider* _pITfFnSearchCandidateProvider = {};
