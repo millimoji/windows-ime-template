@@ -50,6 +50,7 @@
     <ClCompile Include="LanguageBar.cpp" />
     <ClCompile Include="Register.cpp" />
     <ClCompile Include="RegKey.cpp" />
+    <ClCompile Include="SingletonEngineBridge.cpp" />
     <ClCompile Include="WindowsIME.cpp" />
     <ClCompile Include="BaseStructure.cpp" />
     <ClCompile Include="ScrollBarWindow.cpp" />
@@ -67,8 +68,9 @@
     <ClCompile Include="TipCandidateString.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Compartment.h" />
+    <ClInclude Include="CompositionProcessorEngine.h" />
     <ClInclude Include="Define.h" />
-    <ClInclude Include="..\Globals.h" />
     <ClInclude Include="..\WindowsImeLib.h" />
     <ClInclude Include="BaseWindow.h" />
     <ClInclude Include="ButtonWindow.h" />
@@ -80,10 +82,14 @@
     <ClInclude Include="EnumDisplayAttributeInfo.h" />
     <ClInclude Include="EnumTfCandidates.h" />
     <ClInclude Include="GetTextExtentEditSession.h" />
+    <ClInclude Include="Globals.h" />
     <ClInclude Include="KeyHandlerEditSession.h" />
     <ClInclude Include="KeyStateCategory.h" />
+    <ClInclude Include="LanguageBar.h" />
     <ClInclude Include="Private.h" />
     <ClInclude Include="RegKey.h" />
+    <ClInclude Include="SingletonEngineBridge.h" />
+    <ClInclude Include="SingletonEngineHost.h" />
     <ClInclude Include="WindowsIME.h" />
     <ClInclude Include="BaseStructure.h" />
     <ClInclude Include="ScrollBarWindow.h" />
@@ -93,6 +99,7 @@
     <ClInclude Include="TfTextLayoutSink.h" />
     <ClInclude Include="TipCandidateList.h" />
     <ClInclude Include="TipCandidateString.h" />
+    <ClInclude Include="WindowsImeLibTelemetry.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

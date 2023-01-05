@@ -17,11 +17,12 @@
 
 BOOL WindowsImeLib::DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID pvReserved)
 {
-	pvReserved;
+    pvReserved;
 
     switch (dwReason)
     {
     case DLL_PROCESS_ATTACH:
+        wil::SetResultTelemetryFallback(WindowsImeLibTelemetry::FallbackTelemetryCallback);
 
         Global::dllInstanceHandle = hInstance;
 
@@ -52,4 +53,35 @@ BOOL WindowsImeLib::DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID pvReserv
     }
 
     return TRUE;
+}
+
+void WindowsImeLib::TraceLog(const char* format, ...)
+{
+    va_list arg;
+    va_start(arg, format);
+    char buf[4096];
+    vsprintf_s(buf, format, arg);
+    va_end(arg);
+
+    WindowsImeLibTelemetry::TraceLogStr(buf);
+}
+
+void WindowsImeLib::TraceLog(const wchar_t* format, ...)
+{
+    va_list arg;
+    va_start(arg, format);
+    wchar_t buf[4096];
+    vswprintf_s(buf, format, arg);
+    va_end(arg);
+
+    WindowsImeLibTelemetry::TraceLogWstr(buf);
+}
+
+#include "SingletonEngineBridge.h"
+
+__declspec(dllexport) void TestFunction()
+{
+    const auto bridge = SingletonEngineBridge::CreateSingletonEngineBridge();
+    const auto result = bridge->CallTestMethod(L"abc");
+    WindowsImeLibTelemetry::TraceLog("TEST_METHOD result", L"%s", result.get()->c_str());
 }

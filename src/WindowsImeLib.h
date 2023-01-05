@@ -249,12 +249,8 @@ struct ICompositionProcessorEngine
 {
     virtual ~ICompositionProcessorEngine() {}
 
-    // Get language profile.
-    virtual const GUID& GetLanguageProfile(LANGID *plangid) = 0;
-
     // Get locale
     virtual BOOL SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode) = 0;
-    virtual LCID GetLocale() = 0;
 
     virtual BOOL IsKeyEaten(_In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId, UINT code, _Inout_updates_(1) WCHAR *pwch,
         BOOL isComposing, CANDIDATE_MODE candidateMode, BOOL isCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState) = 0;
@@ -299,6 +295,10 @@ struct IConstantProvider
     virtual const GUID& DisplayAttributeConverted() noexcept = 0;
     virtual const GUID& CandUIElement() noexcept = 0;
     virtual const LANGID GetLangID() noexcept = 0;
+    virtual const LCID GetLocale() noexcept = 0;
+    virtual const GUID& ServerCLSID() noexcept = 0;
+    virtual const GUID& ServerAppID() noexcept = 0;
+    virtual const wchar_t* ServerName() noexcept = 0;
 };
 
 struct IProcessorFactory
@@ -318,5 +318,6 @@ extern HRESULT DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr
 extern HRESULT DllCanUnloadNow(void);
 extern HRESULT DllUnregisterServer(void);
 extern HRESULT DllRegisterServer(int textServiceIconIndex);
-
+extern void TraceLog(const char* format, ...);
+extern void TraceLog(const wchar_t* format, ...);
 }

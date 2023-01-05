@@ -14,7 +14,6 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
-        wil::SetResultTelemetryFallback(SampleIMETelemetry::FallbackTelemetryCallback);
         break;
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:

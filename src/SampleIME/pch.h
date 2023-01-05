@@ -31,8 +31,6 @@
 #include <wil/com.h>
 #include <wil/resource.h>
 
-#include "SampleIMETelemetry.h"
-
 #pragma warning(pop)
 
 #pragma warning(disable: 4463)

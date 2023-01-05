@@ -155,20 +155,20 @@ BOOL CCompositionProcessorEngine::SetupLanguageProfile(LANGID langid, REFGUID gu
 //    return ret;
 }
 
-// Get language profile.
-const GUID& CCompositionProcessorEngine::GetLanguageProfile(LANGID *plangid)
-{
-    return processorEngine->GetLanguageProfile(plangid);
-//  *plangid = _langid;
-//  return _guidProfile;
-}
+// // Get language profile.
+// const GUID& CCompositionProcessorEngine::GetLanguageProfile(LANGID *plangid)
+// {
+//     return processorEngine->GetLanguageProfile(plangid);
+// //  *plangid = _langid;
+// //  return _guidProfile;
+// }
 
-// Get locale
-LCID CCompositionProcessorEngine::GetLocale()
-{
-    return processorEngine->GetLocale();
-    // return MAKELCID(_langid, SORT_DEFAULT);
-}
+// // Get locale
+// LCID CCompositionProcessorEngine::GetLocale()
+// {
+//     return processorEngine->GetLocale();
+//     // return MAKELCID(_langid, SORT_DEFAULT);
+// }
 
 BOOL CCompositionProcessorEngine::IsKeyEaten(
     _In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId, UINT code, _Inout_updates_(1) WCHAR *pwch,

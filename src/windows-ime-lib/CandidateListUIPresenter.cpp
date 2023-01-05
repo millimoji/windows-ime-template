@@ -110,8 +110,7 @@ HRESULT CWindowsIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pC
     if (fMakePhraseFromText)
     {
         _pCompositionProcessorEngine->GetCandidateStringInConverted(candidateString, &candidatePhraseList);
-        LCID locale = _pCompositionProcessorEngine->GetLocale();
-
+        LCID locale = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLocale();
         _pCandidateListUIPresenter->RemoveSpecificCandidateFromList(locale, candidatePhraseList, candidateString);
     }
 

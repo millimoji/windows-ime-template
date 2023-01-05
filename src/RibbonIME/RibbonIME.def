@@ -1,8 +1,7 @@
-LIBRARY SampleIME.dll
+LIBRARY RibbonIME.dll
 
 EXPORTS
         DllGetClassObject    PRIVATE
         DllCanUnloadNow      PRIVATE
         DllRegisterServer    PRIVATE
         DllUnregisterServer  PRIVATE
-        TestFunction         PRIVATE

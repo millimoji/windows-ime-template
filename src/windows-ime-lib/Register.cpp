@@ -25,6 +25,7 @@ static const GUID SupportCategories[] = {
     GUID_TFCAT_TIPCAP_IMMERSIVESUPPORT, 
     GUID_TFCAT_TIPCAP_SYSTRAYSUPPORT,
 };
+
 //+---------------------------------------------------------------------------
 //
 //  RegisterProfiles
@@ -98,7 +99,7 @@ void UnregisterProfiles(LANGID langId)
     }
 
     hr = pITfInputProcessorProfileMgr->UnregisterProfile(
-    	WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID(),
+        WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID(),
         langId,
         WindowsImeLib::g_processorFactory->GetConstantProvider()->IMEProfileGuid(),
         0);
@@ -136,9 +137,9 @@ BOOL RegisterCategories()
     for (const GUID& guid: SupportCategories)
     {
         hr = pCategoryMgr->RegisterCategory(
-        		WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID(),
-        		guid,
-        		WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID());
+                WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID(),
+                guid,
+                WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID());
     }
 
     pCategoryMgr->Release();
@@ -166,9 +167,9 @@ void UnregisterCategories()
     for (const GUID& guid: SupportCategories)
     {
         pCategoryMgr->UnregisterCategory(
-        	WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID(),
-        	guid,
-        	WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID());
+            WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID(),
+            guid,
+            WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID());
     }
   
     pCategoryMgr->Release();
@@ -292,4 +293,108 @@ void UnregisterServer()
     memcpy(achIMEKey, RegInfo_Prefix_CLSID, sizeof(RegInfo_Prefix_CLSID) - sizeof(WCHAR));
 
     RecurseDeleteKey(HKEY_CLASSES_ROOT, achIMEKey);
+}
+
+HRESULT RegisterSingletonServer()
+{
+    wchar_t clsId[CLSID_STRLEN + 1] = { '\0' };
+    if (StringFromGUID2(WindowsImeLib::g_processorFactory->GetConstantProvider()->ServerCLSID(), clsId, ARRAYSIZE(clsId)) == 0)
+    {
+        RETURN_LAST_ERROR();
+    }
+    wchar_t appId[CLSID_STRLEN + 1] = { '\0' };
+    if (StringFromGUID2(WindowsImeLib::g_processorFactory->GetConstantProvider()->ServerAppID(), appId, ARRAYSIZE(appId)) == 0)
+    {
+        RETURN_LAST_ERROR();
+    }
+    const DWORD cbAppId = static_cast<DWORD>(sizeof(wchar_t) * (wcslen(appId) + 1));
+
+    const wchar_t* serverName = WindowsImeLib::g_processorFactory->GetConstantProvider()->ServerName();
+    const DWORD cbServerName = static_cast<DWORD>(sizeof(wchar_t) * (wcslen(serverName) + 1));
+
+    wchar_t dllFileName[MAX_PATH] = {'\0'};
+    GetModuleFileName(Global::dllInstanceHandle, dllFileName, ARRAYSIZE(dllFileName));
+    const DWORD cbDllFileName = static_cast<DWORD>(sizeof(wchar_t) * (wcslen(dllFileName) + 1));
+
+    // CLSID\[GUID]
+    //      {} REG_SZ "App Name"
+    //      AppID REG_SZ GUID
+    // CLSID\[GUID]\InprocServer32
+    //      {} REG_SZ full path
+    //      ThreadingModel REG_SZ Both
+    // AppID\[GUID]
+    //      {} REG_SZ /d "App Name"
+    //      DllSurrogate REG_SZ ""
+    //      RunAs REG_SZ "Interactive User"
+
+    wil::unique_hkey clsIdRoot;
+    RETURN_IF_WIN32_ERROR(RegCreateKeyEx(HKEY_CLASSES_ROOT, L"CLSID", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &clsIdRoot, nullptr));
+
+    wil::unique_hkey clsIdGuid;
+    RETURN_IF_WIN32_ERROR(RegCreateKeyEx(clsIdRoot.get(), clsId, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &clsIdGuid, nullptr));
+
+    wil::unique_hkey inprocServer32;
+    RETURN_IF_WIN32_ERROR(RegCreateKeyEx(clsIdGuid.get(), L"InprocServer32", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &inprocServer32, nullptr));
+
+    wil::unique_hkey appIdRoot;
+    RETURN_IF_WIN32_ERROR(RegCreateKeyEx(HKEY_CLASSES_ROOT, L"AppID", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &appIdRoot, nullptr));
+
+    wil::unique_hkey appIdGuid;
+    RETURN_IF_WIN32_ERROR(RegCreateKeyEx(appIdRoot.get(), appId, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &appIdGuid, nullptr));
+
+    // CLSID/[GUID]
+    RETURN_IF_WIN32_ERROR(RegSetValueEx(clsIdGuid.get(), nullptr, 0, REG_SZ, reinterpret_cast<const BYTE*>(serverName), cbServerName));
+
+    RETURN_IF_WIN32_ERROR(RegSetValueEx(clsIdGuid.get(), L"AppID", 0, REG_SZ, reinterpret_cast<const BYTE*>(appId), cbAppId));
+
+    // CLSID/[GUID]/InprocServer32
+
+    RETURN_IF_WIN32_ERROR(RegSetValueEx(inprocServer32.get(), nullptr, 0, REG_SZ, reinterpret_cast<const BYTE*>(dllFileName), cbDllFileName));
+
+    RETURN_IF_WIN32_ERROR(RegSetValueEx(inprocServer32.get(), L"ThreadingModel", 0, REG_SZ, reinterpret_cast<const BYTE*>(L"Both"), 10));
+
+    // AppID/[GUID]
+
+    RETURN_IF_WIN32_ERROR(RegSetValueEx(appIdGuid.get(), nullptr, 0, REG_SZ, reinterpret_cast<const BYTE*>(serverName), cbServerName));
+
+    RETURN_IF_WIN32_ERROR(RegSetValueEx(appIdGuid.get(), L"DllSurrogate", 0, REG_SZ, reinterpret_cast<const BYTE*>(L""), 2));
+
+    const wchar_t* interactiveUser = L"Interactive User";
+    const DWORD cbInteractiveUser = static_cast<DWORD>(sizeof(wchar_t) * (wcslen(interactiveUser) + 1));
+
+    RETURN_IF_WIN32_ERROR(RegSetValueEx(appIdGuid.get(), L"RunAs", 0, REG_SZ, reinterpret_cast<const BYTE*>(interactiveUser), cbInteractiveUser));
+
+    return S_OK;
+}
+
+void UnregisterSingletonServer()
+{
+    wchar_t clsId[CLSID_STRLEN + 1] = {'\0'};
+    if (StringFromGUID2(WindowsImeLib::g_processorFactory->GetConstantProvider()->ServerCLSID(), clsId, ARRAYSIZE(clsId)) == 0)
+    {
+        LOG_LAST_ERROR();
+        return;
+    }
+    wchar_t appId[CLSID_STRLEN + 1] = {'\0'};
+    if (StringFromGUID2(WindowsImeLib::g_processorFactory->GetConstantProvider()->ServerAppID(), appId, ARRAYSIZE(appId)) == 0)
+    {
+        LOG_LAST_ERROR();
+        return;
+    }
+
+    wil::unique_hkey clsIdRoot;
+    LOG_IF_WIN32_ERROR(RegCreateKeyEx(HKEY_CLASSES_ROOT, L"CLSID", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &clsIdRoot, nullptr));
+
+    wil::unique_hkey appIdRoot;
+    LOG_IF_WIN32_ERROR(RegCreateKeyEx(HKEY_CLASSES_ROOT, L"AppID", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &appIdRoot, nullptr));
+
+    if (clsIdRoot)
+    {
+        LOG_IF_WIN32_ERROR(RegDeleteTree(clsIdRoot.get(), clsId));
+    }
+
+    if (appIdRoot)
+    {
+        LOG_IF_WIN32_ERROR(RegDeleteTree(appIdRoot.get(), appId));
+    }
 }

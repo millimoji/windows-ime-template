@@ -25,18 +25,6 @@ public:
 
     BOOL SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode) override;
 
-    // Get language profile.
-    const GUID& GetLanguageProfile(LANGID *plangid) override
-    {
-        *plangid = _langid;
-        return _guidProfile;
-    }
-    // Get locale
-    LCID GetLocale() override
-    {
-        return MAKELCID(_langid, SORT_DEFAULT);
-    }
-
     BOOL IsKeyEaten(_In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId, UINT code, _Inout_updates_(1) WCHAR *pwch,
         BOOL isComposing, CANDIDATE_MODE candidateMode, BOOL isCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState) override;
 

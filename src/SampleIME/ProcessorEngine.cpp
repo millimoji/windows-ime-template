@@ -998,7 +998,9 @@ BOOL CompositionProcessorEngine::SetupDictionaryFile()
         goto ErrorExit;
     }
 
-    _pTableDictionaryEngine = new (std::nothrow) CTableDictionaryEngine(GetLocale(), _pDictionaryFile);
+    _pTableDictionaryEngine = new (std::nothrow) CTableDictionaryEngine(
+        WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLocale(), _pDictionaryFile);
+
     if (!_pTableDictionaryEngine)
     {
         goto ErrorExit;

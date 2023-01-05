@@ -12,6 +12,7 @@
 #include "Compartment.h"
 #include "TfInputProcessorProfile.h"
 #include "RegKey.h"
+#include "SingletonEngineBridge.h"
 
 //+---------------------------------------------------------------------------
 //
@@ -98,6 +99,8 @@ CWindowsIME::CWindowsIME()
 
 CWindowsIME::~CWindowsIME()
 {
+    m_singletonEngine.reset();
+
     if (_pCandidateListUIPresenter)
     {
         delete _pCandidateListUIPresenter;
@@ -293,7 +296,7 @@ STDAPI CWindowsIME::Deactivate()
 
     ITfContext* pContext = _pContext;
     if (_pContext)
-    {   
+    {
         pContext->AddRef();
         _EndComposition(_pContext);
     }
@@ -473,10 +476,9 @@ BOOL CWindowsIME::_AddTextProcessorEngine()
     // Is this already added?
     if (_pCompositionProcessorEngine != nullptr)
     {
-        LANGID langidProfile = 0;
-        GUID guidLanguageProfile = GUID_NULL;
+        LANGID langidProfile = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLangID();
+        GUID guidLanguageProfile = WindowsImeLib::g_processorFactory->GetConstantProvider()->IMEProfileGuid();
 
-        guidLanguageProfile = _pCompositionProcessorEngine->GetLanguageProfile(&langidProfile);
         if ((langid == langidProfile) && IsEqualGUID(guidProfile, guidLanguageProfile))
         {
             return TRUE;
@@ -486,6 +488,8 @@ BOOL CWindowsIME::_AddTextProcessorEngine()
     // Create composition processor engine
     if (_pCompositionProcessorEngine == nullptr)
     {
+        m_singletonEngine = SingletonEngineBridge::CreateSingletonEngineBridge();
+
         _pCompositionProcessorEngine = std::make_shared<CCompositionProcessorEngine>();
         _pCompositionProcessorEngine->Initialize();
     }

@@ -15,12 +15,41 @@ class WindowsImeLibTelemetry : public TelemetryBase
     IMPLEMENT_TELEMETRY_CLASS(WindowsImeLibTelemetry, WindowsImeLibTelemetryProvider);
 public:
 
+    static void TraceLogStr(char const* const args) noexcept
+    {
+        TraceLoggingWrite(TraceLoggingType::Provider(), "TraceLog", // TODO: investigate forwrd keyText
+            TraceLoggingValue(args),
+            TraceLoggingLevel(WINEVENT_LEVEL_INFO),
+            TelemetryPrivacyDataTag(PDT_ProductAndServicePerformance));
+    }
+
+    static void TraceLogWstr(wchar_t const* const args) noexcept
+    {
+        TraceLoggingWrite(TraceLoggingType::Provider(), "TraceLog", // TODO: investigate forwrd keyText
+            TraceLoggingValue(args),
+            TraceLoggingLevel(WINEVENT_LEVEL_INFO),
+            TelemetryPrivacyDataTag(PDT_ProductAndServicePerformance));
+    }
+
     // Easy debug purpose
     template <typename ... Args>
     static void TraceLog(char const* const keyText, wchar_t const * const format, Args const & ... args) noexcept
     {
-        wchar_t buf[2048];
+        wchar_t buf[2048] = { 0 };
         swprintf_s(buf, format, args...);
+        TraceLoggingWrite(TraceLoggingType::Provider(), "TraceLog", // TODO: investigate forwrd keyText
+            TraceLoggingValue(keyText),
+            TraceLoggingValue(buf, "args"),
+            TraceLoggingLevel(WINEVENT_LEVEL_INFO),
+            TelemetryPrivacyDataTag(PDT_ProductAndServicePerformance));
+    }
+
+    // Easy debug purpose
+    template <typename ... Args>
+    static void TraceLog(char const* const keyText, char const* const format, Args const & ... args) noexcept
+    {
+        char buf[2048] = { 0 };
+        sprintf_s(buf, format, args...);
         TraceLoggingWrite(TraceLoggingType::Provider(), "TraceLog", // TODO: investigate forwrd keyText
             TraceLoggingValue(keyText),
             TraceLoggingValue(buf, "args"),

@@ -52,7 +52,6 @@
     <ClInclude Include="SampleIMEDefine.h" />
     <ClInclude Include="SampleIMEGlobals.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="SampleIMETelemetry.h" />
     <ClInclude Include="TableDictionaryEngine.h" />
   </ItemGroup>
   <ItemGroup>

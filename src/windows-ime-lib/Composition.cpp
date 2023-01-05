@@ -332,8 +332,7 @@ BOOL CWindowsIME::_SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pCon
     HRESULT hr = S_OK;
     BOOL ret = TRUE;
 
-    LANGID langidProfile = 0;
-    _pCompositionProcessorEngine->GetLanguageProfile(&langidProfile);
+    LANGID langidProfile = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLangID();
 
     ITfRange* pRangeComposition = nullptr;
     ITfProperty* pLanguageProperty = nullptr;

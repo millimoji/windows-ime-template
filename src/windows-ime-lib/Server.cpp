@@ -23,11 +23,13 @@ BOOL RegisterCategories();
 void UnregisterCategories();
 BOOL RegisterServer();
 void UnregisterServer();
+HRESULT RegisterSingletonServer();
+void UnregisterSingletonServer();
 
 void FreeGlobalObjects(void);
 
 class CClassFactory;
-static CClassFactory* classFactoryObjects[1] = { nullptr };
+static CClassFactory* classFactoryObjects[2] = { nullptr, nullptr };
 
 //+---------------------------------------------------------------------------
 //
@@ -181,8 +183,12 @@ STDAPI CClassFactory::LockServer(BOOL fLock)
 void BuildGlobalObjects(void)
 {
     classFactoryObjects[0] = new (std::nothrow) CClassFactory(
-    	WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID(),
-    	CWindowsIME::CreateInstance);
+        WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID(),
+        CWindowsIME::CreateInstance);
+
+    classFactoryObjects[1] = new (std::nothrow) CClassFactory(
+        WindowsImeLib::g_processorFactory->GetConstantProvider()->ServerCLSID(),
+        SingletonEngineHost::CreateInstance);
 }
 
 //+---------------------------------------------------------------------------
@@ -279,6 +285,7 @@ HRESULT WindowsImeLib::DllUnregisterServer()
     UnregisterProfiles(langId);
     UnregisterCategories();
     UnregisterServer();
+    UnregisterSingletonServer();
 
     return S_OK;
 }
@@ -293,7 +300,7 @@ HRESULT WindowsImeLib::DllRegisterServer(int textServiceIconIndex)
 {
     const auto langId = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLangID();
 
-    if ((!RegisterServer()) || (!RegisterProfiles(langId, textServiceIconIndex)) || (!RegisterCategories()))
+    if ((!RegisterServer()) || (!RegisterProfiles(langId, textServiceIconIndex)) || (!RegisterCategories()) || (FAILED_LOG(RegisterSingletonServer())))
     {
         DllUnregisterServer();
         return E_FAIL;

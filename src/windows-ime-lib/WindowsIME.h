@@ -14,6 +14,7 @@
 
 class CLangBarItemButton;
 class CCandidateListUIPresenter;
+struct SingletonEngineBridge;
 
 const DWORD WM_CheckGlobalCompartment = WM_USER;
 LRESULT CALLBACK CWindowsIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -245,4 +246,6 @@ private:
 
     // Support the search integration
     ITfFnSearchCandidateProvider* _pITfFnSearchCandidateProvider = {};
+
+    std::shared_ptr<SingletonEngineBridge> m_singletonEngine;
 };

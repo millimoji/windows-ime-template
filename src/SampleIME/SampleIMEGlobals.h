@@ -104,6 +104,26 @@ class ConstantProvider :
     {
         return MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED);
     }
+    const LCID GetLocale() noexcept override
+    {
+        return MAKELCID(GetLangID(), SORT_DEFAULT);
+    }
+    const CLSID& ServerCLSID() noexcept override
+    {
+        // {A0F8CCF8-8613-472D-8A15-67568DDD9C21}
+        static const GUID serverCLSID = { 0xa0f8ccf8, 0x8613, 0x472d, { 0x8a, 0x15, 0x67, 0x56, 0x8d, 0xdd, 0x9c, 0x21 } };
+        return serverCLSID;
+    }
+    const GUID& ServerAppID() noexcept override
+    {
+        // {7DCD1161-73BA-42F4-80ED-DDC1CC9E59AD}
+        static const GUID sererAppID = { 0x7dcd1161, 0x73ba, 0x42f4, { 0x80, 0xed, 0xdd, 0xc1, 0xcc, 0x9e, 0x59, 0xad } };
+        return sererAppID;
+    }
+    const wchar_t* ServerName() noexcept override
+    {
+        return L"Sample IME Singleton Sever";
+    }
 };
 
 }
