@@ -25,6 +25,8 @@
 #include <sal.h>
 #include <strsafe.h>
 
+#define _SILENCE_CXX20_CISO646_REMOVED_WARNING
+
 #include <functional>
 #include <memory>
 #include <new>
@@ -37,6 +39,9 @@
 
 #include <wil/com.h>
 #include <wil/resource.h>
+
+#pragma warning(disable: 28020)
+#include <nlohmann/json.hpp>
 
 #include "WindowsImeLibTelemetry.h"
 

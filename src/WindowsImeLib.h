@@ -1,7 +1,9 @@
 #pragma once
 #include <windows.h>
+#include <ctffunc.h>
 #include <cassert>
 #include <memory>
+#include <string>
 #include <vector>
 
 //---------------------------------------------------------------------
@@ -67,109 +69,6 @@ struct _KEYSTROKE_STATE
     KEYSTROKE_CATEGORY Category;
     KEYSTROKE_FUNCTION Function;
 };
-
-// template<class T>
-// class CSampleImeArray
-// {
-//     typedef typename std::vector<T> CSampleImeInnerArray;
-//     typedef typename std::vector<T>::iterator CSampleImeInnerIter;
-// 
-// public:
-//     CSampleImeArray(): _innerVect()
-//     {
-//     }
-// 
-//     explicit CSampleImeArray(size_t count): _innerVect(count)
-//     {
-//     }
-// 
-//     virtual ~CSampleImeArray()
-//     {
-//     }
-// 
-//     inline T* GetAt(size_t index)
-//     {
-//         assert(index >= 0);
-//         assert(index < _innerVect.size());
-// 
-//         T& curT = _innerVect.at(index);
-// 
-//         return &(curT);
-//     }
-// 
-//     inline const T* GetAt(size_t index) const
-//     {
-//         assert(index >= 0);
-//         assert(index < _innerVect.size());
-// 
-//         T& curT = _innerVect.at(index);
-// 
-//         return &(curT);
-//     }
-// 
-//     void RemoveAt(size_t index)
-//     {
-//         assert(index >= 0);
-//         assert(index < _innerVect.size());
-// 
-//         CSampleImeInnerIter iter = _innerVect.begin();
-//         _innerVect.erase(iter + index);
-//     }
-// 
-//     UINT Count() const 
-//     { 
-//         return static_cast<UINT>(_innerVect.size());
-//     }
-// 
-//     T* Append()
-//     {
-//         T newT = {};
-//         _innerVect.push_back(newT);
-//         T& backT = _innerVect.back();
-// 
-//         return &(backT);
-//     }
-// 
-//     void reserve(size_t Count)
-//     {
-//         _innerVect.reserve(Count);
-//     }
-// 
-//     void Clear()
-//     {
-//         _innerVect.clear();
-//     }
-// 
-// private:
-//     CSampleImeInnerArray _innerVect;
-// };
-
-// class CCandidateRange
-// {
-// public:
-//     CCandidateRange(void);
-//     ~CCandidateRange(void);
-// 
-//     BOOL IsRange(UINT vKey);
-//     int GetIndex(UINT vKey);
-// 
-//     inline int Count() const 
-//     { 
-//         return static_cast<int>(_CandidateListIndexRange.size()); 
-//     }
-//     inline DWORD *GetAt(int index) 
-//     { 
-//         return &_CandidateListIndexRange.at(index); 
-//     }
-//     inline DWORD *Append() 
-//     {
-//         _CandidateListIndexRange.emplace_back(0);
-//         return &_CandidateListIndexRange.back();
-//     }
-// 
-// private:
-//     std::vector<DWORD> _CandidateListIndexRange;
-// };
 
 class CStringRange
 {
@@ -286,6 +185,21 @@ struct ICompositionProcessorEngine
     virtual void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) = 0;
 };
 
+struct ITextInputFramework
+{
+    virtual ~ITextInputFramework() {}
+
+    virtual void Test() = 0;
+};
+
+struct ITextInputProcessor
+{
+    virtual ~ITextInputProcessor() {}
+
+    virtual std::wstring TestMethod(const std::wstring_view src) = 0;
+    virtual void SetFocus(bool isGotten) = 0;
+};
+
 struct IConstantProvider
 {
     // GUIDs
@@ -299,6 +213,7 @@ struct IConstantProvider
     virtual const GUID& ServerCLSID() noexcept = 0;
     virtual const GUID& ServerAppID() noexcept = 0;
     virtual const wchar_t* ServerName() noexcept = 0;
+    virtual void GetPreferredTouchKeyboardLayout(_Out_ TKBLayoutType* layoutType, _Out_ WORD* preferredLayoutId) = 0;
 };
 
 struct IProcessorFactory
@@ -307,6 +222,7 @@ struct IProcessorFactory
 
     virtual std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(const std::weak_ptr<ICompositionProcessorEngineOwner>& owner) = 0;
     virtual std::shared_ptr<IConstantProvider> GetConstantProvider() = 0;
+    virtual std::shared_ptr<ITextInputProcessor> CreateTextInputProcessor(ITextInputFramework* framework) = 0;
 };
 
 // TODO: re-design how to inject factory

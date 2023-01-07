@@ -26,12 +26,13 @@ BOOL CWindowsIME::VerifyIMECLSID(_In_ REFCLSID clsid)
 // Sink called by the framework when changes activate language profile.
 //----------------------------------------------------------------------------
 
-STDAPI CWindowsIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID guidProfile, _In_ BOOL isActivated)
+STDAPI CWindowsIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID, _In_ BOOL isActivated)
 {
-	guidProfile;
+    auto activity = WindowsImeLibTelemetry::ITfActiveLanguageProfileNotifySink_OnActivated();
 
     if (FALSE == VerifyIMECLSID(clsid))
     {
+        activity.Stop();
         return S_OK;
     }
 
@@ -42,6 +43,7 @@ STDAPI CWindowsIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID guidProfile, _
 
     if (nullptr == _pCompositionProcessorEngine)
     {
+        activity.Stop();
         return S_OK;
     }
 
@@ -58,6 +60,7 @@ STDAPI CWindowsIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID guidProfile, _
         _pCompositionProcessorEngine->HideAllLanguageBarIcons();
     }
 
+    activity.Stop();
     return S_OK;
 }
 

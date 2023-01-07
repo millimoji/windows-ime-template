@@ -19,6 +19,8 @@
 
 STDAPI CWindowsIME::EnumDisplayAttributeInfo(__RPC__deref_out_opt IEnumTfDisplayAttributeInfo **ppEnum)
 {
+    auto activity = WindowsImeLibTelemetry::ITfDisplayAttributeProvider_EnumDisplayAttributeInfo();
+
     CEnumDisplayAttributeInfo* pAttributeEnum = nullptr;
 
     if (ppEnum == nullptr)
@@ -36,6 +38,7 @@ STDAPI CWindowsIME::EnumDisplayAttributeInfo(__RPC__deref_out_opt IEnumTfDisplay
 
     *ppEnum = pAttributeEnum;
 
+    activity.Stop();
     return S_OK;
 }
 
@@ -47,6 +50,8 @@ STDAPI CWindowsIME::EnumDisplayAttributeInfo(__RPC__deref_out_opt IEnumTfDisplay
 
 STDAPI CWindowsIME::GetDisplayAttributeInfo(__RPC__in REFGUID guidInfo, __RPC__deref_out_opt ITfDisplayAttributeInfo **ppInfo)
 {
+    auto activity = WindowsImeLibTelemetry::ITfDisplayAttributeProvider_GetDisplayAttributeInfo();
+
     if (ppInfo == nullptr)
     {
         return E_INVALIDARG;
@@ -76,6 +81,6 @@ STDAPI CWindowsIME::GetDisplayAttributeInfo(__RPC__in REFGUID guidInfo, __RPC__d
         return E_INVALIDARG;
     }
 
-
+    activity.Stop();
     return S_OK;
 }

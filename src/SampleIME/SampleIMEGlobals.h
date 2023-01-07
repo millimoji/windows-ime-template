@@ -124,6 +124,11 @@ class ConstantProvider :
     {
         return L"Sample IME Singleton Sever";
     }
+    void GetPreferredTouchKeyboardLayout(_Out_ TKBLayoutType* layoutType, _Out_ WORD* preferredLayoutId) noexcept override
+    {
+        *layoutType = TKBLT_OPTIMIZED;
+        *preferredLayoutId = TKBL_OPT_SIMPLIFIED_CHINESE_PINYIN;
+    }
 };
 
 }

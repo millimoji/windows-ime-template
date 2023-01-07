@@ -77,11 +77,11 @@ void WindowsImeLib::TraceLog(const wchar_t* format, ...)
     WindowsImeLibTelemetry::TraceLogWstr(buf);
 }
 
-#include "SingletonEngineBridge.h"
+#include "SingletonProcessor.h"
 
 __declspec(dllexport) void TestFunction()
 {
-    const auto bridge = SingletonEngineBridge::CreateSingletonEngineBridge();
-    const auto result = bridge->CallTestMethod(L"abc");
-    WindowsImeLibTelemetry::TraceLog("TEST_METHOD result", L"%s", result.get()->c_str());
+    const auto bridge = CreateSingletonProcessorBridge();
+    const auto result = bridge->TestMethod(L"abc");
+    WindowsImeLibTelemetry::TraceLog("TEST_METHOD result", L"%s", result.c_str());
 }

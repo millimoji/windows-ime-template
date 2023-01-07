@@ -15,8 +15,15 @@
 //
 //----------------------------------------------------------------------------
 
-STDAPI CWindowsIME::OnSetThreadFocus()
+STDAPI CWindowsIME::OnSetThreadFocus() try
 {
+    auto activity = WindowsImeLibTelemetry::ITfThreadFocusSink_OnSetThreadFocus();
+
+    if (m_singletonProcessor)
+    {
+        m_singletonProcessor->SetFocus(true);
+    }
+
     if (_pCandidateListUIPresenter)
     {
         ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
@@ -33,8 +40,10 @@ STDAPI CWindowsIME::OnSetThreadFocus()
         }
     }
 
+    activity.Stop();
     return S_OK;
 }
+CATCH_RETURN()
 
 //+---------------------------------------------------------------------------
 //
@@ -42,8 +51,15 @@ STDAPI CWindowsIME::OnSetThreadFocus()
 //
 //----------------------------------------------------------------------------
 
-STDAPI CWindowsIME::OnKillThreadFocus()
+STDAPI CWindowsIME::OnKillThreadFocus() try
 {
+    auto activity = WindowsImeLibTelemetry::ITfThreadFocusSink_OnKillThreadFocus();
+
+    if (m_singletonProcessor)
+    {
+        m_singletonProcessor->SetFocus(false);
+    }
+
     if (_pCandidateListUIPresenter)
     {
         ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
@@ -64,8 +80,11 @@ STDAPI CWindowsIME::OnKillThreadFocus()
         }
         _pCandidateListUIPresenter->OnKillThreadFocus();
     }
+
+    activity.Stop();
     return S_OK;
 }
+CATCH_RETURN()
 
 BOOL CWindowsIME::_InitThreadFocusSink()
 {

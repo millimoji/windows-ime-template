@@ -754,11 +754,11 @@ BOOL CompositionProcessorEngine::CheckShiftKeyOnly(_In_ std::vector<TF_PRESERVED
 void CompositionProcessorEngine::OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId)
 {
     *pIsEaten = FALSE;
-	const auto owner = m_owner.lock();
-	if (!owner)
-	{
-		return;
-	}
+    const auto owner = m_owner.lock();
+    if (!owner)
+    {
+        return;
+    }
 
     if (IsEqualGUID(rguid, _PreservedKey_IMEMode.Guid))
     {
@@ -829,38 +829,38 @@ void CompositionProcessorEngine::SetupConfiguration()
 
 void CompositionProcessorEngine::SetupLanguageBar(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode)
 {
-	static const WindowsImeLib::LanguageBarButtonProperty buttonProperties[] = {
-		{
-			GUID_LBI_INPUTMODE,
-			GUID_COMPARTMENT_KEYBOARD_OPENCLOSE,
-			Global::LangbarImeModeDescription,
-			Global::ImeModeDescription,
-			Global::ImeModeOnIcoIndex,
-			Global::ImeModeOffIcoIndex,
-		},
-		{
-			Global::SampleIMEGuidLangBarDoubleSingleByte,
-			Global::SampleIMEGuidCompartmentDoubleSingleByte,
-			Global::LangbarDoubleSingleByteDescription,
-			Global::DoubleSingleByteDescription,
-			Global::DoubleSingleByteOnIcoIndex,
-			Global::DoubleSingleByteOffIcoIndex,
-		},
-		{
-			Global::SampleIMEGuidLangBarPunctuation,
-			Global::SampleIMEGuidCompartmentPunctuation,
-			Global::LangbarPunctuationDescription,
-			Global::PunctuationDescription,
-			Global::PunctuationOnIcoIndex,
-			Global::PunctuationOffIcoIndex,
-		}
-		
-	};
+    static const WindowsImeLib::LanguageBarButtonProperty buttonProperties[] = {
+        {
+            GUID_LBI_INPUTMODE,
+            GUID_COMPARTMENT_KEYBOARD_OPENCLOSE,
+            Global::LangbarImeModeDescription,
+            Global::ImeModeDescription,
+            Global::ImeModeOnIcoIndex,
+            Global::ImeModeOffIcoIndex,
+        },
+        {
+            Global::SampleIMEGuidLangBarDoubleSingleByte,
+            Global::SampleIMEGuidCompartmentDoubleSingleByte,
+            Global::LangbarDoubleSingleByteDescription,
+            Global::DoubleSingleByteDescription,
+            Global::DoubleSingleByteOnIcoIndex,
+            Global::DoubleSingleByteOffIcoIndex,
+        },
+        {
+            Global::SampleIMEGuidLangBarPunctuation,
+            Global::SampleIMEGuidCompartmentPunctuation,
+            Global::LangbarPunctuationDescription,
+            Global::PunctuationDescription,
+            Global::PunctuationOnIcoIndex,
+            Global::PunctuationOffIcoIndex,
+        }
+        
+    };
 
-	if (const auto owner = m_owner.lock())
-	{
-		owner->SetupLanguageBar(pThreadMgr, tfClientId, isSecureMode, buttonProperties, ARRAYSIZE(buttonProperties));
-	}
+    if (const auto owner = m_owner.lock())
+    {
+        owner->SetupLanguageBar(pThreadMgr, tfClientId, isSecureMode, buttonProperties, ARRAYSIZE(buttonProperties));
+    }
 
 //    DWORD dwEnable = 1;
 //    CreateLanguageBarButton(dwEnable, GUID_LBI_INPUTMODE, Global::LangbarImeModeDescription, Global::ImeModeDescription, Global::ImeModeOnIcoIndex, Global::ImeModeOffIcoIndex, &_pLanguageBar_IMEMode, isSecureMode);
@@ -944,17 +944,16 @@ void CompositionProcessorEngine::SetupLanguageBar(_In_ ITfThreadMgr *pThreadMgr,
 
 HMODULE GetThisModuleHandle()
 {
-	static HMODULE module = nullptr;
-
-	if (!module)
-	{
-		LOG_IF_WIN32_ERROR(GetModuleHandleEx(
-			GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-			reinterpret_cast<LPCWSTR>(GetThisModuleHandle),
-			&module));
-	}
-
-	return module;
+    static HMODULE s_module = ([]() -> HMODULE
+        {
+            HMODULE module;
+            LOG_IF_WIN32_BOOL_FALSE(GetModuleHandleEx(
+                GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                reinterpret_cast<LPCWSTR>(GetThisModuleHandle),
+                &module));
+            return module;
+        })();
+    return s_module;
 }
 
 
@@ -1335,8 +1334,8 @@ void CompositionProcessorEngine::SetDefaultCandidateTextFont()
 {
     if (const auto owner = m_owner.lock())
     {
-		owner->SetDefaultCandidateTextFont(IDS_DEFAULT_FONT);
-	}
+        owner->SetDefaultCandidateTextFont(IDS_DEFAULT_FONT);
+    }
 
 //    // Candidate Text Font
 //    if (WindowsImeLib::defaultlFontHandle == nullptr)
@@ -1841,13 +1840,33 @@ BOOL CompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_S
 
 void CompositionProcessorEngine::ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId)
 {
-	const auto owner = m_owner.lock();
-	if (!owner)
-	{
-		return;
-	}
+    const auto owner = m_owner.lock();
+    if (!owner)
+    {
+        return;
+    }
 
-	owner->ClearCompartment(pThreadMgr, tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
-	owner->ClearCompartment(pThreadMgr, tfClientId, Global::SampleIMEGuidCompartmentDoubleSingleByte);
-	owner->ClearCompartment(pThreadMgr, tfClientId, Global::SampleIMEGuidCompartmentPunctuation);
+    owner->ClearCompartment(pThreadMgr, tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
+    owner->ClearCompartment(pThreadMgr, tfClientId, Global::SampleIMEGuidCompartmentDoubleSingleByte);
+    owner->ClearCompartment(pThreadMgr, tfClientId, Global::SampleIMEGuidCompartmentPunctuation);
 }
+
+SampleIMEProcessor::SampleIMEProcessor(WindowsImeLib::ITextInputFramework* framework) :
+    m_framework(framework)
+{
+}
+
+SampleIMEProcessor::~SampleIMEProcessor()
+{
+}
+
+std::wstring SampleIMEProcessor::TestMethod(const std::wstring_view src)
+{
+    return std::wstring(src) + L"-ribbon-suffix";
+}
+
+void SampleIMEProcessor::SetFocus(bool isGotten)
+{
+    WindowsImeLib::TraceLog("SampleIMEProcessor::SetFocus:%d", isGotten ? 1 : 0);
+}
+

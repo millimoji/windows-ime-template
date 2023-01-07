@@ -2,7 +2,9 @@
 
 #include "../WindowsImeLib.h"
 
-class RibbonIMECore : public WindowsImeLib::ICompositionProcessorEngine, public std::enable_shared_from_this<RibbonIMECore>
+class RibbonIMECore :
+    public WindowsImeLib::ICompositionProcessorEngine,
+    public std::enable_shared_from_this<RibbonIMECore>
 {
 public:
     RibbonIMECore(const std::weak_ptr<WindowsImeLib::ICompositionProcessorEngineOwner>& owner);
@@ -46,6 +48,21 @@ public:
 
 private:
     std::weak_ptr<WindowsImeLib::ICompositionProcessorEngineOwner> m_owner;
+};
+
+class RibbonTextInputProcessor :
+    public WindowsImeLib::ITextInputProcessor,
+    public std::enable_shared_from_this<RibbonTextInputProcessor>
+{
+public:
+    RibbonTextInputProcessor(WindowsImeLib::ITextInputFramework* framework);
+    virtual ~RibbonTextInputProcessor();
+
+    std::wstring TestMethod(const std::wstring_view src) override;
+    void SetFocus(bool isGotten) override;
+
+private:
+    WindowsImeLib::ITextInputFramework* m_framework;
 };
 
 class RibbonIMEConstants : public WindowsImeLib::IConstantProvider
@@ -104,5 +121,10 @@ class RibbonIMEConstants : public WindowsImeLib::IConstantProvider
     const wchar_t* ServerName() noexcept override
     {
         return L"Ribbon IME Singleton Sever";
+    }
+    void GetPreferredTouchKeyboardLayout(_Out_ TKBLayoutType* layoutType, _Out_ WORD* preferredLayoutId) noexcept override
+    {
+        *layoutType = TKBLT_OPTIMIZED;
+        *preferredLayoutId = TKBL_OPT_JAPANESE_ABC;
     }
 };

@@ -12,7 +12,7 @@
 #include "Compartment.h"
 #include "TfInputProcessorProfile.h"
 #include "RegKey.h"
-#include "SingletonEngineBridge.h"
+#include "SingletonProcessor.h"
 
 namespace wrl
 {
@@ -42,35 +42,6 @@ HRESULT CWindowsIME::CreateInstance(_In_ IUnknown *pUnkOuter, REFIID riid, _Outp
     return S_OK;
 }
 CATCH_RETURN()
-
-// {
-//     CWindowsIME* imeInstance = nullptr;
-//     HRESULT hr = S_OK;
-// 
-//     if (ppvObj == nullptr)
-//     {
-//         return E_INVALIDARG;
-//     }
-// 
-//     *ppvObj = nullptr;
-// 
-//     if (nullptr != pUnkOuter)
-//     {
-//         return CLASS_E_NOAGGREGATION;
-//     }
-// 
-//     imeInstance = new (std::nothrow) CWindowsIME();
-//     if (imeInstance == nullptr)
-//     {
-//         return E_OUTOFMEMORY;
-//     }
-// 
-//     hr = imeInstance->QueryInterface(riid, ppvObj);
-// 
-//     imeInstance->Release();
-// 
-//     return hr;
-// }
 
 //+---------------------------------------------------------------------------
 //
@@ -120,7 +91,7 @@ CWindowsIME::CWindowsIME()
 
 CWindowsIME::~CWindowsIME()
 {
-    m_singletonEngine.reset();
+    m_singletonProcessor.reset();
 
     if (_pCandidateListUIPresenter)
     {
@@ -132,119 +103,14 @@ CWindowsIME::~CWindowsIME()
 
 //+---------------------------------------------------------------------------
 //
-// QueryInterface
-//
-//----------------------------------------------------------------------------
-
-#if 0
-STDAPI CWindowsIME::QueryInterface(REFIID riid, _Outptr_ void **ppvObj)
-{
-    if (ppvObj == nullptr)
-    {
-        return E_INVALIDARG;
-    }
-
-    *ppvObj = nullptr;
-
-    if (IsEqualIID(riid, IID_IUnknown) ||
-        IsEqualIID(riid, IID_ITfTextInputProcessor))
-    {
-        *ppvObj = (ITfTextInputProcessor *)this;
-    }
-    else if (IsEqualIID(riid, IID_ITfTextInputProcessorEx))
-    {
-        *ppvObj = (ITfTextInputProcessorEx *)this;
-    }
-    else if (IsEqualIID(riid, IID_ITfThreadMgrEventSink))
-    {
-        *ppvObj = (ITfThreadMgrEventSink *)this;
-    }
-    else if (IsEqualIID(riid, IID_ITfTextEditSink))
-    {
-        *ppvObj = (ITfTextEditSink *)this;
-    }
-    else if (IsEqualIID(riid, IID_ITfKeyEventSink))
-    {
-        *ppvObj = (ITfKeyEventSink *)this;
-    }
-    else if (IsEqualIID(riid, IID_ITfActiveLanguageProfileNotifySink))
-    {
-        *ppvObj = (ITfActiveLanguageProfileNotifySink *)this;
-    }
-    else if (IsEqualIID(riid, IID_ITfCompositionSink))
-    {
-        *ppvObj = (ITfKeyEventSink *)this;
-    }
-    else if (IsEqualIID(riid, IID_ITfDisplayAttributeProvider))
-    {
-        *ppvObj = (ITfDisplayAttributeProvider *)this;
-    }
-    else if (IsEqualIID(riid, IID_ITfThreadFocusSink))
-    {
-        *ppvObj = (ITfThreadFocusSink *)this;
-    }
-    else if (IsEqualIID(riid, IID_ITfFunctionProvider))
-    {
-        *ppvObj = (ITfFunctionProvider *)this;
-    }
-    else if (IsEqualIID(riid, IID_ITfFunction))
-    {
-        *ppvObj = (ITfFunction *)this;
-    }
-    else if (IsEqualIID(riid, IID_ITfFnGetPreferredTouchKeyboardLayout))
-    {
-        *ppvObj = (ITfFnGetPreferredTouchKeyboardLayout *)this;
-    }
-
-    if (*ppvObj)
-    {
-        AddRef();
-        return S_OK;
-    }
-
-    return E_NOINTERFACE;
-}
-#endif
-
-//+---------------------------------------------------------------------------
-//
-// AddRef
-//
-//----------------------------------------------------------------------------
-
-// STDAPI_(ULONG) CWindowsIME::AddRef()
-// {
-//     return ++_refCount;
-// }
-
-//+---------------------------------------------------------------------------
-//
-// Release
-//
-//----------------------------------------------------------------------------
-
-// STDAPI_(ULONG) CWindowsIME::Release()
-// {
-//     LONG cr = --_refCount;
-// 
-//     assert(_refCount >= 0);
-// 
-//     if (_refCount == 0)
-//     {
-//         delete this;
-//     }
-// 
-//     return cr;
-// }
-
-//+---------------------------------------------------------------------------
-//
 // ITfTextInputProcessorEx::ActivateEx
 //
 //----------------------------------------------------------------------------
 
 STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, DWORD dwFlags)
 {
+    auto activity = WindowsImeLibTelemetry::ITfTextInputProcessorEx_ActivateEx();
+
     _pThreadMgr = pThreadMgr;
     _pThreadMgr->AddRef();
 
@@ -295,6 +161,7 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
         }
     }
 
+    activity.Stop();
     return S_OK;
 
 ExitError:
@@ -310,6 +177,8 @@ ExitError:
 
 STDAPI CWindowsIME::Deactivate()
 {
+    auto activity = WindowsImeLibTelemetry::ITfTextInputProcessorEx_Deactivate();
+
     if (_pCompositionProcessorEngine)
     {
         _pCompositionProcessorEngine->ClearCompartment(_pThreadMgr, _tfClientId);
@@ -369,6 +238,7 @@ STDAPI CWindowsIME::Deactivate()
 		_pDocMgrLastFocused = nullptr;
     }
 
+    activity.Stop();
     return S_OK;
 }
 
@@ -379,40 +249,49 @@ STDAPI CWindowsIME::Deactivate()
 //----------------------------------------------------------------------------
 HRESULT CWindowsIME::GetType(__RPC__out GUID *pguid)
 {
+    auto activity = WindowsImeLibTelemetry::ITfFunctionProvider_GetType();
+
     HRESULT hr = E_INVALIDARG;
     if (pguid)
     {
         *pguid = WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID();
         hr = S_OK;
     }
+
+    activity.Stop();
     return hr;
 }
 
 //+---------------------------------------------------------------------------
 //
-// ITfFunctionProvider::::GetDescription
+// ITfFunctionProvider::GetDescription
 //
 //----------------------------------------------------------------------------
 HRESULT CWindowsIME::GetDescription(__RPC__deref_out_opt BSTR *pbstrDesc)
 {
+    auto activity = WindowsImeLibTelemetry::ITfFunctionProvider_GetDescription();
+
     HRESULT hr = E_INVALIDARG;
     if (pbstrDesc != nullptr)
     {
         *pbstrDesc = nullptr;
         hr = E_NOTIMPL;
     }
+
+    activity.Stop();
     return hr;
 }
 
 //+---------------------------------------------------------------------------
 //
-// ITfFunctionProvider::::GetFunction
+// ITfFunctionProvider::GetFunction
 //
 //----------------------------------------------------------------------------
 HRESULT CWindowsIME::GetFunction(__RPC__in REFGUID rguid, __RPC__in REFIID riid, __RPC__deref_out_opt IUnknown **ppunk)
 {
-    HRESULT hr = E_NOINTERFACE;
+    auto activity = WindowsImeLibTelemetry::ITfFunctionProvider_GetFunction();
 
+    HRESULT hr = E_NOINTERFACE;
     if ((IsEqualGUID(rguid, GUID_NULL)) 
         && (IsEqualGUID(riid, __uuidof(ITfFnSearchCandidateProvider))))
     {
@@ -423,6 +302,7 @@ HRESULT CWindowsIME::GetFunction(__RPC__in REFGUID rguid, __RPC__in REFIID riid,
         hr = QueryInterface(riid, (void **)ppunk);
     }
 
+    activity.Stop();
     return hr;
 }
 
@@ -433,12 +313,16 @@ HRESULT CWindowsIME::GetFunction(__RPC__in REFGUID rguid, __RPC__in REFIID riid,
 //----------------------------------------------------------------------------
 HRESULT CWindowsIME::GetDisplayName(_Out_ BSTR *pbstrDisplayName)
 {
+    auto activity = WindowsImeLibTelemetry::ITfFunction_GetDisplayName();
+
     HRESULT hr = E_INVALIDARG;
     if (pbstrDisplayName != nullptr)
     {
         *pbstrDisplayName = nullptr;
         hr = E_NOTIMPL;
     }
+
+    activity.Stop();
     return hr;
 }
 
@@ -449,13 +333,16 @@ HRESULT CWindowsIME::GetDisplayName(_Out_ BSTR *pbstrDisplayName)
 //----------------------------------------------------------------------------
 HRESULT CWindowsIME::GetLayout(_Out_ TKBLayoutType *ptkblayoutType, _Out_ WORD *pwPreferredLayoutId)
 {
+    auto activity = WindowsImeLibTelemetry::ITfFnGetPreferredTouchKeyboardLayout_GetLayout();
+
     HRESULT hr = E_INVALIDARG;
     if ((ptkblayoutType != nullptr) && (pwPreferredLayoutId != nullptr))
     {
-        *ptkblayoutType = TKBLT_OPTIMIZED;
-        *pwPreferredLayoutId = TKBL_OPT_SIMPLIFIED_CHINESE_PINYIN;
+        WindowsImeLib::g_processorFactory->GetConstantProvider()->GetPreferredTouchKeyboardLayout(ptkblayoutType, pwPreferredLayoutId);
         hr = S_OK;
     }
+
+    activity.Stop();
     return hr;
 }
 
@@ -510,7 +397,7 @@ BOOL CWindowsIME::_AddTextProcessorEngine()
     // Create composition processor engine
     if (_pCompositionProcessorEngine == nullptr)
     {
-        m_singletonEngine = SingletonEngineBridge::CreateSingletonEngineBridge();
+        m_singletonProcessor = CreateSingletonProcessorBridge();
 
         _pCompositionProcessorEngine = std::make_shared<CCompositionProcessorEngine>();
         _pCompositionProcessorEngine->Initialize();

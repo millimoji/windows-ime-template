@@ -9,7 +9,7 @@
 #include "Globals.h"
 #include "WindowsIME.h"
 #include "../WindowsImeLib.h"
-#include "SingletonEngineHost.h"
+#include "SingletonProcessor.h"
 
 namespace wrl
 {
@@ -188,7 +188,7 @@ void BuildGlobalObjects(void)
 
     classFactoryObjects[1] = new (std::nothrow) CClassFactory(
         WindowsImeLib::g_processorFactory->GetConstantProvider()->ServerCLSID(),
-        SingletonEngineHost::CreateInstance);
+        CreateSingletonProcessorHost);
 }
 
 //+---------------------------------------------------------------------------

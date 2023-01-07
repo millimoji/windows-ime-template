@@ -19,6 +19,8 @@
 
 STDAPI CWindowsIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfComposition *pComposition)
 {
+    auto activity = WindowsImeLibTelemetry::ITfCompositionSink_OnCompositionTerminated();
+
     // Clear dummy composition
     _RemoveDummyCompositionForComposing(ecWrite, pComposition);
 
@@ -39,6 +41,7 @@ STDAPI CWindowsIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfCompos
         pContext = nullptr;
     }
 
+    activity.Stop();
     return S_OK;
 }
 

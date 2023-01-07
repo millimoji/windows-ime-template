@@ -131,10 +131,7 @@
     <ClCompile Include="CompositionProcessorEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SingletonEngineHost.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SingletonEngineBridge.cpp">
+    <ClCompile Include="SingletonProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -224,13 +221,10 @@
     <ClInclude Include="LanguageBar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SingletonEngineHost.h">
+    <ClInclude Include="SingletonProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WindowsImeLibTelemetry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SingletonEngineBridge.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

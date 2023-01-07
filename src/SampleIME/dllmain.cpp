@@ -61,6 +61,12 @@ namespace WindowsImeLib
             static std::shared_ptr<IConstantProvider> constantProvider = std::make_shared<Global::ConstantProvider>();
             return constantProvider;
         }
+
+        std::shared_ptr<ITextInputProcessor> CreateTextInputProcessor(ITextInputFramework* framework) override
+        {
+            auto textInputProcessor = std::make_shared<SampleIMEProcessor>(framework);
+            return std::static_pointer_cast<ITextInputProcessor>(textInputProcessor);
+        }
     };
 
     std::shared_ptr<IProcessorFactory> g_processorFactory = std::static_pointer_cast<IProcessorFactory>(std::make_shared<ProcessorFactory>());

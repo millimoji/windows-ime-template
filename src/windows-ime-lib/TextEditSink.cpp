@@ -18,6 +18,8 @@
 
 STDAPI CWindowsIME::OnEndEdit(__RPC__in_opt ITfContext *pContext, TfEditCookie ecReadOnly, __RPC__in_opt ITfEditRecord *pEditRecord)
 {
+    auto activity = WindowsImeLibTelemetry::ITfTextEditSink_OnEndEdit();
+
     BOOL isSelectionChanged;
 
     //
@@ -65,6 +67,7 @@ STDAPI CWindowsIME::OnEndEdit(__RPC__in_opt ITfContext *pContext, TfEditCookie e
         }
     }
 
+    activity.Stop();
     return S_OK;
 }
 

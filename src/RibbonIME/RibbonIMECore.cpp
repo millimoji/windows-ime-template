@@ -142,3 +142,22 @@ void RibbonIMECore::ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClie
     (void)tfClientId;
 }
 
+
+RibbonTextInputProcessor::RibbonTextInputProcessor(WindowsImeLib::ITextInputFramework* framework) :
+	m_framework(framework)
+{
+}
+
+RibbonTextInputProcessor::~RibbonTextInputProcessor()
+{
+}
+
+std::wstring RibbonTextInputProcessor::TestMethod(const std::wstring_view src)
+{
+    return std::wstring(src) + L"-ribbon-suffix";
+}
+
+void RibbonTextInputProcessor::SetFocus(bool isGotten)
+{
+    WindowsImeLib::TraceLog("RibbonTextInputProcessor::::SetFocus:%d", isGotten ? 1 : 0);
+}

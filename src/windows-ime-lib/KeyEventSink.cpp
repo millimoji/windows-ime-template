@@ -317,12 +317,13 @@ BOOL CWindowsIME::_IsKeyboardDisabled()
 // Called by the system whenever this service gets the keystroke device focus.
 //----------------------------------------------------------------------------
 
-STDAPI CWindowsIME::OnSetFocus(BOOL fForeground)
+STDAPI CWindowsIME::OnSetFocus(BOOL fForeground) try
 {
-	fForeground;
-
+    // auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnSetFocus();
+    // activity.Stop();
     return S_OK;
 }
+CATCH_RETURN()
 
 //+---------------------------------------------------------------------------
 //
@@ -333,6 +334,8 @@ STDAPI CWindowsIME::OnSetFocus(BOOL fForeground)
 
 STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
+    auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnTestKeyDown();
+
     Global::UpdateModifiers(wParam, lParam);
 
     _KEYSTROKE_STATE KeystrokeState;
@@ -350,6 +353,7 @@ STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
         _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
     }
 
+    activity.Stop();
     return S_OK;
 }
 
@@ -363,6 +367,8 @@ STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
 
 STDAPI CWindowsIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
+    auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnKeyDown();
+
     Global::UpdateModifiers(wParam, lParam);
 
     _KEYSTROKE_STATE KeystrokeState;
@@ -400,6 +406,7 @@ STDAPI CWindowsIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam
         _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
     }
 
+    activity.Stop();
     return S_OK;
 }
 
@@ -412,6 +419,8 @@ STDAPI CWindowsIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam
 
 STDAPI CWindowsIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
+    auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnTestKeyUp();
+
     if (pIsEaten == nullptr)
     {
         return E_INVALIDARG;
@@ -424,6 +433,7 @@ STDAPI CWindowsIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lPar
 
     *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, NULL);
 
+    activity.Stop();
     return S_OK;
 }
 
@@ -437,6 +447,8 @@ STDAPI CWindowsIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lPar
 
 STDAPI CWindowsIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
+    auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnKeyUp();
+
     Global::UpdateModifiers(wParam, lParam);
 
     WCHAR wch = '\0';
@@ -444,6 +456,7 @@ STDAPI CWindowsIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, 
 
     *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, NULL);
 
+    activity.Stop();
     return S_OK;
 }
 
@@ -454,12 +467,13 @@ STDAPI CWindowsIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, 
 // Called when a hotkey (registered by us, or by the system) is typed.
 //----------------------------------------------------------------------------
 
-STDAPI CWindowsIME::OnPreservedKey(ITfContext *pContext, REFGUID rguid, BOOL *pIsEaten)
+STDAPI CWindowsIME::OnPreservedKey(ITfContext* /*pContext*/, REFGUID rguid, BOOL* pIsEaten)
 {
-	pContext;
+    auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnPreservedKey();
 
     _pCompositionProcessorEngine->OnPreservedKey(rguid, pIsEaten, _GetThreadMgr(), _GetClientId());
 
+    activity.Stop();
     return S_OK;
 }
 

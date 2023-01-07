@@ -18,9 +18,10 @@
 // a document.
 //----------------------------------------------------------------------------
 
-STDAPI CWindowsIME::OnInitDocumentMgr(_In_ ITfDocumentMgr *pDocMgr)
+STDAPI CWindowsIME::OnInitDocumentMgr(_In_ ITfDocumentMgr*)
 {
-    pDocMgr;
+    auto activity = WindowsImeLibTelemetry::ITfThreadMgrEventSink_OnInitDocumentMgr();
+    activity.Stop();
     return E_NOTIMPL;
 }
 
@@ -32,9 +33,10 @@ STDAPI CWindowsIME::OnInitDocumentMgr(_In_ ITfDocumentMgr *pDocMgr)
 // document.
 //----------------------------------------------------------------------------
 
-STDAPI CWindowsIME::OnUninitDocumentMgr(_In_ ITfDocumentMgr *pDocMgr)
+STDAPI CWindowsIME::OnUninitDocumentMgr(_In_ ITfDocumentMgr*)
 {
-    pDocMgr;
+    auto activity = WindowsImeLibTelemetry::ITfThreadMgrEventSink_OnUninitDocumentMgr();
+    activity.Stop();
     return E_NOTIMPL;
 }
 
@@ -47,9 +49,9 @@ STDAPI CWindowsIME::OnUninitDocumentMgr(_In_ ITfDocumentMgr *pDocMgr)
 // focus document, or now no document holds the input focus.
 //----------------------------------------------------------------------------
 
-STDAPI CWindowsIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocumentMgr *pDocMgrPrevFocus)
+STDAPI CWindowsIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocumentMgr*)
 {
-    pDocMgrPrevFocus;
+    auto activity = WindowsImeLibTelemetry::ITfThreadMgrEventSink_OnSetFocus();
 
     _InitTextEditSink(pDocMgrFocus);
 
@@ -91,6 +93,7 @@ STDAPI CWindowsIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocume
         _pDocMgrLastFocused->AddRef();
     }
 
+    activity.Stop();
     return S_OK;
 }
 
@@ -101,10 +104,10 @@ STDAPI CWindowsIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocume
 // Sink called by the framework when a context is pushed.
 //----------------------------------------------------------------------------
 
-STDAPI CWindowsIME::OnPushContext(_In_ ITfContext *pContext)
+STDAPI CWindowsIME::OnPushContext(_In_ ITfContext*)
 {
-    pContext;
-
+    auto activity = WindowsImeLibTelemetry::ITfThreadMgrEventSink_OnPushContext();
+    activity.Stop();
     return E_NOTIMPL;
 }
 
@@ -115,10 +118,10 @@ STDAPI CWindowsIME::OnPushContext(_In_ ITfContext *pContext)
 // Sink called by the framework when a context is popped.
 //----------------------------------------------------------------------------
 
-STDAPI CWindowsIME::OnPopContext(_In_ ITfContext *pContext)
+STDAPI CWindowsIME::OnPopContext(_In_ ITfContext*)
 {
-    pContext;
-
+    auto activity = WindowsImeLibTelemetry::ITfThreadMgrEventSink_OnPopContext();
+    activity.Stop();
     return E_NOTIMPL;
 }
 

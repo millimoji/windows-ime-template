@@ -14,13 +14,14 @@
 
 class CLangBarItemButton;
 class CCandidateListUIPresenter;
-struct SingletonEngineBridge;
+struct SingletonProcessorBridge;
 
 const DWORD WM_CheckGlobalCompartment = WM_USER;
 LRESULT CALLBACK CWindowsIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 class CWindowsIME :
     public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
+                                        ITfTextInputProcessor,
                                         ITfTextInputProcessorEx,
                                         ITfThreadMgrEventSink,
                                         ITfTextEditSink,
@@ -43,9 +44,7 @@ public:
     // STDMETHODIMP_(ULONG) Release(void);
 
     // ITfTextInputProcessor
-    STDMETHODIMP Activate(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) {
-        return ActivateEx(pThreadMgr, tfClientId, 0);
-    }
+    STDMETHODIMP Activate(ITfThreadMgr* pThreadMgr, TfClientId tfClientId) { return ActivateEx(pThreadMgr, tfClientId, 0); }
     // ITfTextInputProcessorEx
     STDMETHODIMP ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, DWORD dwFlags);
     STDMETHODIMP Deactivate();
@@ -250,5 +249,5 @@ private:
     // Support the search integration
     ITfFnSearchCandidateProvider* _pITfFnSearchCandidateProvider = {};
 
-    std::shared_ptr<SingletonEngineBridge> m_singletonEngine;
+    std::shared_ptr<WindowsImeLib::ITextInputProcessor> m_singletonProcessor;
 };
