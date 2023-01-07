@@ -1862,7 +1862,7 @@ SampleIMEProcessor::~SampleIMEProcessor()
 
 std::wstring SampleIMEProcessor::TestMethod(const std::wstring_view src)
 {
-    return std::wstring(src) + L"-ribbon-suffix";
+    return std::wstring(src) + L"-sample-suffix";
 }
 
 void SampleIMEProcessor::SetFocus(bool isGotten)

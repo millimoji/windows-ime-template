@@ -8,18 +8,14 @@ namespace wrl
     using namespace Microsoft::WRL;
 }
 
-
-
-
-
-class SingletonProcessorOwner :
+class SingletonProcessorEnvironment :
     public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
-    IDispatch,
-    Microsoft::WRL::FtmBase>
+                                        ITextInputEnvironment,
+                                        Microsoft::WRL::FtmBase>
 {
 public:
-    SingletonProcessorOwner() {}
-    virtual ~SingletonProcessorOwner() {}
+    SingletonProcessorEnvironment() {}
+    virtual ~SingletonProcessorEnvironment() {}
 
     HRESULT RuntimeClassInitialize(const std::shared_ptr<TaskRunner>& taskRunner)
     {
@@ -28,20 +24,23 @@ public:
     }
 
 private:
-    IFACEMETHODIMP GetTypeInfoCount(UINT*) noexcept override { return E_NOTIMPL; }
-    IFACEMETHODIMP GetTypeInfo(UINT, LCID, ITypeInfo**) noexcept override { return E_NOTIMPL; }
-    IFACEMETHODIMP GetIDsOfNames(REFIID, LPOLESTR*, UINT, LCID, DISPID*) noexcept override { return E_NOTIMPL; }
-
-    IFACEMETHODIMP Invoke(DISPID /*dispIdMember*/, REFIID, LCID, WORD, DISPPARAMS* /*pDispParams*/, VARIANT* /*pVarResult*/, EXCEPINFO*, UINT*) noexcept override
+    IFACEMETHODIMP TestMethod(_In_ BSTR src, _Outptr_ BSTR* result)
     {
+        std::wstring work(src);
+        work += L"-suffix";
+        *result = SysAllocStringLen(work.c_str(), static_cast<UINT>(work.length()));
         return S_OK;
     }
 
+private:
     std::shared_ptr<TaskRunner> m_taskRunner;
 };
 
 
-struct SingletonProcessorBridge : public std::enable_shared_from_this<SingletonProcessorBridge>, public WindowsImeLib::ITextInputProcessor
+struct SingletonProcessorBridge :
+    public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
+                                        ITextInputProcessor,
+                                        Microsoft::WRL::FtmBase>
 {
     SingletonProcessorBridge()
     {
@@ -54,26 +53,36 @@ struct SingletonProcessorBridge : public std::enable_shared_from_this<SingletonP
         }
     }
 
-    std::wstring TestMethod(const std::wstring_view src) override
+    IFACEMETHODIMP TestMethod(_In_ BSTR src, _Outptr_ BSTR* result) override
     {
         EnsureInitialized();
-        std::wstring result;
-        m_threadTaskRunner->RunOnThread([&]()
-            {
-                result = InvokeIDispatch_WString_WString(m_engine.get(), DISPID_TEST_METHOD, src);
-            });
-        return result;
+        HRESULT hr = S_OK;
+        m_threadTaskRunner->RunOnThread([&]() { hr = m_engine->TestMethod(src, result); });
+        return hr;
     }
 
-    void SetFocus(bool isGotten) override
+    IFACEMETHODIMP Acivate(_In_ ITextInputEnvironment* /*environment*/) override
     {
         EnsureInitialized();
-        nlohmann::json json;
-        json["isGotten"] = isGotten;
-        m_threadTaskRunner->RunOnThread([&]()
-            {
-                InvokeIDispatch_String_Void(m_engine.get(), DISPID_SET_FOCUS, json.dump());
-            });
+        HRESULT hr = S_OK;
+        m_threadTaskRunner->RunOnThread([&]() { hr = m_engine->Acivate(nullptr); });
+        return hr;
+    }
+
+    IFACEMETHODIMP Deacivate(void) override
+    {
+        EnsureInitialized();
+        HRESULT hr = S_OK;
+        m_threadTaskRunner->RunOnThread([&]() { hr = m_engine->Deacivate(); });
+        return hr;
+    }
+
+    IFACEMETHODIMP SetFocus(BOOL isGotten) override
+    {
+        EnsureInitialized();
+        HRESULT hr = S_OK;
+        m_threadTaskRunner->RunOnThread([&]() { hr = m_engine->SetFocus(isGotten); });
+        return hr;
     }
 
 private:
@@ -83,15 +92,16 @@ private:
         {
             m_threadTaskRunner = std::make_unique<ThreadTaskRunner>();
         }
+        if (!m_environment)
+        {
+            m_notification = std::make_shared<TaskRunner>();
+            THROW_IF_FAILED(wrl::MakeAndInitialize<SingletonProcessorEnvironment>(&m_environment, m_notification));
+        }
         if (!m_engine)
         {
             m_threadTaskRunner->RunOnThread([this]() {
-                    m_engine = wil::CoCreateInstance<IDispatch>(WindowsImeLib::g_processorFactory->GetConstantProvider()->ServerCLSID(), CLSCTX_LOCAL_SERVER); });
-        }
-        if (!m_owner)
-        {
-            m_notification = std::make_shared<TaskRunner>();
-            THROW_IF_FAILED(wrl::MakeAndInitialize<SingletonProcessorOwner>(&m_owner, m_notification));
+                m_engine = wil::CoCreateInstance<ITextInputProcessor>(WindowsImeLib::g_processorFactory->GetConstantProvider()->ServerCLSID(), CLSCTX_LOCAL_SERVER);
+            });
         }
     }
 
@@ -104,24 +114,21 @@ private:
     std::unique_ptr<ThreadTaskRunner> m_threadTaskRunner;
     std::shared_ptr<TaskRunner> m_notification;
 
-    wil::com_ptr<IDispatch> m_engine;
-    wil::com_ptr<IDispatch> m_owner;
+    wil::com_ptr<ITextInputProcessor> m_engine;
+    wil::com_ptr<ITextInputEnvironment> m_environment;
 };
 
-std::shared_ptr<WindowsImeLib::ITextInputProcessor> CreateSingletonProcessorBridge()
+wil::com_ptr<ITextInputProcessor> CreateSingletonProcessorBridge()
 {
-    const auto bridge = std::make_shared<SingletonProcessorBridge>();
-    return std::static_pointer_cast<WindowsImeLib::ITextInputProcessor>(bridge);
+    wil::com_ptr<SingletonProcessorBridge> bridgeImp;
+    THROW_IF_FAILED(wrl::MakeAndInitialize<SingletonProcessorBridge>(&bridgeImp));
+    return bridgeImp.query<ITextInputProcessor>();
 }
-
-
-
-
 
 
 class SingletonProcessorHost :
     public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
-                                        IDispatch,
+                                        ITextInputProcessor,
                                         Microsoft::WRL::FtmBase>,
     public WindowsImeLib::ITextInputFramework
 {
@@ -134,36 +141,28 @@ public:
     ~SingletonProcessorHost() {}
 
 private:
-    // IDispatch
-    IFACEMETHODIMP GetTypeInfoCount(UINT*) noexcept override { return E_NOTIMPL; }
-    IFACEMETHODIMP GetTypeInfo(UINT, LCID, ITypeInfo**) noexcept override { return E_NOTIMPL; }
-    IFACEMETHODIMP GetIDsOfNames(REFIID, LPOLESTR*, UINT, LCID, DISPID*) noexcept override { return E_NOTIMPL; }
-
-    IFACEMETHODIMP Invoke(DISPID dispIdMember, REFIID, LCID, WORD, DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO*, UINT*) noexcept override try
+    IFACEMETHODIMP TestMethod(_In_ BSTR src, _Outptr_ BSTR* result)
     {
-	    switch (dispIdMember)
-	    {
-	    case DISPID_TEST_METHOD:
-	        {
-				THROW_HR_IF(E_UNEXPECTED, pDispParams->cArgs != 1);
-	            const auto arg = VARIANTtoWString(pDispParams->rgvarg[0]);
-	            const auto returnStr = arg + L"-suffix";
-	            WStringToVARIANT(returnStr, *pVarResult);
-	        }
-	        return S_OK;
+        const auto resultVal = m_processor->TestMethod(src);
+        *result = SysAllocStringLen(resultVal.c_str(), static_cast<UINT>(resultVal.length()));
+        return S_OK;
+    }
 
-	    case DISPID_SET_FOCUS:
-	        {
-	            THROW_HR_IF(E_UNEXPECTED, pDispParams->cArgs != 1);
-	            const auto arg = VARIANTtoString(pDispParams->rgvarg[0]);
-	            const auto json = nlohmann::json::parse(arg);
-                m_processor->SetFocus(json["isGotten"].get<bool>());
-	        }
-	        return S_OK;
-	    }
-	    return S_OK;
-	}
-	CATCH_RETURN()
+    IFACEMETHODIMP Acivate(_In_ ITextInputEnvironment* /*environment*/) override
+    {
+        return S_OK;
+    }
+
+    IFACEMETHODIMP Deacivate(void) override
+    {
+        return S_OK;
+    }
+
+    IFACEMETHODIMP SetFocus(BOOL isGotten) override
+    {
+        m_processor->SetFocus(!!isGotten);
+        return S_OK;
+    }
 
     // WindowsImeLib::ITextInputFramework
     void Test() override

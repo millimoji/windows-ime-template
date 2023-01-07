@@ -317,7 +317,7 @@ BOOL CWindowsIME::_IsKeyboardDisabled()
 // Called by the system whenever this service gets the keystroke device focus.
 //----------------------------------------------------------------------------
 
-STDAPI CWindowsIME::OnSetFocus(BOOL fForeground) try
+STDAPI CWindowsIME::OnSetFocus(BOOL /*fForeground*/) try
 {
     // auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnSetFocus();
     // activity.Stop();

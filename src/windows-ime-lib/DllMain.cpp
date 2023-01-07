@@ -9,6 +9,11 @@
 #include "Globals.h"
 #include "../WindowsImeLib.h"
 
+extern "C" {
+    // in dlldata.c
+    BOOL WINAPI ProxyStubDllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
+}
+
 //+---------------------------------------------------------------------------
 //
 // DllMain
@@ -17,13 +22,12 @@
 
 BOOL WindowsImeLib::DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID pvReserved)
 {
-    pvReserved;
+    ProxyStubDllMain(hInstance, dwReason, pvReserved);
 
     switch (dwReason)
     {
     case DLL_PROCESS_ATTACH:
         wil::SetResultTelemetryFallback(WindowsImeLibTelemetry::FallbackTelemetryCallback);
-
         Global::dllInstanceHandle = hInstance;
 
         if (!InitializeCriticalSectionAndSpinCount(&Global::CS, 0))
@@ -38,17 +42,13 @@ BOOL WindowsImeLib::DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID pvReserv
         break;
 
     case DLL_PROCESS_DETACH:
-
         DeleteCriticalSection(&Global::CS);
-
         break;
 
     case DLL_THREAD_ATTACH:
-
         break;
 
     case DLL_THREAD_DETACH:
-
         break;
     }
 
@@ -82,6 +82,8 @@ void WindowsImeLib::TraceLog(const wchar_t* format, ...)
 __declspec(dllexport) void TestFunction()
 {
     const auto bridge = CreateSingletonProcessorBridge();
-    const auto result = bridge->TestMethod(L"abc");
-    WindowsImeLibTelemetry::TraceLog("TEST_METHOD result", L"%s", result.c_str());
+    const auto srcBstr = wil::make_bstr(L"abc");
+    wil::unique_bstr resultBstr;
+    LOG_IF_FAILED(bridge->TestMethod(srcBstr.get(), &resultBstr));
+    WindowsImeLibTelemetry::TraceLog("TEST_METHOD result", L"%s", resultBstr.get());
 }

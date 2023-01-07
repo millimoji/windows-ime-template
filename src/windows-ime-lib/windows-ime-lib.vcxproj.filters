@@ -9,6 +9,9 @@
       <UniqueIdentifier>{988f2f0d-8d46-450d-a127-2a64e16ccd46}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="IDLGeneraeted">
+      <UniqueIdentifier>{5d2dfcc9-12d7-45ff-81f0-22c7da81898f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ActiveLanguageProfileNotifySink.cpp">
@@ -134,6 +137,15 @@
     <ClCompile Include="SingletonProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dlldata.c">
+      <Filter>IDLGeneraeted</Filter>
+    </ClCompile>
+    <ClCompile Include="TextInputProcessor_i.c">
+      <Filter>IDLGeneraeted</Filter>
+    </ClCompile>
+    <ClCompile Include="TextInputProcessor_p.c">
+      <Filter>IDLGeneraeted</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseWindow.h">
@@ -233,5 +245,10 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="$(MSBuildThisFileDirectory)..\..\natvis\wil.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="TextInputProcessor.idl">
+      <Filter>Source Files</Filter>
+    </Midl>
   </ItemGroup>
 </Project>

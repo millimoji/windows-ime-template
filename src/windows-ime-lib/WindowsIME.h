@@ -8,6 +8,7 @@
 #pragma once
 
 #include "../WindowsImeLib.h"
+#include "SingletonProcessor.h"
 #include "KeyHandlerEditSession.h"
 #include "BaseStructure.h"
 #include "CompositionProcessorEngine.h"
@@ -249,5 +250,5 @@ private:
     // Support the search integration
     ITfFnSearchCandidateProvider* _pITfFnSearchCandidateProvider = {};
 
-    std::shared_ptr<WindowsImeLib::ITextInputProcessor> m_singletonProcessor;
+    wil::com_ptr<ITextInputProcessor> m_singletonProcessor;
 };

@@ -367,19 +367,17 @@ HRESULT RegisterSingletonServer()
     return S_OK;
 }
 
-void UnregisterSingletonServer()
+HRESULT UnregisterSingletonServer()
 {
     wchar_t clsId[CLSID_STRLEN + 1] = {'\0'};
     if (StringFromGUID2(WindowsImeLib::g_processorFactory->GetConstantProvider()->ServerCLSID(), clsId, ARRAYSIZE(clsId)) == 0)
     {
-        LOG_LAST_ERROR();
-        return;
+        RETURN_LAST_ERROR();
     }
     wchar_t appId[CLSID_STRLEN + 1] = {'\0'};
     if (StringFromGUID2(WindowsImeLib::g_processorFactory->GetConstantProvider()->ServerAppID(), appId, ARRAYSIZE(appId)) == 0)
     {
-        LOG_LAST_ERROR();
-        return;
+        RETURN_LAST_ERROR();
     }
 
     wil::unique_hkey clsIdRoot;
@@ -397,4 +395,6 @@ void UnregisterSingletonServer()
     {
         LOG_IF_WIN32_ERROR(RegDeleteTree(appIdRoot.get(), appId));
     }
+
+    return S_OK;
 }
