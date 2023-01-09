@@ -49,15 +49,23 @@ STDAPI CWindowsIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID, _In_ BOOL isA
 
     if (isActivated)
     {
-        _pCompositionProcessorEngine->ShowAllLanguageBarIcons();
-
-        _pCompositionProcessorEngine->ConversionModeCompartmentUpdated(_pThreadMgr);
+        if (m_inprocClient)
+        {
+            m_inprocClient->SetLanguageBarStatus(TF_LBI_STATUS_HIDDEN, FALSE); // ShowAll
+            m_inprocClient->ConversionModeCompartmentUpdated();
+            //_pCompositionProcessorEngine->ShowAllLanguageBarIcons();
+            // _pCompositionProcessorEngine->ConversionModeCompartmentUpdated(_pThreadMgr);
+        }
     }
     else
     {
         _DeleteCandidateList(FALSE, nullptr);
 
-        _pCompositionProcessorEngine->HideAllLanguageBarIcons();
+        if (m_inprocClient)
+        {
+            m_inprocClient->SetLanguageBarStatus(TF_LBI_STATUS_HIDDEN, TRUE); // HideAll
+            // _pCompositionProcessorEngine->HideAllLanguageBarIcons();
+        }
     }
 
     activity.Stop();

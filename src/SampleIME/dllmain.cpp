@@ -67,6 +67,12 @@ namespace WindowsImeLib
             auto textInputProcessor = std::make_shared<SampleIMEProcessor>(framework);
             return std::static_pointer_cast<ITextInputProcessor>(textInputProcessor);
         }
+
+        std::shared_ptr<IWindowsIMEInprocClient> CreateIMEInprocClient(IWindowsIMEInprocFramework* framework) override
+        {
+            auto inprocClient = std::make_shared<SampleIMEInprocClient>(framework);
+            return std::static_pointer_cast<IWindowsIMEInprocClient>(inprocClient);
+        }
     };
 
     std::shared_ptr<IProcessorFactory> g_processorFactory = std::static_pointer_cast<IProcessorFactory>(std::make_shared<ProcessorFactory>());

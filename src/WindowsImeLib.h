@@ -6,6 +6,11 @@
 #include <string>
 #include <vector>
 
+// TODO: will remove
+#include "Compartment.h"
+#include "LanguageBar.h"
+
+
 //---------------------------------------------------------------------
 // candidate list
 //---------------------------------------------------------------------
@@ -120,6 +125,24 @@ inline BOOL   IsShiftKeyDownOnly = FALSE;
 inline BOOL   IsControlKeyDownOnly = FALSE;
 inline BOOL   IsAltKeyDownOnly = FALSE;
 
+
+struct IWindowsIMEInprocFramework
+{
+    virtual ~IWindowsIMEInprocFramework() {}
+    virtual void UpdateCustomState() = 0;
+};
+
+struct IWindowsIMEInprocClient
+{
+    virtual ~IWindowsIMEInprocClient() {}
+    virtual void Initialize(_In_ ITfThreadMgr* threadMgr, TfClientId tfClientId, BOOL isSecureMode) = 0;
+    virtual void Deinitialize() = 0;
+    virtual void OnPreservedKey(REFGUID rguid, _Out_ BOOL* pIsEaten, _In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId) = 0;
+    virtual void SetLanguageBarStatus(DWORD status, BOOL isSet) = 0;
+    virtual void ConversionModeCompartmentUpdated() = 0;
+    virtual std::string EncodeCustomState() = 0;
+};
+
 struct LanguageBarButtonProperty
 {
     GUID id;
@@ -136,12 +159,12 @@ struct ICompositionProcessorEngineOwner
 
     virtual void SetDefaultCandidateTextFont(int idsDefaultFont) = 0;
 
-    virtual void SetupLanguageBar(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, _In_reads_(countButtons) const LanguageBarButtonProperty* properties, UINT countButtons) = 0;
-    virtual BOOL GetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) = 0;
-    virtual void SetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, BOOL value) = 0;
-    virtual DWORD GetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) = 0;
-    virtual void SetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, DWORD value) = 0;
-    virtual void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) = 0;
+//    virtual void SetupLanguageBar(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, _In_reads_(countButtons) const LanguageBarButtonProperty* properties, UINT countButtons) = 0;
+//    virtual BOOL GetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) = 0;
+//    virtual void SetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, BOOL value) = 0;
+//    virtual DWORD GetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) = 0;
+//    virtual void SetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, DWORD value) = 0;
+//    virtual void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) = 0;
 };
 
 struct ICompositionProcessorEngine
@@ -164,8 +187,8 @@ struct ICompositionProcessorEngine
     virtual void GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) = 0;
     virtual void GetCandidateStringInConverted(CStringRange &searchString, _In_ std::vector<CCandidateListItem> *pCandidateList) = 0;
 
-    // Preserved key handler
-    virtual void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId) = 0;
+//     // Preserved key handler
+//     virtual void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId) = 0;
 
     // Punctuation
     virtual BOOL IsPunctuation(WCHAR wch) = 0;
@@ -175,14 +198,16 @@ struct ICompositionProcessorEngine
     virtual BOOL IsMakePhraseFromText() = 0;
 
     // Language bar control
-    virtual void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) = 0;
+//     virtual void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) = 0;
 
     virtual std::vector<DWORD>* GetCandidateListIndexRange() = 0;
     virtual UINT GetCandidateWindowWidth() = 0;
 
-    // Compartment
-    virtual HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept = 0;
-    virtual void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) = 0;
+//    // Compartment
+//    virtual HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept = 0;
+//    virtual void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) = 0;
+
+	virtual void UpdateCustomState(const std::string& customStateJson) = 0;
 };
 
 struct ITextInputFramework
@@ -196,7 +221,8 @@ struct ITextInputProcessor
 {
     virtual ~ITextInputProcessor() {}
 
-    virtual std::wstring TestMethod(const std::wstring_view src) = 0;
+    virtual std::wstring TestMethod(const std::wstring& src) = 0;
+    virtual void UpdateCustomState(const std::string& stateJson) = 0;
     virtual void SetFocus(bool isGotten) = 0;
 };
 
@@ -223,6 +249,7 @@ struct IProcessorFactory
     virtual std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(const std::weak_ptr<ICompositionProcessorEngineOwner>& owner) = 0;
     virtual std::shared_ptr<IConstantProvider> GetConstantProvider() = 0;
     virtual std::shared_ptr<ITextInputProcessor> CreateTextInputProcessor(ITextInputFramework* framework) = 0;
+    virtual std::shared_ptr<IWindowsIMEInprocClient> CreateIMEInprocClient(IWindowsIMEInprocFramework* framework) = 0;
 };
 
 // TODO: re-design how to inject factory

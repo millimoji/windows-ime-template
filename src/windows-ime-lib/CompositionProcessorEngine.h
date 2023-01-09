@@ -11,8 +11,8 @@
 #include "Private.h"
 #include "../WindowsImeLib.h"
 #include "BaseStructure.h"
-#include "Compartment.h"
-#include "LanguageBar.h"
+#include "../Compartment.h"
+#include "../LanguageBar.h"
 
 class CCompositionProcessorEngine :
     public WindowsImeLib::ICompositionProcessorEngineOwner,
@@ -23,7 +23,7 @@ public:
     ~CCompositionProcessorEngine(void);
 
     void Initialize();
-    void ClearCompartment(_In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId);
+//    void ClearCompartment(_In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId);
 
     BOOL SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode);
 
@@ -41,8 +41,8 @@ public:
     void GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch);
     void GetCandidateStringInConverted(CStringRange &searchString, _In_ std::vector<CCandidateListItem> *pCandidateList);
 
-    // Preserved key handler
-    void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
+//     // Preserved key handler
+//     void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
 
     // Punctuation
     BOOL IsPunctuation(WCHAR wch);
@@ -52,25 +52,27 @@ public:
     BOOL IsMakePhraseFromText();
 
     // Language bar control
-    void SetLanguageBarStatus(DWORD status, BOOL isSet);
+//    void SetLanguageBarStatus(DWORD status, BOOL isSet);
 
-    void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr);
+//    void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr);
 
-    void ShowAllLanguageBarIcons();
-    void HideAllLanguageBarIcons();
+//    void ShowAllLanguageBarIcons();
+//    void HideAllLanguageBarIcons();
 
     std::vector<DWORD> *GetCandidateListIndexRange();
     UINT GetCandidateWindowWidth();
 
+    void UpdateCustomState(const std::string& customStateJson);
+
 private:
-    void SetupLanguageBar(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode,
-        _In_reads_(countButtons) const WindowsImeLib::LanguageBarButtonProperty* properties, UINT countButtons) override;
     void SetDefaultCandidateTextFont(int idsDefaultFont) override;
-    BOOL GetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) override;
-    void SetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, BOOL value) override;
-    DWORD GetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) override;
-    void SetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, DWORD value) override;
-    void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) override;
+//    void SetupLanguageBar(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode,
+//        _In_reads_(countButtons) const WindowsImeLib::LanguageBarButtonProperty* properties, UINT countButtons) override;
+//    BOOL GetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) override;
+//    void SetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, BOOL value) override;
+//    DWORD GetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) override;
+//    void SetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, DWORD value) override;
+//    void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) override;
 
 private:
 	std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> processorEngine;
@@ -91,7 +93,7 @@ private:
 
 private:
 //    void InitKeyStrokeTable();
-    BOOL InitLanguageBar(_In_ CLangBarItemButton *pLanguageBar, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment);
+//    BOOL InitLanguageBar(_In_ CLangBarItemButton *pLanguageBar, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment);
 //
 //    struct _KEYSTROKE;
 //    BOOL IsVirtualKeyKeystrokeComposition(UINT uCode, _Out_opt_ _KEYSTROKE_STATE *pKeyState, KEYSTROKE_FUNCTION function);
@@ -103,7 +105,7 @@ private:
 //    void SetupConfiguration();
 //    void SetKeystrokeTable(_Inout_ std::vector<_KEYSTROKE> *pKeystroke);
 //    void SetupPunctuationPair();
-	void CreateLanguageBarButton(DWORD dwEnable, GUID guidLangBar, _In_z_ LPCWSTR pwszDescriptionValue, _In_z_ LPCWSTR pwszTooltipValue, DWORD dwOnIconIndex, DWORD dwOffIconIndex, _Outptr_result_maybenull_ CLangBarItemButton **ppLangBarItemButton, BOOL isSecureMode);
+//	void CreateLanguageBarButton(DWORD dwEnable, GUID guidLangBar, _In_z_ LPCWSTR pwszDescriptionValue, _In_z_ LPCWSTR pwszTooltipValue, DWORD dwOnIconIndex, DWORD dwOffIconIndex, _Outptr_result_maybenull_ CLangBarItemButton **ppLangBarItemButton, BOOL isSecureMode);
 //    void SetInitialCandidateListRange();
 //	void InitializeSampleIMECompartment(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
 //
@@ -112,7 +114,7 @@ private:
 //    BOOL InitPreservedKey(_In_ XPreservedKey *pXPreservedKey, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
 //    BOOL CheckShiftKeyOnly(_In_ std::vector<TF_PRESERVEDKEY> *pTSFPreservedKeyTable);
 //
-    static HRESULT CompartmentCallback(_In_ void *pv, REFGUID guidCompartment);
+//    static HRESULT CompartmentCallback(_In_ void *pv, REFGUID guidCompartment);
 //    void PrivateCompartmentsUpdated(_In_ ITfThreadMgr *pThreadMgr);
 //    void KeyboardOpenCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr);
 //    
@@ -171,17 +173,16 @@ private:
 //    // Punctuation data
 //    std::vector<CPunctuationPair> _PunctuationPair;
 //    std::vector<CPunctuationNestPair> _PunctuationNestPair;
-
-    // Language bar data
-    std::vector<wil::com_ptr<CLangBarItemButton>> m_langaugeBarButtons;
-
-    // Compartment
-	std::shared_ptr<CCompartment> _pCompartmentConversion;
-	wil::com_ptr<CCompartmentEventSink> _pCompartmentConversionEventSink;
-
-	std::vector<wil::com_ptr<CCompartmentEventSink>> m_langaugeBarButtonEventSinks;
-
-
+// 
+//     // Language bar data
+//     std::vector<wil::com_ptr<CLangBarItemButton>> m_langaugeBarButtons;
+// 
+//     // Compartment
+// 	std::shared_ptr<CCompartment> _pCompartmentConversion;
+// 	wil::com_ptr<CCompartmentEventSink> _pCompartmentConversionEventSink;
+// 
+// 	std::vector<wil::com_ptr<CCompartmentEventSink>> m_langaugeBarButtonEventSinks;
+// 
 //    // Configuration data
 //    BOOL _isWildcard : 1;
 //    BOOL _isDisableWildcardAtFirst : 1;

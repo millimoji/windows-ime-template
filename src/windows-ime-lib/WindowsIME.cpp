@@ -9,7 +9,7 @@
 #include "Globals.h"
 #include "WindowsIME.h"
 #include "CandidateListUIPresenter.h"
-#include "Compartment.h"
+#include "../Compartment.h"
 #include "TfInputProcessorProfile.h"
 #include "RegKey.h"
 #include "SingletonProcessor.h"
@@ -123,42 +123,52 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
     }
 
     {
-        ITfDocumentMgr* pDocMgrFocus = nullptr;
-        if (SUCCEEDED(_pThreadMgr->GetFocus(&pDocMgrFocus)) && (pDocMgrFocus != nullptr))
+        wil::com_ptr<ITfDocumentMgr> pDocMgrFocus;
+        if (SUCCEEDED_LOG(_pThreadMgr->GetFocus(&pDocMgrFocus)) && pDocMgrFocus)
         {
-            _InitTextEditSink(pDocMgrFocus);
-            pDocMgrFocus->Release();
+            _InitTextEditSink(pDocMgrFocus.get());
         }
+    }
 
-        if (!_InitKeyEventSink())
-        {
-            goto ExitError;
-        }
+    if (!_InitKeyEventSink())
+    {
+        goto ExitError;
+    }
 
-        if (!_InitActiveLanguageProfileNotifySink())
-        {
-            goto ExitError;
-        }
+    if (!_InitActiveLanguageProfileNotifySink())
+    {
+        goto ExitError;
+    }
 
-        if (!_InitThreadFocusSink())
-        {
-            goto ExitError;
-        }
+    if (!_InitThreadFocusSink())
+    {
+        goto ExitError;
+    }
 
-        if (!_InitDisplayAttributeGuidAtom())
-        {
-            goto ExitError;
-        }
+    if (!_InitDisplayAttributeGuidAtom())
+    {
+        goto ExitError;
+    }
 
-        if (!_InitFunctionProviderSink())
-        {
-            goto ExitError;
-        }
+    if (!_InitFunctionProviderSink())
+    {
+        goto ExitError;
+    }
 
-        if (!_AddTextProcessorEngine())
-        {
-            goto ExitError;
-        }
+    try
+    {
+        m_inprocClient = WindowsImeLib::g_processorFactory->CreateIMEInprocClient(this);
+        m_inprocClient->Initialize(pThreadMgr, tfClientId, _IsSecureMode());
+    }
+    catch (...)
+    {
+        LOG_CAUGHT_EXCEPTION();
+        goto ExitError;
+	}
+
+    if (!_AddTextProcessorEngine())
+    {
+        goto ExitError;
     }
 
     activity.Stop();
@@ -179,11 +189,11 @@ STDAPI CWindowsIME::Deactivate()
 {
     auto activity = WindowsImeLibTelemetry::ITfTextInputProcessorEx_Deactivate();
 
-    if (_pCompositionProcessorEngine)
-    {
-        _pCompositionProcessorEngine->ClearCompartment(_pThreadMgr, _tfClientId);
-        _pCompositionProcessorEngine.reset();
-    }
+//    if (_pCompositionProcessorEngine)
+//    {
+//        _pCompositionProcessorEngine->ClearCompartment(_pThreadMgr, _tfClientId);
+//        _pCompositionProcessorEngine.reset();
+//    }
 
     ITfContext* pContext = _pContext;
     if (_pContext)
@@ -204,6 +214,12 @@ STDAPI CWindowsIME::Deactivate()
 
         _candidateMode = CANDIDATE_NONE;
         _isCandidateWithWildcard = FALSE;
+    }
+
+    if (m_inprocClient)
+    {
+        m_inprocClient->Deinitialize();
+        m_inprocClient.reset();
     }
 
     _UninitFunctionProviderSink();

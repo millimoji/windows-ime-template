@@ -8,8 +8,8 @@
 #include "Private.h"
 #include "Globals.h"
 #include "WindowsIME.h"
-#include "LanguageBar.h"
-#include "Compartment.h"
+#include "../LanguageBar.h"
+#include "../Compartment.h"
 
 //+---------------------------------------------------------------------------
 //
@@ -60,10 +60,16 @@ void CWindowsIME::_UpdateLanguageBarOnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus
         }
     }
 
+#if 1
+    if (m_inprocClient)
+    {
+        m_inprocClient->SetLanguageBarStatus(TF_LBI_STATUS_DISABLED, needDisableButtons);
+    }
+#else
     CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
     pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
-
     pCompositionProcessorEngine->SetLanguageBarStatus(TF_LBI_STATUS_DISABLED, needDisableButtons);
+#endif
 }
 
 //+---------------------------------------------------------------------------
@@ -625,16 +631,16 @@ BOOL CLangBarItemButton::_UnregisterCompartment(_In_ ITfThreadMgr *pThreadMgr)
 // static
 HRESULT CLangBarItemButton::_CompartmentCallback(_In_ void *pv, REFGUID guidCompartment)
 {
-    CLangBarItemButton* fakeThis = (CLangBarItemButton*)pv;
+    CLangBarItemButton* _this = (CLangBarItemButton*)pv;
 
     GUID guid = GUID_NULL;
-    fakeThis->_pCompartment->_GetGUID(&guid);
+    _this->_pCompartment->_GetGUID(&guid);
 
     if (IsEqualGUID(guid, guidCompartment))
     {
-        if (fakeThis->_pLangBarItemSink)
+        if (_this->_pLangBarItemSink)
         {
-            fakeThis->_pLangBarItemSink->OnUpdate(TF_LBI_STATUS | TF_LBI_ICON);
+            _this->_pLangBarItemSink->OnUpdate(TF_LBI_STATUS | TF_LBI_ICON);
         }
     }
 

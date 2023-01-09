@@ -85,6 +85,16 @@ struct SingletonProcessorBridge :
         return hr;
     }
 
+    IFACEMETHODIMP UpdateCustomState(LPCSTR customStateJson) override
+    {
+        HRESULT hr = S_OK;
+        if (m_threadTaskRunner)
+        {
+            m_threadTaskRunner->RunOnThread([&]() { hr = m_engine->UpdateCustomState(customStateJson); });
+        }
+        return hr;
+    }
+
 private:
     void EnsureInitialized()
     {
@@ -164,10 +174,16 @@ private:
         return S_OK;
     }
 
+    IFACEMETHODIMP UpdateCustomState(LPCSTR customStateJson) override
+    {
+        m_processor->UpdateCustomState(customStateJson);
+        return S_OK;
+    }
+
     // WindowsImeLib::ITextInputFramework
     void Test() override
     {
-	}
+    }
 
 private:
     std::shared_ptr<WindowsImeLib::ITextInputProcessor> m_processor;

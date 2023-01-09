@@ -31,6 +31,9 @@
 #include <wil/com.h>
 #include <wil/resource.h>
 
+#pragma warning(disable: 28020)
+#include <nlohmann/json.hpp>
+
 #pragma warning(pop)
 
 #pragma warning(disable: 4463)

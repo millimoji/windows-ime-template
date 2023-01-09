@@ -33,7 +33,9 @@ class CWindowsIME :
                                         ITfThreadFocusSink,
                                         ITfFunctionProvider,
                                         ITfFnGetPreferredTouchKeyboardLayout,
-                                        Microsoft::WRL::FtmBase>
+                                        Microsoft::WRL::FtmBase>,
+    WindowsImeLib::IWindowsIMEInprocFramework
+
 {
 public: 
     CWindowsIME();
@@ -202,8 +204,24 @@ private:
 
     friend LRESULT CALLBACK CWindowsIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+    void UpdateCustomState() override
+    {
+        if (m_inprocClient)
+        {
+            const auto customStateJson = m_inprocClient->EncodeCustomState();
+            if (_pCompositionProcessorEngine)
+            {
+                _pCompositionProcessorEngine->UpdateCustomState(customStateJson);
+            }
+            if (m_singletonProcessor)
+            {
+                m_singletonProcessor->UpdateCustomState(customStateJson.c_str());
+            }
+        }
+    }
+
 private:
-    ITfThreadMgr* _pThreadMgr;
+    ITfThreadMgr* _pThreadMgr = nullptr;
     TfClientId _tfClientId = {};
     DWORD _dwActivateFlags = {};
 
@@ -250,5 +268,6 @@ private:
     // Support the search integration
     ITfFnSearchCandidateProvider* _pITfFnSearchCandidateProvider = {};
 
+    std::shared_ptr<WindowsImeLib::IWindowsIMEInprocClient> m_inprocClient;
     wil::com_ptr<ITextInputProcessor> m_singletonProcessor;
 };

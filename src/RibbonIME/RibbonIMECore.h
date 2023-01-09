@@ -26,8 +26,8 @@ public:
     void GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) override;
     void GetCandidateStringInConverted(CStringRange &searchString, _In_ std::vector<CCandidateListItem> *pCandidateList) override;
 
-    // Preserved key handler
-    void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
+//     // Preserved key handler
+//     void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
 
     // Punctuation
     BOOL IsPunctuation(WCHAR wch) override;
@@ -37,14 +37,16 @@ public:
     BOOL IsMakePhraseFromText() override;
 
     // Language bar control
-    void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) override;
+//     void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) override;
 
     std::vector<DWORD>* GetCandidateListIndexRange() override;
     UINT GetCandidateWindowWidth() override;
 
-    // Compartment
-    HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept override;
-    void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
+//    // Compartment
+//    HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept override;
+//    void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
+
+    void UpdateCustomState(const std::string& /* customStateJson */) override {}
 
 private:
     std::weak_ptr<WindowsImeLib::ICompositionProcessorEngineOwner> m_owner;
@@ -58,8 +60,12 @@ public:
     RibbonTextInputProcessor(WindowsImeLib::ITextInputFramework* framework);
     virtual ~RibbonTextInputProcessor();
 
-    std::wstring TestMethod(const std::wstring_view src) override;
+    std::wstring TestMethod(const std::wstring& src) override;
     void SetFocus(bool isGotten) override;
+    void UpdateCustomState(const std::string& customStateJson) override
+    {
+        WindowsImeLib::TraceLog("RibbonTextInputProcessor::UpdateSingletonEngine: %s", customStateJson.c_str());
+    }
 
 private:
     WindowsImeLib::ITextInputFramework* m_framework;
@@ -127,4 +133,41 @@ class RibbonIMEConstants : public WindowsImeLib::IConstantProvider
         *layoutType = TKBLT_OPTIMIZED;
         *preferredLayoutId = TKBL_OPT_JAPANESE_ABC;
     }
+};
+
+class RibbonIMEInprocClient :
+    public WindowsImeLib::IWindowsIMEInprocClient,
+    public std::enable_shared_from_this<RibbonIMEInprocClient>
+{
+public:
+    RibbonIMEInprocClient(WindowsImeLib::IWindowsIMEInprocFramework* framework) : m_framework(framework) {}
+    ~RibbonIMEInprocClient() {}
+
+private:
+    void Initialize(_In_ ITfThreadMgr* threadMgr, TfClientId tfClientId, BOOL isSecureMode) override
+    {
+        (void)threadMgr; (void)tfClientId; (void)isSecureMode;
+    }
+    void Deinitialize() override
+    {
+    }
+    std::string EncodeCustomState() override
+    {
+        return "";
+    }
+    void OnPreservedKey(REFGUID rguid, _Out_ BOOL* pIsEaten, _In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId) override
+    {
+        *pIsEaten = FALSE;
+        (void)rguid; (void)pThreadMgr; (void)tfClientId;
+    }
+    void SetLanguageBarStatus(DWORD status, BOOL isSet) override
+    {
+        (void)status; (void)isSet;
+    }
+    void ConversionModeCompartmentUpdated() override
+    {
+    }
+
+private:
+    WindowsImeLib::IWindowsIMEInprocFramework* m_framework;
 };

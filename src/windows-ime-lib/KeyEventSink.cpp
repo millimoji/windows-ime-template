@@ -10,7 +10,7 @@
 #include "WindowsIME.h"
 #include "CandidateListUIPresenter.h"
 #include "KeyHandlerEditSession.h"
-#include "Compartment.h"
+#include "../Compartment.h"
 
 // 0xF003, 0xF004 are the keys that the touch keyboard sends for next/previous
 #define THIRDPARTY_NEXTPAGE  static_cast<WORD>(0xF003)
@@ -471,7 +471,10 @@ STDAPI CWindowsIME::OnPreservedKey(ITfContext* /*pContext*/, REFGUID rguid, BOOL
 {
     auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnPreservedKey();
 
-    _pCompositionProcessorEngine->OnPreservedKey(rguid, pIsEaten, _GetThreadMgr(), _GetClientId());
+    if (m_inprocClient)
+    {
+        m_inprocClient->OnPreservedKey(rguid, pIsEaten, _pThreadMgr, _tfClientId);
+    }
 
     activity.Stop();
     return S_OK;

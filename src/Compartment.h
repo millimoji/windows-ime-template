@@ -20,6 +20,9 @@ public:
     HRESULT _SetCompartmentDWORD(_In_ DWORD dw);
     HRESULT _ClearCompartment();
 
+    BOOL GetCompartmentBOOL() { BOOL value; THROW_IF_FAILED(_GetCompartmentBOOL(value)); return value; }
+    DWORD GetCompartmentDWORD() { DWORD value; THROW_IF_FAILED(_GetCompartmentDWORD(value)); return value; }
+
     VOID _GetGUID(GUID *pguid)
     {
         *pguid = _guidCompartment;

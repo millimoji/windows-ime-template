@@ -18,9 +18,10 @@ interface ITextInputEnvironment : IUnknown
 ]
 interface ITextInputProcessor : IUnknown
 {
-	HRESULT TestMethod([in] BSTR src, [retval, out] BSTR* result);
+    HRESULT TestMethod([in] BSTR src, [retval, out] BSTR* result);
 
-	HRESULT Acivate([in] ITextInputEnvironment* environment);
-	HRESULT Deacivate();
-	HRESULT SetFocus(BOOL isGotten);
+    HRESULT Acivate([in] ITextInputEnvironment* environment);
+    HRESULT Deacivate();
+	HRESULT UpdateCustomState([in] LPCSTR customState);
+	HRESULT SetFocus([in] BOOL isGotten);
 };

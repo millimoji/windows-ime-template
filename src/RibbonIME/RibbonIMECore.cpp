@@ -81,14 +81,14 @@ void RibbonIMECore::GetCandidateStringInConverted(CStringRange &searchString, _I
     (void)pCandidateList;
 }
 
-// Preserved key handler
-void RibbonIMECore::OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId)
-{
-    (void)rguid;
-    (void)pThreadMgr;
-    (void)tfClientId;
-    *pIsEaten = FALSE;
-}
+// // Preserved key handler
+// void RibbonIMECore::OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId)
+// {
+//     (void)rguid;
+//     (void)pThreadMgr;
+//     (void)tfClientId;
+//     *pIsEaten = FALSE;
+// }
 
 // Punctuation
 BOOL RibbonIMECore::IsPunctuation(WCHAR wch)
@@ -114,11 +114,11 @@ BOOL RibbonIMECore::IsMakePhraseFromText()
     return FALSE;
 }
 
-// Language bar control
-void RibbonIMECore::ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr)
-{
-    (void)pThreadMgr;
-}
+// // Language bar control
+// void RibbonIMECore::ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr)
+// {
+//     (void)pThreadMgr;
+// }
 
 std::vector<DWORD>* RibbonIMECore::GetCandidateListIndexRange()
 {
@@ -130,17 +130,17 @@ UINT RibbonIMECore::GetCandidateWindowWidth()
     return 0;
 }
 
-// Compartment
-HRESULT RibbonIMECore::CompartmentCallback(REFGUID guidCompartment) noexcept
-{
-    return S_OK;
-}
-
-void RibbonIMECore::ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId)
-{
-    (void)pThreadMgr;
-    (void)tfClientId;
-}
+// // Compartment
+// HRESULT RibbonIMECore::CompartmentCallback(REFGUID guidCompartment) noexcept
+// {
+//     return S_OK;
+// }
+// 
+// void RibbonIMECore::ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId)
+// {
+//     (void)pThreadMgr;
+//     (void)tfClientId;
+// }
 
 
 RibbonTextInputProcessor::RibbonTextInputProcessor(WindowsImeLib::ITextInputFramework* framework) :
@@ -152,9 +152,9 @@ RibbonTextInputProcessor::~RibbonTextInputProcessor()
 {
 }
 
-std::wstring RibbonTextInputProcessor::TestMethod(const std::wstring_view src)
+std::wstring RibbonTextInputProcessor::TestMethod(const std::wstring& src)
 {
-    return std::wstring(src) + L"-ribbon-suffix";
+    return src + L"-ribbon-suffix";
 }
 
 void RibbonTextInputProcessor::SetFocus(bool isGotten)

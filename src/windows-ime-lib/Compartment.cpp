@@ -7,7 +7,7 @@
 
 #include "Private.h"
 #include "Globals.h"
-#include "Compartment.h"
+#include "../Compartment.h"
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -328,15 +328,18 @@ HRESULT CCompartmentEventSink::_Unadvise()
     HRESULT hr = S_OK;
     ITfSource* pSource = nullptr;
 
-    hr = _pCompartment->QueryInterface(IID_ITfSource, (void **)&pSource);
-    if (SUCCEEDED(hr))
+    if (_pCompartment)
     {
-        hr = pSource->UnadviseSink(_dwCookie);
-        pSource->Release();
-    }
+        hr = _pCompartment->QueryInterface(IID_ITfSource, (void**)&pSource);
+        if (SUCCEEDED(hr))
+        {
+            hr = pSource->UnadviseSink(_dwCookie);
+            pSource->Release();
+        }
 
-    _pCompartment->Release();
-    _pCompartment = nullptr;
+        _pCompartment->Release();
+        _pCompartment = nullptr;
+    }
     _dwCookie = 0;
 
     return hr;

@@ -9,8 +9,6 @@
 #include "../WindowsImeLib.h"
 #include "Globals.h"
 #include "CompositionProcessorEngine.h"
-#include "Compartment.h"
-#include "LanguageBar.h"
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -69,41 +67,41 @@ void CCompositionProcessorEngine::Initialize()
 //
 //----------------------------------------------------------------------------
 
-void CCompositionProcessorEngine::ClearCompartment(ITfThreadMgr* pThreadMgr, TfClientId tfClientId)
-{
-    processorEngine->ClearCompartment(pThreadMgr, tfClientId);
-}
+// void CCompositionProcessorEngine::ClearCompartment(ITfThreadMgr* pThreadMgr, TfClientId tfClientId)
+// {
+//     processorEngine->ClearCompartment(pThreadMgr, tfClientId);
+// }
 
 CCompositionProcessorEngine::~CCompositionProcessorEngine()
 {
-    if (_pCompartmentConversion)
-    {
-        _pCompartmentConversion.reset();
-    }
-    if (_pCompartmentConversionEventSink)
-    {
-        _pCompartmentConversionEventSink->_Unadvise();
-        _pCompartmentConversionEventSink.reset();
-    }
-
-    for (auto&& langBarButton: m_langaugeBarButtons)
-    {
-        if (langBarButton)
-        {
-            langBarButton->CleanUp();
-            langBarButton.reset();
-        }
-    }
-
-    for (auto&& eventSink: m_langaugeBarButtonEventSinks)
-    {
-        if (eventSink)
-        {
-            eventSink->_Unadvise();
-            eventSink.reset();
-        }
-    }
-
+//    if (_pCompartmentConversion)
+//    {
+//        _pCompartmentConversion.reset();
+//    }
+//    if (_pCompartmentConversionEventSink)
+//    {
+//        _pCompartmentConversionEventSink->_Unadvise();
+//        _pCompartmentConversionEventSink.reset();
+//    }
+//
+//    for (auto&& langBarButton: m_langaugeBarButtons)
+//    {
+//        if (langBarButton)
+//        {
+//            langBarButton->CleanUp();
+//            langBarButton.reset();
+//        }
+//    }
+//
+//    for (auto&& eventSink: m_langaugeBarButtonEventSinks)
+//    {
+//        if (eventSink)
+//        {
+//            eventSink->_Unadvise();
+//            eventSink.reset();
+//        }
+//    }
+//
 //
 //    if (_pDictionaryFile)
 //    {
@@ -740,62 +738,62 @@ void CCompositionProcessorEngine::GetCandidateStringInConverted(CStringRange &se
 //     delete [] pwch;
 }
 
-//+---------------------------------------------------------------------------
-//
-// OnPreservedKey
-//
-//----------------------------------------------------------------------------
-
-void CCompositionProcessorEngine::OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId)
-{
-    return processorEngine->OnPreservedKey(rguid, pIsEaten, pThreadMgr, tfClientId);
-
-//     if (IsEqualGUID(rguid, _PreservedKey_IMEMode.Guid))
-//     {
-//         if (!CheckShiftKeyOnly(&_PreservedKey_IMEMode.TSFPreservedKeyTable))
-//         {
-//             *pIsEaten = FALSE;
-//             return;
-//         }
-//         BOOL isOpen = FALSE;
-//         CCompartment CompartmentKeyboardOpen(pThreadMgr, tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
-//         CompartmentKeyboardOpen._GetCompartmentBOOL(isOpen);
-//         CompartmentKeyboardOpen._SetCompartmentBOOL(isOpen ? FALSE : TRUE);
+// //+---------------------------------------------------------------------------
+// //
+// // OnPreservedKey
+// //
+// //----------------------------------------------------------------------------
 // 
-//         *pIsEaten = TRUE;
-//     }
-//     else if (IsEqualGUID(rguid, _PreservedKey_DoubleSingleByte.Guid))
-//     {
-//         if (!CheckShiftKeyOnly(&_PreservedKey_DoubleSingleByte.TSFPreservedKeyTable))
-//         {
-//             *pIsEaten = FALSE;
-//             return;
-//         }
-//         BOOL isDouble = FALSE;
-//         CCompartment CompartmentDoubleSingleByte(pThreadMgr, tfClientId, Global::SampleIMEGuidCompartmentDoubleSingleByte);
-//         CompartmentDoubleSingleByte._GetCompartmentBOOL(isDouble);
-//         CompartmentDoubleSingleByte._SetCompartmentBOOL(isDouble ? FALSE : TRUE);
-//         *pIsEaten = TRUE;
-//     }
-//     else if (IsEqualGUID(rguid, _PreservedKey_Punctuation.Guid))
-//     {
-//         if (!CheckShiftKeyOnly(&_PreservedKey_Punctuation.TSFPreservedKeyTable))
-//         {
-//             *pIsEaten = FALSE;
-//             return;
-//         }
-//         BOOL isPunctuation = FALSE;
-//         CCompartment CompartmentPunctuation(pThreadMgr, tfClientId, Global::SampleIMEGuidCompartmentPunctuation);
-//         CompartmentPunctuation._GetCompartmentBOOL(isPunctuation);
-//         CompartmentPunctuation._SetCompartmentBOOL(isPunctuation ? FALSE : TRUE);
-//         *pIsEaten = TRUE;
-//     }
-//     else
-//     {
-//         *pIsEaten = FALSE;
-//     }
-//     *pIsEaten = TRUE;
-}
+// void CCompositionProcessorEngine::OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId)
+// {
+//     return processorEngine->OnPreservedKey(rguid, pIsEaten, pThreadMgr, tfClientId);
+// 
+// //     if (IsEqualGUID(rguid, _PreservedKey_IMEMode.Guid))
+// //     {
+// //         if (!CheckShiftKeyOnly(&_PreservedKey_IMEMode.TSFPreservedKeyTable))
+// //         {
+// //             *pIsEaten = FALSE;
+// //             return;
+// //         }
+// //         BOOL isOpen = FALSE;
+// //         CCompartment CompartmentKeyboardOpen(pThreadMgr, tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
+// //         CompartmentKeyboardOpen._GetCompartmentBOOL(isOpen);
+// //         CompartmentKeyboardOpen._SetCompartmentBOOL(isOpen ? FALSE : TRUE);
+// // 
+// //         *pIsEaten = TRUE;
+// //     }
+// //     else if (IsEqualGUID(rguid, _PreservedKey_DoubleSingleByte.Guid))
+// //     {
+// //         if (!CheckShiftKeyOnly(&_PreservedKey_DoubleSingleByte.TSFPreservedKeyTable))
+// //         {
+// //             *pIsEaten = FALSE;
+// //             return;
+// //         }
+// //         BOOL isDouble = FALSE;
+// //         CCompartment CompartmentDoubleSingleByte(pThreadMgr, tfClientId, Global::SampleIMEGuidCompartmentDoubleSingleByte);
+// //         CompartmentDoubleSingleByte._GetCompartmentBOOL(isDouble);
+// //         CompartmentDoubleSingleByte._SetCompartmentBOOL(isDouble ? FALSE : TRUE);
+// //         *pIsEaten = TRUE;
+// //     }
+// //     else if (IsEqualGUID(rguid, _PreservedKey_Punctuation.Guid))
+// //     {
+// //         if (!CheckShiftKeyOnly(&_PreservedKey_Punctuation.TSFPreservedKeyTable))
+// //         {
+// //             *pIsEaten = FALSE;
+// //             return;
+// //         }
+// //         BOOL isPunctuation = FALSE;
+// //         CCompartment CompartmentPunctuation(pThreadMgr, tfClientId, Global::SampleIMEGuidCompartmentPunctuation);
+// //         CompartmentPunctuation._GetCompartmentBOOL(isPunctuation);
+// //         CompartmentPunctuation._SetCompartmentBOOL(isPunctuation ? FALSE : TRUE);
+// //         *pIsEaten = TRUE;
+// //     }
+// //     else
+// //     {
+// //         *pIsEaten = FALSE;
+// //     }
+// //     *pIsEaten = TRUE;
+// }
 
 //+---------------------------------------------------------------------------
 //
@@ -930,96 +928,96 @@ BOOL CCompositionProcessorEngine::IsMakePhraseFromText()
     return processorEngine->IsMakePhraseFromText();
 }
 
-//+---------------------------------------------------------------------------
-//
-// CCompositionProcessorEngine::SetLanguageBarStatus
-//
-//----------------------------------------------------------------------------
-
-VOID CCompositionProcessorEngine::SetLanguageBarStatus(DWORD status, BOOL isSet)
-{
-    for (auto&& langBarButton: m_langaugeBarButtons)
-    {
-        if (langBarButton)
-        {
-            langBarButton->SetStatus(status, isSet);
-            langBarButton.reset();
-        }
-    }
-}
-
-//+---------------------------------------------------------------------------
-//
-// UpdatePrivateCompartments
-//
-//----------------------------------------------------------------------------
-
-void CCompositionProcessorEngine::ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr)
-{
-    processorEngine->ConversionModeCompartmentUpdated(pThreadMgr);
-
-//    if (!_pCompartmentConversion)
-//    {
-//        return;
-//    }
-//
-//    DWORD conversionMode = 0;
-//    if (FAILED(_pCompartmentConversion->_GetCompartmentDWORD(conversionMode)))
-//    {
-//        return;
-//    }
-//
-//    BOOL isDouble = FALSE;
-//    CCompartment CompartmentDoubleSingleByte(pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentDoubleSingleByte);
-//    if (SUCCEEDED(CompartmentDoubleSingleByte._GetCompartmentBOOL(isDouble)))
-//    {
-//        if (!isDouble && (conversionMode & TF_CONVERSIONMODE_FULLSHAPE))
-//        {
-//            CompartmentDoubleSingleByte._SetCompartmentBOOL(TRUE);
-//        }
-//        else if (isDouble && !(conversionMode & TF_CONVERSIONMODE_FULLSHAPE))
-//        {
-//            CompartmentDoubleSingleByte._SetCompartmentBOOL(FALSE);
-//        }
-//    }
-//    BOOL isPunctuation = FALSE;
-//    CCompartment CompartmentPunctuation(pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentPunctuation);
-//    if (SUCCEEDED(CompartmentPunctuation._GetCompartmentBOOL(isPunctuation)))
-//    {
-//        if (!isPunctuation && (conversionMode & TF_CONVERSIONMODE_SYMBOL))
-//        {
-//            CompartmentPunctuation._SetCompartmentBOOL(TRUE);
-//        }
-//        else if (isPunctuation && !(conversionMode & TF_CONVERSIONMODE_SYMBOL))
-//        {
-//            CompartmentPunctuation._SetCompartmentBOOL(FALSE);
-//        }
-//    }
-//
-//    BOOL fOpen = FALSE;
-//    CCompartment CompartmentKeyboardOpen(pThreadMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
-//    if (SUCCEEDED(CompartmentKeyboardOpen._GetCompartmentBOOL(fOpen)))
-//    {
-//        if (fOpen && !(conversionMode & TF_CONVERSIONMODE_NATIVE))
-//        {
-//            CompartmentKeyboardOpen._SetCompartmentBOOL(FALSE);
-//        }
-//        else if (!fOpen && (conversionMode & TF_CONVERSIONMODE_NATIVE))
-//        {
-//            CompartmentKeyboardOpen._SetCompartmentBOOL(TRUE);
-//        }
-//    }
-}
-
-void CCompositionProcessorEngine::ShowAllLanguageBarIcons()
-{
-	SetLanguageBarStatus(TF_LBI_STATUS_HIDDEN, FALSE);
-}
-
-void CCompositionProcessorEngine::HideAllLanguageBarIcons()
-{
-	SetLanguageBarStatus(TF_LBI_STATUS_HIDDEN, TRUE);
-}
+// //+---------------------------------------------------------------------------
+// //
+// // CCompositionProcessorEngine::SetLanguageBarStatus
+// //
+// //----------------------------------------------------------------------------
+// 
+// VOID CCompositionProcessorEngine::SetLanguageBarStatus(DWORD status, BOOL isSet)
+// {
+//     for (auto&& langBarButton: m_langaugeBarButtons)
+//     {
+//         if (langBarButton)
+//         {
+//             langBarButton->SetStatus(status, isSet);
+//             langBarButton.reset();
+//         }
+//     }
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // UpdatePrivateCompartments
+// //
+// //----------------------------------------------------------------------------
+// 
+// void CCompositionProcessorEngine::ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr)
+// {
+// //    processorEngine->ConversionModeCompartmentUpdated(pThreadMgr);
+// 
+// //    if (!_pCompartmentConversion)
+// //    {
+// //        return;
+// //    }
+// //
+// //    DWORD conversionMode = 0;
+// //    if (FAILED(_pCompartmentConversion->_GetCompartmentDWORD(conversionMode)))
+// //    {
+// //        return;
+// //    }
+// //
+// //    BOOL isDouble = FALSE;
+// //    CCompartment CompartmentDoubleSingleByte(pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentDoubleSingleByte);
+// //    if (SUCCEEDED(CompartmentDoubleSingleByte._GetCompartmentBOOL(isDouble)))
+// //    {
+// //        if (!isDouble && (conversionMode & TF_CONVERSIONMODE_FULLSHAPE))
+// //        {
+// //            CompartmentDoubleSingleByte._SetCompartmentBOOL(TRUE);
+// //        }
+// //        else if (isDouble && !(conversionMode & TF_CONVERSIONMODE_FULLSHAPE))
+// //        {
+// //            CompartmentDoubleSingleByte._SetCompartmentBOOL(FALSE);
+// //        }
+// //    }
+// //    BOOL isPunctuation = FALSE;
+// //    CCompartment CompartmentPunctuation(pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentPunctuation);
+// //    if (SUCCEEDED(CompartmentPunctuation._GetCompartmentBOOL(isPunctuation)))
+// //    {
+// //        if (!isPunctuation && (conversionMode & TF_CONVERSIONMODE_SYMBOL))
+// //        {
+// //            CompartmentPunctuation._SetCompartmentBOOL(TRUE);
+// //        }
+// //        else if (isPunctuation && !(conversionMode & TF_CONVERSIONMODE_SYMBOL))
+// //        {
+// //            CompartmentPunctuation._SetCompartmentBOOL(FALSE);
+// //        }
+// //    }
+// //
+// //    BOOL fOpen = FALSE;
+// //    CCompartment CompartmentKeyboardOpen(pThreadMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
+// //    if (SUCCEEDED(CompartmentKeyboardOpen._GetCompartmentBOOL(fOpen)))
+// //    {
+// //        if (fOpen && !(conversionMode & TF_CONVERSIONMODE_NATIVE))
+// //        {
+// //            CompartmentKeyboardOpen._SetCompartmentBOOL(FALSE);
+// //        }
+// //        else if (!fOpen && (conversionMode & TF_CONVERSIONMODE_NATIVE))
+// //        {
+// //            CompartmentKeyboardOpen._SetCompartmentBOOL(TRUE);
+// //        }
+// //    }
+// }
+// 
+// void CCompositionProcessorEngine::ShowAllLanguageBarIcons()
+// {
+// 	SetLanguageBarStatus(TF_LBI_STATUS_HIDDEN, FALSE);
+// }
+// 
+// void CCompositionProcessorEngine::HideAllLanguageBarIcons()
+// {
+// 	SetLanguageBarStatus(TF_LBI_STATUS_HIDDEN, TRUE);
+// }
 
 std::vector<DWORD>* CCompositionProcessorEngine::GetCandidateListIndexRange()
 {
@@ -1799,80 +1797,80 @@ UINT CCompositionProcessorEngine::GetCandidateWindowWidth()
 // SetupLanguageBar
 //
 //----------------------------------------------------------------------------
-
-void CCompositionProcessorEngine::SetupLanguageBar(
-	_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode,
-	_In_reads_(countButtons) const WindowsImeLib::LanguageBarButtonProperty* properties, UINT countButtons)
-{
-
-	// INPUT MODE CONVERSION is as default.
-    _pCompartmentConversion = std::make_shared<CCompartment>(pThreadMgr, tfClientId, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION);
-    _pCompartmentConversionEventSink.attach(new (std::nothrow) CCompartmentEventSink(CompartmentCallback, this));
-    if (_pCompartmentConversionEventSink)
-    {
-        _pCompartmentConversionEventSink->_Advise(pThreadMgr, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION);
-	}
-
-	for (UINT i = 0; i < countButtons; ++i)
-	{
-    	const auto& buttonProp = properties[i];
-
-    	wil::com_ptr<CLangBarItemButton> langBarButton;
-    	DWORD dwEnable = 1;
-    	CreateLanguageBarButton(dwEnable,
-    		buttonProp.id, buttonProp.langBarDescription, buttonProp.description, buttonProp.onIconResourceIndex, buttonProp.offIconResourceIndex,
-    		&langBarButton, isSecureMode);
-
-    	InitLanguageBar(langBarButton.get(), pThreadMgr, tfClientId, buttonProp.compartmentId);
-
-    	wil::com_ptr<CCompartmentEventSink> compartmentEventSink;
-    	compartmentEventSink.attach(new (std::nothrow) CCompartmentEventSink(CompartmentCallback, this));
-    	compartmentEventSink->_Advise(pThreadMgr, buttonProp.compartmentId);
-
-		m_langaugeBarButtons.emplace_back(langBarButton);
-		m_langaugeBarButtonEventSinks.emplace_back(compartmentEventSink);
-	}
-}
-
-//+---------------------------------------------------------------------------
+// 
+// void CCompositionProcessorEngine::SetupLanguageBar(
+// 	_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode,
+// 	_In_reads_(countButtons) const WindowsImeLib::LanguageBarButtonProperty* properties, UINT countButtons)
+// {
+// 
+// 	// INPUT MODE CONVERSION is as default.
+//     _pCompartmentConversion = std::make_shared<CCompartment>(pThreadMgr, tfClientId, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION);
+//     _pCompartmentConversionEventSink.attach(new (std::nothrow) CCompartmentEventSink(CompartmentCallback, this));
+//     if (_pCompartmentConversionEventSink)
+//     {
+//         _pCompartmentConversionEventSink->_Advise(pThreadMgr, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION);
+// 	}
+// 
+// 	for (UINT i = 0; i < countButtons; ++i)
+// 	{
+//     	const auto& buttonProp = properties[i];
+// 
+//     	wil::com_ptr<CLangBarItemButton> langBarButton;
+//     	DWORD dwEnable = 1;
+//     	CreateLanguageBarButton(dwEnable,
+//     		buttonProp.id, buttonProp.langBarDescription, buttonProp.description, buttonProp.onIconResourceIndex, buttonProp.offIconResourceIndex,
+//     		&langBarButton, isSecureMode);
+// 
+//     	InitLanguageBar(langBarButton.get(), pThreadMgr, tfClientId, buttonProp.compartmentId);
+// 
+//     	wil::com_ptr<CCompartmentEventSink> compartmentEventSink;
+//     	compartmentEventSink.attach(new (std::nothrow) CCompartmentEventSink(CompartmentCallback, this));
+//     	compartmentEventSink->_Advise(pThreadMgr, buttonProp.compartmentId);
+// 
+// 		m_langaugeBarButtons.emplace_back(langBarButton);
+// 		m_langaugeBarButtonEventSinks.emplace_back(compartmentEventSink);
+// 	}
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // CreateLanguageBarButton
+// //
+// //----------------------------------------------------------------------------
+// 
+// void CCompositionProcessorEngine::CreateLanguageBarButton(DWORD dwEnable, GUID guidLangBar, _In_z_ LPCWSTR pwszDescriptionValue, _In_z_ LPCWSTR pwszTooltipValue, DWORD dwOnIconIndex, DWORD dwOffIconIndex, _Outptr_result_maybenull_ CLangBarItemButton **ppLangBarItemButton, BOOL isSecureMode)
+// {
+//     dwEnable;
+// 
+//     if (ppLangBarItemButton)
+//     {
+//         *ppLangBarItemButton = new (std::nothrow) CLangBarItemButton(guidLangBar, pwszDescriptionValue, pwszTooltipValue, dwOnIconIndex, dwOffIconIndex, isSecureMode);
+//     }
+// 
+//     return;
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // InitLanguageBar
+// //
+// //----------------------------------------------------------------------------
 //
-// CreateLanguageBarButton
+// BOOL CCompositionProcessorEngine::InitLanguageBar(_In_ CLangBarItemButton *pLangBarItemButton, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment)
+// {
+//     if (pLangBarItemButton)
+//     {
+//         if (pLangBarItemButton->_AddItem(pThreadMgr) == S_OK)
+//         {
+//             if (pLangBarItemButton->_RegisterCompartment(pThreadMgr, tfClientId, guidCompartment))
+//             {
+//                 return TRUE;
+//             }
+//         }
+//     }
+//     return FALSE;
+// }
 //
-//----------------------------------------------------------------------------
-
-void CCompositionProcessorEngine::CreateLanguageBarButton(DWORD dwEnable, GUID guidLangBar, _In_z_ LPCWSTR pwszDescriptionValue, _In_z_ LPCWSTR pwszTooltipValue, DWORD dwOnIconIndex, DWORD dwOffIconIndex, _Outptr_result_maybenull_ CLangBarItemButton **ppLangBarItemButton, BOOL isSecureMode)
-{
-    dwEnable;
-
-    if (ppLangBarItemButton)
-    {
-        *ppLangBarItemButton = new (std::nothrow) CLangBarItemButton(guidLangBar, pwszDescriptionValue, pwszTooltipValue, dwOnIconIndex, dwOffIconIndex, isSecureMode);
-    }
-
-    return;
-}
-
-//+---------------------------------------------------------------------------
-//
-// InitLanguageBar
-//
-//----------------------------------------------------------------------------
-
-BOOL CCompositionProcessorEngine::InitLanguageBar(_In_ CLangBarItemButton *pLangBarItemButton, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment)
-{
-    if (pLangBarItemButton)
-    {
-        if (pLangBarItemButton->_AddItem(pThreadMgr) == S_OK)
-        {
-            if (pLangBarItemButton->_RegisterCompartment(pThreadMgr, tfClientId, guidCompartment))
-            {
-                return TRUE;
-            }
-        }
-    }
-    return FALSE;
-}
-
 ////+---------------------------------------------------------------------------
 ////
 //// SetupDictionaryFile
@@ -1992,24 +1990,24 @@ BOOL CCompositionProcessorEngine::InitLanguageBar(_In_ CLangBarItemButton *pLang
 //    PrivateCompartmentsUpdated(pThreadMgr);
 //}
 
-//+---------------------------------------------------------------------------
-//
-// CompartmentCallback
-//
-//----------------------------------------------------------------------------
-
-// static
-HRESULT CCompositionProcessorEngine::CompartmentCallback(_In_ void *pv, REFGUID guidCompartment)
-{
-    CCompositionProcessorEngine* fakeThis = (CCompositionProcessorEngine*)pv;
-
-    if (fakeThis && fakeThis->processorEngine)
-    {
-        return fakeThis->processorEngine->CompartmentCallback(guidCompartment);
-    }
-
-    return S_OK;
-
+// //+---------------------------------------------------------------------------
+// //
+// // CompartmentCallback
+// //
+// //----------------------------------------------------------------------------
+// 
+// // static
+// HRESULT CCompositionProcessorEngine::CompartmentCallback(_In_ void *pv, REFGUID guidCompartment)
+// {
+//     CCompositionProcessorEngine* fakeThis = (CCompositionProcessorEngine*)pv;
+// 
+//     if (fakeThis && fakeThis->processorEngine)
+//     {
+//         return fakeThis->processorEngine->CompartmentCallback(guidCompartment);
+//     }
+// 
+//     return S_OK;
+// 
 //    ITfThreadMgr* pThreadMgr = nullptr;
 //    HRESULT hr = CoCreateInstance(CLSID_TF_ThreadMgr, nullptr, CLSCTX_INPROC_SERVER, IID_ITfThreadMgr, (void**)&pThreadMgr);
 //    if (FAILED(hr))
@@ -2036,8 +2034,8 @@ HRESULT CCompositionProcessorEngine::CompartmentCallback(_In_ void *pv, REFGUID 
 //    pThreadMgr = nullptr;
 //
 //    return S_OK;
-}
-
+// }
+// 
 ////+---------------------------------------------------------------------------
 ////
 //// UpdatePrivateCompartments
@@ -2702,37 +2700,41 @@ void CCompositionProcessorEngine::SetDefaultCandidateTextFont(int idsDefaultFont
 //    return FALSE;
 //}
 
+// BOOL CCompositionProcessorEngine::GetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment)
+// {
+//     BOOL value = FALSE;
+//     CCompartment compartment(pThreadMgr, tfClientId, guidCompartment);
+//     LOG_IF_FAILED(compartment._GetCompartmentBOOL(value));
+//     return value;
+// }
+// 
+// void CCompositionProcessorEngine::SetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, BOOL value)
+// {
+//     CCompartment compartment(pThreadMgr, tfClientId, guidCompartment);
+//     LOG_IF_FAILED(compartment._SetCompartmentBOOL(value));
+// }
+// 
+// DWORD CCompositionProcessorEngine::GetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment)
+// {
+//     DWORD value = 0;
+//     CCompartment compartment(pThreadMgr, tfClientId, guidCompartment);
+//     LOG_IF_FAILED(compartment._GetCompartmentDWORD(value));
+//     return value;
+// }
+// 
+// void CCompositionProcessorEngine::SetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, DWORD value)
+// {
+//     CCompartment compartment(pThreadMgr, tfClientId, guidCompartment);
+//     LOG_IF_FAILED(compartment._SetCompartmentDWORD(value));
+// }
+// 
+// void CCompositionProcessorEngine::ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment)
+// {
+//     CCompartment compartment(pThreadMgr, tfClientId, guidCompartment);
+//     LOG_IF_FAILED(compartment._ClearCompartment());
+// }
 
-BOOL CCompositionProcessorEngine::GetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment)
+void CCompositionProcessorEngine::UpdateCustomState(const std::string& customStateJson)
 {
-    BOOL value = FALSE;
-    CCompartment compartment(pThreadMgr, tfClientId, guidCompartment);
-    LOG_IF_FAILED(compartment._GetCompartmentBOOL(value));
-    return value;
-}
-
-void CCompositionProcessorEngine::SetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, BOOL value)
-{
-    CCompartment compartment(pThreadMgr, tfClientId, guidCompartment);
-    LOG_IF_FAILED(compartment._SetCompartmentBOOL(value));
-}
-
-DWORD CCompositionProcessorEngine::GetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment)
-{
-    DWORD value = 0;
-    CCompartment compartment(pThreadMgr, tfClientId, guidCompartment);
-    LOG_IF_FAILED(compartment._GetCompartmentDWORD(value));
-    return value;
-}
-
-void CCompositionProcessorEngine::SetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, DWORD value)
-{
-    CCompartment compartment(pThreadMgr, tfClientId, guidCompartment);
-    LOG_IF_FAILED(compartment._SetCompartmentDWORD(value));
-}
-
-void CCompositionProcessorEngine::ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment)
-{
-    CCompartment compartment(pThreadMgr, tfClientId, guidCompartment);
-    LOG_IF_FAILED(compartment._ClearCompartment());
+    processorEngine->UpdateCustomState(customStateJson);
 }
