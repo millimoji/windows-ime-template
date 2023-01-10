@@ -54,7 +54,7 @@ CompositionProcessorEngine::CompositionProcessorEngine(WindowsImeLib::ICompositi
 
     _candidateListPhraseModifier = 0;
 
-    _candidateWndWidth = CAND_WIDTH;
+//    _candidateWndWidth = CAND_WIDTH;
 
     InitKeyStrokeTable();
 }
@@ -813,7 +813,7 @@ void CompositionProcessorEngine::SetupConfiguration()
     _isDisableWildcardAtFirst = TRUE;
     _hasMakePhraseFromText = TRUE;
     _isKeystrokeSort = TRUE;
-    _candidateWndWidth = CAND_WIDTH;
+//    _candidateWndWidth = CAND_WIDTH;
 
     SetInitialCandidateListRange();
 

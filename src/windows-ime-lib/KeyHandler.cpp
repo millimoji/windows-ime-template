@@ -258,7 +258,8 @@ HRESULT CWindowsIME::_CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionPr
             ITfRange* pRange = nullptr;
             if (SUCCEEDED(_pComposition->GetRange(&pRange)))
             {
-                hr = _pCandidateListUIPresenter->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, ec, pRange, pCompositionProcessorEngine->GetCandidateWindowWidth());
+                hr = _pCandidateListUIPresenter->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, ec, pRange,
+                        WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
                 pRange->Release();
             }
             pDocumentMgr->Release();
@@ -392,7 +393,8 @@ HRESULT CWindowsIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext 
             ITfRange* pRange = nullptr;
             if (SUCCEEDED(_pComposition->GetRange(&pRange)))
             {
-                hr = _pCandidateListUIPresenter->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, ec, pRange, pCompositionProcessorEngine->GetCandidateWindowWidth());
+                hr = _pCandidateListUIPresenter->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, ec, pRange,
+                        WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
                 pRange->Release();
             }
             pDocumentMgr->Release();

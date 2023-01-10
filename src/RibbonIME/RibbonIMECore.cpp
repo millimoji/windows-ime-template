@@ -71,12 +71,12 @@ void RibbonIMECore::GetCandidateStringInConverted(CStringRange &searchString, _I
 //     *pIsEaten = FALSE;
 // }
 
-// Punctuation
-BOOL RibbonIMECore::IsPunctuation(WCHAR wch)
-{
-    (void)wch;
-    return FALSE;
-}
+// // Punctuation
+// BOOL RibbonIMECore::IsPunctuation(WCHAR wch)
+// {
+//     (void)wch;
+//     return FALSE;
+// }
 
 WCHAR RibbonIMECore::GetPunctuation(WCHAR wch)
 {
@@ -104,11 +104,6 @@ BOOL RibbonIMECore::IsMakePhraseFromText()
 std::vector<DWORD>* RibbonIMECore::GetCandidateListIndexRange()
 {
     return nullptr;
-}
-
-UINT RibbonIMECore::GetCandidateWindowWidth()
-{
-    return 0;
 }
 
 // // Compartment

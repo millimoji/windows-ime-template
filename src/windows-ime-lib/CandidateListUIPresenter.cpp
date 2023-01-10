@@ -140,7 +140,8 @@ HRESULT CWindowsIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pC
         {
             if (pTempCandListUIPresenter)
             {
-                hrStartCandidateList = pTempCandListUIPresenter->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, ec, pRange, _pCompositionProcessorEngine->GetCandidateWindowWidth());
+                hrStartCandidateList = pTempCandListUIPresenter->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, ec, pRange,
+                        WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
             } 
 
             pRange->Release();

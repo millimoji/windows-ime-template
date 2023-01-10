@@ -29,7 +29,7 @@ public:
 //     void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
 
     // Punctuation
-    BOOL IsPunctuation(WCHAR wch) override;
+//     BOOL IsPunctuation(WCHAR wch) override;
     WCHAR GetPunctuation(WCHAR wch) override;
 
     BOOL IsDoubleSingleByte(WCHAR wch) override;
@@ -39,7 +39,6 @@ public:
 //     void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) override;
 
     std::vector<DWORD>* GetCandidateListIndexRange() override;
-    UINT GetCandidateWindowWidth() override;
 
 //    // Compartment
 //    HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept override;
@@ -131,6 +130,10 @@ class RibbonIMEConstants : public WindowsImeLib::IConstantProvider
     {
         *layoutType = TKBLT_OPTIMIZED;
         *preferredLayoutId = TKBL_OPT_JAPANESE_ABC;
+    }
+    UINT GetCandidateWindowWidth() noexcept override
+    {
+        return 13; // CAND_WIDTH
     }
     const int GetDefaultCandidateTextFontResourceID()  override
     {

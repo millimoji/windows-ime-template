@@ -43,7 +43,7 @@ public:
 //    void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
 
     // Punctuation
-    BOOL IsPunctuation(WCHAR wch) override;
+    BOOL IsPunctuation(WCHAR wch);
     WCHAR GetPunctuation(WCHAR wch) override;
 
     BOOL IsDoubleSingleByte(WCHAR wch) override;
@@ -53,7 +53,6 @@ public:
 //    void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) override;
 
     inline std::vector<DWORD> *GetCandidateListIndexRange()  override { return &_candidateListIndexRange; }
-    inline UINT GetCandidateWindowWidth()  override { return _candidateWndWidth; }
 
 //    HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept override;
 //    void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
@@ -199,7 +198,7 @@ private:
 //    BOOL _isComLessMode : 1;
     std::vector<DWORD> _candidateListIndexRange;
     UINT _candidateListPhraseModifier;
-    UINT _candidateWndWidth;
+//    UINT _candidateWndWidth;
 
     CFileMapping* _pDictionaryFile;
 

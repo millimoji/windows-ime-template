@@ -145,16 +145,6 @@ struct IWindowsIMEInprocClient
     virtual std::string EncodeCustomState() = 0;
 };
 
-struct LanguageBarButtonProperty
-{
-    GUID id;
-    GUID compartmentId;
-    LPCWSTR langBarDescription;
-    LPCWSTR description;
-    int onIconResourceIndex;
-    int offIconResourceIndex;
-};
-
 struct ICompositionProcessorEngineOwner
 {
     virtual ~ICompositionProcessorEngineOwner() {}
@@ -191,7 +181,7 @@ struct ICompositionProcessorEngine
 //     virtual void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId) = 0;
 
     // Punctuation
-    virtual BOOL IsPunctuation(WCHAR wch) = 0;
+    // virtual BOOL IsPunctuation(WCHAR wch) = 0;
     virtual WCHAR GetPunctuation(WCHAR wch) = 0;
 
     virtual BOOL IsDoubleSingleByte(WCHAR wch) = 0;
@@ -201,7 +191,6 @@ struct ICompositionProcessorEngine
 //     virtual void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) = 0;
 
     virtual std::vector<DWORD>* GetCandidateListIndexRange() = 0;
-    virtual UINT GetCandidateWindowWidth() = 0;
 
 //    // Compartment
 //    virtual HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept = 0;
@@ -239,6 +228,7 @@ struct IConstantProvider
     virtual const GUID& ServerCLSID() noexcept = 0;
     virtual const GUID& ServerAppID() noexcept = 0;
     virtual const wchar_t* ServerName() noexcept = 0;
+    virtual UINT GetCandidateWindowWidth() noexcept = 0;
     virtual const int GetDefaultCandidateTextFontResourceID() = 0;
     virtual void GetPreferredTouchKeyboardLayout(_Out_ TKBLayoutType* layoutType, _Out_ WORD* preferredLayoutId) = 0;
 };
