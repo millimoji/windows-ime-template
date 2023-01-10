@@ -1,4 +1,5 @@
-// dllmain.cpp : Defines the entry point for the DLL application.
+// Copyright (c) millimoji@gmail.com
+
 #include "pch.h"
 #include "resource.h"
 #include "../WindowsImeLib.h"
