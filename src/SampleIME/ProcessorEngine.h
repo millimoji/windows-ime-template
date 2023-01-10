@@ -24,7 +24,8 @@ public:
     CompositionProcessorEngine(const std::weak_ptr<WindowsImeLib::ICompositionProcessorEngineOwner>& owner);
     ~CompositionProcessorEngine(void);
 
-    BOOL SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode) override;
+    BOOL Initialize() override;
+    // BOOL SetupLanguageProfile() override; // LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode) override;
 
     BOOL IsKeyEaten(_In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId, UINT code, _Inout_updates_(1) WCHAR *pwch,
         BOOL isComposing, CANDIDATE_MODE candidateMode, BOOL isCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState) override;
@@ -135,9 +136,9 @@ private:
 
     BOOL _hasWildcardIncludedInKeystrokeBuffer;
 
-    LANGID _langid;
-    GUID _guidProfile;
-    TfClientId  _tfClientId;
+//    LANGID _langid;
+//    GUID _guidProfile;
+//    TfClientId  _tfClientId;
 
     std::vector<_KEYSTROKE> _KeystrokeComposition;
     std::vector<_KEYSTROKE> _KeystrokeCandidate;
@@ -188,7 +189,7 @@ private:
     BOOL _isDisableWildcardAtFirst : 1;
     BOOL _hasMakePhraseFromText : 1;
     BOOL _isKeystrokeSort : 1;
-    BOOL _isComLessMode : 1;
+//    BOOL _isComLessMode : 1;
     std::vector<DWORD> _candidateListIndexRange;
     UINT _candidateListPhraseModifier;
     UINT _candidateWndWidth;
@@ -262,79 +263,79 @@ private:
             const auto preservedKeyData = FindPreservedKey(rguid);
             if (CheckShiftKeyOnly(preservedKeyData->tfPreservedKey.uModifiers))
             {
-				const auto isOpen = m_compartmentKeyboardOpenClose->GetCompartmentBOOL();
-				THROW_IF_FAILED(m_compartmentKeyboardOpenClose->_SetCompartmentBOOL(isOpen ? FALSE : TRUE));
-	            *pIsEaten = TRUE;
-			}
+                const auto isOpen = m_compartmentKeyboardOpenClose->GetCompartmentBOOL();
+                THROW_IF_FAILED(m_compartmentKeyboardOpenClose->_SetCompartmentBOOL(isOpen ? FALSE : TRUE));
+                *pIsEaten = TRUE;
+            }
         }
         else if (IsEqualGUID(rguid, Global::SampleIMEGuidDoubleSingleBytePreserveKey))
         {
             const auto preservedKeyData = FindPreservedKey(rguid);
             if (CheckShiftKeyOnly(preservedKeyData->tfPreservedKey.uModifiers))
             {
-				const auto isDouble = m_compartmentDoubleSingleByte->GetCompartmentBOOL();
-				THROW_IF_FAILED(m_compartmentDoubleSingleByte->_SetCompartmentBOOL(isDouble ? FALSE : TRUE));
-	            *pIsEaten = TRUE;
-			}
+                const auto isDouble = m_compartmentDoubleSingleByte->GetCompartmentBOOL();
+                THROW_IF_FAILED(m_compartmentDoubleSingleByte->_SetCompartmentBOOL(isDouble ? FALSE : TRUE));
+                *pIsEaten = TRUE;
+            }
         }
         else if (IsEqualGUID(rguid, Global::SampleIMEGuidPunctuationPreserveKey))
         {
             const auto preservedKeyData = FindPreservedKey(rguid);
             if (CheckShiftKeyOnly(preservedKeyData->tfPreservedKey.uModifiers))
             {
-				const auto isPunctuation = m_compartmentPunctuation->GetCompartmentBOOL();
-				THROW_IF_FAILED(m_compartmentPunctuation->_SetCompartmentBOOL(isPunctuation ? FALSE : TRUE));
-	            *pIsEaten = TRUE;
-			}
+                const auto isPunctuation = m_compartmentPunctuation->GetCompartmentBOOL();
+                THROW_IF_FAILED(m_compartmentPunctuation->_SetCompartmentBOOL(isPunctuation ? FALSE : TRUE));
+                *pIsEaten = TRUE;
+            }
         }
     }
 
-	void SetLanguageBarStatus(DWORD status, BOOL isSet) override
-	{
-	    for (auto&& item: m_listLanguageBarItem)
-	    {
-	        if (item)
-	        {
-	            item->SetStatus(status, isSet);
-	        }
-    	}
-	}
+    void SetLanguageBarStatus(DWORD status, BOOL isSet) override
+    {
+        for (auto&& item: m_listLanguageBarItem)
+        {
+            if (item)
+            {
+                item->SetStatus(status, isSet);
+            }
+        }
+    }
 
-	void ConversionModeCompartmentUpdated() override
-	{
-	    DWORD conversionMode = m_compartmentKeyboardInputModeConversion->GetCompartmentDWORD();
+    void ConversionModeCompartmentUpdated() override
+    {
+        DWORD conversionMode = m_compartmentKeyboardInputModeConversion->GetCompartmentDWORD();
 
-		const auto isOpen = m_compartmentKeyboardOpenClose->GetCompartmentBOOL();
-		const auto isDouble = m_compartmentDoubleSingleByte->GetCompartmentBOOL();
-		const auto isPunctuation = m_compartmentPunctuation->GetCompartmentBOOL();
+        const auto isOpen = m_compartmentKeyboardOpenClose->GetCompartmentBOOL();
+        const auto isDouble = m_compartmentDoubleSingleByte->GetCompartmentBOOL();
+        const auto isPunctuation = m_compartmentPunctuation->GetCompartmentBOOL();
 
-		if (!isDouble && (conversionMode & TF_CONVERSIONMODE_FULLSHAPE))
-		{
-			m_compartmentDoubleSingleByte->_SetCompartmentBOOL(TRUE);
-		}
-		else if (isDouble && !(conversionMode & TF_CONVERSIONMODE_FULLSHAPE))
-		{
-			m_compartmentDoubleSingleByte->_SetCompartmentBOOL(FALSE);
-		}
+        if (!isDouble && (conversionMode & TF_CONVERSIONMODE_FULLSHAPE))
+        {
+            m_compartmentDoubleSingleByte->_SetCompartmentBOOL(TRUE);
+        }
+        else if (isDouble && !(conversionMode & TF_CONVERSIONMODE_FULLSHAPE))
+        {
+            m_compartmentDoubleSingleByte->_SetCompartmentBOOL(FALSE);
+        }
 
-		if (!isPunctuation && (conversionMode & TF_CONVERSIONMODE_SYMBOL))
-		{
-			m_compartmentPunctuation->_SetCompartmentBOOL(TRUE);
-		}
-		else if (isPunctuation && !(conversionMode & TF_CONVERSIONMODE_SYMBOL))
-		{
-			m_compartmentPunctuation->_SetCompartmentBOOL(FALSE);
-		}
+        if (!isPunctuation && (conversionMode & TF_CONVERSIONMODE_SYMBOL))
+        {
+            m_compartmentPunctuation->_SetCompartmentBOOL(TRUE);
+        }
+        else if (isPunctuation && !(conversionMode & TF_CONVERSIONMODE_SYMBOL))
+        {
+            m_compartmentPunctuation->_SetCompartmentBOOL(FALSE);
+        }
 
-		if (isOpen && !(conversionMode & TF_CONVERSIONMODE_NATIVE))
-		{
-			m_compartmentKeyboardOpenClose->_SetCompartmentBOOL(FALSE);
-		}
-		else
-		{
-			m_compartmentKeyboardOpenClose->_SetCompartmentBOOL(TRUE);
-		}
-	}
+        if (isOpen && !(conversionMode & TF_CONVERSIONMODE_NATIVE))
+        {
+            m_compartmentKeyboardOpenClose->_SetCompartmentBOOL(FALSE);
+        }
+        else
+        {
+            m_compartmentKeyboardOpenClose->_SetCompartmentBOOL(TRUE);
+        }
+    }
 
     std::string EncodeCustomState() override
     {
@@ -347,25 +348,25 @@ private:
 
 private:
     static const inline GUID s_compartmentGuids[5] = {
-		GUID_COMPARTMENT_KEYBOARD_OPENCLOSE,
-		GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION,
-		GUID_COMPARTMENT_KEYBOARD_INPUTMODE_SENTENCE,
-		Global::SampleIMEGuidCompartmentDoubleSingleByte,
-		Global::SampleIMEGuidCompartmentPunctuation
-	};
+        GUID_COMPARTMENT_KEYBOARD_OPENCLOSE,
+        GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION,
+        GUID_COMPARTMENT_KEYBOARD_INPUTMODE_SENTENCE,
+        Global::SampleIMEGuidCompartmentDoubleSingleByte,
+        Global::SampleIMEGuidCompartmentPunctuation
+    };
 
     void InitCompartments()
     {
-		for (const auto& compartmentGuid: s_compartmentGuids)
-		{
-			const auto compartment = std::make_shared<CCompartment>(m_threadMgr.get(), m_tfClientId, compartmentGuid);
-			wil::com_ptr<CCompartmentEventSink> eventCallback;
-			eventCallback.attach(new CCompartmentEventSink(CompartmentCallback, this));
-        	THROW_IF_FAILED(eventCallback->_Advise(m_threadMgr.get(), compartmentGuid));
+        for (const auto& compartmentGuid: s_compartmentGuids)
+        {
+            const auto compartment = std::make_shared<CCompartment>(m_threadMgr.get(), m_tfClientId, compartmentGuid);
+            wil::com_ptr<CCompartmentEventSink> eventCallback;
+            eventCallback.attach(new CCompartmentEventSink(CompartmentCallback, this));
+            THROW_IF_FAILED(eventCallback->_Advise(m_threadMgr.get(), compartmentGuid));
 
-			m_listCompartment.emplace_back(compartment);
-			m_listCompartmentEventSink.emplace_back(eventCallback);
-		}
+            m_listCompartment.emplace_back(compartment);
+            m_listCompartmentEventSink.emplace_back(eventCallback);
+        }
 
         // map to named variable
         m_compartmentKeyboardOpenClose = m_listCompartment[0];
@@ -415,20 +416,20 @@ private:
             Global::LangbarImeModeDescription, Global::ImeModeDescription, Global::ImeModeOnIcoIndex, Global::ImeModeOffIcoIndex },
         { Global::SampleIMEGuidLangBarDoubleSingleByte, Global::SampleIMEGuidCompartmentDoubleSingleByte,
             Global::LangbarDoubleSingleByteDescription, Global::DoubleSingleByteDescription, Global::DoubleSingleByteOnIcoIndex, Global::DoubleSingleByteOffIcoIndex },
-		{ Global::SampleIMEGuidLangBarPunctuation, Global::SampleIMEGuidCompartmentPunctuation,
-			Global::LangbarPunctuationDescription, Global::PunctuationDescription, Global::PunctuationOnIcoIndex, Global::PunctuationOffIcoIndex }
+        { Global::SampleIMEGuidLangBarPunctuation, Global::SampleIMEGuidCompartmentPunctuation,
+            Global::LangbarPunctuationDescription, Global::PunctuationDescription, Global::PunctuationOnIcoIndex, Global::PunctuationOffIcoIndex }
     };
 
     void InitLanguageBar(BOOL isSecureMode)
     {
-		for (const auto& langBarItemData: s_langBarItems)
-		{
-        	m_listLanguageBarItem.emplace_back(wil::com_ptr<CLangBarItemButton>());
-	        m_listLanguageBarItem.back().attach(new CLangBarItemButton(langBarItemData.langBarItemGuid,
-	        		langBarItemData.description, langBarItemData.toolTip, langBarItemData.onIconResourceId, langBarItemData.offIconResourceId, isSecureMode));
-        	THROW_IF_FAILED(m_listLanguageBarItem.back()->_AddItem(m_threadMgr.get()));
-        	THROW_HR_IF(E_FAIL, !m_listLanguageBarItem.back()->_RegisterCompartment(m_threadMgr.get(), m_tfClientId, langBarItemData.compartmentGuid));
-		}
+        for (const auto& langBarItemData: s_langBarItems)
+        {
+            m_listLanguageBarItem.emplace_back(wil::com_ptr<CLangBarItemButton>());
+            m_listLanguageBarItem.back().attach(new CLangBarItemButton(langBarItemData.langBarItemGuid,
+                    langBarItemData.description, langBarItemData.toolTip, langBarItemData.onIconResourceId, langBarItemData.offIconResourceId, isSecureMode));
+            THROW_IF_FAILED(m_listLanguageBarItem.back()->_AddItem(m_threadMgr.get()));
+            THROW_HR_IF(E_FAIL, !m_listLanguageBarItem.back()->_RegisterCompartment(m_threadMgr.get(), m_tfClientId, langBarItemData.compartmentGuid));
+        }
     }
 
     void DeinitLanguageBar()
@@ -488,8 +489,8 @@ private:
         return nullptr;
     }
 
-	BOOL CheckShiftKeyOnly(UINT extendedModifer)
-	{
+    BOOL CheckShiftKeyOnly(UINT extendedModifer)
+    {
 
         if (((extendedModifer & (_TF_MOD_ON_KEYUP_SHIFT_ONLY & 0xffff0000)) && !WindowsImeLib::IsShiftKeyDownOnly) ||
             ((extendedModifer & (_TF_MOD_ON_KEYUP_CONTROL_ONLY & 0xffff0000)) && !WindowsImeLib::IsControlKeyDownOnly) ||
@@ -497,109 +498,109 @@ private:
         {
             return FALSE;
         }
-	    return TRUE;
-	}
+        return TRUE;
+    }
 
     static HRESULT CompartmentCallback(void* pv, REFGUID guidCompartment)
     {
         SampleIMEInprocClient* _this = reinterpret_cast<SampleIMEInprocClient*>(pv);
 
-	    if (IsEqualGUID(guidCompartment, Global::SampleIMEGuidCompartmentDoubleSingleByte) ||
-	        IsEqualGUID(guidCompartment, Global::SampleIMEGuidCompartmentPunctuation))
-	    {
-	        _this->PrivateCompartmentsUpdated();
-	    }
-	    else if (IsEqualGUID(guidCompartment, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION) ||
-	        IsEqualGUID(guidCompartment, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_SENTENCE))
-	    {
-	        _this->ConversionModeCompartmentUpdated();
-	    }
-	    else if (IsEqualGUID(guidCompartment, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE))
-	    {
-	        _this->KeyboardOpenCompartmentUpdated();
-	    }
+        if (IsEqualGUID(guidCompartment, Global::SampleIMEGuidCompartmentDoubleSingleByte) ||
+            IsEqualGUID(guidCompartment, Global::SampleIMEGuidCompartmentPunctuation))
+        {
+            _this->PrivateCompartmentsUpdated();
+        }
+        else if (IsEqualGUID(guidCompartment, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION) ||
+            IsEqualGUID(guidCompartment, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_SENTENCE))
+        {
+            _this->ConversionModeCompartmentUpdated();
+        }
+        else if (IsEqualGUID(guidCompartment, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE))
+        {
+            _this->KeyboardOpenCompartmentUpdated();
+        }
 
         _this->UpdateCustomStateIfRequired();
-    	return S_OK;
+        return S_OK;
     }
 
-	void PrivateCompartmentsUpdated()
-	{
-	    DWORD conversionMode = m_compartmentKeyboardInputModeConversion->GetCompartmentDWORD();
-	    DWORD conversionModePrev = conversionMode;
+    void PrivateCompartmentsUpdated()
+    {
+        DWORD conversionMode = m_compartmentKeyboardInputModeConversion->GetCompartmentDWORD();
+        DWORD conversionModePrev = conversionMode;
 
-	    BOOL isDouble = m_compartmentDoubleSingleByte->GetCompartmentBOOL();
-	    if (!isDouble && (conversionMode & TF_CONVERSIONMODE_FULLSHAPE))
-	    {
-	        conversionMode &= ~TF_CONVERSIONMODE_FULLSHAPE;
-	    }
-	    else if (isDouble && !(conversionMode & TF_CONVERSIONMODE_FULLSHAPE))
-	    {
-	        conversionMode |= TF_CONVERSIONMODE_FULLSHAPE;
-	    }
+        BOOL isDouble = m_compartmentDoubleSingleByte->GetCompartmentBOOL();
+        if (!isDouble && (conversionMode & TF_CONVERSIONMODE_FULLSHAPE))
+        {
+            conversionMode &= ~TF_CONVERSIONMODE_FULLSHAPE;
+        }
+        else if (isDouble && !(conversionMode & TF_CONVERSIONMODE_FULLSHAPE))
+        {
+            conversionMode |= TF_CONVERSIONMODE_FULLSHAPE;
+        }
 
-	    BOOL isPunctuation = m_compartmentPunctuation->GetCompartmentBOOL();
-	    if (!isPunctuation && (conversionMode & TF_CONVERSIONMODE_SYMBOL))
-	    {
-	        conversionMode &= ~TF_CONVERSIONMODE_SYMBOL;
-	    }
-	    else if (isPunctuation && !(conversionMode & TF_CONVERSIONMODE_SYMBOL))
-	    {
-	        conversionMode |= TF_CONVERSIONMODE_SYMBOL;
-	    }
+        BOOL isPunctuation = m_compartmentPunctuation->GetCompartmentBOOL();
+        if (!isPunctuation && (conversionMode & TF_CONVERSIONMODE_SYMBOL))
+        {
+            conversionMode &= ~TF_CONVERSIONMODE_SYMBOL;
+        }
+        else if (isPunctuation && !(conversionMode & TF_CONVERSIONMODE_SYMBOL))
+        {
+            conversionMode |= TF_CONVERSIONMODE_SYMBOL;
+        }
 
-	    if (conversionMode != conversionModePrev)
-	    {
-	        m_compartmentKeyboardInputModeConversion->_SetCompartmentDWORD(conversionMode);
-	    }
-	}
-
-	void KeyboardOpenCompartmentUpdated()
-	{
-	    DWORD conversionMode = m_compartmentKeyboardInputModeConversion->GetCompartmentDWORD();
-	    DWORD conversionModePrev = conversionMode;
-
-		const auto isOpen = m_compartmentKeyboardOpenClose->GetCompartmentBOOL();
-
-		if (isOpen && !(conversionMode & TF_CONVERSIONMODE_NATIVE))
-		{
-			conversionMode |= TF_CONVERSIONMODE_NATIVE;
-		}
-		else if (!isOpen && (conversionMode & TF_CONVERSIONMODE_NATIVE))
-		{
-			conversionMode &= ~TF_CONVERSIONMODE_NATIVE;
-		}
-
-		if (conversionMode != conversionModePrev)
-		{
-	        m_compartmentKeyboardInputModeConversion->_SetCompartmentDWORD(conversionMode);
-		}
+        if (conversionMode != conversionModePrev)
+        {
+            m_compartmentKeyboardInputModeConversion->_SetCompartmentDWORD(conversionMode);
+        }
     }
 
-	void UpdateCustomStateIfRequired()
-	{
+    void KeyboardOpenCompartmentUpdated()
+    {
+        DWORD conversionMode = m_compartmentKeyboardInputModeConversion->GetCompartmentDWORD();
+        DWORD conversionModePrev = conversionMode;
+
+        const auto isOpen = m_compartmentKeyboardOpenClose->GetCompartmentBOOL();
+
+        if (isOpen && !(conversionMode & TF_CONVERSIONMODE_NATIVE))
+        {
+            conversionMode |= TF_CONVERSIONMODE_NATIVE;
+        }
+        else if (!isOpen && (conversionMode & TF_CONVERSIONMODE_NATIVE))
+        {
+            conversionMode &= ~TF_CONVERSIONMODE_NATIVE;
+        }
+
+        if (conversionMode != conversionModePrev)
+        {
+            m_compartmentKeyboardInputModeConversion->_SetCompartmentDWORD(conversionMode);
+        }
+    }
+
+    void UpdateCustomStateIfRequired()
+    {
         bool isOpen = !!m_compartmentKeyboardOpenClose->GetCompartmentBOOL();
         bool isDouble = !!m_compartmentDoubleSingleByte->GetCompartmentBOOL();
         bool isPunctuation = !!m_compartmentPunctuation->GetCompartmentBOOL();
 
         if (m_lastCompartmentIsOpen != isOpen ||
-        	m_lastCompartmentIsDoubleSingleByte != isDouble ||
-        	m_lastCompartmentIsPunctuation != isPunctuation)
+            m_lastCompartmentIsDoubleSingleByte != isDouble ||
+            m_lastCompartmentIsPunctuation != isPunctuation)
         {
-			m_framework->UpdateCustomState();
+            m_framework->UpdateCustomState();
 
             m_lastCompartmentIsOpen = isOpen;
             m_lastCompartmentIsDoubleSingleByte = isDouble;
             m_lastCompartmentIsPunctuation = isPunctuation;
-		}
-	}
+        }
+    }
 
 private:
     WindowsImeLib::IWindowsIMEInprocFramework* m_framework;
     wil::com_ptr<ITfThreadMgr> m_threadMgr;
     TfClientId m_tfClientId = TF_CLIENTID_NULL;
 
-	bool m_lastCompartmentIsOpen = false;
+    bool m_lastCompartmentIsOpen = false;
     bool m_lastCompartmentIsDoubleSingleByte = false;
     bool m_lastCompartmentIsPunctuation = false;
 

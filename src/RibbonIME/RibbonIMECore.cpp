@@ -12,15 +12,8 @@ RibbonIMECore::~RibbonIMECore()
 }
 
 // Get locale
-BOOL RibbonIMECore::SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode)
+BOOL RibbonIMECore::Initialize()
 {
-    (void)langid;
-    (void)guidLanguageProfile;
-    (void)pThreadMgr;
-    (void)tfClientId;
-    (void)isSecureMode;
-    (void)isComLessMode;
-
     return TRUE;
 }
 

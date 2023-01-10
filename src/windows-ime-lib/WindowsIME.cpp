@@ -423,12 +423,6 @@ BOOL CWindowsIME::_AddTextProcessorEngine()
         return FALSE;
     }
 
-    // setup composition processor engine
-    if (FALSE == _pCompositionProcessorEngine->SetupLanguageProfile(langid, guidProfile, _GetThreadMgr(), _GetClientId(), _IsSecureMode(), _IsComLess()))
-    {
-        return FALSE;
-    }
-
     return TRUE;
 }
 

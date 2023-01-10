@@ -31,9 +31,9 @@ CompositionProcessorEngine::CompositionProcessorEngine(const std::weak_ptr<Windo
     _pTableDictionaryEngine = nullptr;
     _pDictionaryFile = nullptr;
 
-    _langid = 0xffff;
-    _guidProfile = GUID_NULL;
-    _tfClientId = TF_CLIENTID_NULL;
+//    _langid = 0xffff;
+//    _guidProfile = GUID_NULL;
+//    _tfClientId = TF_CLIENTID_NULL;
 
 //    _pLanguageBar_IMEMode = nullptr;
 //    _pLanguageBar_DoubleSingleByte = nullptr;
@@ -145,19 +145,20 @@ CompositionProcessorEngine::~CompositionProcessorEngine()
 // N.B. For reverse conversion, ITfThreadMgr is NULL, TfClientId is 0 and isSecureMode is ignored.
 //+---------------------------------------------------------------------------
 
-BOOL CompositionProcessorEngine::SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL /*isSecureMode*/, BOOL isComLessMode)
+BOOL CompositionProcessorEngine::Initialize()
 {
     BOOL ret = TRUE;
-    if ((tfClientId == 0) && (pThreadMgr == nullptr))
-    {
-        ret = FALSE;
-        goto Exit;
-    }
 
-    _isComLessMode = isComLessMode;
-    _langid = langid;
-    _guidProfile = guidLanguageProfile;
-    _tfClientId = tfClientId;
+//    if ((tfClientId == 0) && (pThreadMgr == nullptr))
+//    {
+//        ret = FALSE;
+//        goto Exit;
+//    }
+
+//    _isComLessMode = isComLessMode;
+//    _langid = langid;
+//    _guidProfile = guidLanguageProfile;
+//    _tfClientId = tfClientId;
 
     // SetupPreserved(pThreadMgr, tfClientId); 
     // InitializeSampleIMECompartment(pThreadMgr, tfClientId);
@@ -166,8 +167,7 @@ BOOL CompositionProcessorEngine::SetupLanguageProfile(LANGID langid, REFGUID gui
     SetupKeystroke();
     SetupConfiguration();
     SetupDictionaryFile();
-
-Exit:
+// Exit:
     return ret;
 }
 

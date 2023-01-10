@@ -22,10 +22,8 @@ public:
     CCompositionProcessorEngine(void);
     ~CCompositionProcessorEngine(void);
 
-    void Initialize();
+    BOOL Initialize();
 //    void ClearCompartment(_In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId);
-
-    BOOL SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode);
 
     BOOL IsKeyEaten(_In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId, UINT code, _Inout_updates_(1) WCHAR *pwch,
         BOOL isComposing, CANDIDATE_MODE candidateMode, BOOL isCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
@@ -45,7 +43,7 @@ public:
 //     void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
 
     // Punctuation
-    BOOL IsPunctuation(WCHAR wch);
+//    BOOL IsPunctuation(WCHAR wch);
     WCHAR GetPunctuation(WCHAR wch);
 
     BOOL IsDoubleSingleByte(WCHAR wch);

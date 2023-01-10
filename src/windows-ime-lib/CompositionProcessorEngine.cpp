@@ -55,10 +55,11 @@ CCompositionProcessorEngine::CCompositionProcessorEngine()
 //    InitKeyStrokeTable();
 }
 
-void CCompositionProcessorEngine::Initialize()
+BOOL CCompositionProcessorEngine::Initialize()
 {
     const auto thisAsOwner = std::static_pointer_cast<WindowsImeLib::ICompositionProcessorEngineOwner>(shared_from_this());
     processorEngine = WindowsImeLib::g_processorFactory->CreateCompositionProcessorEngine(std::weak_ptr(thisAsOwner));
+    return processorEngine->Initialize();
 }
 
 //+---------------------------------------------------------------------------
@@ -126,33 +127,33 @@ CCompositionProcessorEngine::~CCompositionProcessorEngine()
 // N.B. For reverse conversion, ITfThreadMgr is NULL, TfClientId is 0 and isSecureMode is ignored.
 //+---------------------------------------------------------------------------
 
-BOOL CCompositionProcessorEngine::SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode)
-{
-    return processorEngine->SetupLanguageProfile(langid, guidLanguageProfile, pThreadMgr, tfClientId, isSecureMode, isComLessMode);
-//    BOOL ret = TRUE;
-//    if ((tfClientId == 0) && (pThreadMgr == nullptr))
-//    {
-//        ret = FALSE;
-//        goto Exit;
-//    }
-//
-//    _isComLessMode = isComLessMode;
-//    _langid = langid;
-//    _guidProfile = guidLanguageProfile;
-//    _tfClientId = tfClientId;
-//
-//    SetupPreserved(pThreadMgr, tfClientId); 
-//    InitializeSampleIMECompartment(pThreadMgr, tfClientId);
-//    SetupPunctuationPair();
-//    SetupLanguageBar(pThreadMgr, tfClientId, isSecureMode);
-//    SetupKeystroke();
-//    SetupConfiguration();
-//    SetupDictionaryFile();
-//
-//Exit:
-//    return ret;
-}
-
+// BOOL CCompositionProcessorEngine::SetupLanguageProfile() // LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode)
+// {
+//     return processorEngine->SetupLanguageProfile(); // langid, guidLanguageProfile, pThreadMgr, tfClientId, isSecureMode, isComLessMode);
+// //    BOOL ret = TRUE;
+// //    if ((tfClientId == 0) && (pThreadMgr == nullptr))
+// //    {
+// //        ret = FALSE;
+// //        goto Exit;
+// //    }
+// //
+// //    _isComLessMode = isComLessMode;
+// //    _langid = langid;
+// //    _guidProfile = guidLanguageProfile;
+// //    _tfClientId = tfClientId;
+// //
+// //    SetupPreserved(pThreadMgr, tfClientId); 
+// //    InitializeSampleIMECompartment(pThreadMgr, tfClientId);
+// //    SetupPunctuationPair();
+// //    SetupLanguageBar(pThreadMgr, tfClientId, isSecureMode);
+// //    SetupKeystroke();
+// //    SetupConfiguration();
+// //    SetupDictionaryFile();
+// //
+// //Exit:
+// //    return ret;
+// }
+// 
 // // Get language profile.
 // const GUID& CCompositionProcessorEngine::GetLanguageProfile(LANGID *plangid)
 // {
@@ -795,49 +796,49 @@ void CCompositionProcessorEngine::GetCandidateStringInConverted(CStringRange &se
 // //     *pIsEaten = TRUE;
 // }
 
-//+---------------------------------------------------------------------------
-//
-// IsPunctuation
-//
-//----------------------------------------------------------------------------
-
-BOOL CCompositionProcessorEngine::IsPunctuation(WCHAR wch)
-{
-    return processorEngine->IsPunctuation(wch);
-
-//     for (int i = 0; i < ARRAYSIZE(Global::PunctuationTable); i++)
-//     {
-//         if (Global::PunctuationTable[i]._Code == wch)
-//         {
-//             return TRUE;
-//         }
-//     }
+// //+---------------------------------------------------------------------------
+// //
+// // IsPunctuation
+// //
+// //----------------------------------------------------------------------------
 // 
-//     for (UINT j = 0; j < _PunctuationPair.Count(); j++)
-//     {
-//         CPunctuationPair* pPuncPair = _PunctuationPair.GetAt(j);
+// BOOL CCompositionProcessorEngine::IsPunctuation(WCHAR wch)
+// {
+//     return processorEngine->IsPunctuation(wch);
 // 
-//         if (pPuncPair->_punctuation._Code == wch)
-//         {
-//             return TRUE;
-//         }
-//     }
-// 
-//     for (UINT k = 0; k < _PunctuationNestPair.Count(); k++)
-//     {
-//         CPunctuationNestPair* pPuncNestPair = _PunctuationNestPair.GetAt(k);
-// 
-//         if (pPuncNestPair->_punctuation_begin._Code == wch)
-//         {
-//             return TRUE;
-//         }
-//         if (pPuncNestPair->_punctuation_end._Code == wch)
-//         {
-//             return TRUE;
-//         }
-//     }
-//     return FALSE;
-}
+// //     for (int i = 0; i < ARRAYSIZE(Global::PunctuationTable); i++)
+// //     {
+// //         if (Global::PunctuationTable[i]._Code == wch)
+// //         {
+// //             return TRUE;
+// //         }
+// //     }
+// // 
+// //     for (UINT j = 0; j < _PunctuationPair.Count(); j++)
+// //     {
+// //         CPunctuationPair* pPuncPair = _PunctuationPair.GetAt(j);
+// // 
+// //         if (pPuncPair->_punctuation._Code == wch)
+// //         {
+// //             return TRUE;
+// //         }
+// //     }
+// // 
+// //     for (UINT k = 0; k < _PunctuationNestPair.Count(); k++)
+// //     {
+// //         CPunctuationNestPair* pPuncNestPair = _PunctuationNestPair.GetAt(k);
+// // 
+// //         if (pPuncNestPair->_punctuation_begin._Code == wch)
+// //         {
+// //             return TRUE;
+// //         }
+// //         if (pPuncNestPair->_punctuation_end._Code == wch)
+// //         {
+// //             return TRUE;
+// //         }
+// //     }
+// //     return FALSE;
+// }
 
 //+---------------------------------------------------------------------------
 //
