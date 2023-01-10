@@ -45,6 +45,9 @@
     <ClCompile Include="ProcessorEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SampleIMEInprocClient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TableDictionaryEngine.h">
