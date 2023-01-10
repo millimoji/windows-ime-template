@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../WindowsImeLib.h"
+#include "resource.h"
 
 class RibbonIMECore :
     public WindowsImeLib::ICompositionProcessorEngine,
@@ -131,6 +132,10 @@ class RibbonIMEConstants : public WindowsImeLib::IConstantProvider
     {
         *layoutType = TKBLT_OPTIMIZED;
         *preferredLayoutId = TKBL_OPT_JAPANESE_ABC;
+    }
+    const int GetDefaultCandidateTextFontResourceID()  override
+    {
+        return IDS_DEFAULT_FONT;
     }
 };
 

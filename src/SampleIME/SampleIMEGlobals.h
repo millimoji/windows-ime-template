@@ -129,6 +129,10 @@ class ConstantProvider :
         *layoutType = TKBLT_OPTIMIZED;
         *preferredLayoutId = TKBL_OPT_SIMPLIFIED_CHINESE_PINYIN;
     }
+    const int GetDefaultCandidateTextFontResourceID()  override
+    {
+        return IDS_DEFAULT_FONT;
+    }
 };
 
 }

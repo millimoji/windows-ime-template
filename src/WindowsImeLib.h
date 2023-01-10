@@ -159,8 +159,8 @@ struct ICompositionProcessorEngineOwner
 {
     virtual ~ICompositionProcessorEngineOwner() {}
 
-    virtual void SetDefaultCandidateTextFont(int idsDefaultFont) = 0;
-
+//    virtual void SetDefaultCandidateTextFont(int idsDefaultFont) = 0;
+//
 //    virtual void SetupLanguageBar(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, _In_reads_(countButtons) const LanguageBarButtonProperty* properties, UINT countButtons) = 0;
 //    virtual BOOL GetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) = 0;
 //    virtual void SetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, BOOL value) = 0;
@@ -240,6 +240,7 @@ struct IConstantProvider
     virtual const GUID& ServerCLSID() noexcept = 0;
     virtual const GUID& ServerAppID() noexcept = 0;
     virtual const wchar_t* ServerName() noexcept = 0;
+    virtual const int GetDefaultCandidateTextFontResourceID() = 0;
     virtual void GetPreferredTouchKeyboardLayout(_Out_ TKBLayoutType* layoutType, _Out_ WORD* preferredLayoutId) = 0;
 };
 

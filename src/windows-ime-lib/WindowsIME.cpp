@@ -417,6 +417,7 @@ BOOL CWindowsIME::_AddTextProcessorEngine()
 
         _pCompositionProcessorEngine = std::make_shared<CCompositionProcessorEngine>();
         _pCompositionProcessorEngine->Initialize();
+        SetDefaultCandidateTextFont();
     }
     if (!_pCompositionProcessorEngine)
     {
@@ -559,4 +560,24 @@ HRESULT CWindowsIME::GetComModuleName(REFGUID rclsid, _Out_writes_(cchPath)WCHAR
     }
 
     return hr;
+}
+
+void CWindowsIME::SetDefaultCandidateTextFont()
+{
+    // Candidate Text Font
+    if (Global::defaultlFontHandle == nullptr)
+    {
+        const auto fontNameResourceId = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetDefaultCandidateTextFontResourceID();
+
+        WCHAR fontName[50] = {'\0'}; 
+        LoadString(Global::dllInstanceHandle, fontNameResourceId, fontName, 50);
+        Global::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, fontName);
+        if (!Global::defaultlFontHandle)
+        {
+            LOGFONT lf = {};
+            SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
+            // Fall back to the default GUI font on failure.
+            Global::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, lf.lfFaceName);
+        }
+    }
 }

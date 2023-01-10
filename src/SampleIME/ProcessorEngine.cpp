@@ -817,7 +817,7 @@ void CompositionProcessorEngine::SetupConfiguration()
 
     SetInitialCandidateListRange();
 
-    SetDefaultCandidateTextFont();
+    // SetDefaultCandidateTextFont();
 
     return;
 }
@@ -1332,29 +1332,29 @@ void CompositionProcessorEngine::SetInitialCandidateListRange()
     }
 }
 
-void CompositionProcessorEngine::SetDefaultCandidateTextFont()
-{
-    if (const auto owner = m_owner.lock())
-    {
-        owner->SetDefaultCandidateTextFont(IDS_DEFAULT_FONT);
-    }
-
-//    // Candidate Text Font
-//    if (WindowsImeLib::defaultlFontHandle == nullptr)
-//    {
-//        WCHAR fontName[50] = {'\0'}; 
-//        LoadString(WindowsImeLib::dllInstanceHandle, IDS_DEFAULT_FONT, fontName, 50);
-//        WindowsImeLib::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, fontName);
-//        if (!WindowsImeLib::defaultlFontHandle)
-//        {
-//            LOGFONT lf = {};
-//            SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
-//            // Fall back to the default GUI font on failure.
-//            WindowsImeLib::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, lf.lfFaceName);
-//        }
-//    }
-}
-
+// void CompositionProcessorEngine::SetDefaultCandidateTextFont()
+// {
+//     if (const auto owner = m_owner.lock())
+//     {
+//         owner->SetDefaultCandidateTextFont(IDS_DEFAULT_FONT);
+//     }
+// 
+// //    // Candidate Text Font
+// //    if (WindowsImeLib::defaultlFontHandle == nullptr)
+// //    {
+// //        WCHAR fontName[50] = {'\0'}; 
+// //        LoadString(WindowsImeLib::dllInstanceHandle, IDS_DEFAULT_FONT, fontName, 50);
+// //        WindowsImeLib::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, fontName);
+// //        if (!WindowsImeLib::defaultlFontHandle)
+// //        {
+// //            LOGFONT lf = {};
+// //            SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &lf, 0);
+// //            // Fall back to the default GUI font on failure.
+// //            WindowsImeLib::defaultlFontHandle = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, FW_MEDIUM, 0, 0, 0, 0, 0, 0, 0, 0, lf.lfFaceName);
+// //        }
+// //    }
+// }
+// 
 //////////////////////////////////////////////////////////////////////
 //
 //    CompositionProcessorEngine

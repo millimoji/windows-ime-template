@@ -204,6 +204,7 @@ private:
 
 //    friend LRESULT CALLBACK CWindowsIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+    void SetDefaultCandidateTextFont();
     void UpdateCustomState() override
     {
         if (m_inprocClient)

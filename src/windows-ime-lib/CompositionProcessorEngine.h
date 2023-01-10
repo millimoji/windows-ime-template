@@ -63,7 +63,7 @@ public:
     void UpdateCustomState(const std::string& customStateJson);
 
 private:
-    void SetDefaultCandidateTextFont(int idsDefaultFont) override;
+//    void SetDefaultCandidateTextFont(int idsDefaultFont) override;
 //    void SetupLanguageBar(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode,
 //        _In_reads_(countButtons) const WindowsImeLib::LanguageBarButtonProperty* properties, UINT countButtons) override;
 //    BOOL GetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) override;
