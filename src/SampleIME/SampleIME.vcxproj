@@ -38,6 +38,7 @@
     <ClCompile Include="ProcessorEngine.cpp" />
     <ClCompile Include="SampleIMEBaseStructure.cpp" />
     <ClCompile Include="SampleIMEGlobals.cpp" />
+    <ClCompile Include="SampleIMEInprocClient.cpp" />
     <ClCompile Include="TableDictionaryEngine.cpp" />
   </ItemGroup>
   <ItemGroup>

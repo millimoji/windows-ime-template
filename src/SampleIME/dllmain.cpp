@@ -47,6 +47,7 @@ STDAPI DllRegisterServer(void)
 
 namespace WindowsImeLib
 {
+	extern std::shared_ptr<IWindowsIMEInprocClient> ProcessorFactory_CreateIMEInprocClient(IWindowsIMEInprocFramework* framework);
 
     class ProcessorFactory : public std::enable_shared_from_this<ProcessorFactory>, public IProcessorFactory
     {
@@ -70,8 +71,7 @@ namespace WindowsImeLib
 
         std::shared_ptr<IWindowsIMEInprocClient> CreateIMEInprocClient(IWindowsIMEInprocFramework* framework) override
         {
-            auto inprocClient = std::make_shared<SampleIMEInprocClient>(framework);
-            return std::static_pointer_cast<IWindowsIMEInprocClient>(inprocClient);
+            return ProcessorFactory_CreateIMEInprocClient(framework);
         }
     };
 

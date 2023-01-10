@@ -116,8 +116,8 @@ struct CCandidateListItem
     }
 };
 
-struct ITfThreadMgr;
-typedef /* [uuid] */  DECLSPEC_UUID("de403c21-89fd-4f85-8b87-64584d063fbc") DWORD TfClientId;
+// struct ITfThreadMgr;
+// typedef /* [uuid] */  DECLSPEC_UUID("de403c21-89fd-4f85-8b87-64584d063fbc") DWORD TfClientId;
 
 namespace WindowsImeLib
 {

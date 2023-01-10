@@ -17,8 +17,8 @@ class CLangBarItemButton;
 class CCandidateListUIPresenter;
 struct SingletonProcessorBridge;
 
-const DWORD WM_CheckGlobalCompartment = WM_USER;
-LRESULT CALLBACK CWindowsIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
+// const DWORD WM_CheckGlobalCompartment = WM_USER;
+// LRESULT CALLBACK CWindowsIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 class CWindowsIME :
     public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
@@ -202,7 +202,7 @@ private:
 
     BOOL VerifyIMECLSID(_In_ REFCLSID clsid);
 
-    friend LRESULT CALLBACK CWindowsIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
+//    friend LRESULT CALLBACK CWindowsIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     void UpdateCustomState() override
     {
