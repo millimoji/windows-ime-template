@@ -1,4 +1,6 @@
+// Copyright (c) millimoji@gmail.com
 #pragma once
+
 #include <windows.h>
 #include <ctffunc.h>
 #include <cassert>
