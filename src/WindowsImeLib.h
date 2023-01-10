@@ -159,14 +159,14 @@ struct ICompositionProcessorEngineOwner
 {
     virtual ~ICompositionProcessorEngineOwner() {}
 
-//    virtual void SetDefaultCandidateTextFont(int idsDefaultFont) = 0;
-//
-//    virtual void SetupLanguageBar(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, _In_reads_(countButtons) const LanguageBarButtonProperty* properties, UINT countButtons) = 0;
-//    virtual BOOL GetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) = 0;
-//    virtual void SetCompartmentBool(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, BOOL value) = 0;
-//    virtual DWORD GetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) = 0;
-//    virtual void SetCompartmentDword(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment, DWORD value) = 0;
-//    virtual void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, REFGUID guidCompartment) = 0;
+    virtual wchar_t ConvertVKey(UINT code) = 0;
+    virtual UINT VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch) = 0;
+    virtual bool _IsKeyboardDisabled() = 0;
+    virtual BOOL _IsComposing() = 0;
+    virtual CANDIDATE_MODE _CandidateMode() = 0;
+    virtual bool IsCandidateWithWildcard() = 0;
+
+    virtual HRESULT _InvokeKeyHandler(_In_ ITfContext *pContext, UINT code, WCHAR wch, DWORD flags, _KEYSTROKE_STATE keyState) = 0;
 };
 
 struct ICompositionProcessorEngine
@@ -175,8 +175,7 @@ struct ICompositionProcessorEngine
 
     virtual BOOL Initialize() = 0;
 
-    virtual BOOL IsKeyEaten(_In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId, UINT code, _Inout_updates_(1) WCHAR *pwch,
-        BOOL isComposing, CANDIDATE_MODE candidateMode, BOOL isCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState) = 0;
+    virtual void OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, bool isTest, bool isUp) = 0;
 
     virtual BOOL AddVirtualKey(WCHAR wch) = 0;
     virtual void RemoveVirtualKey(DWORD_PTR dwIndex) = 0;

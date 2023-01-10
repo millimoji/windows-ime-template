@@ -36,6 +36,7 @@
     <ClCompile Include="File.cpp" />
     <ClCompile Include="FileMapping.cpp" />
     <ClCompile Include="CompositionProcessorEngine.cpp" />
+    <ClCompile Include="KeyEventSink.cpp" />
     <ClCompile Include="SampleIMEBaseStructure.cpp" />
     <ClCompile Include="SampleIMEGlobals.cpp" />
     <ClCompile Include="SampleIMEInprocClient.cpp" />

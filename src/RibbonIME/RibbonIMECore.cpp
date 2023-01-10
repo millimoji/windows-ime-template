@@ -17,21 +17,9 @@ BOOL RibbonIMECore::Initialize()
     return TRUE;
 }
 
-BOOL RibbonIMECore::IsKeyEaten(_In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId, UINT code, _Inout_updates_(1) WCHAR *pwch,
-        BOOL isComposing, CANDIDATE_MODE candidateMode, BOOL isCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState)
+void RibbonIMECore::OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, bool isTest, bool isUp)
 {
-    (void)pThreadMgr;
-    (void)tfClientId;
-    (void)code;
-    (void)pwch;
-    (void)isComposing;
-    (void)candidateMode;
-    (void)isCandidateWithWildcard;
-
-    if (pKeyState) {
-        *pKeyState = _KEYSTROKE_STATE();
-    }
-    return FALSE;
+    (void)pContext; (void)wParam; (void)lParam; (void)pIsEaten; (void)isTest; (void)isUp;
 }
 
 BOOL RibbonIMECore::AddVirtualKey(WCHAR wch)

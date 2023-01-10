@@ -18,7 +18,7 @@
 
 // Because the code mostly works with VKeys, here map a WCHAR back to a VKKey for certain
 // vkeys that the IME handles specially
-__inline UINT VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch)
+UINT CWindowsIME::VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch)
 {
     UINT vkRet = vk;
     if (LOWORD(vk) == VK_PACKET)
@@ -51,181 +51,181 @@ __inline UINT VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch)
     return vkRet;
 }
 
-//+---------------------------------------------------------------------------
-//
-// _IsKeyEaten
-//
-//----------------------------------------------------------------------------
-
-BOOL CWindowsIME::_IsKeyEaten(_In_ ITfContext*, UINT codeIn, _Out_ UINT *pCodeOut, _Out_writes_(1) WCHAR *pwch, _Out_opt_ _KEYSTROKE_STATE *pKeyState)
-{
-    *pCodeOut = codeIn;
-
-    if (pKeyState)
-    {
-        pKeyState->Category = CATEGORY_NONE;
-        pKeyState->Function = FUNCTION_NONE;
-    }
-
-    if (pwch)
-    {
-        *pwch = L'\0';
-    }
-
-    // if the keyboard is disabled, we don't eat keys.
-    if (_IsKeyboardDisabled())
-    {
-        return FALSE;
-    }
-
-    //
-    // Map virtual key to character code
-    //
-    BOOL isTouchKeyboardSpecialKeys = FALSE;
-    WCHAR wch = ConvertVKey(codeIn);
-    *pCodeOut = VKeyFromVKPacketAndWchar(codeIn, wch); // new VK
-
-    if ((wch == THIRDPARTY_NEXTPAGE) || (wch == THIRDPARTY_PREVPAGE))
-    {
-        // We always eat the above softkeyboard special keys
-        isTouchKeyboardSpecialKeys = TRUE;
-        if (pwch)
-        {
-            *pwch = wch;
-        }
-    }
-
-    auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
-
-    if (pCompositionProcessorEngine)
-    {
-        *pwch = wch;
-        BOOL isEaten = pCompositionProcessorEngine->IsKeyEaten(_pThreadMgr, _tfClientId, *pCodeOut, pwch, _IsComposing(), _candidateMode, _candidateMode, pKeyState);
-        if (isEaten || isTouchKeyboardSpecialKeys)
-        {
-            return TRUE;
-        }
-        else
-        {
-            *pwch = L'\0';
-            return FALSE;
-        }
-    }
-
-    return isTouchKeyboardSpecialKeys;
-
-//    pContext;
-//
-//    *pCodeOut = codeIn;
-//
-//    BOOL isOpen = FALSE;
-//    CCompartment CompartmentKeyboardOpen(_pThreadMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
-//    CompartmentKeyboardOpen._GetCompartmentBOOL(isOpen);
-//
-//    BOOL isDoubleSingleByte = FALSE;
-//    CCompartment CompartmentDoubleSingleByte(_pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentDoubleSingleByte);
-//    CompartmentDoubleSingleByte._GetCompartmentBOOL(isDoubleSingleByte);
-//
-//    BOOL isPunctuation = FALSE;
-//    CCompartment CompartmentPunctuation(_pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentPunctuation);
-//    CompartmentPunctuation._GetCompartmentBOOL(isPunctuation);
-//
-//    if (pKeyState)
-//    {
-//        pKeyState->Category = CATEGORY_NONE;
-//        pKeyState->Function = FUNCTION_NONE;
-//    }
-//    if (pwch)
-//    {
-//        *pwch = L'\0';
-//    }
-//
-//    // if the keyboard is disabled, we don't eat keys.
-//    if (_IsKeyboardDisabled())
-//    {
-//        return FALSE;
-//    }
-//
-//    //
-//    // Map virtual key to character code
-//    //
-//    BOOL isTouchKeyboardSpecialKeys = FALSE;
-//    WCHAR wch = ConvertVKey(codeIn);
-//    *pCodeOut = VKeyFromVKPacketAndWchar(codeIn, wch);
-//    if ((wch == THIRDPARTY_NEXTPAGE) || (wch == THIRDPARTY_PREVPAGE))
-//    {
-//        // We always eat the above softkeyboard special keys
-//        isTouchKeyboardSpecialKeys = TRUE;
-//        if (pwch)
-//        {
-//            *pwch = wch;
-//        }
-//    }
-//
-//    // if the keyboard is closed, we don't eat keys, with the exception of the touch keyboard specials keys
-//    if (!isOpen && !isDoubleSingleByte && !isPunctuation)
-//    {
-//        return isTouchKeyboardSpecialKeys;
-//    }
-//
-//    if (pwch)
-//    {
-//        *pwch = wch;
-//    }
-//
-//    //
-//    // Get composition engine
-//    //
-//    CCompositionProcessorEngine *pCompositionProcessorEngine;
-//    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
-//
-//    if (isOpen)
-//    {
-//        //
-//        // The candidate or phrase list handles the keys through ITfKeyEventSink.
-//        //
-//        // eat only keys that CKeyHandlerEditSession can handles.
-//        //
-//        if (_pCompositionProcessorEngine->IsVirtualKeyNeed(*pCodeOut, pwch, _IsComposing(), _candidateMode, _isCandidateWithWildcard, pKeyState))
-//        {
-//            return TRUE;
-//        }
-//    }
-//
-//    //
-//    // Punctuation
-//    //
-//    if (_pCompositionProcessorEngine->IsPunctuation(wch))
-//    {
-//        if ((_candidateMode == CANDIDATE_NONE) && isPunctuation)
-//        {
-//            if (pKeyState)
-//            {
-//                pKeyState->Category = CATEGORY_COMPOSING;
-//                pKeyState->Function = FUNCTION_PUNCTUATION;
-//            }
-//            return TRUE;
-//        }
-//    }
-//
-//    //
-//    // Double/Single byte
-//    //
-//    if (isDoubleSingleByte && _pCompositionProcessorEngine->IsDoubleSingleByte(wch))
-//    {
-//        if (_candidateMode == CANDIDATE_NONE)
-//        {
-//            if (pKeyState)
-//            {
-//                pKeyState->Category = CATEGORY_COMPOSING;
-//                pKeyState->Function = FUNCTION_DOUBLE_SINGLE_BYTE;
-//            }
-//            return TRUE;
-//        }
-//    }
-//
-//    return isTouchKeyboardSpecialKeys;
-}
+// //+---------------------------------------------------------------------------
+// //
+// // _IsKeyEaten
+// //
+// //----------------------------------------------------------------------------
+// 
+// BOOL CWindowsIME::_IsKeyEaten(_In_ ITfContext*, UINT codeIn, _Out_ UINT *pCodeOut, _Out_writes_(1) WCHAR *pwch, _Out_opt_ _KEYSTROKE_STATE *pKeyState)
+// {
+//     *pCodeOut = codeIn;
+// 
+//     if (pKeyState)
+//     {
+//         pKeyState->Category = CATEGORY_NONE;
+//         pKeyState->Function = FUNCTION_NONE;
+//     }
+// 
+//     if (pwch)
+//     {
+//         *pwch = L'\0';
+//     }
+// 
+//     // if the keyboard is disabled, we don't eat keys.
+//     if (_IsKeyboardDisabled())
+//     {
+//         return FALSE;
+//     }
+// 
+//     //
+//     // Map virtual key to character code
+//     //
+//     BOOL isTouchKeyboardSpecialKeys = FALSE;
+//     WCHAR wch = ConvertVKey(codeIn);
+//     *pCodeOut = VKeyFromVKPacketAndWchar(codeIn, wch); // new VK
+// 
+//     if ((wch == THIRDPARTY_NEXTPAGE) || (wch == THIRDPARTY_PREVPAGE))
+//     {
+//         // We always eat the above softkeyboard special keys
+//         isTouchKeyboardSpecialKeys = TRUE;
+//         if (pwch)
+//         {
+//             *pwch = wch;
+//         }
+//     }
+// 
+//     auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+// 
+//     if (pCompositionProcessorEngine)
+//     {
+//         *pwch = wch;
+//         BOOL isEaten = pCompositionProcessorEngine->IsKeyEaten(_pThreadMgr, _tfClientId, *pCodeOut, pwch, _IsComposing(), _candidateMode, _candidateMode, pKeyState);
+//         if (isEaten || isTouchKeyboardSpecialKeys)
+//         {
+//             return TRUE;
+//         }
+//         else
+//         {
+//             *pwch = L'\0';
+//             return FALSE;
+//         }
+//     }
+// 
+//     return isTouchKeyboardSpecialKeys;
+// 
+// //    pContext;
+// //
+// //    *pCodeOut = codeIn;
+// //
+// //    BOOL isOpen = FALSE;
+// //    CCompartment CompartmentKeyboardOpen(_pThreadMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
+// //    CompartmentKeyboardOpen._GetCompartmentBOOL(isOpen);
+// //
+// //    BOOL isDoubleSingleByte = FALSE;
+// //    CCompartment CompartmentDoubleSingleByte(_pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentDoubleSingleByte);
+// //    CompartmentDoubleSingleByte._GetCompartmentBOOL(isDoubleSingleByte);
+// //
+// //    BOOL isPunctuation = FALSE;
+// //    CCompartment CompartmentPunctuation(_pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentPunctuation);
+// //    CompartmentPunctuation._GetCompartmentBOOL(isPunctuation);
+// //
+// //    if (pKeyState)
+// //    {
+// //        pKeyState->Category = CATEGORY_NONE;
+// //        pKeyState->Function = FUNCTION_NONE;
+// //    }
+// //    if (pwch)
+// //    {
+// //        *pwch = L'\0';
+// //    }
+// //
+// //    // if the keyboard is disabled, we don't eat keys.
+// //    if (_IsKeyboardDisabled())
+// //    {
+// //        return FALSE;
+// //    }
+// //
+// //    //
+// //    // Map virtual key to character code
+// //    //
+// //    BOOL isTouchKeyboardSpecialKeys = FALSE;
+// //    WCHAR wch = ConvertVKey(codeIn);
+// //    *pCodeOut = VKeyFromVKPacketAndWchar(codeIn, wch);
+// //    if ((wch == THIRDPARTY_NEXTPAGE) || (wch == THIRDPARTY_PREVPAGE))
+// //    {
+// //        // We always eat the above softkeyboard special keys
+// //        isTouchKeyboardSpecialKeys = TRUE;
+// //        if (pwch)
+// //        {
+// //            *pwch = wch;
+// //        }
+// //    }
+// //
+// //    // if the keyboard is closed, we don't eat keys, with the exception of the touch keyboard specials keys
+// //    if (!isOpen && !isDoubleSingleByte && !isPunctuation)
+// //    {
+// //        return isTouchKeyboardSpecialKeys;
+// //    }
+// //
+// //    if (pwch)
+// //    {
+// //        *pwch = wch;
+// //    }
+// //
+// //    //
+// //    // Get composition engine
+// //    //
+// //    CCompositionProcessorEngine *pCompositionProcessorEngine;
+// //    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+// //
+// //    if (isOpen)
+// //    {
+// //        //
+// //        // The candidate or phrase list handles the keys through ITfKeyEventSink.
+// //        //
+// //        // eat only keys that CKeyHandlerEditSession can handles.
+// //        //
+// //        if (_pCompositionProcessorEngine->IsVirtualKeyNeed(*pCodeOut, pwch, _IsComposing(), _candidateMode, _isCandidateWithWildcard, pKeyState))
+// //        {
+// //            return TRUE;
+// //        }
+// //    }
+// //
+// //    //
+// //    // Punctuation
+// //    //
+// //    if (_pCompositionProcessorEngine->IsPunctuation(wch))
+// //    {
+// //        if ((_candidateMode == CANDIDATE_NONE) && isPunctuation)
+// //        {
+// //            if (pKeyState)
+// //            {
+// //                pKeyState->Category = CATEGORY_COMPOSING;
+// //                pKeyState->Function = FUNCTION_PUNCTUATION;
+// //            }
+// //            return TRUE;
+// //        }
+// //    }
+// //
+// //    //
+// //    // Double/Single byte
+// //    //
+// //    if (isDoubleSingleByte && _pCompositionProcessorEngine->IsDoubleSingleByte(wch))
+// //    {
+// //        if (_candidateMode == CANDIDATE_NONE)
+// //        {
+// //            if (pKeyState)
+// //            {
+// //                pKeyState->Category = CATEGORY_COMPOSING;
+// //                pKeyState->Function = FUNCTION_DOUBLE_SINGLE_BYTE;
+// //            }
+// //            return TRUE;
+// //        }
+// //    }
+// //
+// //    return isTouchKeyboardSpecialKeys;
+// }
 
 //+---------------------------------------------------------------------------
 //
@@ -233,7 +233,7 @@ BOOL CWindowsIME::_IsKeyEaten(_In_ ITfContext*, UINT codeIn, _Out_ UINT *pCodeOu
 //
 //----------------------------------------------------------------------------
 
-WCHAR CWindowsIME::ConvertVKey(UINT code)
+wchar_t CWindowsIME::ConvertVKey(UINT code)
 {
     //
     // Map virtual key to scan code
@@ -268,7 +268,7 @@ WCHAR CWindowsIME::ConvertVKey(UINT code)
 //
 //----------------------------------------------------------------------------
 
-BOOL CWindowsIME::_IsKeyboardDisabled()
+bool CWindowsIME::_IsKeyboardDisabled()
 {
     ITfDocumentMgr* pDocMgrFocus = nullptr;
     ITfContext* pContext = nullptr;
@@ -306,7 +306,7 @@ BOOL CWindowsIME::_IsKeyboardDisabled()
         pDocMgrFocus->Release();
     }
 
-    return isDisabled;
+    return !!isDisabled;
 }
 
 //+---------------------------------------------------------------------------
@@ -331,29 +331,34 @@ CATCH_RETURN()
 // Called by the system to query this service wants a potential keystroke.
 //----------------------------------------------------------------------------
 
-STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
+STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten) 
 {
     auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnTestKeyDown();
 
     Global::UpdateModifiers(wParam, lParam);
 
-    _KEYSTROKE_STATE KeystrokeState;
-    WCHAR wch = '\0';
-    UINT code = 0;
-    *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, &KeystrokeState);
-
-    if (KeystrokeState.Category == CATEGORY_INVOKE_COMPOSITION_EDIT_SESSION)
+    if (_pCompositionProcessorEngine)
     {
-        //
-        // Invoke key handler edit session
-        //
-        KeystrokeState.Category = CATEGORY_COMPOSING;
-
-        _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
+        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, true /*test*/, true /*down*/);
     }
 
-    activity.Stop();
-    return S_OK;
+//    _KEYSTROKE_STATE KeystrokeState;
+//    WCHAR wch = '\0';
+//    UINT code = 0;
+//    *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, &KeystrokeState);
+//
+//    if (KeystrokeState.Category == CATEGORY_INVOKE_COMPOSITION_EDIT_SESSION)
+//    {
+//        //
+//        // Invoke key handler edit session
+//        //
+//        KeystrokeState.Category = CATEGORY_COMPOSING;
+//
+//        _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
+//    }
+//
+	activity.Stop();
+	return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -370,40 +375,45 @@ STDAPI CWindowsIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam
 
     Global::UpdateModifiers(wParam, lParam);
 
-    _KEYSTROKE_STATE KeystrokeState;
-    WCHAR wch = '\0';
-    UINT code = 0;
-
-    *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, &KeystrokeState);
-
-    if (*pIsEaten)
+    if (_pCompositionProcessorEngine)
     {
-        bool needInvokeKeyHandler = true;
-        //
-        // Invoke key handler edit session
-        //
-        if (code == VK_ESCAPE)
-        {
-            KeystrokeState.Category = CATEGORY_COMPOSING;
-        }
-
-        // Always eat THIRDPARTY_NEXTPAGE and THIRDPARTY_PREVPAGE keys, but don't always process them.
-        if ((wch == THIRDPARTY_NEXTPAGE) || (wch == THIRDPARTY_PREVPAGE))
-        {
-            needInvokeKeyHandler = !((KeystrokeState.Category == CATEGORY_NONE) && (KeystrokeState.Function == FUNCTION_NONE));
-        }
-
-        if (needInvokeKeyHandler)
-        {
-            _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
-        }
+        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, false /*test*/, true /*down*/);
     }
-    else if (KeystrokeState.Category == CATEGORY_INVOKE_COMPOSITION_EDIT_SESSION)
-    {
-        // Invoke key handler edit session
-        KeystrokeState.Category = CATEGORY_COMPOSING;
-        _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
-    }
+
+//    _KEYSTROKE_STATE KeystrokeState;
+//    WCHAR wch = '\0';
+//    UINT code = 0;
+//
+//    *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, &KeystrokeState);
+//
+//    if (*pIsEaten)
+//    {
+//        bool needInvokeKeyHandler = true;
+//        //
+//        // Invoke key handler edit session
+//        //
+//        if (code == VK_ESCAPE)
+//        {
+//            KeystrokeState.Category = CATEGORY_COMPOSING;
+//        }
+//
+//        // Always eat THIRDPARTY_NEXTPAGE and THIRDPARTY_PREVPAGE keys, but don't always process them.
+//        if ((wch == THIRDPARTY_NEXTPAGE) || (wch == THIRDPARTY_PREVPAGE))
+//        {
+//            needInvokeKeyHandler = !((KeystrokeState.Category == CATEGORY_NONE) && (KeystrokeState.Function == FUNCTION_NONE));
+//        }
+//
+//        if (needInvokeKeyHandler)
+//        {
+//            _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
+//        }
+//    }
+//    else if (KeystrokeState.Category == CATEGORY_INVOKE_COMPOSITION_EDIT_SESSION)
+//    {
+//        // Invoke key handler edit session
+//        KeystrokeState.Category = CATEGORY_COMPOSING;
+//        _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
+//    }
 
     activity.Stop();
     return S_OK;
@@ -420,17 +430,22 @@ STDAPI CWindowsIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lPar
 {
     auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnTestKeyUp();
 
-    if (pIsEaten == nullptr)
+    if (_pCompositionProcessorEngine)
     {
-        return E_INVALIDARG;
+        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, true /*test*/, false /*down*/);
     }
 
-    Global::UpdateModifiers(wParam, lParam);
-
-    WCHAR wch = '\0';
-    UINT code = 0;
-
-    *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, NULL);
+//    if (pIsEaten == nullptr)
+//    {
+//        return E_INVALIDARG;
+//    }
+//
+//    Global::UpdateModifiers(wParam, lParam);
+//
+//    WCHAR wch = '\0';
+//    UINT code = 0;
+//
+//    *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, NULL);
 
     activity.Stop();
     return S_OK;
@@ -450,10 +465,15 @@ STDAPI CWindowsIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, 
 
     Global::UpdateModifiers(wParam, lParam);
 
-    WCHAR wch = '\0';
-    UINT code = 0;
+    if (_pCompositionProcessorEngine)
+    {
+        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, false /*test*/, false /*down*/);
+    }
 
-    *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, NULL);
+//    WCHAR wch = '\0';
+//    UINT code = 0;
+//
+//    *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, NULL);
 
     activity.Stop();
     return S_OK;

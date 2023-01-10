@@ -1361,77 +1361,30 @@ void CompositionProcessorEngine::SetInitialCandidateListRange()
 //
 //////////////////////////////////////////////////////////////////////
 
-BOOL CompositionProcessorEngine::IsKeyEaten(
-    _In_ ITfThreadMgr* /*pThreadMgr*/, TfClientId, UINT code, _Inout_updates_(1) WCHAR* pwch,
-    BOOL isComposing, CANDIDATE_MODE candidateMode, BOOL isCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState)
+void CompositionProcessorEngine::OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, bool isTest, bool isUp)
 {
-    if (pKeyState)
+    if (isTest)
     {
-        pKeyState->Category = CATEGORY_NONE;
-        pKeyState->Function = FUNCTION_NONE;
-    }
-
-    BOOL isOpen = m_compartmentIsOpen;
-    BOOL isDoubleSingleByte = m_compartmentIsDoubleSingleByte;
-    BOOL isPunctuation = m_compartmentIsPunctuation;
-
-    // if the keyboard is closed, we don't eat keys, with the exception of the touch keyboard specials keys
-    if (!isOpen && !isDoubleSingleByte && !isPunctuation)
-    {
-        *pwch = L'\0';
-        return FALSE;
-    }
-
-    //
-    // Get composition engine
-    //
-
-    if (isOpen)
-    {
-        //
-        // The candidate or phrase list handles the keys through ITfKeyEventSink.
-        //
-        // eat only keys that CKeyHandlerEditSession can handles.
-        //
-        if (IsVirtualKeyNeed(code, pwch, isComposing, candidateMode, isCandidateWithWildcard, pKeyState))
+        if (!isUp)
         {
-            return TRUE;
+            OnTestKeyDown(pContext, wParam, lParam, pIsEaten);
+        }
+        else
+        {
+            OnKeyDown(pContext, wParam, lParam, pIsEaten);
         }
     }
-
-    //
-    // Punctuation
-    //
-    if (IsPunctuation(*pwch))
+    else
     {
-        if ((candidateMode == CANDIDATE_NONE) && isPunctuation)
+        if (!isUp)
         {
-            if (pKeyState)
-            {
-                pKeyState->Category = CATEGORY_COMPOSING;
-                pKeyState->Function = FUNCTION_PUNCTUATION;
-            }
-            return TRUE;
+            OnTestKeyUp(pContext, wParam, lParam, pIsEaten);
+        }
+        else
+        {
+            OnKeyUp(pContext, wParam, lParam, pIsEaten);
         }
     }
-
-    //
-    // Double/Single byte
-    //
-    if (isDoubleSingleByte && IsDoubleSingleByte(*pwch))
-    {
-        if (candidateMode == CANDIDATE_NONE)
-        {
-            if (pKeyState)
-            {
-                pKeyState->Category = CATEGORY_COMPOSING;
-                pKeyState->Function = FUNCTION_DOUBLE_SINGLE_BYTE;
-            }
-            return TRUE;
-        }
-    }
-
-    return FALSE;
 }
 
 //+---------------------------------------------------------------------------
