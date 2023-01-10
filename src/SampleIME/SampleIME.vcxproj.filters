@@ -42,7 +42,7 @@
     <ClCompile Include="SampleIMEBaseStructure.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ProcessorEngine.cpp">
+    <ClCompile Include="CompositionProcessorEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SampleIMEInprocClient.cpp">
@@ -83,7 +83,7 @@
     <ClInclude Include="SampleIMEBaseStructure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ProcessorEngine.h">
+    <ClInclude Include="CompositionProcessorEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

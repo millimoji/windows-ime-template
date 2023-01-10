@@ -2,7 +2,7 @@
 
 #include "RibbonIMECore.h"
 
-RibbonIMECore::RibbonIMECore(const std::weak_ptr<WindowsImeLib::ICompositionProcessorEngineOwner>& owner)
+RibbonIMECore::RibbonIMECore(WindowsImeLib::ICompositionProcessorEngineOwner* owner)
     : m_owner(owner)
 {
 }

@@ -54,8 +54,7 @@ VOID CWindowsIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pConte
 {
     isForce;pContext;
 
-    CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+    auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
     pCompositionProcessorEngine->PurgeVirtualKey();
 
     if (_pCandidateListUIPresenter)
@@ -115,8 +114,7 @@ HRESULT CWindowsIME::_HandleCompositionInput(TfEditCookie ec, _In_ ITfContext *p
     ULONG fetched = 0;
     BOOL isCovered = TRUE;
 
-    CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+    auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
 
     if ((_pCandidateListUIPresenter != nullptr) && (_candidateMode != CANDIDATE_INCREMENTAL))
     {
@@ -166,7 +164,7 @@ Exit:
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandleCompositionInputWorker(_In_ CCompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CWindowsIME::_HandleCompositionInputWorker(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
 {
     HRESULT hr = S_OK;
     std::vector<CStringRange> readingStrings;
@@ -222,7 +220,7 @@ HRESULT CWindowsIME::_HandleCompositionInputWorker(_In_ CCompositionProcessorEng
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_CreateAndStartCandidate(_In_ CCompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CWindowsIME::_CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
 {
     HRESULT hr = S_OK;
 
@@ -349,8 +347,7 @@ HRESULT CWindowsIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext 
     //
     // Get candidate string from composition processor engine
     //
-    CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+    auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
     pCompositionProcessorEngine->GetCandidateList(&candidateList, FALSE, isWildcardSearch);
 
     // If there is no candlidate listin the current reading string, we don't do anything. Just wait for
@@ -451,8 +448,7 @@ HRESULT CWindowsIME::_HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContex
     // Add virtual key to composition processor engine
     //
     {
-        CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-        pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+        auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
 
         DWORD_PTR vKeyLen = pCompositionProcessorEngine->GetVirtualKeyLength();
 
@@ -547,8 +543,7 @@ HRESULT CWindowsIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfCont
     //
     // Get punctuation char from composition processor engine
     //
-    CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+    auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
 
     WCHAR punctuation = pCompositionProcessorEngine->GetPunctuation(wch);
 

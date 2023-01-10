@@ -35,7 +35,7 @@
     </ClCompile>
     <ClCompile Include="File.cpp" />
     <ClCompile Include="FileMapping.cpp" />
-    <ClCompile Include="ProcessorEngine.cpp" />
+    <ClCompile Include="CompositionProcessorEngine.cpp" />
     <ClCompile Include="SampleIMEBaseStructure.cpp" />
     <ClCompile Include="SampleIMEGlobals.cpp" />
     <ClCompile Include="SampleIMEInprocClient.cpp" />
@@ -48,7 +48,7 @@
     <ClInclude Include="File.h" />
     <ClInclude Include="FileMapping.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="ProcessorEngine.h" />
+    <ClInclude Include="CompositionProcessorEngine.h" />
     <ClInclude Include="SampleIMEBaseStructure.h" />
     <ClInclude Include="SampleIMEDefine.h" />
     <ClInclude Include="SampleIMEGlobals.h" />

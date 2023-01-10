@@ -248,7 +248,7 @@ struct IProcessorFactory
 {
     virtual ~IProcessorFactory() {}
 
-    virtual std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(const std::weak_ptr<ICompositionProcessorEngineOwner>& owner) = 0;
+    virtual std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(ICompositionProcessorEngineOwner* owner) = 0;
     virtual std::shared_ptr<IConstantProvider> GetConstantProvider() = 0;
     virtual std::shared_ptr<ITextInputProcessor> CreateTextInputProcessor(ITextInputFramework* framework) = 0;
     virtual std::shared_ptr<IWindowsIMEInprocClient> CreateIMEInprocClient(IWindowsIMEInprocFramework* framework) = 0;

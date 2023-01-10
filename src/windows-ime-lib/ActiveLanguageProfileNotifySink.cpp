@@ -41,7 +41,7 @@ STDAPI CWindowsIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID, _In_ BOOL isA
         _AddTextProcessorEngine();
     }
 
-    if (nullptr == _pCompositionProcessorEngine)
+    if (!_pCompositionProcessorEngine)
     {
         activity.Stop();
         return S_OK;

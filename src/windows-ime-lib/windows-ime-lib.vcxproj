@@ -26,7 +26,6 @@
     <ClCompile Include="CandidateWindow.cpp" />
     <ClCompile Include="Compartment.cpp" />
     <ClCompile Include="Composition.cpp" />
-    <ClCompile Include="CompositionProcessorEngine.cpp" />
     <ClCompile Include="DisplayAttribute.cpp" />
     <ClCompile Include="DisplayAttributeInfo.cpp" />
     <ClCompile Include="DisplayAttributeProvider.cpp" />
@@ -86,7 +85,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Compartment.h" />
-    <ClInclude Include="CompositionProcessorEngine.h" />
     <ClInclude Include="Define.h" />
     <ClInclude Include="..\WindowsImeLib.h" />
     <ClInclude Include="BaseWindow.h" />

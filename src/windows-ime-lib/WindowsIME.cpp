@@ -66,7 +66,7 @@ CWindowsIME::CWindowsIME()
 
     _pComposition = nullptr;
 
-    _pCompositionProcessorEngine = nullptr;
+//    _pCompositionProcessorEngine = nullptr;
 
     _candidateMode = CANDIDATE_NONE;
     _pCandidateListUIPresenter = nullptr;
@@ -189,11 +189,11 @@ STDAPI CWindowsIME::Deactivate()
 {
     auto activity = WindowsImeLibTelemetry::ITfTextInputProcessorEx_Deactivate();
 
-//    if (_pCompositionProcessorEngine)
-//    {
+    if (_pCompositionProcessorEngine)
+    {
 //        _pCompositionProcessorEngine->ClearCompartment(_pThreadMgr, _tfClientId);
-//        _pCompositionProcessorEngine.reset();
-//    }
+        _pCompositionProcessorEngine.reset();
+    }
 
     ITfContext* pContext = _pContext;
     if (_pContext)
@@ -399,7 +399,7 @@ BOOL CWindowsIME::_AddTextProcessorEngine()
     }
 
     // Is this already added?
-    if (_pCompositionProcessorEngine != nullptr)
+    if (_pCompositionProcessorEngine)
     {
         LANGID langidProfile = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLangID();
         GUID guidLanguageProfile = WindowsImeLib::g_processorFactory->GetConstantProvider()->IMEProfileGuid();
@@ -411,11 +411,12 @@ BOOL CWindowsIME::_AddTextProcessorEngine()
     }
 
     // Create composition processor engine
-    if (_pCompositionProcessorEngine == nullptr)
+    if (!_pCompositionProcessorEngine)
     {
         m_singletonProcessor = CreateSingletonProcessorBridge();
 
-        _pCompositionProcessorEngine = std::make_shared<CCompositionProcessorEngine>();
+        _pCompositionProcessorEngine = WindowsImeLib::g_processorFactory->CreateCompositionProcessorEngine(this);
+        
         _pCompositionProcessorEngine->Initialize();
         SetDefaultCandidateTextFont();
     }

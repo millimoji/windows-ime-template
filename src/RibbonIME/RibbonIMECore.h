@@ -8,7 +8,7 @@ class RibbonIMECore :
     public std::enable_shared_from_this<RibbonIMECore>
 {
 public:
-    RibbonIMECore(const std::weak_ptr<WindowsImeLib::ICompositionProcessorEngineOwner>& owner);
+    RibbonIMECore(WindowsImeLib::ICompositionProcessorEngineOwner* owner);
     virtual ~RibbonIMECore();
 
     BOOL Initialize() override;
@@ -49,7 +49,7 @@ public:
     void UpdateCustomState(const std::string& /* customStateJson */) override {}
 
 private:
-    std::weak_ptr<WindowsImeLib::ICompositionProcessorEngineOwner> m_owner;
+    WindowsImeLib::ICompositionProcessorEngineOwner* m_owner;
 };
 
 class RibbonTextInputProcessor :

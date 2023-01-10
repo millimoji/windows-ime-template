@@ -2,7 +2,7 @@
 #include "../WindowsImeLib.h"
 #include "SampleIMEDefine.h"
 #include "SampleIMEGlobals.h"
-#include "ProcessorEngine.h"
+#include "CompositionProcessorEngine.h"
 
 #pragma comment(lib, "RuntimeObject.lib")
 
@@ -52,7 +52,7 @@ namespace WindowsImeLib
     class ProcessorFactory : public std::enable_shared_from_this<ProcessorFactory>, public IProcessorFactory
     {
     public:
-        std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(const std::weak_ptr<ICompositionProcessorEngineOwner>& owner) override
+        std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(ICompositionProcessorEngineOwner* owner) override
         {
             return std::make_shared<CompositionProcessorEngine>(owner);
         }

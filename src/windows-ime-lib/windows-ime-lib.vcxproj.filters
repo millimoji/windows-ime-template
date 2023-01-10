@@ -131,9 +131,6 @@
     <ClCompile Include="TipCandidateString.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CompositionProcessorEngine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SingletonProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -222,9 +219,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Compartment.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CompositionProcessorEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Globals.h">

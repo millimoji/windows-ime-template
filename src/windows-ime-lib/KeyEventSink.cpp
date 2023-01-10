@@ -95,8 +95,7 @@ BOOL CWindowsIME::_IsKeyEaten(_In_ ITfContext*, UINT codeIn, _Out_ UINT *pCodeOu
         }
     }
 
-    CCompositionProcessorEngine *pCompositionProcessorEngine;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+    auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
 
     if (pCompositionProcessorEngine)
     {

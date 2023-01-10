@@ -6,7 +6,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #include "pch.h"
-#include "ProcessorEngine.h"
+#include "CompositionProcessorEngine.h"
 #include "TableDictionaryEngine.h"
 #include "DictionarySearch.h"
 // #include "TfInputProcessorProfile.h"
@@ -25,7 +25,7 @@
 //
 //----------------------------------------------------------------------------
 
-CompositionProcessorEngine::CompositionProcessorEngine(const std::weak_ptr<WindowsImeLib::ICompositionProcessorEngineOwner>& owner) :
+CompositionProcessorEngine::CompositionProcessorEngine(WindowsImeLib::ICompositionProcessorEngineOwner* owner) :
     m_owner(owner)
 {
     _pTableDictionaryEngine = nullptr;

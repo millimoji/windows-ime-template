@@ -21,7 +21,7 @@ class CompositionProcessorEngine :
     public std::enable_shared_from_this<CompositionProcessorEngine>
 {
 public:
-    CompositionProcessorEngine(const std::weak_ptr<WindowsImeLib::ICompositionProcessorEngineOwner>& owner);
+    CompositionProcessorEngine(WindowsImeLib::ICompositionProcessorEngineOwner* owner);
     ~CompositionProcessorEngine(void);
 
     BOOL Initialize() override;
@@ -114,7 +114,7 @@ private:
     CFile* GetDictionaryFile();
 
 private:
-    std::weak_ptr<WindowsImeLib::ICompositionProcessorEngineOwner> m_owner;
+    WindowsImeLib::ICompositionProcessorEngineOwner* m_owner;
 
     struct _KEYSTROKE
     {

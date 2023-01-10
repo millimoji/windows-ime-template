@@ -60,16 +60,10 @@ void CWindowsIME::_UpdateLanguageBarOnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus
         }
     }
 
-#if 1
     if (m_inprocClient)
     {
         m_inprocClient->SetLanguageBarStatus(TF_LBI_STATUS_DISABLED, needDisableButtons);
     }
-#else
-    CCompositionProcessorEngine* pCompositionProcessorEngine = nullptr;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
-    pCompositionProcessorEngine->SetLanguageBarStatus(TF_LBI_STATUS_DISABLED, needDisableButtons);
-#endif
 }
 
 //+---------------------------------------------------------------------------
