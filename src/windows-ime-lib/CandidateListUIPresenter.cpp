@@ -7,6 +7,7 @@
 
 #include "Private.h"
 #include "WindowsIME.h"
+#include "Globals.h"
 #include "CandidateWindow.h"
 #include "CandidateListUIPresenter.h"
 #include "BaseStructure.h"
@@ -1100,8 +1101,7 @@ HRESULT CCandidateListUIPresenter::_CandidateChangeNotification(_In_ enum CANDWN
         auto pTextService = _pTextService;
         RETURN_IF_FAILED(engineOwner->_SubmitEditSessionTask(pContext, [pTextService, KeyState, pContext](TfEditCookie ec, void* /*pv*/) ->  HRESULT
         {
-            auto engineOwner = static_cast<WindowsImeLib::ICompositionProcessorEngineOwner*>(pTextService);
-            return engineOwner->KeyHandlerEditSession_DoEditSession(ec, KeyState, pContext, 0, 0, pTextService);
+            return pTextService->GetCompositionProcessorEngine()->KeyHandlerEditSession_DoEditSession(ec, KeyState, pContext, 0, 0, pTextService);
         }, TF_ES_ASYNC | TF_ES_READWRITE));
     }
 

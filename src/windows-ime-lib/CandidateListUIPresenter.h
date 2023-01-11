@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "KeyHandlerEditSession.h"
+// #include "KeyHandlerEditSession.h"
 #include "CandidateWindow.h"
 #include "TfTextLayoutSink.h"
 #include "WindowsIME.h"

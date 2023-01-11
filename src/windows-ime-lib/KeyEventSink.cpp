@@ -9,7 +9,7 @@
 #include "Globals.h"
 #include "WindowsIME.h"
 #include "CandidateListUIPresenter.h"
-#include "KeyHandlerEditSession.h"
+//#include "KeyHandlerEditSession.h"
 #include "../Compartment.h"
 
 // 0xF003, 0xF004 are the keys that the touch keyboard sends for next/previous

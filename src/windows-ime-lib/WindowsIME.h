@@ -9,7 +9,6 @@
 
 #include "../WindowsImeLib.h"
 #include "SingletonProcessor.h"
-#include "KeyHandlerEditSession.h"
 #include "BaseStructure.h"
 
 class CLangBarItemButton;
@@ -108,27 +107,27 @@ public:
 
     // key event handlers for composition/candidate/phrase common objects.
     HRESULT _HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext);
-    HRESULT _HandleCancel(TfEditCookie ec, _In_ ITfContext *pContext);
+    HRESULT _HandleCancel(TfEditCookie ec, _In_ ITfContext *pContext) override;
 
     // key event handlers for composition object.
-    HRESULT _HandleCompositionInput(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch);
-    HRESULT _HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext *pContext, BOOL fCandidateList);
-    HRESULT _HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isWildcardSearch);
-    HRESULT _HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext *pContext);
-    HRESULT _HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, KEYSTROKE_FUNCTION keyFunction);
-    HRESULT _HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch);
-    HRESULT _HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch);
+    HRESULT _HandleCompositionInput(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch) override;
+    HRESULT _HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext *pContext, BOOL fCandidateList) override;
+    HRESULT _HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isWildcardSearch) override;
+    HRESULT _HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext *pContext) override;
+    HRESULT _HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, KEYSTROKE_FUNCTION keyFunction) override;
+    HRESULT _HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch) override;
+    HRESULT _HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch) override;
 
     // key event handlers for candidate object.
-    HRESULT _HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext *pContext);
-    HRESULT _HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext *pContext);
-    HRESULT _HandleCandidateArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction);
-    HRESULT _HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode);
+    HRESULT _HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext *pContext) override;
+    HRESULT _HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext *pContext) override;
+    HRESULT _HandleCandidateArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction) override;
+    HRESULT _HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode) override;
 
     // key event handlers for phrase object.
-    HRESULT _HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext *pContext);
-    HRESULT _HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction);
-    HRESULT _HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode);
+    HRESULT _HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext *pContext) override;
+    HRESULT _HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction) override;
+    HRESULT _HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode) override;
 
     BOOL _IsSecureMode(void) { return (_dwActivateFlags & TF_TMAE_SECUREMODE) ? TRUE : FALSE; }
     BOOL _IsComLess(void) { return (_dwActivateFlags & TF_TMAE_COMLESS) ? TRUE : FALSE; }
@@ -165,8 +164,8 @@ private:
 
     // Invoke key handler edit session
     // HRESULT _InvokeKeyHandler(_In_ ITfContext *pContext, UINT code, WCHAR wch, DWORD flags, _KEYSTROKE_STATE keyState) override;
-    HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, void* pv)>& editSesisonTask, DWORD tfEsFlags) override;
-    HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch, void* /*pv*/)  override;
+    HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, WindowsImeLib::ICompositionProcessorEngineOwner* textService)>& editSesisonTask, DWORD tfEsFlags) override;
+    // HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch, void* /*pv*/)  override;
 
     // function for the language property
     BOOL _SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pContext);

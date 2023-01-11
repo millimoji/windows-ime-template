@@ -28,6 +28,9 @@ public:
     // BOOL SetupLanguageProfile() override; // LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode) override;
 
 	void OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, bool isTest, bool isUp) override;
+	// in KeyHandlerEditSession.cpp
+	HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch,
+        _In_ WindowsImeLib::ICompositionProcessorEngineOwner* textService) override;
 
     BOOL AddVirtualKey(WCHAR wch) override;
     void RemoveVirtualKey(DWORD_PTR dwIndex) override;

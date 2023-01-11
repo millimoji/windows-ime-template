@@ -156,8 +156,27 @@ struct ICompositionProcessorEngineOwner
     virtual CANDIDATE_MODE _CandidateMode() = 0;
     virtual bool IsCandidateWithWildcard() = 0;
 
-    virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, void* pv)>& editSesisonTask, DWORD tfEsFlags) = 0;
-    virtual HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch, void* /*pv*/) = 0;
+    virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, ICompositionProcessorEngineOwner* pv)>& editSesisonTask, DWORD tfEsFlags) = 0;
+
+    // key event handlers for composition/candidate/phrase common objects.
+    virtual HRESULT _HandleCancel(TfEditCookie ec, _In_ ITfContext *pContext) = 0;
+    // key event handlers for composition object.
+    virtual HRESULT _HandleCompositionInput(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch) = 0;
+    virtual HRESULT _HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext *pContext, BOOL fCandidateList) = 0;
+    virtual HRESULT _HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isWildcardSearch) = 0;
+    virtual HRESULT _HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext *pContext) = 0;
+    virtual HRESULT _HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, KEYSTROKE_FUNCTION keyFunction) = 0;
+    virtual HRESULT _HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch) = 0;
+    virtual HRESULT _HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch) = 0;
+    // key event handlers for candidate object.
+    virtual HRESULT _HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext *pContext) = 0;
+    virtual HRESULT _HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext *pContext) = 0;
+    virtual HRESULT _HandleCandidateArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction) = 0;
+    virtual HRESULT _HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode) = 0;
+    // key event handlers for phrase object.
+    virtual HRESULT _HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext *pContext) = 0;
+    virtual HRESULT _HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction) = 0;
+    virtual HRESULT _HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode) = 0;
 };
 
 struct ICompositionProcessorEngine
@@ -167,6 +186,8 @@ struct ICompositionProcessorEngine
     virtual BOOL Initialize() = 0;
 
     virtual void OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, bool isTest, bool isUp) = 0;
+    virtual HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch,
+        _In_ WindowsImeLib::ICompositionProcessorEngineOwner* textService) = 0;
 
     virtual BOOL AddVirtualKey(WCHAR wch) = 0;
     virtual void RemoveVirtualKey(DWORD_PTR dwIndex) = 0;

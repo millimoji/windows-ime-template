@@ -9,6 +9,10 @@
 #pragma once
 
 class CWindowsIME;
+namespace WindowsImeLib
+{
+    struct ICompositionProcessorEngineOwner;
+}
 
 class CEditSessionBase : public ITfEditSession
 {
@@ -41,20 +45,20 @@ public:
     CEditSessionTask() {}
     virtual ~CEditSessionTask() {}
 
-    HRESULT RuntimeClassInitialize(const std::function<HRESULT (TfEditCookie ec, void* pv)>& editSesisonTask, void* pv)
+    HRESULT RuntimeClassInitialize(const std::function<HRESULT (TfEditCookie ec, WindowsImeLib::ICompositionProcessorEngineOwner* textService)>& editSesisonTask, WindowsImeLib::ICompositionProcessorEngineOwner* textService)
     {
         m_editSesisonTask = editSesisonTask;
-        m_pv = pv;
+        m_textService = textService;
         return S_OK;
     }
 
     // ITfEditSession
     IFACEMETHODIMP DoEditSession(TfEditCookie ec) override
     {
-        return m_editSesisonTask(ec, m_pv);
+        return m_editSesisonTask(ec, m_textService);
     }
 
 private:
-    std::function<HRESULT (TfEditCookie ec, void* pv)> m_editSesisonTask;
-    void* m_pv = nullptr;
+    std::function<HRESULT (TfEditCookie ec, WindowsImeLib::ICompositionProcessorEngineOwner* textService)> m_editSesisonTask;
+    WindowsImeLib::ICompositionProcessorEngineOwner* m_textService = nullptr;
 };

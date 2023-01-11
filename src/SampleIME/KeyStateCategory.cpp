@@ -5,7 +5,8 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-#include "Private.h"
+#include "pch.h"
+//#include "Private.h"
 #include "KeyStateCategory.h"
 
 CKeyStateCategoryFactory* CKeyStateCategoryFactory::_instance;
@@ -25,7 +26,7 @@ CKeyStateCategoryFactory* CKeyStateCategoryFactory::Instance()
     return _instance;
 }
 
-CKeyStateCategory* CKeyStateCategoryFactory::MakeKeyStateCategory(KEYSTROKE_CATEGORY keyCategory, _In_ CWindowsIME *pTextService)
+CKeyStateCategory* CKeyStateCategoryFactory::MakeKeyStateCategory(KEYSTROKE_CATEGORY keyCategory, _In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService)
 {
     CKeyStateCategory* pKeyState = nullptr;
 
@@ -66,7 +67,7 @@ void CKeyStateCategoryFactory::Release()
 /*
 class CKeyStateCategory
 */
-CKeyStateCategory::CKeyStateCategory(_In_ CWindowsIME *pTextService)
+CKeyStateCategory::CKeyStateCategory(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService)
 {
     _pTextService = pTextService;
 }
@@ -228,7 +229,7 @@ HRESULT CKeyStateCategory::HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto)
 /*
 class CKeyStateComposing
 */
-CKeyStateComposing::CKeyStateComposing(_In_ CWindowsIME *pTextService) : CKeyStateCategory(pTextService)
+CKeyStateComposing::CKeyStateComposing(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService) : CKeyStateCategory(pTextService)
 {
 }
 
@@ -297,7 +298,7 @@ HRESULT CKeyStateComposing::HandleKeyPunctuation(KeyHandlerEditSessionDTO dto)
 /*
 class CKeyStateCandidate
 */
-CKeyStateCandidate::CKeyStateCandidate(_In_ CWindowsIME *pTextService) : CKeyStateCategory(pTextService)
+CKeyStateCandidate::CKeyStateCandidate(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService) : CKeyStateCategory(pTextService)
 {
 }
 
@@ -342,7 +343,7 @@ HRESULT CKeyStateCandidate::HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto
 class CKeyStatePhrase
 */
 
-CKeyStatePhrase::CKeyStatePhrase(_In_ CWindowsIME *pTextService) : CKeyStateCategory(pTextService)
+CKeyStatePhrase::CKeyStatePhrase(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService) : CKeyStateCategory(pTextService)
 {
 }
 

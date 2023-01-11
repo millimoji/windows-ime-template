@@ -74,12 +74,6 @@
     <ClCompile Include="KeyHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="KeyHandlerEditSession.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KeyStateCategory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LanguageBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -173,12 +167,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GetTextExtentEditSession.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KeyHandlerEditSession.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KeyStateCategory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RegKey.h">

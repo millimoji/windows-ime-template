@@ -6,9 +6,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #pragma once
-#include "Globals.h"
-#include "Private.h"
-#include "WindowsIME.h"
+#include "SampleIMEDefine.h"
+#include "SampleIMEGlobals.h"
+#include "../WindowsImeLib.h"
+// #include "Globals.h"
+// #include "Private.h"
+// #include "WindowsIME.h"
 
 class CKeyStateCategory;
 
@@ -16,7 +19,7 @@ class CKeyStateCategoryFactory
 {
 public:
     static CKeyStateCategoryFactory* Instance();
-    CKeyStateCategory* MakeKeyStateCategory(KEYSTROKE_CATEGORY keyCategory, _In_ CWindowsIME *pTextService);
+    CKeyStateCategory* MakeKeyStateCategory(KEYSTROKE_CATEGORY keyCategory, _In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService);
     void Release();
 
 protected:
@@ -48,7 +51,7 @@ typedef struct KeyHandlerEditSessionDTO
 class CKeyStateCategory
 {
 public:
-    CKeyStateCategory(_In_ CWindowsIME *pTextService);
+    CKeyStateCategory(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService);
 
 protected:
     ~CKeyStateCategory(void);
@@ -98,13 +101,13 @@ protected:
     virtual HRESULT HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto);
 
 protected:
-    CWindowsIME* _pTextService;
+    WindowsImeLib::ICompositionProcessorEngineOwner* _pTextService;
 };
 
 class CKeyStateComposing : public CKeyStateCategory
 {
 public:
-    CKeyStateComposing(_In_ CWindowsIME *pTextService);
+    CKeyStateComposing(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService);
 
 protected:
     // _HandleCompositionInput
@@ -147,7 +150,7 @@ protected:
 class CKeyStateCandidate : public CKeyStateCategory
 {
 public:
-    CKeyStateCandidate(_In_ CWindowsIME *pTextService);
+    CKeyStateCandidate(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService);
 
 protected:
     // HandleKeyFinalizeCandidatelist
@@ -172,7 +175,7 @@ protected:
 class CKeyStatePhrase : public CKeyStateCategory
 {
 public:
-    CKeyStatePhrase(_In_ CWindowsIME *pTextService);
+    CKeyStatePhrase(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService);
 
 protected:
     //_HandleCancel
@@ -192,7 +195,7 @@ protected:
 class CKeyStateNull : public CKeyStateCategory
 {
 public:
-    CKeyStateNull(_In_ CWindowsIME *pTextService) : CKeyStateCategory(pTextService) {};
+    CKeyStateNull(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService) : CKeyStateCategory(pTextService) {};
 
 protected:
     // _HandleNullInput

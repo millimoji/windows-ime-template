@@ -5,10 +5,12 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-#include "Private.h"
+#include "pch.h"
+//#include "Private.h"
+#include "CompositionProcessorEngine.h"
 #include "KeyHandlerEditSession.h"
-#include "EditSession.h"
-#include "WindowsIME.h"
+//#include "EditSession.h"
+//#include "WindowsIME.h"
 #include "KeyStateCategory.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -25,12 +27,13 @@
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* pContext, UINT _uCode, WCHAR _wch, void* /*pv*/)
+HRESULT CompositionProcessorEngine::KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* pContext, UINT _uCode, WCHAR _wch,
+    _In_ WindowsImeLib::ICompositionProcessorEngineOwner* textService)
 {
     HRESULT hResult = S_OK;
 
     CKeyStateCategoryFactory* pKeyStateCategoryFactory = CKeyStateCategoryFactory::Instance();
-    CKeyStateCategory* pKeyStateCategory = pKeyStateCategoryFactory->MakeKeyStateCategory(_KeyState.Category, this);
+    CKeyStateCategory* pKeyStateCategory = pKeyStateCategoryFactory->MakeKeyStateCategory(_KeyState.Category, textService);
 
     if (pKeyStateCategory)
     {

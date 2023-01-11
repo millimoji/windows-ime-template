@@ -6,8 +6,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #include "Private.h"
-#include "TfTextLayoutSink.h"
 #include "WindowsIME.h"
+#include "Globals.h"
+#include "TfTextLayoutSink.h"
 #include "GetTextExtentEditSession.h"
 
 CTfTextLayoutSink::CTfTextLayoutSink(_In_ CWindowsIME *pTextService)

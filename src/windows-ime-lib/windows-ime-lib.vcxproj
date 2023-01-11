@@ -50,8 +50,6 @@
     <ClCompile Include="Globals.cpp" />
     <ClCompile Include="KeyEventSink.cpp" />
     <ClCompile Include="KeyHandler.cpp" />
-    <ClCompile Include="KeyHandlerEditSession.cpp" />
-    <ClCompile Include="KeyStateCategory.cpp" />
     <ClCompile Include="LanguageBar.cpp" />
     <ClCompile Include="Register.cpp" />
     <ClCompile Include="RegKey.cpp" />
@@ -98,8 +96,6 @@
     <ClInclude Include="EnumTfCandidates.h" />
     <ClInclude Include="GetTextExtentEditSession.h" />
     <ClInclude Include="Globals.h" />
-    <ClInclude Include="KeyHandlerEditSession.h" />
-    <ClInclude Include="KeyStateCategory.h" />
     <ClInclude Include="..\LanguageBar.h" />
     <ClInclude Include="Private.h" />
     <ClInclude Include="RegKey.h" />

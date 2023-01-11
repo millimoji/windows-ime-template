@@ -274,9 +274,9 @@ HRESULT CompositionProcessorEngine::OnTestKeyDown(ITfContext *pContext, WPARAM w
         //
         KeystrokeState.Category = CATEGORY_COMPOSING;
 //        m_owner->_InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
-        m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, void* pv) -> HRESULT
+        m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, _In_ WindowsImeLib::ICompositionProcessorEngineOwner* textService) -> HRESULT
             {
-                return m_owner->KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, pv);
+                return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, textService);
             }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
     }
 
@@ -319,9 +319,9 @@ HRESULT CompositionProcessorEngine::OnKeyDown(ITfContext *pContext, WPARAM wPara
         if (needInvokeKeyHandler)
         {
 //            m_owner->_InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
-            m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, void* pv) -> HRESULT
+            m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, _In_ WindowsImeLib::ICompositionProcessorEngineOwner* textService) -> HRESULT
                 {
-                    return m_owner->KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, pv);
+                    return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, textService);
                 }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
         }
     }
@@ -330,9 +330,9 @@ HRESULT CompositionProcessorEngine::OnKeyDown(ITfContext *pContext, WPARAM wPara
         // Invoke key handler edit session
         KeystrokeState.Category = CATEGORY_COMPOSING;
 //        m_owner->_InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
-        m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, void* pv) -> HRESULT
+        m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, _In_ WindowsImeLib::ICompositionProcessorEngineOwner* textService) -> HRESULT
             {
-                return m_owner->KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, pv);
+                return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, textService);
             }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
     }
 
