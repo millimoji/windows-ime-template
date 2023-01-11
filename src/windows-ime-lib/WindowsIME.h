@@ -33,9 +33,8 @@ class CWindowsIME :
                                         ITfFunctionProvider,
                                         ITfFnGetPreferredTouchKeyboardLayout,
                                         Microsoft::WRL::FtmBase>,
-    WindowsImeLib::ICompositionProcessorEngineOwner,
+    public WindowsImeLib::ICompositionProcessorEngineOwner,
     WindowsImeLib::IWindowsIMEInprocFramework
-
 {
 public: 
     CWindowsIME();
@@ -165,7 +164,9 @@ private:
     HRESULT _RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition);
 
     // Invoke key handler edit session
-    HRESULT _InvokeKeyHandler(_In_ ITfContext *pContext, UINT code, WCHAR wch, DWORD flags, _KEYSTROKE_STATE keyState) override;
+    // HRESULT _InvokeKeyHandler(_In_ ITfContext *pContext, UINT code, WCHAR wch, DWORD flags, _KEYSTROKE_STATE keyState) override;
+    HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, void* pv)>& editSesisonTask, DWORD tfEsFlags) override;
+    HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch, void* /*pv*/)  override;
 
     // function for the language property
     BOOL _SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pContext);

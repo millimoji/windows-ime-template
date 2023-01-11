@@ -1048,7 +1048,7 @@ HRESULT CCandidateListUIPresenter::_CandidateChangeNotification(_In_ enum CANDWN
 {
     HRESULT hr = E_FAIL;
 
-    TfClientId tfClientId = _pTextService->_GetClientId();
+    // TfClientId tfClientId = _pTextService->_GetClientId();
     ITfThreadMgr* pThreadMgr = nullptr;
     ITfDocumentMgr* pDocumentMgr = nullptr;
     ITfContext* pContext = nullptr;
@@ -1081,18 +1081,28 @@ HRESULT CCandidateListUIPresenter::_CandidateChangeNotification(_In_ enum CANDWN
         goto Exit;
     }
 
+//    {
+//        CKeyHandlerEditSession* pEditSession = new (std::nothrow) CKeyHandlerEditSession(_pTextService, pContext, 0, 0, KeyState);
+//        if (nullptr != pEditSession)
+//        {
+//            HRESULT hrSession = S_OK;
+//            hr = pContext->RequestEditSession(tfClientId, pEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hrSession);
+//            if (hrSession == TF_E_SYNCHRONOUS || hrSession == TS_E_READONLY)
+//            {
+//                hr = pContext->RequestEditSession(tfClientId, pEditSession, TF_ES_ASYNC | TF_ES_READWRITE, &hrSession);
+//            }
+//            pEditSession->Release();
+//        }
+//    }
+
     {
-        CKeyHandlerEditSession* pEditSession = new (std::nothrow) CKeyHandlerEditSession(_pTextService, pContext, 0, 0, KeyState);
-        if (nullptr != pEditSession)
+        auto engineOwner = static_cast<WindowsImeLib::ICompositionProcessorEngineOwner*>(_pTextService);
+        auto pTextService = _pTextService;
+        RETURN_IF_FAILED(engineOwner->_SubmitEditSessionTask(pContext, [pTextService, KeyState, pContext](TfEditCookie ec, void* /*pv*/) ->  HRESULT
         {
-            HRESULT hrSession = S_OK;
-            hr = pContext->RequestEditSession(tfClientId, pEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hrSession);
-            if (hrSession == TF_E_SYNCHRONOUS || hrSession == TS_E_READONLY)
-            {
-                hr = pContext->RequestEditSession(tfClientId, pEditSession, TF_ES_ASYNC | TF_ES_READWRITE, &hrSession);
-            }
-            pEditSession->Release();
-        }
+            auto engineOwner = static_cast<WindowsImeLib::ICompositionProcessorEngineOwner*>(pTextService);
+            return engineOwner->KeyHandlerEditSession_DoEditSession(ec, KeyState, pContext, 0, 0, pTextService);
+        }, TF_ES_ASYNC | TF_ES_READWRITE));
     }
 
     pContext->Release();

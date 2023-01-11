@@ -156,7 +156,8 @@ struct ICompositionProcessorEngineOwner
     virtual CANDIDATE_MODE _CandidateMode() = 0;
     virtual bool IsCandidateWithWildcard() = 0;
 
-    virtual HRESULT _InvokeKeyHandler(_In_ ITfContext *pContext, UINT code, WCHAR wch, DWORD flags, _KEYSTROKE_STATE keyState) = 0;
+    virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, void* pv)>& editSesisonTask, DWORD tfEsFlags) = 0;
+    virtual HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch, void* /*pv*/) = 0;
 };
 
 struct ICompositionProcessorEngine

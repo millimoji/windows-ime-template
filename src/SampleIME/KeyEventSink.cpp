@@ -260,7 +260,7 @@ BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT codeIn, _Out_ UINT *pCode
 // Called by the system to query this service wants a potential keystroke.
 //----------------------------------------------------------------------------
 
-HRESULT CompositionProcessorEngine::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
+HRESULT CompositionProcessorEngine::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten)
 {
     _KEYSTROKE_STATE KeystrokeState;
     WCHAR wch = '\0';
@@ -273,8 +273,11 @@ HRESULT CompositionProcessorEngine::OnTestKeyDown(ITfContext *pContext, WPARAM w
         // Invoke key handler edit session
         //
         KeystrokeState.Category = CATEGORY_COMPOSING;
-
-        m_owner->_InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
+//        m_owner->_InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
+        m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, void* pv) -> HRESULT
+            {
+                return m_owner->KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, pv);
+            }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
     }
 
     return S_OK;
@@ -288,7 +291,7 @@ HRESULT CompositionProcessorEngine::OnTestKeyDown(ITfContext *pContext, WPARAM w
 // on exit, the application will not handle the keystroke.
 //----------------------------------------------------------------------------
 
-HRESULT CompositionProcessorEngine::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
+HRESULT CompositionProcessorEngine::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten)
 {
     _KEYSTROKE_STATE KeystrokeState;
     WCHAR wch = '\0';
@@ -315,14 +318,22 @@ HRESULT CompositionProcessorEngine::OnKeyDown(ITfContext *pContext, WPARAM wPara
 
         if (needInvokeKeyHandler)
         {
-            m_owner->_InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
+//            m_owner->_InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
+            m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, void* pv) -> HRESULT
+                {
+                    return m_owner->KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, pv);
+                }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
         }
     }
     else if (KeystrokeState.Category == CATEGORY_INVOKE_COMPOSITION_EDIT_SESSION)
     {
         // Invoke key handler edit session
         KeystrokeState.Category = CATEGORY_COMPOSING;
-        m_owner->_InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
+//        m_owner->_InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
+        m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, void* pv) -> HRESULT
+            {
+                return m_owner->KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, pv);
+            }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
     }
 
     return S_OK;

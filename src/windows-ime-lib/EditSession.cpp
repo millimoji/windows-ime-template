@@ -97,3 +97,17 @@ STDAPI_(ULONG) CEditSessionBase::Release(void)
 
     return cr;
 }
+
+HRESULT CWindowsIME::_SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, void* pv)>& editSesisonTask, DWORD tfEsFlags)
+{
+    wil::com_ptr<CEditSessionTask> editSessionTaskObj;
+    RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CEditSessionTask>(&editSessionTaskObj, editSesisonTask, this));
+
+    auto editSession = editSessionTaskObj.query<ITfEditSession>();
+
+    HRESULT hr = S_OK;
+    RETURN_IF_FAILED(context->RequestEditSession(_tfClientId, editSession.get(), tfEsFlags, &hr));
+
+    return S_OK;
+}
+

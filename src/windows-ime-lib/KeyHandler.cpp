@@ -591,43 +591,43 @@ HRESULT CWindowsIME::_HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ IT
     return S_OK;
 }
 
-//+---------------------------------------------------------------------------
-//
-// _InvokeKeyHandler
-//
-// This text service is interested in handling keystrokes to demonstrate the
-// use the compositions. Some apps will cancel compositions if they receive
-// keystrokes while a compositions is ongoing.
-//
-// param
-//    [in] uCode - virtual key code of WM_KEYDOWN wParam
-//    [in] dwFlags - WM_KEYDOWN lParam
-//    [in] dwKeyFunction - Function regarding virtual key
-//----------------------------------------------------------------------------
-
-HRESULT CWindowsIME::_InvokeKeyHandler(_In_ ITfContext *pContext, UINT code, WCHAR wch, DWORD flags, _KEYSTROKE_STATE keyState)
-{
-    flags;
-
-    CKeyHandlerEditSession* pEditSession = nullptr;
-    HRESULT hr = E_FAIL;
-
-    // we'll insert a char ourselves in place of this keystroke
-    pEditSession = new (std::nothrow) CKeyHandlerEditSession(this, pContext, code, wch, keyState);
-    if (pEditSession == nullptr)
-    {
-        goto Exit;
-    }
-
-    //
-    // Call CKeyHandlerEditSession::DoEditSession().
-    //
-    // Do not specify TF_ES_SYNC so edit session is not invoked on WinWord
-    //
-    hr = pContext->RequestEditSession(_tfClientId, pEditSession, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE, &hr);
-
-    pEditSession->Release();
-
-Exit:
-    return hr;
-}
+// //+---------------------------------------------------------------------------
+// //
+// // _InvokeKeyHandler
+// //
+// // This text service is interested in handling keystrokes to demonstrate the
+// // use the compositions. Some apps will cancel compositions if they receive
+// // keystrokes while a compositions is ongoing.
+// //
+// // param
+// //    [in] uCode - virtual key code of WM_KEYDOWN wParam
+// //    [in] dwFlags - WM_KEYDOWN lParam
+// //    [in] dwKeyFunction - Function regarding virtual key
+// //----------------------------------------------------------------------------
+// 
+// HRESULT CWindowsIME::_InvokeKeyHandler(_In_ ITfContext *pContext, UINT code, WCHAR wch, DWORD flags, _KEYSTROKE_STATE keyState)
+// {
+//     flags;
+// 
+//     CKeyHandlerEditSession* pEditSession = nullptr;
+//     HRESULT hr = E_FAIL;
+// 
+//     // we'll insert a char ourselves in place of this keystroke
+//     pEditSession = new (std::nothrow) CKeyHandlerEditSession(this, pContext, code, wch, keyState);
+//     if (pEditSession == nullptr)
+//     {
+//         goto Exit;
+//     }
+// 
+//     //
+//     // Call CKeyHandlerEditSession::DoEditSession().
+//     //
+//     // Do not specify TF_ES_SYNC so edit session is not invoked on WinWord
+//     //
+//     hr = pContext->RequestEditSession(_tfClientId, pEditSession, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE, &hr);
+// 
+//     pEditSession->Release();
+// 
+// Exit:
+//     return hr;
+// }

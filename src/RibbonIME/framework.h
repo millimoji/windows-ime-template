@@ -18,6 +18,7 @@
 #include <sal.h>
 #include <strsafe.h>
 
+#include <functional>
 #include <memory>
 #include <vector>
 #include <cassert>

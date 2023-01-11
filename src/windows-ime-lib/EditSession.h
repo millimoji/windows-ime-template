@@ -31,3 +31,30 @@ protected:
 private:
     LONG _refCount;     // COM ref count
 };
+
+class CEditSessionTask :
+    public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
+                                        ITfEditSession,
+                                        Microsoft::WRL::FtmBase>
+{
+public:
+    CEditSessionTask() {}
+    virtual ~CEditSessionTask() {}
+
+    HRESULT RuntimeClassInitialize(const std::function<HRESULT (TfEditCookie ec, void* pv)>& editSesisonTask, void* pv)
+    {
+        m_editSesisonTask = editSesisonTask;
+        m_pv = pv;
+        return S_OK;
+    }
+
+    // ITfEditSession
+    IFACEMETHODIMP DoEditSession(TfEditCookie ec) override
+    {
+        return m_editSesisonTask(ec, m_pv);
+    }
+
+private:
+    std::function<HRESULT (TfEditCookie ec, void* pv)> m_editSesisonTask;
+    void* m_pv = nullptr;
+};
