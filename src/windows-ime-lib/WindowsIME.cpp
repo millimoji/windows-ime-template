@@ -418,6 +418,7 @@ BOOL CWindowsIME::_AddTextProcessorEngine()
         _pCompositionProcessorEngine = WindowsImeLib::g_processorFactory->CreateCompositionProcessorEngine(this);
         
         _pCompositionProcessorEngine->Initialize();
+        UpdateCustomState();
         SetDefaultCandidateTextFont();
     }
     if (!_pCompositionProcessorEngine)

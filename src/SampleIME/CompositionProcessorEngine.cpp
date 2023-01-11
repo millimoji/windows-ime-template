@@ -1361,24 +1361,24 @@ void CompositionProcessorEngine::SetInitialCandidateListRange()
 //
 //////////////////////////////////////////////////////////////////////
 
-void CompositionProcessorEngine::OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, bool isTest, bool isUp)
+void CompositionProcessorEngine::OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, bool isTest, bool isDown)
 {
     if (isTest)
     {
-        if (!isUp)
+        if (isDown)
         {
             OnTestKeyDown(pContext, wParam, lParam, pIsEaten);
         }
         else
         {
-            OnKeyDown(pContext, wParam, lParam, pIsEaten);
+            OnTestKeyUp(pContext, wParam, lParam, pIsEaten);
         }
     }
     else
     {
-        if (!isUp)
+        if (isDown)
         {
-            OnTestKeyUp(pContext, wParam, lParam, pIsEaten);
+            OnKeyDown(pContext, wParam, lParam, pIsEaten);
         }
         else
         {

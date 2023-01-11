@@ -17,7 +17,7 @@ BOOL RibbonIMECore::Initialize()
     return TRUE;
 }
 
-void RibbonIMECore::OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, bool isTest, bool isUp)
+void RibbonIMECore::OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, bool isTest, bool isDown)
 {
     (void)pContext; (void)wParam; (void)lParam; (void)pIsEaten; (void)isTest; (void)isUp;
 }

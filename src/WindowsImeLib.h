@@ -185,7 +185,7 @@ struct ICompositionProcessorEngine
 
     virtual BOOL Initialize() = 0;
 
-    virtual void OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, bool isTest, bool isUp) = 0;
+    virtual void OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, bool isTest, bool isDown) = 0;
     virtual HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch,
         _In_ WindowsImeLib::ICompositionProcessorEngineOwner* textService) = 0;
 
