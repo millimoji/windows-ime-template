@@ -1361,8 +1361,15 @@ void CompositionProcessorEngine::SetInitialCandidateListRange()
 //
 //////////////////////////////////////////////////////////////////////
 
-void CompositionProcessorEngine::OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, bool isTest, bool isDown)
+void CompositionProcessorEngine::OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, DWORD modifiers, DWORD uniqueModifiers, bool isTest, bool isDown)
 {
+    // copy modifier state
+    Global::ModifiersValue = static_cast<USHORT>(modifiers);
+    Global::UniqueModifiersValue = static_cast<USHORT>(uniqueModifiers);
+    Global::IsShiftKeyDownOnly = (uniqueModifiers & TF_MOD_SHIFT) ? TRUE : FALSE;
+    Global::IsControlKeyDownOnly = (uniqueModifiers & TF_MOD_CONTROL) ? TRUE : FALSE;
+    Global::IsAltKeyDownOnly = (uniqueModifiers & TF_MOD_ALT) ? TRUE : FALSE;
+
     if (isTest)
     {
         if (isDown)
@@ -1663,7 +1670,7 @@ BOOL CompositionProcessorEngine::IsVirtualKeyKeystrokeComposition(UINT uCode, _O
 
         pKeystroke = &_KeystrokeComposition.at(i);
 
-        if ((pKeystroke->VirtualKey == uCode) && Global::CheckModifiers(WindowsImeLib::ModifiersValue, pKeystroke->Modifiers))
+        if ((pKeystroke->VirtualKey == uCode) && Global::CheckModifiers(Global::ModifiersValue, pKeystroke->Modifiers))
         {
             if (function == FUNCTION_NONE)
             {
@@ -1703,7 +1710,7 @@ BOOL CompositionProcessorEngine::IsVirtualKeyKeystrokeCandidate(UINT uCode, _In_
 
         pKeystroke = &pKeystrokeMetric->at(i);
 
-        if ((pKeystroke->VirtualKey == uCode) && Global::CheckModifiers(WindowsImeLib::ModifiersValue, pKeystroke->Modifiers))
+        if ((pKeystroke->VirtualKey == uCode) && Global::CheckModifiers(Global::ModifiersValue, pKeystroke->Modifiers))
         {
             *pfRetCode = TRUE;
             if (pKeyState)
@@ -1755,8 +1762,8 @@ BOOL CompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_S
         if (candidateMode == CANDIDATE_PHRASE)
         {
             // Candidate phrase could specify modifier
-            if ((GetCandidateListPhraseModifier() == 0 && WindowsImeLib::ModifiersValue == 0) ||
-                (GetCandidateListPhraseModifier() != 0 && Global::CheckModifiers(WindowsImeLib::ModifiersValue, GetCandidateListPhraseModifier())))
+            if ((GetCandidateListPhraseModifier() == 0 && Global::ModifiersValue == 0) ||
+                (GetCandidateListPhraseModifier() != 0 && Global::CheckModifiers(Global::ModifiersValue, GetCandidateListPhraseModifier())))
             {
                 pKeyState->Category = CATEGORY_PHRASE; pKeyState->Function = FUNCTION_SELECT_BY_NUMBER;
                 return TRUE;
@@ -1770,8 +1777,8 @@ BOOL CompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_S
         else if (candidateMode == CANDIDATE_WITH_NEXT_COMPOSITION)
         {
             // Candidate phrase could specify modifier
-            if ((GetCandidateListPhraseModifier() == 0 && WindowsImeLib::ModifiersValue == 0) ||
-                (GetCandidateListPhraseModifier() != 0 && Global::CheckModifiers(WindowsImeLib::ModifiersValue, GetCandidateListPhraseModifier())))
+            if ((GetCandidateListPhraseModifier() == 0 && Global::ModifiersValue == 0) ||
+                (GetCandidateListPhraseModifier() != 0 && Global::CheckModifiers(Global::ModifiersValue, GetCandidateListPhraseModifier())))
             {
                 pKeyState->Category = CATEGORY_CANDIDATE; pKeyState->Function = FUNCTION_SELECT_BY_NUMBER;
                 return TRUE;

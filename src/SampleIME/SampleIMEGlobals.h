@@ -10,8 +10,15 @@
 #include "SampleIMEDefine.h"
 #include "SampleIMEBaseStructure.h"
 
+namespace SampleIMENS
+{
 namespace Global
 {
+inline USHORT ModifiersValue = 0;
+inline USHORT UniqueModifiersValue = 0;
+inline BOOL   IsShiftKeyDownOnly = FALSE;
+inline BOOL   IsControlKeyDownOnly = FALSE;
+inline BOOL   IsAltKeyDownOnly = FALSE;
 
 extern const CLSID SampleIMEGuidImeModePreserveKey;
 extern const CLSID SampleIMEGuidDoubleSingleBytePreserveKey;
@@ -140,3 +147,5 @@ class ConstantProvider :
 };
 
 }
+}
+using namespace SampleIMENS;

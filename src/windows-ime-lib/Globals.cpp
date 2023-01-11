@@ -11,6 +11,8 @@ g// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 #include "Globals.h"
 #include "../WindowsImeLib.h"
 
+namespace WindowsImeLibLocal
+{
 namespace Global {
 
 HINSTANCE dllInstanceHandle;
@@ -115,11 +117,11 @@ BOOL UpdateModifiers(WPARAM wParam, LPARAM lParam)
             // is extended key?
             if (lParam & 0x01000000)
             {
-                WindowsImeLib::ModifiersValue |= (TF_MOD_RALT | TF_MOD_ALT);
+                Global::ModifiersValue |= (TF_MOD_RALT | TF_MOD_ALT);
             }
             else
             {
-                WindowsImeLib::ModifiersValue |= (TF_MOD_LALT | TF_MOD_ALT);
+                Global::ModifiersValue |= (TF_MOD_LALT | TF_MOD_ALT);
             }
 
             // is previous key state up?
@@ -128,13 +130,13 @@ BOOL UpdateModifiers(WPARAM wParam, LPARAM lParam)
                 // is VK_CONTROL and VK_SHIFT up?
                 if (!(sksCtrl & 0x8000) && !(sksShft & 0x8000))
                 {
-                    WindowsImeLib::IsAltKeyDownOnly = TRUE;
+                    Global::IsAltKeyDownOnly = TRUE;
                 }
                 else
                 {
-                    WindowsImeLib::IsShiftKeyDownOnly = FALSE;
-                    WindowsImeLib::IsControlKeyDownOnly = FALSE;
-                    WindowsImeLib::IsAltKeyDownOnly = FALSE;
+                    Global::IsShiftKeyDownOnly = FALSE;
+                    Global::IsControlKeyDownOnly = FALSE;
+                    Global::IsAltKeyDownOnly = FALSE;
                 }
             }
         }
@@ -147,11 +149,11 @@ BOOL UpdateModifiers(WPARAM wParam, LPARAM lParam)
             // is extended key?
             if (lParam & 0x01000000)
             {
-                WindowsImeLib::ModifiersValue |= (TF_MOD_RCONTROL | TF_MOD_CONTROL);
+                Global::ModifiersValue |= (TF_MOD_RCONTROL | TF_MOD_CONTROL);
             }
             else
             {
-                WindowsImeLib::ModifiersValue |= (TF_MOD_LCONTROL | TF_MOD_CONTROL);
+                Global::ModifiersValue |= (TF_MOD_LCONTROL | TF_MOD_CONTROL);
             }
 
             // is previous key state up?
@@ -160,13 +162,13 @@ BOOL UpdateModifiers(WPARAM wParam, LPARAM lParam)
                 // is VK_SHIFT and VK_MENU up?
                 if (!(sksShft & 0x8000) && !(sksMenu & 0x8000))
                 {
-                    WindowsImeLib::IsControlKeyDownOnly = TRUE;
+                    Global::IsControlKeyDownOnly = TRUE;
                 }
                 else
                 {
-                    WindowsImeLib::IsShiftKeyDownOnly = FALSE;
-                    WindowsImeLib::IsControlKeyDownOnly = FALSE;
-                    WindowsImeLib::IsAltKeyDownOnly = FALSE;
+                    Global::IsShiftKeyDownOnly = FALSE;
+                    Global::IsControlKeyDownOnly = FALSE;
+                    Global::IsAltKeyDownOnly = FALSE;
                 }
             }
         }
@@ -179,11 +181,11 @@ BOOL UpdateModifiers(WPARAM wParam, LPARAM lParam)
             // is scan code 0x36(right shift)?
             if (((lParam >> 16) & 0x00ff) == 0x36)
             {
-                WindowsImeLib::ModifiersValue |= (TF_MOD_RSHIFT | TF_MOD_SHIFT);
+                Global::ModifiersValue |= (TF_MOD_RSHIFT | TF_MOD_SHIFT);
             }
             else
             {
-                WindowsImeLib::ModifiersValue |= (TF_MOD_LSHIFT | TF_MOD_SHIFT);
+                Global::ModifiersValue |= (TF_MOD_LSHIFT | TF_MOD_SHIFT);
             }
 
             // is previous key state up?
@@ -192,46 +194,51 @@ BOOL UpdateModifiers(WPARAM wParam, LPARAM lParam)
                 // is VK_MENU and VK_CONTROL up?
                 if (!(sksMenu & 0x8000) && !(sksCtrl & 0x8000))
                 {
-                    WindowsImeLib::IsShiftKeyDownOnly = TRUE;
+                    Global::IsShiftKeyDownOnly = TRUE;
                 }
                 else
                 {
-                    WindowsImeLib::IsShiftKeyDownOnly = FALSE;
-                    WindowsImeLib::IsControlKeyDownOnly = FALSE;
-                    WindowsImeLib::IsAltKeyDownOnly = FALSE;
+                    Global::IsShiftKeyDownOnly = FALSE;
+                    Global::IsControlKeyDownOnly = FALSE;
+                    Global::IsAltKeyDownOnly = FALSE;
                 }
             }
         }
         break;
 
     default:
-        WindowsImeLib::IsShiftKeyDownOnly = FALSE;
-        WindowsImeLib::IsControlKeyDownOnly = FALSE;
-        WindowsImeLib::IsAltKeyDownOnly = FALSE;
+        Global::IsShiftKeyDownOnly = FALSE;
+        Global::IsControlKeyDownOnly = FALSE;
+        Global::IsAltKeyDownOnly = FALSE;
         break;
     }
 
     if (!(sksMenu & 0x8000))
     {
-        WindowsImeLib::ModifiersValue &= ~TF_MOD_ALLALT;
+        Global::ModifiersValue &= ~TF_MOD_ALLALT;
     }
     if (!(sksCtrl & 0x8000))
     {
-        WindowsImeLib::ModifiersValue &= ~TF_MOD_ALLCONTROL;
+        Global::ModifiersValue &= ~TF_MOD_ALLCONTROL;
     }
     if (!(sksShft & 0x8000))
     {
-        WindowsImeLib::ModifiersValue &= ~TF_MOD_ALLSHIFT;
+        Global::ModifiersValue &= ~TF_MOD_ALLSHIFT;
     }
+
+    Global::UniqueModifiersValue = (Global::IsShiftKeyDownOnly ? TF_MOD_SHIFT : 0) |
+                                   (Global::IsControlKeyDownOnly ? TF_MOD_CONTROL : 0) |
+                                   (Global::IsAltKeyDownOnly ? TF_MOD_ALT : 0);
 
     return TRUE;
 }
 
-//---------------------------------------------------------------------
-// override CompareElements
-//---------------------------------------------------------------------
-BOOL CompareElements(LCID locale, const CStringRange* pElement1, const CStringRange* pElement2)
-{
-    return (CStringRange::Compare(locale, (CStringRange*)pElement1, (CStringRange*)pElement2) == CSTR_EQUAL) ? TRUE : FALSE;
+// //---------------------------------------------------------------------
+// // override CompareElements
+// //---------------------------------------------------------------------
+// BOOL CompareElements(LCID locale, const CStringRange* pElement1, const CStringRange* pElement2)
+// {
+//     return (CStringRange::Compare(locale, (CStringRange*)pElement1, (CStringRange*)pElement2) == CSTR_EQUAL) ? TRUE : FALSE;
+// }
 }
 }

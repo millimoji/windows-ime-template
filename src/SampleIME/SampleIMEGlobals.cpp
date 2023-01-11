@@ -10,6 +10,8 @@
 #include "SampleIMEDefine.h"
 #include "SampleIMEBaseStructure.h"
 
+namespace SampleIMENS
+{
 namespace Global
 {
 
@@ -180,4 +182,5 @@ BOOL CheckModifiers(UINT modCurrent, UINT mod)
     return TRUE;
 }
 
+}
 }

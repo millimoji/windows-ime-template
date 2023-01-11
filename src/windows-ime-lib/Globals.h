@@ -13,8 +13,16 @@
 void DllAddRef();
 void DllRelease();
 
+namespace WindowsImeLibLocal
+{
 namespace Global
 {
+
+inline USHORT ModifiersValue = 0;
+inline USHORT UniqueModifiersValue = 0;
+inline BOOL   IsShiftKeyDownOnly = FALSE;
+inline BOOL   IsControlKeyDownOnly = FALSE;
+inline BOOL   IsAltKeyDownOnly = FALSE;
 
 //+---------------------------------------------------------------------------
 //
@@ -71,3 +79,5 @@ BOOL UpdateModifiers(WPARAM wParam, LPARAM lParam);
 extern const WCHAR FullWidthCharTable[];
 
 }
+} // namespace WindowsImeLibLocal
+using namespace WindowsImeLibLocal;

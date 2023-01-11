@@ -339,7 +339,7 @@ STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
 
     if (_pCompositionProcessorEngine)
     {
-        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, true /*test*/, true /*down*/);
+        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, Global::ModifiersValue, Global::UniqueModifiersValue, true /*test*/, true /*down*/);
     }
 
 //    _KEYSTROKE_STATE KeystrokeState;
@@ -377,7 +377,7 @@ STDAPI CWindowsIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam
 
     if (_pCompositionProcessorEngine)
     {
-        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, false /*test*/, true /*down*/);
+        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, Global::ModifiersValue, Global::UniqueModifiersValue, false /*test*/, true /*down*/);
     }
 
 //    _KEYSTROKE_STATE KeystrokeState;
@@ -430,9 +430,11 @@ STDAPI CWindowsIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lPar
 {
     auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnTestKeyUp();
 
+    Global::UpdateModifiers(wParam, lParam);
+
     if (_pCompositionProcessorEngine)
     {
-        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, true /*test*/, false /*down*/);
+        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, Global::ModifiersValue, Global::UniqueModifiersValue, true /*test*/, false /*down*/);
     }
 
 //    if (pIsEaten == nullptr)
@@ -467,7 +469,7 @@ STDAPI CWindowsIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, 
 
     if (_pCompositionProcessorEngine)
     {
-        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, false /*test*/, false /*down*/);
+        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, Global::ModifiersValue, Global::UniqueModifiersValue, false /*test*/, false /*down*/);
     }
 
 //    WCHAR wch = '\0';

@@ -287,9 +287,9 @@ private:
     BOOL CheckShiftKeyOnly(UINT extendedModifer)
     {
 
-        if (((extendedModifer & (_TF_MOD_ON_KEYUP_SHIFT_ONLY & 0xffff0000)) && !WindowsImeLib::IsShiftKeyDownOnly) ||
-            ((extendedModifer & (_TF_MOD_ON_KEYUP_CONTROL_ONLY & 0xffff0000)) && !WindowsImeLib::IsControlKeyDownOnly) ||
-            ((extendedModifer & (_TF_MOD_ON_KEYUP_ALT_ONLY & 0xffff0000)) && !WindowsImeLib::IsAltKeyDownOnly))
+        if (((extendedModifer & (_TF_MOD_ON_KEYUP_SHIFT_ONLY & 0xffff0000)) && !Global::IsShiftKeyDownOnly) ||
+            ((extendedModifer & (_TF_MOD_ON_KEYUP_CONTROL_ONLY & 0xffff0000)) && !Global::IsControlKeyDownOnly) ||
+            ((extendedModifer & (_TF_MOD_ON_KEYUP_ALT_ONLY & 0xffff0000)) && !Global::IsAltKeyDownOnly))
         {
             return FALSE;
         }

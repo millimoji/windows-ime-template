@@ -154,9 +154,6 @@
     <ClInclude Include="DisplayAttributeInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DisplayString.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="EditSession.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -90,7 +90,6 @@
     <ClInclude Include="CandidateListUIPresenter.h" />
     <ClInclude Include="CandidateWindow.h" />
     <ClInclude Include="DisplayAttributeInfo.h" />
-    <ClInclude Include="DisplayString.h" />
     <ClInclude Include="EditSession.h" />
     <ClInclude Include="EnumDisplayAttributeInfo.h" />
     <ClInclude Include="EnumTfCandidates.h" />
