@@ -11,7 +11,7 @@
 class CWindowsIME;
 namespace WindowsImeLib
 {
-    struct ICompositionProcessorEngineOwner;
+    struct IWindowsIMECompositionBuffer;
 }
 
 class CEditSessionBase : public ITfEditSession
@@ -45,7 +45,7 @@ public:
     CEditSessionTask() {}
     virtual ~CEditSessionTask() {}
 
-    HRESULT RuntimeClassInitialize(const std::function<HRESULT (TfEditCookie ec, WindowsImeLib::ICompositionProcessorEngineOwner* textService)>& editSesisonTask, WindowsImeLib::ICompositionProcessorEngineOwner* textService)
+    HRESULT RuntimeClassInitialize(const std::function<HRESULT (TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService)>& editSesisonTask, WindowsImeLib::IWindowsIMECompositionBuffer* textService)
     {
         m_editSesisonTask = editSesisonTask;
         m_textService = textService;
@@ -59,6 +59,6 @@ public:
     }
 
 private:
-    std::function<HRESULT (TfEditCookie ec, WindowsImeLib::ICompositionProcessorEngineOwner* textService)> m_editSesisonTask;
-    WindowsImeLib::ICompositionProcessorEngineOwner* m_textService = nullptr;
+    std::function<HRESULT (TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService)> m_editSesisonTask;
+    WindowsImeLib::IWindowsIMECompositionBuffer* m_textService = nullptr;
 };

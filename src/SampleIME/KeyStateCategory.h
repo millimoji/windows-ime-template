@@ -19,7 +19,7 @@ class CKeyStateCategoryFactory
 {
 public:
     static CKeyStateCategoryFactory* Instance();
-    CKeyStateCategory* MakeKeyStateCategory(KEYSTROKE_CATEGORY keyCategory, _In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService);
+    CKeyStateCategory* MakeKeyStateCategory(KEYSTROKE_CATEGORY keyCategory, _In_ WindowsImeLib::IWindowsIMECompositionBuffer*pTextService);
     void Release();
 
 protected:
@@ -51,7 +51,7 @@ typedef struct KeyHandlerEditSessionDTO
 class CKeyStateCategory
 {
 public:
-    CKeyStateCategory(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService);
+    CKeyStateCategory(_In_ WindowsImeLib::IWindowsIMECompositionBuffer* _pTextService);
 
 protected:
     ~CKeyStateCategory(void);
@@ -101,13 +101,13 @@ protected:
     virtual HRESULT HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto);
 
 protected:
-    WindowsImeLib::ICompositionProcessorEngineOwner* _pTextService;
+    WindowsImeLib::IWindowsIMECompositionBuffer* _pTextService;
 };
 
 class CKeyStateComposing : public CKeyStateCategory
 {
 public:
-    CKeyStateComposing(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService);
+    CKeyStateComposing(_In_ WindowsImeLib::IWindowsIMECompositionBuffer *pTextService);
 
 protected:
     // _HandleCompositionInput
@@ -150,7 +150,7 @@ protected:
 class CKeyStateCandidate : public CKeyStateCategory
 {
 public:
-    CKeyStateCandidate(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService);
+    CKeyStateCandidate(_In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService);
 
 protected:
     // HandleKeyFinalizeCandidatelist
@@ -175,7 +175,7 @@ protected:
 class CKeyStatePhrase : public CKeyStateCategory
 {
 public:
-    CKeyStatePhrase(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService);
+    CKeyStatePhrase(_In_ WindowsImeLib::IWindowsIMECompositionBuffer*pTextService);
 
 protected:
     //_HandleCancel
@@ -195,7 +195,7 @@ protected:
 class CKeyStateNull : public CKeyStateCategory
 {
 public:
-    CKeyStateNull(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService) : CKeyStateCategory(pTextService) {};
+    CKeyStateNull(_In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService) : CKeyStateCategory(pTextService) {};
 
 protected:
     // _HandleNullInput

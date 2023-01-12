@@ -98,7 +98,7 @@ STDAPI_(ULONG) CEditSessionBase::Release(void)
     return cr;
 }
 
-HRESULT CWindowsIME::_SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, WindowsImeLib::ICompositionProcessorEngineOwner* textService)>& editSesisonTask, DWORD tfEsFlags)
+HRESULT CWindowsIME::_SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService)>& editSesisonTask, DWORD tfEsFlags)
 {
     wil::com_ptr<CEditSessionTask> editSessionTaskObj;
     RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CEditSessionTask>(&editSessionTaskObj, editSesisonTask, this));

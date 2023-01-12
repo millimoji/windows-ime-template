@@ -28,7 +28,7 @@
 //----------------------------------------------------------------------------
 
 HRESULT CompositionProcessorEngine::KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* pContext, UINT _uCode, WCHAR _wch,
-    _In_ WindowsImeLib::ICompositionProcessorEngineOwner* textService)
+    _In_ WindowsImeLib::IWindowsIMECompositionBuffer* textService)
 {
     HRESULT hResult = S_OK;
 

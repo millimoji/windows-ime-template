@@ -30,7 +30,7 @@ public:
 	void OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, DWORD modifiers, DWORD uniqueModifiers, bool isTest, bool isUp) override;
 	// in KeyHandlerEditSession.cpp
 	HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch,
-        _In_ WindowsImeLib::ICompositionProcessorEngineOwner* textService) override;
+        _In_ WindowsImeLib::IWindowsIMECompositionBuffer* textService) override;
 
     BOOL AddVirtualKey(WCHAR wch) override;
     void RemoveVirtualKey(DWORD_PTR dwIndex) override;

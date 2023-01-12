@@ -26,7 +26,7 @@ CKeyStateCategoryFactory* CKeyStateCategoryFactory::Instance()
     return _instance;
 }
 
-CKeyStateCategory* CKeyStateCategoryFactory::MakeKeyStateCategory(KEYSTROKE_CATEGORY keyCategory, _In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService)
+CKeyStateCategory* CKeyStateCategoryFactory::MakeKeyStateCategory(KEYSTROKE_CATEGORY keyCategory, _In_ WindowsImeLib::IWindowsIMECompositionBuffer *pTextService)
 {
     CKeyStateCategory* pKeyState = nullptr;
 
@@ -67,7 +67,7 @@ void CKeyStateCategoryFactory::Release()
 /*
 class CKeyStateCategory
 */
-CKeyStateCategory::CKeyStateCategory(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService)
+CKeyStateCategory::CKeyStateCategory(_In_ WindowsImeLib::IWindowsIMECompositionBuffer*pTextService)
 {
     _pTextService = pTextService;
 }
@@ -229,7 +229,7 @@ HRESULT CKeyStateCategory::HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto)
 /*
 class CKeyStateComposing
 */
-CKeyStateComposing::CKeyStateComposing(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService) : CKeyStateCategory(pTextService)
+CKeyStateComposing::CKeyStateComposing(_In_ WindowsImeLib::IWindowsIMECompositionBuffer*pTextService) : CKeyStateCategory(pTextService)
 {
 }
 
@@ -298,7 +298,7 @@ HRESULT CKeyStateComposing::HandleKeyPunctuation(KeyHandlerEditSessionDTO dto)
 /*
 class CKeyStateCandidate
 */
-CKeyStateCandidate::CKeyStateCandidate(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService) : CKeyStateCategory(pTextService)
+CKeyStateCandidate::CKeyStateCandidate(_In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService) : CKeyStateCategory(pTextService)
 {
 }
 
@@ -343,7 +343,7 @@ HRESULT CKeyStateCandidate::HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto
 class CKeyStatePhrase
 */
 
-CKeyStatePhrase::CKeyStatePhrase(_In_ WindowsImeLib::ICompositionProcessorEngineOwner *pTextService) : CKeyStateCategory(pTextService)
+CKeyStatePhrase::CKeyStatePhrase(_In_ WindowsImeLib::IWindowsIMECompositionBuffer*pTextService) : CKeyStateCategory(pTextService)
 {
 }
 

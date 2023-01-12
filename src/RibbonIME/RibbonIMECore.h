@@ -13,8 +13,9 @@ public:
 
     BOOL Initialize() override;
 
-    void OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, bool isTest, bool isUp) override;
-    virtual HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie, _KEYSTROKE_STATE, _In_ ITfContext*, UINT, WCHAR, _In_ WindowsImeLib::ICompositionProcessorEngineOwner*) override {
+    void OnKeyEvent(ITfContext*, WPARAM, LPARAM, BOOL*, DWORD, DWORD, bool, bool) override {
+    }
+    HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie, _KEYSTROKE_STATE, _In_ ITfContext*, UINT, WCHAR, _In_ WindowsImeLib::IWindowsIMECompositionBuffer*) override {
         return S_OK;
     }
 

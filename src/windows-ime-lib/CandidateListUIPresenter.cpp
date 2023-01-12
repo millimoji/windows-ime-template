@@ -1097,12 +1097,14 @@ HRESULT CCandidateListUIPresenter::_CandidateChangeNotification(_In_ enum CANDWN
 //    }
 
     {
-        auto engineOwner = static_cast<WindowsImeLib::ICompositionProcessorEngineOwner*>(_pTextService);
-        auto pTextService = _pTextService;
-        RETURN_IF_FAILED(engineOwner->_SubmitEditSessionTask(pContext, [pTextService, KeyState, pContext](TfEditCookie ec, void* /*pv*/) ->  HRESULT
-        {
-            return pTextService->GetCompositionProcessorEngine()->KeyHandlerEditSession_DoEditSession(ec, KeyState, pContext, 0, 0, pTextService);
-        }, TF_ES_ASYNC | TF_ES_READWRITE));
+        auto compositionBuffer = static_cast<WindowsImeLib::IWindowsIMECompositionBuffer*>(_pTextService);
+        auto pTextService = static_cast<WindowsImeLib::ICompositionProcessorEngineOwner*>(_pTextService);
+        auto compositionEngiene = _pTextService->GetCompositionProcessorEngine();
+        RETURN_IF_FAILED(pTextService->_SubmitEditSessionTask(pContext, [pTextService, compositionBuffer, compositionEngiene, KeyState, pContext]
+            (TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* /*pv*/) ->  HRESULT
+            {
+                return compositionEngiene->KeyHandlerEditSession_DoEditSession(ec, KeyState, pContext, 0, 0, compositionBuffer);
+            }, TF_ES_ASYNC | TF_ES_READWRITE));
     }
 
     pContext->Release();

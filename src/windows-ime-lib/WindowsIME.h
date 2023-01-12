@@ -33,6 +33,7 @@ class CWindowsIME :
                                         ITfFnGetPreferredTouchKeyboardLayout,
                                         Microsoft::WRL::FtmBase>,
     public WindowsImeLib::ICompositionProcessorEngineOwner,
+    public WindowsImeLib::IWindowsIMECompositionBuffer,
     WindowsImeLib::IWindowsIMEInprocFramework
 {
 public: 
@@ -164,7 +165,7 @@ private:
 
     // Invoke key handler edit session
     // HRESULT _InvokeKeyHandler(_In_ ITfContext *pContext, UINT code, WCHAR wch, DWORD flags, _KEYSTROKE_STATE keyState) override;
-    HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, WindowsImeLib::ICompositionProcessorEngineOwner* textService)>& editSesisonTask, DWORD tfEsFlags) override;
+    HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService)>& editSesisonTask, DWORD tfEsFlags) override;
     // HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch, void* /*pv*/)  override;
 
     // function for the language property
