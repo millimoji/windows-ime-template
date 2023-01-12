@@ -273,6 +273,7 @@ private:
     // Support the search integration
     ITfFnSearchCandidateProvider* _pITfFnSearchCandidateProvider = {};
 
+    std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> m_compositionBuffer;
     std::shared_ptr<WindowsImeLib::IWindowsIMEInprocClient> m_inprocClient;
     wil::com_ptr<ITextInputProcessor> m_singletonProcessor;
 };

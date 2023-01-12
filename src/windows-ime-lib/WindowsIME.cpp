@@ -19,6 +19,8 @@ namespace wrl
     using namespace Microsoft::WRL;
 }
 
+extern std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> CreateCompositionBuffer(WindowsImeLib::IWindowsIMECompositionBuffer* windowsIme);
+
 //+---------------------------------------------------------------------------
 //
 // CreateInstance
@@ -165,6 +167,8 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
         LOG_CAUGHT_EXCEPTION();
         goto ExitError;
 	}
+
+    m_compositionBuffer = CreateCompositionBuffer(this);
 
     if (!_AddTextProcessorEngine())
     {

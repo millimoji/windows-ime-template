@@ -26,6 +26,7 @@
     <ClCompile Include="CandidateWindow.cpp" />
     <ClCompile Include="Compartment.cpp" />
     <ClCompile Include="Composition.cpp" />
+    <ClCompile Include="CompositionBuffer.cpp" />
     <ClCompile Include="DisplayAttribute.cpp" />
     <ClCompile Include="DisplayAttributeInfo.cpp" />
     <ClCompile Include="DisplayAttributeProvider.cpp" />
@@ -99,6 +100,7 @@
     <ClInclude Include="Private.h" />
     <ClInclude Include="RegKey.h" />
     <ClInclude Include="SingletonProcessor.h" />
+    <ClInclude Include="ThreadTaskRunner.h" />
     <ClInclude Include="WindowsIME.h" />
     <ClInclude Include="BaseStructure.h" />
     <ClInclude Include="ScrollBarWindow.h" />
