@@ -25,7 +25,7 @@
 //
 //----------------------------------------------------------------------------
 
-BOOL CWindowsIME::_IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover)
+BOOL CompositionBuffer::_IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover)
 {
     LONG lResult = 0;;
 
@@ -72,9 +72,9 @@ VOID CWindowsIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pConte
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CompositionBuffer::_HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext)
 {
-    _DeleteCandidateList(FALSE, pContext);
+    m_textService->_DeleteCandidateList(FALSE, pContext);
 
     // just terminate the composition
     _TerminateComposition(ec, pContext);
@@ -88,11 +88,11 @@ HRESULT CWindowsIME::_HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext)
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandleCancel(TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CompositionBuffer::_HandleCancel(TfEditCookie ec, _In_ ITfContext *pContext)
 {
-    _RemoveDummyCompositionForComposing(ec, _pComposition);
+    _RemoveDummyCompositionForComposing(ec, m_pComposition);
 
-    _DeleteCandidateList(FALSE, pContext);
+    m_textService->_DeleteCandidateList(FALSE, pContext);
 
     _TerminateComposition(ec, pContext);
 
@@ -107,24 +107,24 @@ HRESULT CWindowsIME::_HandleCancel(TfEditCookie ec, _In_ ITfContext *pContext)
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandleCompositionInput(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch)
+HRESULT CompositionBuffer::_HandleCompositionInput(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch)
 {
     ITfRange* pRangeComposition = nullptr;
     TF_SELECTION tfSelection;
     ULONG fetched = 0;
     BOOL isCovered = TRUE;
 
-    auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+    auto pCompositionProcessorEngine = m_pCompositionProcessorEngine.get();
 
-    if ((_pCandidateListUIPresenter != nullptr) && (_candidateMode != CANDIDATE_INCREMENTAL))
+    if ((m_pCandidateListUIPresenter != nullptr) && (m_candidateMode != CANDIDATE_INCREMENTAL))
     {
         _HandleCompositionFinalize(ec, pContext, FALSE);
     }
 
     // Start the new (std::nothrow) compositon if there is no composition.
-    if (!_IsComposing())
+    if (!m_textService->_IsComposing())
     {
-        _StartComposition(pContext);
+        m_textService->_StartComposition(pContext);
     }
 
     // first, test where a keystroke would go in the document if we did an insert
@@ -134,7 +134,7 @@ HRESULT CWindowsIME::_HandleCompositionInput(TfEditCookie ec, _In_ ITfContext *p
     }
 
     // is the insertion point covered by a composition?
-    if (SUCCEEDED(_pComposition->GetRange(&pRangeComposition)))
+    if (SUCCEEDED(m_pComposition->GetRange(&pRangeComposition)))
     {
         isCovered = _IsRangeCovered(ec, tfSelection.range, pRangeComposition);
 
@@ -164,7 +164,7 @@ Exit:
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandleCompositionInputWorker(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CompositionBuffer::_HandleCompositionInputWorker(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
 {
     HRESULT hr = S_OK;
     std::vector<CStringRange> readingStrings;
@@ -196,20 +196,20 @@ HRESULT CWindowsIME::_HandleCompositionInputWorker(_In_ WindowsImeLib::IComposit
         hr = _CreateAndStartCandidate(pCompositionProcessorEngine, ec, pContext);
         if (SUCCEEDED(hr))
         {
-            _pCandidateListUIPresenter->_ClearList();
-            _pCandidateListUIPresenter->_SetText(&candidateList, TRUE);
+            m_pCandidateListUIPresenter->_ClearList();
+            m_pCandidateListUIPresenter->_SetText(&candidateList, TRUE);
         }
     }
-    else if (_pCandidateListUIPresenter)
+    else if (m_pCandidateListUIPresenter)
     {
-        _pCandidateListUIPresenter->_ClearList();
+        m_pCandidateListUIPresenter->_ClearList();
     }
     else if (readingStrings.size() && isWildcardIncluded)
     {
         hr = _CreateAndStartCandidate(pCompositionProcessorEngine, ec, pContext);
         if (SUCCEEDED(hr))
         {
-            _pCandidateListUIPresenter->_ClearList();
+            m_pCandidateListUIPresenter->_ClearList();
         }
     }
     return hr;
@@ -220,35 +220,37 @@ HRESULT CWindowsIME::_HandleCompositionInputWorker(_In_ WindowsImeLib::IComposit
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CompositionBuffer::_CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
 {
     HRESULT hr = S_OK;
 
-    if (((_candidateMode == CANDIDATE_PHRASE) && (_pCandidateListUIPresenter))
-        || ((_candidateMode == CANDIDATE_NONE) && (_pCandidateListUIPresenter)))
+    if (((m_candidateMode == CANDIDATE_PHRASE) && (m_pCandidateListUIPresenter))
+        || ((m_candidateMode == CANDIDATE_NONE) && (m_pCandidateListUIPresenter)))
     {
         // Recreate candidate list
-        _pCandidateListUIPresenter->_EndCandidateList();
-        delete _pCandidateListUIPresenter;
-        _pCandidateListUIPresenter = nullptr;
+        m_pCandidateListUIPresenter->_EndCandidateList();
+        delete m_pCandidateListUIPresenter;
+        m_pCandidateListUIPresenter = nullptr;
 
-        _candidateMode = CANDIDATE_NONE;
-        _isCandidateWithWildcard = FALSE;
+        m_candidateMode = CANDIDATE_NONE;
+        m_isCandidateWithWildcard = FALSE;
     }
 
-    if (_pCandidateListUIPresenter == nullptr)
+    if (m_pCandidateListUIPresenter == nullptr)
     {
-        _pCandidateListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(this, Global::AtomCandidateWindow,
+        m_pCandidateListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(
+            reinterpret_cast<CWindowsIME*>(m_textService->GetTextService()),
+            Global::AtomCandidateWindow,
             CATEGORY_CANDIDATE,
             pCompositionProcessorEngine->GetCandidateListIndexRange(),
             FALSE);
-        if (!_pCandidateListUIPresenter)
+        if (!m_pCandidateListUIPresenter)
         {
             return E_OUTOFMEMORY;
         }
 
-        _candidateMode = CANDIDATE_INCREMENTAL;
-        _isCandidateWithWildcard = FALSE;
+        m_candidateMode = CANDIDATE_INCREMENTAL;
+        m_isCandidateWithWildcard = FALSE;
 
         // we don't cache the document manager object. So get it from pContext.
         ITfDocumentMgr* pDocumentMgr = nullptr;
@@ -256,9 +258,9 @@ HRESULT CWindowsIME::_CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionPr
         {
             // get the composition range.
             ITfRange* pRange = nullptr;
-            if (SUCCEEDED(_pComposition->GetRange(&pRange)))
+            if (SUCCEEDED(m_pComposition->GetRange(&pRange)))
             {
-                hr = _pCandidateListUIPresenter->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, ec, pRange,
+                hr = m_pCandidateListUIPresenter->_StartCandidateList(m_tfClientId, pDocumentMgr, pContext, ec, pRange,
                         WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
                 pRange->Release();
             }
@@ -275,17 +277,17 @@ HRESULT CWindowsIME::_CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionPr
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCandidateList)
+HRESULT CompositionBuffer::_HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCandidateList)
 {
     HRESULT hr = S_OK;
 
-    if (isCandidateList && _pCandidateListUIPresenter)
+    if (isCandidateList && m_pCandidateListUIPresenter)
     {
         // Finalize selected candidate string from CCandidateListUIPresenter
         DWORD_PTR candidateLen = 0;
         const WCHAR *pCandidateString = nullptr;
 
-        candidateLen = _pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
+        candidateLen = m_pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
 
         CStringRange candidateString;
         candidateString.Set(pCandidateString, candidateLen);
@@ -303,7 +305,7 @@ HRESULT CWindowsIME::_HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext
     else
     {
         // Finalize current text store strings
-        if (_IsComposing())
+        if (m_textService->_IsComposing())
         {
             ULONG fetched = 0;
             TF_SELECTION tfSelection;
@@ -314,11 +316,11 @@ HRESULT CWindowsIME::_HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext
             }
 
             ITfRange* pRangeComposition = nullptr;
-            if (SUCCEEDED(_pComposition->GetRange(&pRangeComposition)))
+            if (SUCCEEDED(m_pComposition->GetRange(&pRangeComposition)))
             {
                 if (_IsRangeCovered(ec, tfSelection.range, pRangeComposition))
                 {
-                    _EndComposition(pContext);
+                    m_textService->_EndComposition(pContext);
                 }
 
                 pRangeComposition->Release();
@@ -339,7 +341,7 @@ HRESULT CWindowsIME::_HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isWildcardSearch)
+HRESULT CompositionBuffer::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isWildcardSearch)
 {
     HRESULT hr = S_OK;
 
@@ -348,7 +350,7 @@ HRESULT CWindowsIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext 
     //
     // Get candidate string from composition processor engine
     //
-    auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+    auto pCompositionProcessorEngine = m_pCompositionProcessorEngine.get();
     pCompositionProcessorEngine->GetCandidateList(&candidateList, FALSE, isWildcardSearch);
 
     // If there is no candlidate listin the current reading string, we don't do anything. Just wait for
@@ -356,34 +358,36 @@ HRESULT CWindowsIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext 
     int nCount = static_cast<int>(candidateList.size());
     if (nCount)
     {
-        if (_pCandidateListUIPresenter)
+        if (m_pCandidateListUIPresenter)
         {
-            _pCandidateListUIPresenter->_EndCandidateList();
-            delete _pCandidateListUIPresenter;
-            _pCandidateListUIPresenter = nullptr;
+            m_pCandidateListUIPresenter->_EndCandidateList();
+            delete m_pCandidateListUIPresenter;
+            m_pCandidateListUIPresenter = nullptr;
 
-            _candidateMode = CANDIDATE_NONE;
-            _isCandidateWithWildcard = FALSE;
+            m_candidateMode = CANDIDATE_NONE;
+            m_isCandidateWithWildcard = FALSE;
         }
 
         // 
         // create an instance of the candidate list class.
         // 
-        if (_pCandidateListUIPresenter == nullptr)
+        if (m_pCandidateListUIPresenter == nullptr)
         {
-            _pCandidateListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(this, Global::AtomCandidateWindow,
+            m_pCandidateListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(
+                reinterpret_cast<CWindowsIME*>(m_textService->GetTextService()),
+                Global::AtomCandidateWindow,
                 CATEGORY_CANDIDATE,
                 pCompositionProcessorEngine->GetCandidateListIndexRange(),
                 FALSE);
-            if (!_pCandidateListUIPresenter)
+            if (!m_pCandidateListUIPresenter)
             {
                 return E_OUTOFMEMORY;
             }
 
-            _candidateMode = CANDIDATE_ORIGINAL;
+            m_candidateMode = CANDIDATE_ORIGINAL;
         }
 
-        _isCandidateWithWildcard = isWildcardSearch;
+        m_isCandidateWithWildcard = isWildcardSearch;
 
         // we don't cache the document manager object. So get it from pContext.
         ITfDocumentMgr* pDocumentMgr = nullptr;
@@ -391,9 +395,9 @@ HRESULT CWindowsIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext 
         {
             // get the composition range.
             ITfRange* pRange = nullptr;
-            if (SUCCEEDED(_pComposition->GetRange(&pRange)))
+            if (SUCCEEDED(m_pComposition->GetRange(&pRange)))
             {
-                hr = _pCandidateListUIPresenter->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, ec, pRange,
+                hr = m_pCandidateListUIPresenter->_StartCandidateList(m_tfClientId, pDocumentMgr, pContext, ec, pRange,
                         WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
                 pRange->Release();
             }
@@ -401,7 +405,7 @@ HRESULT CWindowsIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext 
         }
         if (SUCCEEDED(hr))
         {
-            _pCandidateListUIPresenter->_SetText(&candidateList, FALSE);
+            m_pCandidateListUIPresenter->_SetText(&candidateList, FALSE);
         }
     }
 
@@ -414,7 +418,7 @@ HRESULT CWindowsIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext 
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CompositionBuffer::_HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext *pContext)
 {
     ITfRange* pRangeComposition = nullptr;
     TF_SELECTION tfSelection;
@@ -422,7 +426,7 @@ HRESULT CWindowsIME::_HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContex
     BOOL isCovered = TRUE;
 
     // Start the new (std::nothrow) compositon if there is no composition.
-    if (!_IsComposing())
+    if (!m_textService->_IsComposing())
     {
         return S_OK;
     }
@@ -434,7 +438,7 @@ HRESULT CWindowsIME::_HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContex
     }
 
     // is the insertion point covered by a composition?
-    if (SUCCEEDED(_pComposition->GetRange(&pRangeComposition)))
+    if (SUCCEEDED(m_pComposition->GetRange(&pRangeComposition)))
     {
         isCovered = _IsRangeCovered(ec, tfSelection.range, pRangeComposition);
 
@@ -450,7 +454,7 @@ HRESULT CWindowsIME::_HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContex
     // Add virtual key to composition processor engine
     //
     {
-        auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+        auto pCompositionProcessorEngine = m_pCompositionProcessorEngine.get();
 
         DWORD_PTR vKeyLen = pCompositionProcessorEngine->GetVirtualKeyLength();
 
@@ -482,7 +486,7 @@ Exit:
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, KEYSTROKE_FUNCTION keyFunction)
+HRESULT CompositionBuffer::_HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, KEYSTROKE_FUNCTION keyFunction)
 {
     ITfRange* pRangeComposition = nullptr;
     TF_SELECTION tfSelection;
@@ -497,15 +501,15 @@ HRESULT CWindowsIME::_HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext
     }
 
     // get the composition range
-    if (FAILED(_pComposition->GetRange(&pRangeComposition)))
+    if (FAILED(m_pComposition->GetRange(&pRangeComposition)))
     {
         goto Exit;
     }
 
     // For incremental candidate list
-    if (_pCandidateListUIPresenter)
+    if (m_pCandidateListUIPresenter)
     {
-        _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
+        m_pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
     }
 
     pContext->SetSelection(ec, 1, &tfSelection);
@@ -523,16 +527,16 @@ Exit:
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch)
+HRESULT CompositionBuffer::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch)
 {
     HRESULT hr = S_OK;
 
-    if (_candidateMode != CANDIDATE_NONE && _pCandidateListUIPresenter)
+    if (m_candidateMode != CANDIDATE_NONE && m_pCandidateListUIPresenter)
     {
         DWORD_PTR candidateLen = 0;
         const WCHAR* pCandidateString = nullptr;
 
-        candidateLen = _pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
+        candidateLen = m_pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
 
         CStringRange candidateString;
         candidateString.Set(pCandidateString, candidateLen);
@@ -545,7 +549,7 @@ HRESULT CWindowsIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfCont
     //
     // Get punctuation char from composition processor engine
     //
-    auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+    auto pCompositionProcessorEngine = m_pCompositionProcessorEngine.get();
 
     WCHAR punctuation = pCompositionProcessorEngine->GetPunctuation(wch);
 
@@ -570,7 +574,7 @@ HRESULT CWindowsIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfCont
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch)
+HRESULT CompositionBuffer::_HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch)
 {
     HRESULT hr = S_OK;
 

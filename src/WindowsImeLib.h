@@ -139,13 +139,20 @@ struct IWindowsIMEInprocClient
     virtual std::string EncodeCustomState() = 0;
 };
 
+struct ICompositionProcessorEngine;
+
 struct IWindowsIMECompositionBuffer
 {
+    // functions for the composition object.
+    virtual void _TerminateComposition(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCalledFromDeactivate = FALSE) = 0;
+
     // key event handlers for composition/candidate/phrase common objects.
+    virtual HRESULT _HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext) = 0;
     virtual HRESULT _HandleCancel(TfEditCookie ec, _In_ ITfContext* pContext) = 0;
     // key event handlers for composition object.
     virtual HRESULT _HandleCompositionInput(TfEditCookie ec, _In_ ITfContext* pContext, WCHAR wch) = 0;
     virtual HRESULT _HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext* pContext, BOOL fCandidateList) = 0;
+
     virtual HRESULT _HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext* pContext, BOOL isWildcardSearch) = 0;
     virtual HRESULT _HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext* pContext) = 0;
     virtual HRESULT _HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext* pContext, KEYSTROKE_FUNCTION keyFunction) = 0;
@@ -160,6 +167,29 @@ struct IWindowsIMECompositionBuffer
     virtual HRESULT _HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext* pContext) = 0;
     virtual HRESULT _HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext* pContext, _In_ KEYSTROKE_FUNCTION keyFunction) = 0;
     virtual HRESULT _HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext* pContext, _In_ UINT uCode) = 0;
+
+    // functions for the composition object.
+    virtual HRESULT _HandleCompositionInputWorker(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext) = 0;
+    virtual HRESULT _CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext) = 0;
+    virtual HRESULT _HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext) = 0;
+
+    virtual HRESULT _AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString) = 0;
+    virtual HRESULT _AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString) = 0;
+
+    virtual BOOL _FindComposingRange(TfEditCookie ec, _In_ ITfContext *pContext, _In_ ITfRange *pSelection, _Outptr_result_maybenull_ ITfRange **ppRange) = 0;
+    virtual HRESULT _SetInputString(TfEditCookie ec, _In_ ITfContext *pContext, _Out_opt_ ITfRange *pRange, _In_ CStringRange *pstrAddString, BOOL exist_composing) = 0;
+    virtual HRESULT _InsertAtSelection(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString, _Outptr_ ITfRange **ppCompRange) = 0;
+
+    virtual HRESULT _RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition) = 0;
+
+    // function for the language property
+    virtual BOOL _SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pContext) = 0;
+
+    // function for the display attribute
+    virtual void _ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext) = 0;
+    virtual BOOL _SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute) = 0;
+
+    virtual BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover) = 0;
 };
 
 struct ICompositionProcessorEngineOwner
@@ -172,8 +202,14 @@ struct ICompositionProcessorEngineOwner
     virtual BOOL _IsComposing() = 0;
     virtual CANDIDATE_MODE _CandidateMode() = 0;
     virtual bool IsCandidateWithWildcard() = 0;
+    virtual std::shared_ptr<IWindowsIMECompositionBuffer> GetCompositionBuffer() = 0;
 
     virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, IWindowsIMECompositionBuffer* pv)>& editSesisonTask, DWORD tfEsFlags) = 0;
+
+    virtual void _StartComposition(_In_ ITfContext *pContext) = 0;
+    virtual void _EndComposition(_In_opt_ ITfContext *pContext) = 0;
+    virtual VOID _DeleteCandidateList(BOOL fForce, _In_opt_ ITfContext *pContext) = 0;
+    virtual void* GetTextService() = 0;
 };
 
 struct ICompositionProcessorEngine

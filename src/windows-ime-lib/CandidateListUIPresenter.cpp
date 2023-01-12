@@ -28,19 +28,19 @@ const int MOVETO_BOTTOM = -1;
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CompositionBuffer::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext *pContext)
 {
     HRESULT hr = S_OK;
     DWORD_PTR candidateLen = 0;
     const WCHAR* pCandidateString = nullptr;
     CStringRange candidateString;
 
-    if (nullptr == _pCandidateListUIPresenter)
+    if (nullptr == m_pCandidateListUIPresenter)
     {
         goto NoPresenter;
     }
 
-    candidateLen = _pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
+    candidateLen = m_pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
 
     candidateString.Set(pCandidateString, candidateLen);
 
@@ -67,7 +67,7 @@ NoPresenter:
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CompositionBuffer::_HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext *pContext)
 {
     return _HandleCandidateWorker(ec, pContext);
 }
@@ -78,7 +78,7 @@ HRESULT CWindowsIME::_HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext *p
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CompositionBuffer::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext)
 {
     HRESULT hrReturn = E_FAIL;
     DWORD_PTR candidateLen = 0;
@@ -92,13 +92,13 @@ HRESULT CWindowsIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pC
     ITfDocumentMgr* pDocumentMgr = nullptr;
     HRESULT hrStartCandidateList = E_FAIL;
 
-    if (nullptr == _pCandidateListUIPresenter)
+    if (nullptr == m_pCandidateListUIPresenter)
     {
         hrReturn = S_OK;
         goto Exit;
     }
 
-    candidateLen = _pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
+    candidateLen = m_pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
     if (0 == candidateLen)
     {
         hrReturn = S_FALSE;
@@ -107,12 +107,12 @@ HRESULT CWindowsIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pC
 
     candidateString.Set(pCandidateString, candidateLen);
 
-    fMakePhraseFromText = _pCompositionProcessorEngine->IsMakePhraseFromText();
+    fMakePhraseFromText = m_pCompositionProcessorEngine->IsMakePhraseFromText();
     if (fMakePhraseFromText)
     {
-        _pCompositionProcessorEngine->GetCandidateStringInConverted(candidateString, &candidatePhraseList);
+        m_pCompositionProcessorEngine->GetCandidateStringInConverted(candidateString, &candidatePhraseList);
         LCID locale = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLocale();
-        _pCandidateListUIPresenter->RemoveSpecificCandidateFromList(locale, candidatePhraseList, candidateString);
+        m_pCandidateListUIPresenter->RemoveSpecificCandidateFromList(locale, candidatePhraseList, candidateString);
     }
 
     // We have a candidate list if candidatePhraseList.Cnt is not 0
@@ -121,9 +121,11 @@ HRESULT CWindowsIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pC
     {
         tempCandMode = CANDIDATE_WITH_NEXT_COMPOSITION;
 
-        pTempCandListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(this, Global::AtomCandidateWindow,
+        pTempCandListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(
+            reinterpret_cast<CWindowsIME*>(m_textService->GetTextService()),
+            Global::AtomCandidateWindow,
             CATEGORY_CANDIDATE,
-            _pCompositionProcessorEngine->GetCandidateListIndexRange(),
+            m_pCompositionProcessorEngine->GetCandidateListIndexRange(),
             FALSE);
         if (nullptr == pTempCandListUIPresenter)
         {
@@ -137,11 +139,11 @@ HRESULT CWindowsIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pC
     if (pContext->GetDocumentMgr(&pDocumentMgr) == S_OK)
     {
         ITfRange* pRange = nullptr;
-        if (_pComposition->GetRange(&pRange) == S_OK)
+        if (m_pComposition->GetRange(&pRange) == S_OK)
         {
             if (pTempCandListUIPresenter)
             {
-                hrStartCandidateList = pTempCandListUIPresenter->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, ec, pRange,
+                hrStartCandidateList = pTempCandListUIPresenter->_StartCandidateList(m_tfClientId, pDocumentMgr, pContext, ec, pRange,
                         WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
             } 
 
@@ -161,23 +163,23 @@ HRESULT CWindowsIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pC
         hrReturn = _AddComposingAndChar(ec, pContext, &candidateString);
 
         // close candidate list
-        if (_pCandidateListUIPresenter)
+        if (m_pCandidateListUIPresenter)
         {
-            _pCandidateListUIPresenter->_EndCandidateList();
-            delete _pCandidateListUIPresenter;
-            _pCandidateListUIPresenter = nullptr;
+            m_pCandidateListUIPresenter->_EndCandidateList();
+            delete m_pCandidateListUIPresenter;
+            m_pCandidateListUIPresenter = nullptr;
 
-            _candidateMode = CANDIDATE_NONE;
-            _isCandidateWithWildcard = FALSE;
+            m_candidateMode = CANDIDATE_NONE;
+            m_isCandidateWithWildcard = FALSE;
         }
 
         if (hrReturn == S_OK)
         {
             // copy temp candidate
-            _pCandidateListUIPresenter = pTempCandListUIPresenter;
+            m_pCandidateListUIPresenter = pTempCandListUIPresenter;
 
-            _candidateMode = tempCandMode;
-            _isCandidateWithWildcard = FALSE;
+            m_candidateMode = tempCandMode;
+            m_isCandidateWithWildcard = FALSE;
         }
     }
     else
@@ -200,12 +202,12 @@ Exit:
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandleCandidateArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction)
+HRESULT CompositionBuffer::_HandleCandidateArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction)
 {
     ec;
     pContext;
 
-    _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
+    m_pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
 
     return S_OK;
 }
@@ -230,18 +232,18 @@ inline int FindVkInVector(const std::vector<DWORD>& srcVkList, UINT vk)
     return -1;
 }
 
-HRESULT CWindowsIME::_HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode)
+HRESULT CompositionBuffer::_HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode)
 {
-    int iSelectAsNumber = FindVkInVector(*_pCompositionProcessorEngine->GetCandidateListIndexRange(), uCode);
+    int iSelectAsNumber = FindVkInVector(*m_pCompositionProcessorEngine->GetCandidateListIndexRange(), uCode);
 
     if (iSelectAsNumber == -1)
     {
         return S_FALSE;
     }
 
-    if (_pCandidateListUIPresenter)
+    if (m_pCandidateListUIPresenter)
     {
-        if (_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
+        if (m_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
         {
             return _HandleCandidateConvert(ec, pContext);
         }
@@ -256,14 +258,14 @@ HRESULT CWindowsIME::_HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfCon
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CompositionBuffer::_HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext *pContext)
 {
     HRESULT hr = S_OK;
 
     DWORD phraseLen = 0;
     const WCHAR* pPhraseString = nullptr;
 
-    phraseLen = (DWORD)_pCandidateListUIPresenter->_GetSelectedCandidateString(&pPhraseString);
+    phraseLen = (DWORD)m_pCandidateListUIPresenter->_GetSelectedCandidateString(&pPhraseString);
 
     CStringRange phraseString;
     phraseString.Set(pPhraseString, phraseLen);
@@ -287,12 +289,12 @@ HRESULT CWindowsIME::_HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext *pCo
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction)
+HRESULT CompositionBuffer::_HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction)
 {
     ec;
     pContext;
 
-    _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
+    m_pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
 
     return S_OK;
 }
@@ -303,17 +305,17 @@ HRESULT CWindowsIME::_HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext *pCo
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode)
+HRESULT CompositionBuffer::_HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode)
 {
-    int iSelectAsNumber = FindVkInVector(*_pCompositionProcessorEngine->GetCandidateListIndexRange(), uCode);
+    int iSelectAsNumber = FindVkInVector(*m_pCompositionProcessorEngine->GetCandidateListIndexRange(), uCode);
     if (iSelectAsNumber == -1)
     {
         return S_FALSE;
     }
 
-    if (_pCandidateListUIPresenter)
+    if (m_pCandidateListUIPresenter)
     {
-        if (_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
+        if (m_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
         {
             return _HandlePhraseFinalize(ec, pContext);
         }
@@ -1097,13 +1099,13 @@ HRESULT CCandidateListUIPresenter::_CandidateChangeNotification(_In_ enum CANDWN
 //    }
 
     {
-        auto compositionBuffer = static_cast<WindowsImeLib::IWindowsIMECompositionBuffer*>(_pTextService);
+        auto compositionBuffer = _pTextService->GetCompositionBuffer();
         auto pTextService = static_cast<WindowsImeLib::ICompositionProcessorEngineOwner*>(_pTextService);
         auto compositionEngiene = _pTextService->GetCompositionProcessorEngine();
         RETURN_IF_FAILED(pTextService->_SubmitEditSessionTask(pContext, [pTextService, compositionBuffer, compositionEngiene, KeyState, pContext]
             (TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* /*pv*/) ->  HRESULT
             {
-                return compositionEngiene->KeyHandlerEditSession_DoEditSession(ec, KeyState, pContext, 0, 0, compositionBuffer);
+                return compositionEngiene->KeyHandlerEditSession_DoEditSession(ec, KeyState, pContext, 0, 0, compositionBuffer.get());
             }, TF_ES_ASYNC | TF_ES_READWRITE));
     }
 

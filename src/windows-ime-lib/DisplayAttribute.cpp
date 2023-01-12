@@ -15,13 +15,13 @@
 //
 //----------------------------------------------------------------------------
 
-void CWindowsIME::_ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext)
+void CompositionBuffer::_ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext)
 {
     ITfRange* pRangeComposition = nullptr;
     ITfProperty* pDisplayAttributeProperty = nullptr;
 
     // get the compositon range.
-    if (FAILED(_pComposition->GetRange(&pRangeComposition)))
+    if (FAILED(m_pComposition->GetRange(&pRangeComposition)))
     {
         return;
     }
@@ -44,14 +44,14 @@ void CWindowsIME::_ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfCo
 //
 //----------------------------------------------------------------------------
 
-BOOL CWindowsIME::_SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute)
+BOOL CompositionBuffer::_SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute)
 {
     ITfRange* pRangeComposition = nullptr;
     ITfProperty* pDisplayAttributeProperty = nullptr;
     HRESULT hr = S_OK;
 
     // we need a range and the context it lives in
-    hr = _pComposition->GetRange(&pRangeComposition);
+    hr = m_pComposition->GetRange(&pRangeComposition);
     if (FAILED(hr))
     {
         return FALSE;
@@ -62,7 +62,7 @@ BOOL CWindowsIME::_SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfCont
     // get our the display attribute property
     if (SUCCEEDED(pContext->GetProperty(GUID_PROP_ATTRIBUTE, &pDisplayAttributeProperty)))
     {
-        VARIANT var;
+        VARIANT var = {};
         // set the value over the range
         // the application will use this guid atom to lookup the acutal rendering information
         var.vt = VT_I4; // we're going to set a TfGuidAtom

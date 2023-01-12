@@ -22,7 +22,7 @@ STDAPI CWindowsIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfCompos
     auto activity = WindowsImeLibTelemetry::ITfCompositionSink_OnCompositionTerminated();
 
     // Clear dummy composition
-    _RemoveDummyCompositionForComposing(ecWrite, pComposition);
+    m_compositionBuffer->_RemoveDummyCompositionForComposing(ecWrite, pComposition);
 
     // Clear display attribute and end composition, _EndComposition will release composition for us
     ITfContext* pContext = _pContext;
@@ -73,7 +73,7 @@ void CWindowsIME::_SetComposition(_In_ ITfComposition *pComposition)
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString)
+HRESULT CompositionBuffer::_AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString)
 {
     HRESULT hr = S_OK;
 
@@ -121,7 +121,7 @@ HRESULT CWindowsIME::_AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pCon
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString)
+HRESULT CompositionBuffer::_AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString)
 {
     HRESULT hr = E_FAIL;
 
@@ -153,7 +153,7 @@ HRESULT CWindowsIME::_AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pCont
 //
 //----------------------------------------------------------------------------
 
-BOOL CWindowsIME::_FindComposingRange(TfEditCookie ec, _In_ ITfContext *pContext, _In_ ITfRange *pSelection, _Outptr_result_maybenull_ ITfRange **ppRange)
+BOOL CompositionBuffer::_FindComposingRange(TfEditCookie ec, _In_ ITfContext *pContext, _In_ ITfRange *pSelection, _Outptr_result_maybenull_ ITfRange **ppRange)
 {
     if (ppRange == nullptr)
     {
@@ -210,7 +210,7 @@ BOOL CWindowsIME::_FindComposingRange(TfEditCookie ec, _In_ ITfContext *pContext
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_SetInputString(TfEditCookie ec, _In_ ITfContext *pContext, _Out_opt_ ITfRange *pRange, _In_ CStringRange *pstrAddString, BOOL exist_composing)
+HRESULT CompositionBuffer::_SetInputString(TfEditCookie ec, _In_ ITfContext *pContext, _Out_opt_ ITfRange *pRange, _In_ CStringRange *pstrAddString, BOOL exist_composing)
 {
     ITfRange* pRangeInsert = nullptr;
     if (!exist_composing)
@@ -229,7 +229,7 @@ HRESULT CWindowsIME::_SetInputString(TfEditCookie ec, _In_ ITfContext *pContext,
 
     _SetCompositionLanguage(ec, pContext);
 
-    _SetCompositionDisplayAttributes(ec, pContext, _gaDisplayAttributeInput);
+    _SetCompositionDisplayAttributes(ec, pContext, m_gaDisplayAttributeInput);
 
     // update the selection, we'll make it an insertion point just past
     // the inserted text.
@@ -262,7 +262,7 @@ HRESULT CWindowsIME::_SetInputString(TfEditCookie ec, _In_ ITfContext *pContext,
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_InsertAtSelection(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString, _Outptr_ ITfRange **ppCompRange)
+HRESULT CompositionBuffer::_InsertAtSelection(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString, _Outptr_ ITfRange **ppCompRange)
 {
     ITfRange* rangeInsert = nullptr;
     ITfInsertAtSelection* pias = nullptr;
@@ -305,7 +305,7 @@ Exit:
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::_RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition)
+HRESULT CompositionBuffer::_RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition)
 {
     HRESULT hr = S_OK;
 
@@ -330,7 +330,7 @@ HRESULT CWindowsIME::_RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ I
 //
 //----------------------------------------------------------------------------
 
-BOOL CWindowsIME::_SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pContext)
+BOOL CompositionBuffer::_SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pContext)
 {
     HRESULT hr = S_OK;
     BOOL ret = TRUE;
@@ -341,7 +341,7 @@ BOOL CWindowsIME::_SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pCon
     ITfProperty* pLanguageProperty = nullptr;
 
     // we need a range and the context it lives in
-    hr = _pComposition->GetRange(&pRangeComposition);
+    hr = m_pComposition->GetRange(&pRangeComposition);
     if (FAILED(hr))
     {
         ret = FALSE;

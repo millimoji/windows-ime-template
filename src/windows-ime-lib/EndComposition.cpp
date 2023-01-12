@@ -34,7 +34,7 @@ public:
     // ITfEditSession
     STDMETHODIMP DoEditSession(TfEditCookie ec)
     {
-        _pTextService->_TerminateComposition(ec, _pContext, TRUE);
+        _pTextService->GetCompositionBuffer()->_TerminateComposition(ec, _pContext, TRUE);
         return S_OK;
     }
 
@@ -52,28 +52,28 @@ public:
 //
 //----------------------------------------------------------------------------
 
-void CWindowsIME::_TerminateComposition(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCalledFromDeactivate)
+void CompositionBuffer::_TerminateComposition(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCalledFromDeactivate)
 {
 	isCalledFromDeactivate;
 
-    if (_pComposition != nullptr)
+    if (m_pComposition != nullptr)
     {
         // remove the display attribute from the composition range.
         _ClearCompositionDisplayAttributes(ec, pContext);
 
-        if (FAILED(_pComposition->EndComposition(ec)))
+        if (FAILED(m_pComposition->EndComposition(ec)))
         {
             // if we fail to EndComposition, then we need to close the reverse reading window.
-            _DeleteCandidateList(TRUE, pContext);
+            m_textService->_DeleteCandidateList(TRUE, pContext);
         }
 
-        _pComposition->Release();
-        _pComposition = nullptr;
+        m_pComposition->Release();
+        m_pComposition = nullptr;
 
-        if (_pContext)
+        if (m_pContext)
         {
-            _pContext->Release();
-            _pContext = nullptr;
+            m_pContext->Release();
+            m_pContext = nullptr;
         }
     }
 }

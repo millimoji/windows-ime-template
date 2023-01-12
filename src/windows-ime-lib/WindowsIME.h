@@ -10,6 +10,7 @@
 #include "../WindowsImeLib.h"
 #include "SingletonProcessor.h"
 #include "BaseStructure.h"
+#include "CompositionBuffer.h"
 
 class CLangBarItemButton;
 class CCandidateListUIPresenter;
@@ -33,7 +34,6 @@ class CWindowsIME :
                                         ITfFnGetPreferredTouchKeyboardLayout,
                                         Microsoft::WRL::FtmBase>,
     public WindowsImeLib::ICompositionProcessorEngineOwner,
-    public WindowsImeLib::IWindowsIMECompositionBuffer,
     WindowsImeLib::IWindowsIMEInprocFramework
 {
 public: 
@@ -103,32 +103,32 @@ public:
 
     // functions for the composition object.
     void _SetComposition(_In_ ITfComposition *pComposition);
-    void _TerminateComposition(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCalledFromDeactivate = FALSE);
+//    void _TerminateComposition(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCalledFromDeactivate = FALSE);
     void _SaveCompositionContext(_In_ ITfContext *pContext);
 
     // key event handlers for composition/candidate/phrase common objects.
-    HRESULT _HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext);
-    HRESULT _HandleCancel(TfEditCookie ec, _In_ ITfContext *pContext) override;
+//    HRESULT _HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext);
+//    HRESULT _HandleCancel(TfEditCookie ec, _In_ ITfContext *pContext) override;
 
     // key event handlers for composition object.
-    HRESULT _HandleCompositionInput(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch) override;
-    HRESULT _HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext *pContext, BOOL fCandidateList) override;
-    HRESULT _HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isWildcardSearch) override;
-    HRESULT _HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext *pContext) override;
-    HRESULT _HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, KEYSTROKE_FUNCTION keyFunction) override;
-    HRESULT _HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch) override;
-    HRESULT _HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch) override;
+//    HRESULT _HandleCompositionInput(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch) override;
+//    HRESULT _HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext *pContext, BOOL fCandidateList) override;
+//    HRESULT _HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isWildcardSearch) override;
+//    HRESULT _HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext *pContext) override;
+//    HRESULT _HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, KEYSTROKE_FUNCTION keyFunction) override;
+//    HRESULT _HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch) override;
+//    HRESULT _HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch) override;
 
     // key event handlers for candidate object.
-    HRESULT _HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext *pContext) override;
-    HRESULT _HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext *pContext) override;
-    HRESULT _HandleCandidateArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction) override;
-    HRESULT _HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode) override;
+//    HRESULT _HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext *pContext) override;
+//    HRESULT _HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext *pContext) override;
+//    HRESULT _HandleCandidateArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction) override;
+//    HRESULT _HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode) override;
 
     // key event handlers for phrase object.
-    HRESULT _HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext *pContext) override;
-    HRESULT _HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction) override;
-    HRESULT _HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode) override;
+//    HRESULT _HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext *pContext) override;
+//    HRESULT _HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction) override;
+//    HRESULT _HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode) override;
 
     BOOL _IsSecureMode(void) { return (_dwActivateFlags & TF_TMAE_SECUREMODE) ? TRUE : FALSE; }
     BOOL _IsComLess(void) { return (_dwActivateFlags & TF_TMAE_COMLESS) ? TRUE : FALSE; }
@@ -143,25 +143,25 @@ public:
 
 private:
     // functions for the composition object.
-    HRESULT _HandleCompositionInputWorker(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext);
-    HRESULT _CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext);
-    HRESULT _HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext);
+//    HRESULT _HandleCompositionInputWorker(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext);
+//    HRESULT _CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext);
+//    HRESULT _HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext);
 
-    void _StartComposition(_In_ ITfContext *pContext);
-    void _EndComposition(_In_opt_ ITfContext *pContext);
+    void _StartComposition(_In_ ITfContext *pContext) override;
+    void _EndComposition(_In_opt_ ITfContext *pContext) override;
     BOOL _IsComposing() override;
     bool _IsKeyboardDisabled() override;
     CANDIDATE_MODE _CandidateMode() override { return _candidateMode; }
     bool IsCandidateWithWildcard() override { return _isCandidateWithWildcard; }
 
-    HRESULT _AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString);
-    HRESULT _AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString);
+//    HRESULT _AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString);
+//    HRESULT _AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString);
 
-    BOOL _FindComposingRange(TfEditCookie ec, _In_ ITfContext *pContext, _In_ ITfRange *pSelection, _Outptr_result_maybenull_ ITfRange **ppRange);
-    HRESULT _SetInputString(TfEditCookie ec, _In_ ITfContext *pContext, _Out_opt_ ITfRange *pRange, _In_ CStringRange *pstrAddString, BOOL exist_composing);
-    HRESULT _InsertAtSelection(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString, _Outptr_ ITfRange **ppCompRange);
+//    BOOL _FindComposingRange(TfEditCookie ec, _In_ ITfContext *pContext, _In_ ITfRange *pSelection, _Outptr_result_maybenull_ ITfRange **ppRange);
+//    HRESULT _SetInputString(TfEditCookie ec, _In_ ITfContext *pContext, _Out_opt_ ITfRange *pRange, _In_ CStringRange *pstrAddString, BOOL exist_composing);
+//    HRESULT _InsertAtSelection(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString, _Outptr_ ITfRange **ppCompRange);
 
-    HRESULT _RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition);
+//    HRESULT _RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition);
 
     // Invoke key handler edit session
     // HRESULT _InvokeKeyHandler(_In_ ITfContext *pContext, UINT code, WCHAR wch, DWORD flags, _KEYSTROKE_STATE keyState) override;
@@ -169,11 +169,11 @@ private:
     // HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch, void* /*pv*/)  override;
 
     // function for the language property
-    BOOL _SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pContext);
+//    BOOL _SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pContext);
 
     // function for the display attribute
-    void _ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext);
-    BOOL _SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute);
+//    void _ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext);
+//    BOOL _SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute);
     BOOL _InitDisplayAttributeGuidAtom();
 
     BOOL _InitThreadMgrEventSink();
@@ -190,8 +190,8 @@ private:
     void _UninitActiveLanguageProfileNotifySink();
 
 //    BOOL _IsKeyEaten(_In_ ITfContext *pContext, UINT codeIn, _Out_ UINT *pCodeOut, _Out_writes_(1) WCHAR *pwch, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
-    BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover);
-    VOID _DeleteCandidateList(BOOL fForce, _In_opt_ ITfContext *pContext);
+//    BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover);
+    VOID _DeleteCandidateList(BOOL fForce, _In_opt_ ITfContext *pContext) override;
 
     wchar_t ConvertVKey(UINT code) override;
     UINT VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch) override;
@@ -224,6 +224,15 @@ private:
             }
         }
     }
+    void* GetTextService() override
+    {
+        return (void*)this;
+    }
+public:
+    std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> GetCompositionBuffer() override
+    {
+		return m_compositionBuffer;
+	}
 
 private:
     ITfThreadMgr* _pThreadMgr = nullptr;

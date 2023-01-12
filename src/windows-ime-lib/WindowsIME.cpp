@@ -13,6 +13,7 @@
 #include "TfInputProcessorProfile.h"
 #include "RegKey.h"
 #include "SingletonProcessor.h"
+#include "CompositionBuffer.h"
 
 namespace wrl
 {

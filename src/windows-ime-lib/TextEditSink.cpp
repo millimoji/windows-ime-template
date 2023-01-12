@@ -55,7 +55,7 @@ STDAPI CWindowsIME::OnEndEdit(__RPC__in_opt ITfContext *pContext, TfEditCookie e
             ITfRange* pRangeComposition = nullptr;
             if (SUCCEEDED(_pComposition->GetRange(&pRangeComposition)))
             {
-                if (!_IsRangeCovered(ecReadOnly, tfSelection.range, pRangeComposition))
+                if (!m_compositionBuffer->_IsRangeCovered(ecReadOnly, tfSelection.range, pRangeComposition))
                 {
                     _EndComposition(pContext);
                 }
