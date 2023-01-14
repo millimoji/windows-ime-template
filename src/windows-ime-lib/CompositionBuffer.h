@@ -11,8 +11,27 @@ class CompositionBuffer :
     public std::enable_shared_from_this<CompositionBuffer>
 {
 public:
-    CompositionBuffer(WindowsImeLib::ICompositionProcessorEngineOwner* textService)
-        : m_textService(textService)
+    CompositionBuffer(
+        WindowsImeLib::ICompositionProcessorEngineOwner* textService,
+        const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine,
+        const TfClientId& tfClientId,
+        const TfGuidAtom& gaDisplayAttributeInput,
+        // need to sync with m_textService
+        CCandidateListUIPresenter*& pCandidateListUIPresenter,
+        ITfComposition*& pComposition,
+        ITfContext*& pContext,
+        CANDIDATE_MODE& candidateMode,
+        BOOL& isCandidateWithWildcard
+    ) :
+        _textService(textService),
+        _pCompositionProcessorEngine(pCompositionProcessorEngine),
+        _tfClientId(tfClientId),
+        _gaDisplayAttributeInput(gaDisplayAttributeInput),
+        _pCandidateListUIPresenter(pCandidateListUIPresenter),
+        _pComposition(pComposition),
+        _pContext(pContext),
+        _candidateMode(candidateMode),
+        _isCandidateWithWildcard(isCandidateWithWildcard)
     {}
     virtual ~CompositionBuffer() {}
 
@@ -66,21 +85,16 @@ private:
     BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover) override;
 
 private:
-    WindowsImeLib::ICompositionProcessorEngineOwner* m_textService = nullptr;
+    WindowsImeLib::ICompositionProcessorEngineOwner* _textService = nullptr;
+    std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> _pCompositionProcessorEngine;
+
+    TfClientId _tfClientId = TF_CLIENTID_NULL;
+    TfGuidAtom _gaDisplayAttributeInput = {};
 
     // need to sync with m_textService
-    CCandidateListUIPresenter *m_pCandidateListUIPresenter = nullptr;
-    std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> m_pCompositionProcessorEngine;
-	ITfComposition* m_pComposition = nullptr;
-	ITfContext* m_pContext = nullptr;
-	TfClientId m_tfClientId = {};
-    CANDIDATE_MODE m_candidateMode = {};
-	BOOL m_isCandidateWithWildcard = {};
-	TfGuidAtom m_gaDisplayAttributeInput = {};
+    CCandidateListUIPresenter*& _pCandidateListUIPresenter;
+    ITfComposition*& _pComposition;
+    ITfContext*& _pContext;
+    CANDIDATE_MODE& _candidateMode;
+    BOOL& _isCandidateWithWildcard;
 };
-
-inline std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> CreateCompositionBuffer(WindowsImeLib::ICompositionProcessorEngineOwner* textService)
-{
-    auto _this = std::make_shared<CompositionBuffer>(textService);
-    return std::static_pointer_cast<WindowsImeLib::IWindowsIMECompositionBuffer>(_this);
-}

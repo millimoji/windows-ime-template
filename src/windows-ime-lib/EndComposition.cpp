@@ -56,24 +56,24 @@ void CompositionBuffer::_TerminateComposition(TfEditCookie ec, _In_ ITfContext *
 {
 	isCalledFromDeactivate;
 
-    if (m_pComposition != nullptr)
+    if (_pComposition != nullptr)
     {
         // remove the display attribute from the composition range.
         _ClearCompositionDisplayAttributes(ec, pContext);
 
-        if (FAILED(m_pComposition->EndComposition(ec)))
+        if (FAILED(_pComposition->EndComposition(ec)))
         {
             // if we fail to EndComposition, then we need to close the reverse reading window.
-            m_textService->_DeleteCandidateList(TRUE, pContext);
+            _textService->_DeleteCandidateList(TRUE, pContext);
         }
 
-        m_pComposition->Release();
-        m_pComposition = nullptr;
+        _pComposition->Release();
+        _pComposition = nullptr;
 
-        if (m_pContext)
+        if (_pContext)
         {
-            m_pContext->Release();
-            m_pContext = nullptr;
+            _pContext->Release();
+            _pContext = nullptr;
         }
     }
 }

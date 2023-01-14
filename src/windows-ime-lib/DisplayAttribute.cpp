@@ -21,7 +21,7 @@ void CompositionBuffer::_ClearCompositionDisplayAttributes(TfEditCookie ec, _In_
     ITfProperty* pDisplayAttributeProperty = nullptr;
 
     // get the compositon range.
-    if (FAILED(m_pComposition->GetRange(&pRangeComposition)))
+    if (FAILED(_pComposition->GetRange(&pRangeComposition)))
     {
         return;
     }
@@ -51,7 +51,7 @@ BOOL CompositionBuffer::_SetCompositionDisplayAttributes(TfEditCookie ec, _In_ I
     HRESULT hr = S_OK;
 
     // we need a range and the context it lives in
-    hr = m_pComposition->GetRange(&pRangeComposition);
+    hr = _pComposition->GetRange(&pRangeComposition);
     if (FAILED(hr))
     {
         return FALSE;

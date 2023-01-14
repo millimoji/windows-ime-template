@@ -229,7 +229,7 @@ HRESULT CompositionBuffer::_SetInputString(TfEditCookie ec, _In_ ITfContext *pCo
 
     _SetCompositionLanguage(ec, pContext);
 
-    _SetCompositionDisplayAttributes(ec, pContext, m_gaDisplayAttributeInput);
+    _SetCompositionDisplayAttributes(ec, pContext, _gaDisplayAttributeInput);
 
     // update the selection, we'll make it an insertion point just past
     // the inserted text.
@@ -341,7 +341,7 @@ BOOL CompositionBuffer::_SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext
     ITfProperty* pLanguageProperty = nullptr;
 
     // we need a range and the context it lives in
-    hr = m_pComposition->GetRange(&pRangeComposition);
+    hr = _pComposition->GetRange(&pRangeComposition);
     if (FAILED(hr))
     {
         ret = FALSE;

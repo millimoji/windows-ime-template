@@ -266,7 +266,7 @@ private:
 
     CANDIDATE_MODE _candidateMode;
     CCandidateListUIPresenter *_pCandidateListUIPresenter;
-    BOOL _isCandidateWithWildcard : 1;
+    BOOL _isCandidateWithWildcard;
 
     ITfDocumentMgr* _pDocMgrLastFocused;
 
