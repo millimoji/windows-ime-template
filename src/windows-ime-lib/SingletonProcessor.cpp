@@ -145,8 +145,8 @@ class SingletonProcessorHost :
 public:
     SingletonProcessorHost()
     {
-    	m_processor = WindowsImeLib::g_processorFactory->CreateTextInputProcessor(this);
-	}
+        m_processor = WindowsImeLib::g_processorFactory->CreateTextInputProcessor(this);
+    }
 
     ~SingletonProcessorHost() {}
 

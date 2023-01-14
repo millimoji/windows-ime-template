@@ -38,7 +38,7 @@ STDAPI CWindowsIME::OnEndEdit(__RPC__in_opt ITfContext *pContext, TfEditCookie e
         // If the selection is moved to out side of the current composition,
         // we terminate the composition. This TextService supports only one
         // composition in one context object.
-        if (_IsComposing())
+        if (m_compositionBuffer->_IsComposing())
         {
             TF_SELECTION tfSelection;
             ULONG fetched = 0;
@@ -52,6 +52,7 @@ STDAPI CWindowsIME::OnEndEdit(__RPC__in_opt ITfContext *pContext, TfEditCookie e
                 return S_FALSE;
             }
 
+            auto _pComposition = m_compositionBuffer->GetComposition();
             ITfRange* pRangeComposition = nullptr;
             if (SUCCEEDED(_pComposition->GetRange(&pRangeComposition)))
             {
@@ -93,8 +94,9 @@ BOOL CWindowsIME::_InitTextEditSink(_In_ ITfDocumentMgr *pDocMgr)
             pSource->Release();
         }
 
-        _pTextEditSinkContext->Release();
-        _pTextEditSinkContext = nullptr;
+//        _pTextEditSinkContext->Release();
+//        _pTextEditSinkContext = nullptr;
+        _pTextEditSinkContext.reset();
         _textEditSinkCookie = TF_INVALID_COOKIE;
     }
 
@@ -108,7 +110,7 @@ BOOL CWindowsIME::_InitTextEditSink(_In_ ITfDocumentMgr *pDocMgr)
         return FALSE;
     }
 
-    if (_pTextEditSinkContext == nullptr)
+    if (!_pTextEditSinkContext)
     {
         return TRUE; // empty document, no sink possible
     }
@@ -129,8 +131,9 @@ BOOL CWindowsIME::_InitTextEditSink(_In_ ITfDocumentMgr *pDocMgr)
 
     if (ret == FALSE)
     {
-        _pTextEditSinkContext->Release();
-        _pTextEditSinkContext = nullptr;
+//        _pTextEditSinkContext->Release();
+//        _pTextEditSinkContext = nullptr;
+        _pTextEditSinkContext.reset();
     }
 
     return ret;

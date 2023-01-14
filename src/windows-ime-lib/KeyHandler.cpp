@@ -93,7 +93,7 @@ HRESULT CompositionBuffer::_HandleComplete(TfEditCookie ec, _In_ ITfContext *pCo
 
 HRESULT CompositionBuffer::_HandleCancel(TfEditCookie ec, _In_ ITfContext *pContext)
 {
-    _RemoveDummyCompositionForComposing(ec, _pComposition);
+    _RemoveDummyCompositionForComposing(ec, _pComposition.get());
 
     _textService->_DeleteCandidateList(FALSE, pContext);
 
@@ -125,7 +125,7 @@ HRESULT CompositionBuffer::_HandleCompositionInput(TfEditCookie ec, _In_ ITfCont
     }
 
     // Start the new (std::nothrow) compositon if there is no composition.
-    if (!_textService->_IsComposing())
+    if (!_IsComposing())
     {
         _StartComposition(ec, pContext);
     }
@@ -309,7 +309,7 @@ HRESULT CompositionBuffer::_HandleCompositionFinalize(TfEditCookie ec, _In_ ITfC
     else
     {
         // Finalize current text store strings
-        if (_textService->_IsComposing())
+        if (_IsComposing())
         {
             ULONG fetched = 0;
             TF_SELECTION tfSelection;
@@ -432,7 +432,7 @@ HRESULT CompositionBuffer::_HandleCompositionBackspace(TfEditCookie ec, _In_ ITf
     BOOL isCovered = TRUE;
 
     // Start the new (std::nothrow) compositon if there is no composition.
-    if (!_textService->_IsComposing())
+    if (!_IsComposing())
     {
         return S_OK;
     }

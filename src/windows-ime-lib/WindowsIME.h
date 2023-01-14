@@ -36,7 +36,7 @@ class CWindowsIME :
     public WindowsImeLib::ICompositionProcessorEngineOwner,
     WindowsImeLib::IWindowsIMEInprocFramework
 {
-public: 
+public:
     CWindowsIME();
     virtual ~CWindowsIME();
 
@@ -98,11 +98,11 @@ public:
     static HRESULT CreateInstance(_In_ IUnknown *pUnkOuter, REFIID riid, _Outptr_ void **ppvObj);
 
     // utility function for thread manager.
-    ITfThreadMgr* _GetThreadMgr() { return _pThreadMgr; }
+    wil::com_ptr<ITfThreadMgr> _GetThreadMgr() { return _pThreadMgr; }
     TfClientId _GetClientId() { return _tfClientId; }
 
     // functions for the composition object.
-    void _SetComposition(_In_ ITfComposition *pComposition);
+//    void _SetComposition(_In_ ITfComposition *pComposition);
 //    void _TerminateComposition(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCalledFromDeactivate = FALSE);
 //    void _SaveCompositionContext(_In_ ITfContext *pContext);
 
@@ -149,7 +149,7 @@ private:
 
 //    void _StartComposition(_In_ ITfContext *pContext) override;
 //    void _EndComposition(_In_opt_ ITfContext *pContext) override;
-    BOOL _IsComposing() override;
+//    BOOL _IsComposing() override;
     bool _IsKeyboardDisabled() override;
 //    CANDIDATE_MODE _CandidateMode() override { return _candidateMode; }
 //    bool IsCandidateWithWildcard() override { return _isCandidateWithWildcard; }
@@ -206,8 +206,6 @@ private:
 
     BOOL VerifyIMECLSID(_In_ REFCLSID clsid);
 
-//    friend LRESULT CALLBACK CWindowsIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
     void SetDefaultCandidateTextFont();
     void UpdateCustomState() override
     {
@@ -231,59 +229,57 @@ private:
 public:
     std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> GetCompositionBuffer() override
     {
-		return m_compositionBuffer;
-	}
+        return m_compositionBuffer;
+    }
 
 private:
-    ITfThreadMgr* _pThreadMgr = nullptr;
+    wil::com_ptr<ITfThreadMgr> _pThreadMgr;
     TfClientId _tfClientId = {};
     DWORD _dwActivateFlags = {};
 
     // The cookie of ThreadMgrEventSink
-    DWORD _threadMgrEventSinkCookie;
+    DWORD _threadMgrEventSinkCookie = TF_INVALID_COOKIE;
 
-    ITfContext* _pTextEditSinkContext;
-    DWORD _textEditSinkCookie;
+    wil::com_ptr<ITfContext> _pTextEditSinkContext;
+    DWORD _textEditSinkCookie = TF_INVALID_COOKIE;
 
     // The cookie of ActiveLanguageProfileNotifySink
-    DWORD _activeLanguageProfileNotifySinkCookie;
+    DWORD _activeLanguageProfileNotifySinkCookie = TF_INVALID_COOKIE;
 
     // The cookie of ThreadFocusSink
-    DWORD _dwThreadFocusSinkCookie;
+    DWORD _dwThreadFocusSinkCookie = TF_INVALID_COOKIE;
 
     // Composition Processor Engine object.
     std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> _pCompositionProcessorEngine;
+
+    // guidatom for the display attibute.
+    TfGuidAtom _gaDisplayAttributeInput = {};
+    TfGuidAtom _gaDisplayAttributeConverted = {};
+
+    wil::com_ptr<ITfDocumentMgr> _pDocMgrLastFocused;
+
+    // Support the search integration
+    wil::com_ptr<ITfFnSearchCandidateProvider> _pITfFnSearchCandidateProvider;
+
+    std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> m_compositionBuffer;
+    std::shared_ptr<WindowsImeLib::IWindowsIMEInprocClient> m_inprocClient;
+    wil::com_ptr<ITextInputProcessor> m_singletonProcessor;
+
 
     // Language bar item object.
     // CLangBarItemButton* _pLangBarItem = {};
 
     // the current composition object.
-    ITfComposition* _pComposition;
-
-    // guidatom for the display attibute.
-    TfGuidAtom _gaDisplayAttributeInput = {};
-    TfGuidAtom _gaDisplayAttributeConverted = {};
+//    ITfComposition* _pComposition;
 
 //    CANDIDATE_MODE _candidateMode;
 //    CCandidateListUIPresenter *_pCandidateListUIPresenter;
 //    BOOL _isCandidateWithWildcard;
 //    wil::com_ptr<WindowsImeLib::IWindowsIMECandidateList> _pCandidateListUIPresenter;
 
-    ITfDocumentMgr* _pDocMgrLastFocused;
-
 //    ITfContext* _pContext;
-
 //    ITfCompartment* _pSIPIMEOnOffCompartment;
 //    DWORD _dwSIPIMEOnOffCompartmentSinkCookie;
-
 //    HWND _msgWndHandle;
-
-    // LONG _refCount;
-
-    // Support the search integration
-    ITfFnSearchCandidateProvider* _pITfFnSearchCandidateProvider = {};
-
-    std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> m_compositionBuffer;
-    std::shared_ptr<WindowsImeLib::IWindowsIMEInprocClient> m_inprocClient;
-    wil::com_ptr<ITextInputProcessor> m_singletonProcessor;
+//    LONG _refCount;
 };

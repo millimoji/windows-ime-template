@@ -54,34 +54,23 @@ CWindowsIME::CWindowsIME()
 {
     DllAddRef();
 
-    _pThreadMgr = nullptr;
-
-    _threadMgrEventSinkCookie = TF_INVALID_COOKIE;
-
-    _pTextEditSinkContext = nullptr;
-    _textEditSinkCookie = TF_INVALID_COOKIE;
-
-    _activeLanguageProfileNotifySinkCookie = TF_INVALID_COOKIE;
-
-    _dwThreadFocusSinkCookie = TF_INVALID_COOKIE;
-
-    _pComposition = nullptr;
-
+//    _pThreadMgr = nullptr;
+//    _threadMgrEventSinkCookie = TF_INVALID_COOKIE;
+//    _pTextEditSinkContext = nullptr;
+//    _textEditSinkCookie = TF_INVALID_COOKIE;
+//    _activeLanguageProfileNotifySinkCookie = TF_INVALID_COOKIE;
+//    _dwThreadFocusSinkCookie = TF_INVALID_COOKIE;
+//    _pComposition = nullptr;
 //    _pCompositionProcessorEngine = nullptr;
-
 //    _candidateMode = CANDIDATE_NONE;
 //    _pCandidateListUIPresenter = nullptr;
 //    _isCandidateWithWildcard = FALSE;
-
-    _pDocMgrLastFocused = nullptr;
-
+//    _pDocMgrLastFocused = nullptr;
 //    _pSIPIMEOnOffCompartment = nullptr;
 //    _dwSIPIMEOnOffCompartmentSinkCookie = 0;
 //    _msgWndHandle = nullptr;
-
 //    _pContext = nullptr;
-
-    // _refCount = 1;
+//    _refCount = 1;
 }
 
 //+---------------------------------------------------------------------------
@@ -96,9 +85,8 @@ CWindowsIME::~CWindowsIME()
 
 //    if (_pCandidateListUIPresenter)
 //    {
-//        // delete _pCandidateListUIPresenter;
-//        // _pCandidateListUIPresenter = nullptr;
-//        _pCandidateListUIPresenter.reset();
+//        delete _pCandidateListUIPresenter;
+//        _pCandidateListUIPresenter = nullptr;
 //    }
 
     DllRelease();
@@ -115,7 +103,7 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
     auto activity = WindowsImeLibTelemetry::ITfTextInputProcessorEx_ActivateEx();
 
     _pThreadMgr = pThreadMgr;
-    _pThreadMgr->AddRef();
+    // _pThreadMgr->AddRef();
 
     _tfClientId = tfClientId;
     _dwActivateFlags = dwFlags;
@@ -167,7 +155,7 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
     {
         LOG_CAUGHT_EXCEPTION();
         goto ExitError;
-	}
+    }
 
     if (!_AddTextProcessorEngine())
     {
@@ -178,8 +166,7 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
         this,
         _pCompositionProcessorEngine,
         _tfClientId,
-        _gaDisplayAttributeInput,
-        _pComposition
+        _gaDisplayAttributeInput
         );
 
     activity.Stop();
@@ -255,18 +242,20 @@ STDAPI CWindowsIME::Deactivate()
 //    CCompartment CompartmentPunctuation(_pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentPunctuation);
 //    CompartmentDoubleSingleByte._ClearCompartment();
 
-    if (_pThreadMgr != nullptr)
-    {
-        _pThreadMgr->Release();
-    }
+//    if (_pThreadMgr != nullptr)
+//    {
+//        _pThreadMgr->Release();
+//    }
 
+    _pThreadMgr.reset();
     _tfClientId = TF_CLIENTID_NULL;
 
-    if (_pDocMgrLastFocused)
-    {
-        _pDocMgrLastFocused->Release();
-		_pDocMgrLastFocused = nullptr;
-    }
+//    if (_pDocMgrLastFocused)
+//    {
+//        _pDocMgrLastFocused->Release();
+//        _pDocMgrLastFocused = nullptr;
+//    }
+    _pDocMgrLastFocused.reset();
 
     activity.Stop();
     return S_OK;

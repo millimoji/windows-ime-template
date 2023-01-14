@@ -1794,7 +1794,6 @@ BOOL CompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_S
     return FALSE;
 }
 
-
 void CompositionProcessorEngine::EndComposition(_In_opt_ ITfContext *pContext)
 {
     if (!pContext)
@@ -1806,6 +1805,18 @@ void CompositionProcessorEngine::EndComposition(_In_opt_ ITfContext *pContext)
     {
         textService->_TerminateComposition(ec, pContext, TRUE);
         return S_OK;
+    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+}
+
+void CompositionProcessorEngine::FinalizeCandidateList(_In_ ITfContext *pContext, KEYSTROKE_CATEGORY Category)
+{
+    _KEYSTROKE_STATE KeystrokeState = {};
+    KeystrokeState.Category = Category;
+    KeystrokeState.Function = FUNCTION_FINALIZE_CANDIDATELIST;
+
+    m_owner->_SubmitEditSessionTask(pContext, [this, KeystrokeState, pContext](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
+    {
+        return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, 0, 0, textService);
     }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 

@@ -313,7 +313,7 @@ BOOL CStringRange::WildcardCompare(LCID locale, _In_ CStringRange* stringWithWil
 // CPunctuationNestPair::CPunctuationNestPair(WCHAR codeBegin, WCHAR punctuationBegin, WCHAR pairBegin,
 //     WCHAR codeEnd,   WCHAR punctuationEnd,   WCHAR pairEnd)
 // {
-// 	pairEnd;punctuationEnd;
+//  pairEnd;punctuationEnd;
 //     _punctuation_begin._Code = codeBegin;
 //     _punctuation_begin._Punctuation = punctuationBegin;
 //     _pairPunctuation_begin = pairBegin;

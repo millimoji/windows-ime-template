@@ -81,18 +81,20 @@ STDAPI CWindowsIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocume
         }
     }
 
-    if (_pDocMgrLastFocused)
-    {
-        _pDocMgrLastFocused->Release();
-		_pDocMgrLastFocused = nullptr;
-    }
+//    if (_pDocMgrLastFocused)
+//    {
+//        _pDocMgrLastFocused->Release();
+//        _pDocMgrLastFocused = nullptr;
+//    }
+//
+//    _pDocMgrLastFocused = pDocMgrFocus;
+//
+//    if (_pDocMgrLastFocused)
+//    {
+//        _pDocMgrLastFocused->AddRef();
+//    }
 
     _pDocMgrLastFocused = pDocMgrFocus;
-
-    if (_pDocMgrLastFocused)
-    {
-        _pDocMgrLastFocused->AddRef();
-    }
 
     activity.Stop();
     return S_OK;

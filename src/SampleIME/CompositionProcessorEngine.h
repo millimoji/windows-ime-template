@@ -53,6 +53,7 @@ public:
     BOOL IsMakePhraseFromText()  override { return _hasMakePhraseFromText; }
 
     void EndComposition(_In_opt_ ITfContext* pContext) override;
+    void FinalizeCandidateList(_In_ ITfContext *pContext, KEYSTROKE_CATEGORY Category) override;
 
     // Language bar control
 //    void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) override;

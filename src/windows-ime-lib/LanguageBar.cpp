@@ -79,10 +79,10 @@ CLangBarItemButton::CLangBarItemButton(REFGUID guidLangBar, LPCWSTR description,
     DllAddRef();
 
     // initialize TF_LANGBARITEMINFO structure.
-    _tfLangBarItemInfo.clsidService = WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID();		// This LangBarItem belongs to this TextService.
-    _tfLangBarItemInfo.guidItem = guidLangBar;															        // GUID of this LangBarItem.
-    _tfLangBarItemInfo.dwStyle = (TF_LBI_STYLE_BTN_BUTTON | TF_LBI_STYLE_SHOWNINTRAY);						    // This LangBar is a button type.
-    _tfLangBarItemInfo.ulSort = 0;																			    // The position of this LangBar Item is not specified.
+    _tfLangBarItemInfo.clsidService = WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID();     // This LangBarItem belongs to this TextService.
+    _tfLangBarItemInfo.guidItem = guidLangBar;                                                                  // GUID of this LangBarItem.
+    _tfLangBarItemInfo.dwStyle = (TF_LBI_STYLE_BTN_BUTTON | TF_LBI_STYLE_SHOWNINTRAY);                          // This LangBar is a button type.
+    _tfLangBarItemInfo.ulSort = 0;                                                                              // The position of this LangBar Item is not specified.
     StringCchCopy(_tfLangBarItemInfo.szDescription, ARRAYSIZE(_tfLangBarItemInfo.szDescription), description);  // Set the description of this LangBar Item.
 
     // Initialize the sink pointer to NULL.
@@ -106,8 +106,8 @@ CLangBarItemButton::CLangBarItemButton(REFGUID guidLangBar, LPCWSTR description,
     _pTooltipText = nullptr;
     if (tooltip)
     {
-		size_t len = 0;
-		if (StringCchLength(tooltip, STRSAFE_MAX_CCH, &len) != S_OK)
+        size_t len = 0;
+        if (StringCchLength(tooltip, STRSAFE_MAX_CCH, &len) != S_OK)
         {
             len = 0; 
         }
@@ -314,7 +314,7 @@ void CLangBarItemButton::SetStatus(DWORD dwStatus, BOOL fSet)
 
 STDAPI CLangBarItemButton::Show(BOOL fShow)
 {
-	fShow;
+    fShow;
     if (_pLangBarItemSink)
     {
         _pLangBarItemSink->OnUpdate(TF_LBI_STATUS);
@@ -405,7 +405,7 @@ STDAPI CLangBarItemButton::GetIcon(_Out_ HICON *phIcon)
     DWORD status = 0;
     GetStatus(&status);
 
-	// If IME is working on the UAC mode, the size of ICON should be 24 x 24.
+    // If IME is working on the UAC mode, the size of ICON should be 24 x 24.
     int desiredSize = 16;
     if (_isSecureMode) // detect UAC mode
     {
@@ -600,7 +600,7 @@ BOOL CLangBarItemButton::_RegisterCompartment(_In_ ITfThreadMgr *pThreadMgr, TfC
 
 BOOL CLangBarItemButton::_UnregisterCompartment(_In_ ITfThreadMgr *pThreadMgr)
 {
-	pThreadMgr;
+    pThreadMgr;
     if (_pCompartment)
     {
         // Unadvice ITfCompartmentEventSink

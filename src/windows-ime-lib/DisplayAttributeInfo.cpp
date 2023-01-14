@@ -34,7 +34,7 @@ const TF_DISPLAYATTRIBUTE CDisplayAttributeInfoInput::_s_DisplayAttribute =
 {
     { TF_CT_COLORREF, RGB(0, 103,206) },    // text color
     { TF_CT_NONE, 0 },                      // background color (TF_CT_NONE => app default)
-    TF_LS_DOT,								// underline style
+    TF_LS_DOT,                              // underline style
     FALSE,                                  // underline boldness
     { TF_CT_COLORREF, RGB(0, 103,206) },    // underline color
     TF_ATTR_INPUT                           // attribute info

@@ -289,10 +289,10 @@ bool CWindowsIME::_IsKeyboardDisabled()
     }
     else
     {
-        CCompartment CompartmentKeyboardDisabled(_pThreadMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_DISABLED);
+        CCompartment CompartmentKeyboardDisabled(_pThreadMgr.get(), _tfClientId, GUID_COMPARTMENT_KEYBOARD_DISABLED);
         CompartmentKeyboardDisabled._GetCompartmentBOOL(isDisabled);
 
-        CCompartment CompartmentEmptyContext(_pThreadMgr, _tfClientId, GUID_COMPARTMENT_EMPTYCONTEXT);
+        CCompartment CompartmentEmptyContext(_pThreadMgr.get(), _tfClientId, GUID_COMPARTMENT_EMPTYCONTEXT);
         CompartmentEmptyContext._GetCompartmentBOOL(isDisabled);
     }
 
@@ -357,8 +357,8 @@ STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
 //        _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
 //    }
 //
-	activity.Stop();
-	return S_OK;
+    activity.Stop();
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -494,7 +494,7 @@ STDAPI CWindowsIME::OnPreservedKey(ITfContext* /*pContext*/, REFGUID rguid, BOOL
 
     if (m_inprocClient)
     {
-        m_inprocClient->OnPreservedKey(rguid, pIsEaten, _pThreadMgr, _tfClientId);
+        m_inprocClient->OnPreservedKey(rguid, pIsEaten, _pThreadMgr.get(), _tfClientId);
     }
 
     activity.Stop();

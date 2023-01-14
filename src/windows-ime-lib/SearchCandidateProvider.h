@@ -36,10 +36,10 @@ public:
     STDMETHODIMP GetDisplayName(_Out_ BSTR *pbstrName);
 
     // ITfFnSearchCandidateProvider methods
-	//
-	// GetSearchCandidates is responsible for supporting the candidates to caller, search integration
-	// SetResult is not used
-	//
+    //
+    // GetSearchCandidates is responsible for supporting the candidates to caller, search integration
+    // SetResult is not used
+    //
     STDMETHODIMP GetSearchCandidates(BSTR bstrQuery, BSTR bstrApplicationID, _Outptr_result_maybenull_ ITfCandidateList **pplist); 
     STDMETHODIMP SetResult(BSTR bstrQuery, BSTR bstrApplicationID, BSTR bstrResult);
 

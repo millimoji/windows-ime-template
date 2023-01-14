@@ -361,7 +361,7 @@ LRESULT CALLBACK CCandidateWindow::_WindowProcCallback(_In_ HWND wndHandle, UINT
             // handle mouse message
             _HandleMouseMsg(uMsg, point);
         }
-		// we processes this message, it should return zero. 
+        // we processes this message, it should return zero. 
         return 0;
 
     case WM_MOUSEACTIVATE:
@@ -615,7 +615,7 @@ void CCandidateWindow::_DrawList(_In_ HDC dcHandle, _In_ UINT iIndex, _In_ RECT 
 
     RECT rc = {};
 
-	const size_t lenOfPageCount = 16;
+    const size_t lenOfPageCount = 16;
     for (;
         (iIndex < _candidateList.size()) && (pageCount < candidateListPageCnt);
         iIndex++, pageCount++)
@@ -817,8 +817,8 @@ DWORD CCandidateWindow::_GetCandidateString(_In_ int iIndex, _Outptr_result_mayb
     }
 
     UINT index = static_cast<UINT>(iIndex);
-	
-	if (index >= _candidateList.size())
+    
+    if (index >= _candidateList.size())
     {
         *ppwchCandidateString = nullptr;
         return 0;
@@ -863,7 +863,7 @@ DWORD CCandidateWindow::_GetSelectedCandidateString(_Outptr_result_maybenull_ co
 //----------------------------------------------------------------------------
 
 BOOL CCandidateWindow::_SetSelectionInPage(int nPos)
-{	
+{   
     if (nPos < 0)
     {
         return FALSE;
@@ -1018,7 +1018,7 @@ BOOL CCandidateWindow::_MovePage(_In_ int offSet, _In_ BOOL isNotify)
 
 BOOL CCandidateWindow::_SetSelectionOffset(_In_ int offSet)
 {
-	if (static_cast<size_t>(_currentSelection + offSet) >= _candidateList.size())
+    if (static_cast<size_t>(_currentSelection + offSet) >= _candidateList.size())
     {
         return FALSE;
     }

@@ -513,10 +513,10 @@ HRESULT CCandidateListUIPresenter::ToShowCandidateWindow()
 
 HRESULT CCandidateListUIPresenter::ToHideCandidateWindow()
 {
-	if (_pCandidateWnd)
-	{
-		_pCandidateWnd->_Show(FALSE);
-	}
+    if (_pCandidateWnd)
+    {
+        _pCandidateWnd->_Show(FALSE);
+    }
 
     _updatedFlags = TF_CLUIE_SELECTION | TF_CLUIE_CURRENTPAGE;
     _UpdateUIElement();
@@ -782,7 +782,7 @@ STDAPI CCandidateListUIPresenter::FinalizeExactCompositionString()
 
 HRESULT CCandidateListUIPresenter::_StartCandidateList(TfClientId tfClientId, _In_ ITfDocumentMgr *pDocumentMgr, _In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth)
 {
-	pDocumentMgr;tfClientId;
+    pDocumentMgr;tfClientId;
 
     HRESULT hr = E_FAIL;
 
@@ -1049,68 +1049,79 @@ VOID CCandidateListUIPresenter::_LayoutDestroyNotification()
 
 HRESULT CCandidateListUIPresenter::_CandidateChangeNotification(_In_ enum CANDWND_ACTION action)
 {
-    HRESULT hr = E_FAIL;
+    HRESULT hr = S_OK;
 
-    // TfClientId tfClientId = _pTextService->_GetClientId();
-    ITfThreadMgr* pThreadMgr = nullptr;
-    ITfDocumentMgr* pDocumentMgr = nullptr;
-    ITfContext* pContext = nullptr;
+//    TfClientId tfClientId = _pTextService->_GetClientId();
+//    wil::com_ptr<ITfThreadMgr> pThreadMgr;
+//    ITfDocumentMgr* pDocumentMgr = nullptr;
+//    ITfContext* pContext = nullptr;
 
-    _KEYSTROKE_STATE KeyState = {};
-    KeyState.Category = _Category;
-    KeyState.Function = FUNCTION_FINALIZE_CANDIDATELIST;
+//    _KEYSTROKE_STATE KeyState = {};
+//    KeyState.Category = _Category;
+//    KeyState.Function = FUNCTION_FINALIZE_CANDIDATELIST;
 
     if (CAND_ITEM_SELECT != action)
     {
         goto Exit;
     }
 
-    pThreadMgr = _pTextService->_GetThreadMgr();
-    if (nullptr == pThreadMgr)
     {
-        goto Exit;
+        wil::com_ptr<ITfDocumentMgr> pDocumentMgr;
+        RETURN_IF_FAILED(_pTextService->_GetThreadMgr()->GetFocus(&pDocumentMgr));
+
+        wil::com_ptr<ITfContext> pContext;
+        RETURN_IF_FAILED(pDocumentMgr->GetTop(&pContext));
+
+        auto compositionBuffer = _pTextService->GetCompositionProcessorEngine();
+        compositionBuffer->FinalizeCandidateList(pContext.get(), _Category);
     }
 
-    hr = pThreadMgr->GetFocus(&pDocumentMgr);
-    if (FAILED(hr))
-    {
-        goto Exit;
-    }
-
-    hr = pDocumentMgr->GetTop(&pContext);
-    if (FAILED(hr))
-    {
-        pDocumentMgr->Release();
-        goto Exit;
-    }
-
+//    pThreadMgr = _pTextService->_GetThreadMgr();
+//    if (nullptr == pThreadMgr)
 //    {
-//        CKeyHandlerEditSession* pEditSession = new (std::nothrow) CKeyHandlerEditSession(_pTextService, pContext, 0, 0, KeyState);
-//        if (nullptr != pEditSession)
-//        {
-//            HRESULT hrSession = S_OK;
-//            hr = pContext->RequestEditSession(tfClientId, pEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hrSession);
-//            if (hrSession == TF_E_SYNCHRONOUS || hrSession == TS_E_READONLY)
-//            {
-//                hr = pContext->RequestEditSession(tfClientId, pEditSession, TF_ES_ASYNC | TF_ES_READWRITE, &hrSession);
-//            }
-//            pEditSession->Release();
-//        }
+//        goto Exit;
 //    }
-
-    {
-        auto compositionBuffer = _pTextService->GetCompositionBuffer();
-        auto pTextService = static_cast<WindowsImeLib::ICompositionProcessorEngineOwner*>(_pTextService);
-        auto compositionEngiene = _pTextService->GetCompositionProcessorEngine();
-        RETURN_IF_FAILED(pTextService->_SubmitEditSessionTask(pContext, [pTextService, compositionBuffer, compositionEngiene, KeyState, pContext]
-            (TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* /*pv*/) ->  HRESULT
-            {
-                return compositionEngiene->KeyHandlerEditSession_DoEditSession(ec, KeyState, pContext, 0, 0, compositionBuffer.get());
-            }, TF_ES_ASYNC | TF_ES_READWRITE));
-    }
-
-    pContext->Release();
-    pDocumentMgr->Release();
+//
+//    hr = pThreadMgr->GetFocus(&pDocumentMgr);
+//    if (FAILED(hr))
+//    {
+//        goto Exit;
+//    }
+//
+//    hr = pDocumentMgr->GetTop(&pContext);
+//    if (FAILED(hr))
+//    {
+//        pDocumentMgr->Release();
+//        goto Exit;
+//    }
+//
+////    {
+////        CKeyHandlerEditSession* pEditSession = new (std::nothrow) CKeyHandlerEditSession(_pTextService, pContext, 0, 0, KeyState);
+////        if (nullptr != pEditSession)
+////        {
+////            HRESULT hrSession = S_OK;
+////            hr = pContext->RequestEditSession(tfClientId, pEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hrSession);
+////            if (hrSession == TF_E_SYNCHRONOUS || hrSession == TS_E_READONLY)
+////            {
+////                hr = pContext->RequestEditSession(tfClientId, pEditSession, TF_ES_ASYNC | TF_ES_READWRITE, &hrSession);
+////            }
+////            pEditSession->Release();
+////        }
+////    }
+//
+//    {
+//        auto compositionBuffer = _pTextService->GetCompositionBuffer();
+//        auto pTextService = static_cast<WindowsImeLib::ICompositionProcessorEngineOwner*>(_pTextService);
+//        auto compositionEngiene = _pTextService->GetCompositionProcessorEngine();
+//        RETURN_IF_FAILED(pTextService->_SubmitEditSessionTask(pContext, [pTextService, compositionBuffer, compositionEngiene, KeyState, pContext]
+//            (TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* /*pv*/) ->  HRESULT
+//            {
+//                return compositionEngiene->KeyHandlerEditSession_DoEditSession(ec, KeyState, pContext, 0, 0, compositionBuffer.get());
+//            }, TF_ES_ASYNC | TF_ES_READWRITE));
+//    }
+//
+//    pContext->Release();
+//    pDocumentMgr->Release();
 
 Exit:
     return hr;
@@ -1140,8 +1151,8 @@ HRESULT CCandidateListUIPresenter::_UpdateUIElement()
 {
     HRESULT hr = S_OK;
 
-    ITfThreadMgr* pThreadMgr = _pTextService->_GetThreadMgr();
-    if (nullptr == pThreadMgr)
+    auto pThreadMgr = _pTextService->_GetThreadMgr();
+    if (!pThreadMgr)
     {
         return S_OK;
     }
@@ -1247,8 +1258,8 @@ HRESULT CCandidateListUIPresenter::BeginUIElement()
 {
     HRESULT hr = S_OK;
 
-    ITfThreadMgr* pThreadMgr = _pTextService->_GetThreadMgr();
-    if (nullptr ==pThreadMgr)
+    auto pThreadMgr = _pTextService->_GetThreadMgr();
+    if (!pThreadMgr)
     {
         hr = E_FAIL;
         goto Exit;
@@ -1272,8 +1283,8 @@ HRESULT CCandidateListUIPresenter::EndUIElement()
 {
     HRESULT hr = S_OK;
 
-    ITfThreadMgr* pThreadMgr = _pTextService->_GetThreadMgr();
-    if ((nullptr == pThreadMgr) || (-1 == _uiElementId))
+    auto pThreadMgr = _pTextService->_GetThreadMgr();
+    if (!pThreadMgr || (-1 == _uiElementId))
     {
         hr = E_FAIL;
         goto Exit;

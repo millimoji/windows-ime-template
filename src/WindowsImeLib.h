@@ -215,9 +215,11 @@ struct IWindowsIMECompositionBuffer
     //
     virtual wil::com_ptr<IWindowsIMECandidateList> GetCandidateList() = 0;
     virtual wil::com_ptr<ITfContext> GetContext() = 0;
+    virtual wil::com_ptr<ITfComposition> GetComposition() = 0;
     virtual CANDIDATE_MODE CandidateMode() = 0;
     virtual bool IsCandidateWithWildcard() = 0;
     virtual void ResetCandidateState() = 0;
+    virtual BOOL _IsComposing() = 0;
 };
 
 struct ICompositionProcessorEngineOwner
@@ -227,7 +229,6 @@ struct ICompositionProcessorEngineOwner
     virtual wchar_t ConvertVKey(UINT code) = 0;
     virtual UINT VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch) = 0;
     virtual bool _IsKeyboardDisabled() = 0;
-    virtual BOOL _IsComposing() = 0;
     virtual std::shared_ptr<IWindowsIMECompositionBuffer> GetCompositionBuffer() = 0;
 
     virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, IWindowsIMECompositionBuffer* pv)>& editSesisonTask, DWORD tfEsFlags) = 0;
@@ -269,6 +270,7 @@ struct ICompositionProcessorEngine
     virtual BOOL IsMakePhraseFromText() = 0;
 
     virtual void EndComposition(_In_opt_ ITfContext* pContext) = 0;
+    virtual void FinalizeCandidateList(_In_ ITfContext* pContext, KEYSTROKE_CATEGORY Category) = 0;
 
     // Language bar control
 //     virtual void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) = 0;

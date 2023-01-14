@@ -59,7 +59,7 @@ HRESULT CompositionBuffer::_StartComposition(TfEditCookie ec, _In_ ITfContext *p
 
     if (SUCCEEDED(pContextComposition->StartComposition(ec, pRangeInsert, _pTextService, &pComposition)) && (nullptr != pComposition))
     {
-        _pTextService->_SetComposition(pComposition);
+        _SetComposition(pComposition);
 
         // set selection to the adjusted range
         TF_SELECTION tfSelection = {};

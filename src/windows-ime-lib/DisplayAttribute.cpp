@@ -107,7 +107,7 @@ BOOL CWindowsIME::_InitDisplayAttributeGuidAtom()
     hr = pCategoryMgr->RegisterGUID(
         WindowsImeLib::g_processorFactory->GetConstantProvider()->DisplayAttributeConverted(),
         &_gaDisplayAttributeConverted);
-	if (FAILED(hr))
+    if (FAILED(hr))
     {
         goto Exit;
     }

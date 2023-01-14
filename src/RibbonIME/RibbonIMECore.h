@@ -48,6 +48,7 @@ public:
 //    HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept override;
 //    void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
     void EndComposition(_In_opt_ ITfContext* pContext) override {}
+    void FinalizeCandidateList(_In_ ITfContext *pContext, KEYSTROKE_CATEGORY Category) override {}
 
     void UpdateCustomState(const std::string& /* customStateJson */) override {}
 

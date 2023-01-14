@@ -76,7 +76,7 @@ private:
     BOOL _AdjustPageIndexForSelection();
     HRESULT _CurrentPageHasEmptyItems(_Inout_ BOOL *pfHasEmptyItems);
 
-	// LightDismiss feature support, it will fire messages lightdismiss-related to the light dismiss layout.
+    // LightDismiss feature support, it will fire messages lightdismiss-related to the light dismiss layout.
     void _FireMessageToLightDismiss(_In_ HWND wndHandle, _In_ WINDOWPOS *pWndPos);
 
     BOOL _CreateMainWindow(ATOM atom, _In_opt_ HWND parentWndHandle);

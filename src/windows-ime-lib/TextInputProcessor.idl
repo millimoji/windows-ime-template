@@ -2,19 +2,19 @@ import "oaidl.idl";
 import "ocidl.idl";
 
 [
-	uuid(C9B54A64-5371-442F-AFD0-E9F3DCE9A401),
-	helpstring("ITextInputEnvironment interface"),
-	pointer_default(unique)
+    uuid(C9B54A64-5371-442F-AFD0-E9F3DCE9A401),
+    helpstring("ITextInputEnvironment interface"),
+    pointer_default(unique)
 ]
 interface ITextInputEnvironment : IUnknown
 {
-	HRESULT TestMethod([in] BSTR src, [retval, out] BSTR* result);
+    HRESULT TestMethod([in] BSTR src, [retval, out] BSTR* result);
 };
 
 [
-	uuid(44D9D766-0B6C-41D8-960D-40BD0BD1AF78),
-	helpstring("ITextInputProcessor interface"),
-	pointer_default(unique)
+    uuid(44D9D766-0B6C-41D8-960D-40BD0BD1AF78),
+    helpstring("ITextInputProcessor interface"),
+    pointer_default(unique)
 ]
 interface ITextInputProcessor : IUnknown
 {
@@ -22,6 +22,6 @@ interface ITextInputProcessor : IUnknown
 
     HRESULT Acivate([in] ITextInputEnvironment* environment);
     HRESULT Deacivate();
-	HRESULT SetFocus([in] BOOL isGotten);
-	HRESULT UpdateCustomState([in] LPCSTR customState);
+    HRESULT SetFocus([in] BOOL isGotten);
+    HRESULT UpdateCustomState([in] LPCSTR customState);
 };

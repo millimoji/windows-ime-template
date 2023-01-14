@@ -15,15 +15,12 @@ public:
         WindowsImeLib::ICompositionProcessorEngineOwner* textService,
         const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine,
         const TfClientId& tfClientId,
-        const TfGuidAtom& gaDisplayAttributeInput,
-        // need to sync with m_textService
-        ITfComposition*& pComposition
+        const TfGuidAtom& gaDisplayAttributeInput
     ) :
         _textService(textService),
         _pCompositionProcessorEngine(pCompositionProcessorEngine),
         _tfClientId(tfClientId),
-        _gaDisplayAttributeInput(gaDisplayAttributeInput),
-        _pComposition(pComposition)
+        _gaDisplayAttributeInput(gaDisplayAttributeInput)
     {}
     virtual ~CompositionBuffer() {}
 
@@ -77,9 +74,11 @@ private:
     BOOL _SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute) override;
 
     BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover) override;
+    BOOL _IsComposing() override;
 
     wil::com_ptr<WindowsImeLib::IWindowsIMECandidateList> GetCandidateList() override { return _pCandidateListUIPresenter; }
-    wil::com_ptr<ITfContext> GetContext() { return _pContext; }
+    wil::com_ptr<ITfContext> GetContext() override { return _pContext; }
+    wil::com_ptr<ITfComposition> GetComposition() override { return _pComposition; }
     CANDIDATE_MODE CandidateMode() override { return _candidateMode; }
     bool IsCandidateWithWildcard() override  { return !!_isCandidateWithWildcard; }
     void ResetCandidateState() override
@@ -89,6 +88,7 @@ private:
     }
 
 private:
+    void _SetComposition(_In_ ITfComposition *pComposition);
     void _SaveCompositionContext(_In_ ITfContext *pContext);
 
 private:
@@ -100,8 +100,8 @@ private:
 
     // need to sync with m_textService
     wil::com_ptr<WindowsImeLib::IWindowsIMECandidateList> _pCandidateListUIPresenter;
-    ITfComposition*& _pComposition;
     wil::com_ptr<ITfContext> _pContext;
+    wil::com_ptr<ITfComposition> _pComposition;
     CANDIDATE_MODE _candidateMode = CANDIDATE_NONE;
     BOOL _isCandidateWithWildcard = FALSE;
 };

@@ -32,7 +32,7 @@ STDAPI CWindowsIME::OnSetThreadFocus() try
 
         if ((nullptr != pTfContext) && SUCCEEDED(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr)))
         {
-            if (pCandidateListDocumentMgr == _pDocMgrLastFocused)
+            if (pCandidateListDocumentMgr == _pDocMgrLastFocused.get())
             {
                 _pCandidateListUIPresenter->OnSetThreadFocus();
             }
@@ -69,16 +69,16 @@ STDAPI CWindowsIME::OnKillThreadFocus() try
 
         if ((nullptr != pTfContext) && SUCCEEDED(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr)))
         {
-            if (_pDocMgrLastFocused)
-            {
-                _pDocMgrLastFocused->Release();
-				_pDocMgrLastFocused = nullptr;
-            }
+//            if (_pDocMgrLastFocused)
+//            {
+//                _pDocMgrLastFocused->Release();
+//                _pDocMgrLastFocused = nullptr;
+//            }
             _pDocMgrLastFocused = pCandidateListDocumentMgr;
-            if (_pDocMgrLastFocused)
-            {
-                _pDocMgrLastFocused->AddRef();
-            }
+//            if (_pDocMgrLastFocused)
+//            {
+//                _pDocMgrLastFocused->AddRef();
+//            }
         }
         _pCandidateListUIPresenter->OnKillThreadFocus();
     }

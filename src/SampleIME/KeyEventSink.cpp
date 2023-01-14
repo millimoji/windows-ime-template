@@ -117,8 +117,9 @@ BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT codeIn, _Out_ UINT *pCode
         // eat only keys that CKeyHandlerEditSession can handles.
         //
         const auto isCandidateWithWildcard = m_owner->GetCompositionBuffer()->IsCandidateWithWildcard();
+        const auto isComposing = m_owner->GetCompositionBuffer()->_IsComposing();
 
-        if (IsVirtualKeyNeed(*pCodeOut, pwch, m_owner->_IsComposing(), candidateMode, isCandidateWithWildcard, pKeyState))
+        if (IsVirtualKeyNeed(*pCodeOut, pwch, isComposing, candidateMode, isCandidateWithWildcard, pKeyState))
         {
             return TRUE;
         }

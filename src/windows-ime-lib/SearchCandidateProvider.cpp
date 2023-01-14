@@ -151,7 +151,7 @@ STDMETHODIMP CSearchCandidateProvider::GetDisplayName(_Out_ BSTR *pbstrName)
 
 STDMETHODIMP CSearchCandidateProvider::GetSearchCandidates(BSTR bstrQuery, BSTR bstrApplicationID, _Outptr_result_maybenull_ ITfCandidateList **pplist)
 {
-	bstrApplicationID;bstrQuery;
+    bstrApplicationID;bstrQuery;
     HRESULT hr = E_FAIL;
     *pplist = nullptr;
 
@@ -173,10 +173,10 @@ STDMETHODIMP CSearchCandidateProvider::GetSearchCandidates(BSTR bstrQuery, BSTR 
     if (0 < cCand)
     {
         hr = CTipCandidateList::CreateInstance(pplist, cCand);
-		if (FAILED(hr))
-		{
-			return hr;
-		}
+        if (FAILED(hr))
+        {
+            return hr;
+        }
         for (int iCand = 0; iCand < cCand; iCand++)
         {
             ITfCandidateString* pCandStr = nullptr;
