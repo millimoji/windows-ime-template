@@ -66,6 +66,8 @@ private:
     HRESULT _CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext) override;
     HRESULT _HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext) override;
 
+    HRESULT _StartComposition(TfEditCookie ec, _In_ ITfContext *_pContext);
+
     HRESULT _AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString) override;
     HRESULT _AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString) override;
 

@@ -124,7 +124,7 @@ HRESULT CompositionBuffer::_HandleCompositionInput(TfEditCookie ec, _In_ ITfCont
     // Start the new (std::nothrow) compositon if there is no composition.
     if (!_textService->_IsComposing())
     {
-        _textService->_StartComposition(pContext);
+        _StartComposition(ec, pContext);
     }
 
     // first, test where a keystroke would go in the document if we did an insert

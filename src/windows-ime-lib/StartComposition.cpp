@@ -10,22 +10,22 @@
 #include "EditSession.h"
 #include "WindowsIME.h"
 
-//+---------------------------------------------------------------------------
-//
-// CStartCompositinoEditSession
-//
-//----------------------------------------------------------------------------
-
-class CStartCompositionEditSession : public CEditSessionBase
-{
-public:
-    CStartCompositionEditSession(_In_ CWindowsIME *pTextService, _In_ ITfContext *pContext) : CEditSessionBase(pTextService, pContext)
-    {
-    }
-
-    // ITfEditSession
-    STDMETHODIMP DoEditSession(TfEditCookie ec);
-};
+// //+---------------------------------------------------------------------------
+// //
+// // CStartCompositinoEditSession
+// //
+// //----------------------------------------------------------------------------
+// 
+// class CStartCompositionEditSession : public CEditSessionBase
+// {
+// public:
+//     CStartCompositionEditSession(_In_ CWindowsIME *pTextService, _In_ ITfContext *pContext) : CEditSessionBase(pTextService, pContext)
+//     {
+//     }
+// 
+//     // ITfEditSession
+//     STDMETHODIMP DoEditSession(TfEditCookie ec);
+// };
 
 //+---------------------------------------------------------------------------
 //
@@ -33,14 +33,16 @@ public:
 //
 //----------------------------------------------------------------------------
 
-STDAPI CStartCompositionEditSession::DoEditSession(TfEditCookie ec)
+// STDAPI CStartCompositionEditSession::DoEditSession(TfEditCookie ec)
+HRESULT CompositionBuffer::_StartComposition(TfEditCookie ec, _In_ ITfContext *pContext)
 {
     ITfInsertAtSelection* pInsertAtSelection = nullptr;
     ITfRange* pRangeInsert = nullptr;
     ITfContextComposition* pContextComposition = nullptr;
     ITfComposition* pComposition = nullptr;
+    auto _pTextService = reinterpret_cast<CWindowsIME*>(_textService->GetTextService());
 
-    if (FAILED(_pContext->QueryInterface(IID_ITfInsertAtSelection, (void **)&pInsertAtSelection)))
+    if (FAILED(pContext->QueryInterface(IID_ITfInsertAtSelection, (void **)&pInsertAtSelection)))
     {
         goto Exit;
     }
@@ -50,7 +52,7 @@ STDAPI CStartCompositionEditSession::DoEditSession(TfEditCookie ec)
         goto Exit;
     }
 
-    if (FAILED(_pContext->QueryInterface(IID_ITfContextComposition, (void **)&pContextComposition)))
+    if (FAILED(pContext->QueryInterface(IID_ITfContextComposition, (void **)&pContextComposition)))
     {
         goto Exit;
     }
@@ -65,8 +67,8 @@ STDAPI CStartCompositionEditSession::DoEditSession(TfEditCookie ec)
         tfSelection.style.ase = TF_AE_NONE;
         tfSelection.style.fInterimChar = FALSE;
 
-        _pContext->SetSelection(ec, 1, &tfSelection);
-        _pTextService->_SaveCompositionContext(_pContext);
+        pContext->SetSelection(ec, 1, &tfSelection);
+        _pTextService->_SaveCompositionContext(pContext);
     }
 
 Exit:
@@ -102,18 +104,18 @@ Exit:
 // focus context.
 //----------------------------------------------------------------------------
 
-void CWindowsIME::_StartComposition(_In_ ITfContext *pContext)
-{
-    CStartCompositionEditSession* pStartCompositionEditSession = new (std::nothrow) CStartCompositionEditSession(this, pContext);
-
-    if (nullptr != pStartCompositionEditSession)
-    {
-        HRESULT hr = S_OK;
-        pContext->RequestEditSession(_tfClientId, pStartCompositionEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hr);
-
-        pStartCompositionEditSession->Release();
-    }
-}
+// void CWindowsIME::_StartComposition(_In_ ITfContext *pContext)
+// {
+//     CStartCompositionEditSession* pStartCompositionEditSession = new (std::nothrow) CStartCompositionEditSession(this, pContext);
+// 
+//     if (nullptr != pStartCompositionEditSession)
+//     {
+//         HRESULT hr = S_OK;
+//         pContext->RequestEditSession(_tfClientId, pStartCompositionEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hr);
+// 
+//         pStartCompositionEditSession->Release();
+//     }
+// }
 
 //+---------------------------------------------------------------------------
 //

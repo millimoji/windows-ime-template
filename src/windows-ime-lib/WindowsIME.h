@@ -147,7 +147,7 @@ private:
 //    HRESULT _CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext);
 //    HRESULT _HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext);
 
-    void _StartComposition(_In_ ITfContext *pContext) override;
+//    void _StartComposition(_In_ ITfContext *pContext) override;
     void _EndComposition(_In_opt_ ITfContext *pContext) override;
     BOOL _IsComposing() override;
     bool _IsKeyboardDisabled() override;

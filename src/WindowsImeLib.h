@@ -206,7 +206,7 @@ struct ICompositionProcessorEngineOwner
 
     virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, IWindowsIMECompositionBuffer* pv)>& editSesisonTask, DWORD tfEsFlags) = 0;
 
-    virtual void _StartComposition(_In_ ITfContext *pContext) = 0;
+//    virtual void _StartComposition(_In_ ITfContext *pContext) = 0;
     virtual void _EndComposition(_In_opt_ ITfContext *pContext) = 0;
     virtual VOID _DeleteCandidateList(BOOL fForce, _In_opt_ ITfContext *pContext) = 0;
     virtual void* GetTextService() = 0;

@@ -24,21 +24,21 @@
 //
 //----------------------------------------------------------------------------
 
-class CEndCompositionEditSession : public CEditSessionBase
-{
-public:
-    CEndCompositionEditSession(_In_ CWindowsIME *pTextService, _In_ ITfContext *pContext) : CEditSessionBase(pTextService, pContext)
-    {
-    }
-
-    // ITfEditSession
-    STDMETHODIMP DoEditSession(TfEditCookie ec)
-    {
-        _pTextService->GetCompositionBuffer()->_TerminateComposition(ec, _pContext, TRUE);
-        return S_OK;
-    }
-
-};
+// class CEndCompositionEditSession : public CEditSessionBase
+// {
+// public:
+//     CEndCompositionEditSession(_In_ CWindowsIME *pTextService, _In_ ITfContext *pContext) : CEditSessionBase(pTextService, pContext)
+//     {
+//     }
+// 
+//     // ITfEditSession
+//     STDMETHODIMP DoEditSession(TfEditCookie ec)
+//     {
+//         _pTextService->GetCompositionBuffer()->_TerminateComposition(ec, _pContext, TRUE);
+//         return S_OK;
+//     }
+// 
+// };
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -54,10 +54,15 @@ public:
 
 void CompositionBuffer::_TerminateComposition(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCalledFromDeactivate)
 {
-	isCalledFromDeactivate;
+    isCalledFromDeactivate;
 
     if (_pComposition != nullptr)
     {
+        if (!pContext)
+        {
+            pContext = _pContext;
+        }
+
         // remove the display attribute from the composition range.
         _ClearCompositionDisplayAttributes(ec, pContext);
 
@@ -86,13 +91,24 @@ void CompositionBuffer::_TerminateComposition(TfEditCookie ec, _In_ ITfContext *
 
 void CWindowsIME::_EndComposition(_In_opt_ ITfContext *pContext)
 {
-    CEndCompositionEditSession *pEditSession = new (std::nothrow) CEndCompositionEditSession(this, pContext);
-    HRESULT hr = S_OK;
-
-    if (nullptr != pEditSession)
+    if (!pContext)
     {
-        pContext->RequestEditSession(_tfClientId, pEditSession, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE, &hr);
-        pEditSession->Release();
+        return;
     }
+
+    _SubmitEditSessionTask(pContext, [pContext](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
+    {
+        textService->_TerminateComposition(ec, pContext, TRUE);
+        return S_OK;
+    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+
+//    CEndCompositionEditSession *pEditSession = new (std::nothrow) CEndCompositionEditSession(this, pContext);
+//    HRESULT hr = S_OK;
+//
+//    if (nullptr != pEditSession)
+//    {
+//        pContext->RequestEditSession(_tfClientId, pEditSession, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE, &hr);
+//        pEditSession->Release();
+//    }
 }
 
