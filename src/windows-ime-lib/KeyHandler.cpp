@@ -57,12 +57,15 @@ VOID CWindowsIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pConte
     auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
     pCompositionProcessorEngine->PurgeVirtualKey();
 
+    auto _pCandidateListUIPresenter = m_compositionBuffer->GetCandidateList();
     if (_pCandidateListUIPresenter)
     {
         _pCandidateListUIPresenter->_EndCandidateList();
 
-        _candidateMode = CANDIDATE_NONE;
-        _isCandidateWithWildcard = FALSE;
+        // _candidateMode = CANDIDATE_NONE;
+        // _isCandidateWithWildcard = FALSE;
+
+        m_compositionBuffer->ResetCandidateState();
     }
 }
 
@@ -229,8 +232,9 @@ HRESULT CompositionBuffer::_CreateAndStartCandidate(_In_ WindowsImeLib::IComposi
     {
         // Recreate candidate list
         _pCandidateListUIPresenter->_EndCandidateList();
-        delete _pCandidateListUIPresenter;
-        _pCandidateListUIPresenter = nullptr;
+        // delete _pCandidateListUIPresenter;
+        // _pCandidateListUIPresenter = nullptr;
+        _pCandidateListUIPresenter.reset();
 
         _candidateMode = CANDIDATE_NONE;
         _isCandidateWithWildcard = FALSE;
@@ -320,7 +324,8 @@ HRESULT CompositionBuffer::_HandleCompositionFinalize(TfEditCookie ec, _In_ ITfC
             {
                 if (_IsRangeCovered(ec, tfSelection.range, pRangeComposition))
                 {
-                    _textService->_EndComposition(pContext);
+                    _TerminateComposition(ec, pContext, FALSE);
+                    // _textService->_EndComposition(pContext);
                 }
 
                 pRangeComposition->Release();
@@ -361,8 +366,9 @@ HRESULT CompositionBuffer::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfCo
         if (_pCandidateListUIPresenter)
         {
             _pCandidateListUIPresenter->_EndCandidateList();
-            delete _pCandidateListUIPresenter;
-            _pCandidateListUIPresenter = nullptr;
+            // delete _pCandidateListUIPresenter;
+            // _pCandidateListUIPresenter = nullptr;
+            _pCandidateListUIPresenter.reset();
 
             _candidateMode = CANDIDATE_NONE;
             _isCandidateWithWildcard = FALSE;

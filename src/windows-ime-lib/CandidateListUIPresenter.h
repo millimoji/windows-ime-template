@@ -28,7 +28,8 @@ class CReadingLine;
 
 class CCandidateListUIPresenter : public CTfTextLayoutSink,
     public ITfCandidateListUIElementBehavior,
-    public ITfIntegratableCandidateListUIElement
+    public ITfIntegratableCandidateListUIElement,
+    public WindowsImeLib::IWindowsIMECandidateList
 {
 public:
     CCandidateListUIPresenter(_In_ CWindowsIME *pTextService, ATOM atom,
@@ -37,6 +38,7 @@ public:
         BOOL hideWindow);
     virtual ~CCandidateListUIPresenter();
 
+private:
     // IUnknown
     STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);
     STDMETHODIMP_(ULONG) AddRef(void);
@@ -70,16 +72,21 @@ public:
     STDMETHODIMP ShowCandidateNumbers(_Out_ BOOL *pIsShow); 
     STDMETHODIMP FinalizeExactCompositionString();
 
-    virtual HRESULT _StartCandidateList(TfClientId tfClientId, _In_ ITfDocumentMgr *pDocumentMgr, _In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth);
-    void _EndCandidateList();
+private:
+    // transfer from parent class
+    ITfContext* _GetContextDocument() override { return CTfTextLayoutSink::_GetContextDocument(); };
 
-    void _SetText(_In_ std::vector<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode);
-    void _ClearList();
-    VOID _SetTextColor(COLORREF crColor, COLORREF crBkColor);
-    VOID _SetFillColor(HBRUSH hBrush);
+    HRESULT _StartCandidateList(TfClientId tfClientId, _In_ ITfDocumentMgr *pDocumentMgr, _In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth) override;
+    void _EndCandidateList() override;
 
-    DWORD_PTR _GetSelectedCandidateString(_Outptr_result_maybenull_ const WCHAR **ppwchCandidateString);
-    BOOL _SetSelectionInPage(int nPos) { return _pCandidateWnd->_SetSelectionInPage(nPos); }
+    void _SetText(_In_ std::vector<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode) override;
+    void _ClearList() override;
+    VOID _SetTextColor(COLORREF crColor, COLORREF crBkColor) override;
+    VOID _SetFillColor(HBRUSH hBrush) override;;
+
+    DWORD_PTR _GetSelectedCandidateString(_Outptr_result_maybenull_ const WCHAR **ppwchCandidateString) override;
+
+    BOOL _SetSelectionInPage(int nPos) override { return _pCandidateWnd->_SetSelectionInPage(nPos); }
 
     BOOL _MoveSelection(_In_ int offSet);
     BOOL _SetSelection(_In_ int selectedIndex);
@@ -92,11 +99,11 @@ public:
     virtual VOID _LayoutDestroyNotification();
 
     // Event for ITfThreadFocusSink
-    virtual HRESULT OnSetThreadFocus();
-    virtual HRESULT OnKillThreadFocus();
+    virtual HRESULT OnSetThreadFocus() override;
+    virtual HRESULT OnKillThreadFocus() override;
 
-    void RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, _In_ CStringRange &srgCandidateString);
-    void AdviseUIChangedByArrowKey(_In_ KEYSTROKE_FUNCTION arrowKey);
+    void RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, _In_ CStringRange &srgCandidateString) override;
+    void AdviseUIChangedByArrowKey(_In_ KEYSTROKE_FUNCTION arrowKey) override;
 
 private:
     virtual HRESULT CALLBACK _CandidateChangeNotification(_In_ enum CANDWND_ACTION action);
@@ -133,5 +140,5 @@ private:
     DWORD _updatedFlags;
     DWORD _uiElementId;
     CWindowsIME* _pTextService;
-    LONG _refCount;
+    // LONG _refCount;
 };

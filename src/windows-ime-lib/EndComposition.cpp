@@ -83,32 +83,32 @@ void CompositionBuffer::_TerminateComposition(TfEditCookie ec, _In_ ITfContext *
     }
 }
 
-//+---------------------------------------------------------------------------
-//
-// _EndComposition
-//
-//----------------------------------------------------------------------------
-
-void CWindowsIME::_EndComposition(_In_opt_ ITfContext *pContext)
-{
-    if (!pContext)
-    {
-        return;
-    }
-
-    _SubmitEditSessionTask(pContext, [pContext](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
-    {
-        textService->_TerminateComposition(ec, pContext, TRUE);
-        return S_OK;
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
-
-//    CEndCompositionEditSession *pEditSession = new (std::nothrow) CEndCompositionEditSession(this, pContext);
-//    HRESULT hr = S_OK;
-//
-//    if (nullptr != pEditSession)
-//    {
-//        pContext->RequestEditSession(_tfClientId, pEditSession, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE, &hr);
-//        pEditSession->Release();
-//    }
-}
-
+// //+---------------------------------------------------------------------------
+// //
+// // _EndComposition
+// //
+// //----------------------------------------------------------------------------
+// 
+// void CWindowsIME::_EndComposition(_In_opt_ ITfContext *pContext)
+// {
+//     if (!pContext)
+//     {
+//         return;
+//     }
+// 
+//     _SubmitEditSessionTask(pContext, [pContext](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
+//     {
+//         textService->_TerminateComposition(ec, pContext, TRUE);
+//         return S_OK;
+//     }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+// 
+// //    CEndCompositionEditSession *pEditSession = new (std::nothrow) CEndCompositionEditSession(this, pContext);
+// //    HRESULT hr = S_OK;
+// //
+// //    if (nullptr != pEditSession)
+// //    {
+// //        pContext->RequestEditSession(_tfClientId, pEditSession, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE, &hr);
+// //        pEditSession->Release();
+// //    }
+// }
+// 

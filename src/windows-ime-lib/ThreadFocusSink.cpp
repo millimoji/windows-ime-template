@@ -24,6 +24,7 @@ STDAPI CWindowsIME::OnSetThreadFocus() try
         m_singletonProcessor->SetFocus(true);
     }
 
+    auto _pCandidateListUIPresenter = m_compositionBuffer->GetCandidateList();
     if (_pCandidateListUIPresenter)
     {
         ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
@@ -60,6 +61,7 @@ STDAPI CWindowsIME::OnKillThreadFocus() try
         m_singletonProcessor->SetFocus(false);
     }
 
+    auto _pCandidateListUIPresenter = m_compositionBuffer->GetCandidateList();
     if (_pCandidateListUIPresenter)
     {
         ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;

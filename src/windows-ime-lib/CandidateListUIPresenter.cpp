@@ -35,7 +35,7 @@ HRESULT CompositionBuffer::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfCon
     const WCHAR* pCandidateString = nullptr;
     CStringRange candidateString;
 
-    if (nullptr == _pCandidateListUIPresenter)
+    if (!_pCandidateListUIPresenter)
     {
         goto NoPresenter;
     }
@@ -91,8 +91,9 @@ HRESULT CompositionBuffer::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfConte
     CCandidateListUIPresenter* pTempCandListUIPresenter = nullptr;
     ITfDocumentMgr* pDocumentMgr = nullptr;
     HRESULT hrStartCandidateList = E_FAIL;
+    WindowsImeLib::IWindowsIMECandidateList* candidateListInterface = nullptr;
 
-    if (nullptr == _pCandidateListUIPresenter)
+    if (!_pCandidateListUIPresenter)
     {
         hrReturn = S_OK;
         goto Exit;
@@ -133,6 +134,7 @@ HRESULT CompositionBuffer::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfConte
             goto Exit;
         }
     }
+    candidateListInterface = static_cast<WindowsImeLib::IWindowsIMECandidateList*>(pTempCandListUIPresenter);
 
     // call _Start*Line for CCandidateListUIPresenter or CReadingLine
     // we don't cache the document manager object so get it from pContext.
@@ -143,7 +145,7 @@ HRESULT CompositionBuffer::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfConte
         {
             if (pTempCandListUIPresenter)
             {
-                hrStartCandidateList = pTempCandListUIPresenter->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, ec, pRange,
+                hrStartCandidateList = candidateListInterface->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, ec, pRange,
                         WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
             } 
 
@@ -155,9 +157,9 @@ HRESULT CompositionBuffer::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfConte
     // set up candidate list if it is being shown
     if (SUCCEEDED(hrStartCandidateList))
     {
-        pTempCandListUIPresenter->_SetTextColor(RGB(0, 0x80, 0), GetSysColor(COLOR_WINDOW));    // Text color is green
-        pTempCandListUIPresenter->_SetFillColor((HBRUSH)(COLOR_WINDOW+1));    // Background color is window
-        pTempCandListUIPresenter->_SetText(&candidatePhraseList, FALSE);
+        candidateListInterface->_SetTextColor(RGB(0, 0x80, 0), GetSysColor(COLOR_WINDOW));    // Text color is green
+        candidateListInterface->_SetFillColor((HBRUSH)(COLOR_WINDOW+1));    // Background color is window
+        candidateListInterface->_SetText(&candidatePhraseList, FALSE);
 
         // Add composing character
         hrReturn = _AddComposingAndChar(ec, pContext, &candidateString);
@@ -166,17 +168,14 @@ HRESULT CompositionBuffer::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfConte
         if (_pCandidateListUIPresenter)
         {
             _pCandidateListUIPresenter->_EndCandidateList();
-            delete _pCandidateListUIPresenter;
-            _pCandidateListUIPresenter = nullptr;
-
-            _candidateMode = CANDIDATE_NONE;
-            _isCandidateWithWildcard = FALSE;
+            _pCandidateListUIPresenter.reset();
+            ResetCandidateState();
         }
 
         if (hrReturn == S_OK)
         {
             // copy temp candidate
-            _pCandidateListUIPresenter = pTempCandListUIPresenter;
+            _pCandidateListUIPresenter.attach(pTempCandListUIPresenter);
 
             _candidateMode = tempCandMode;
             _isCandidateWithWildcard = FALSE;
@@ -356,7 +355,7 @@ CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ CWindowsIME *pTextServ
     _pTextService = pTextService;
     _pTextService->AddRef();
 
-    _refCount = 1;
+    // _refCount = 1;
 }
 
 //+---------------------------------------------------------------------------
@@ -423,8 +422,8 @@ STDAPI CCandidateListUIPresenter::QueryInterface(REFIID riid, _Outptr_ void **pp
 
 STDAPI_(ULONG) CCandidateListUIPresenter::AddRef()
 {
-    CTfTextLayoutSink::AddRef();
-    return ++_refCount;
+    return CTfTextLayoutSink::AddRef();
+    // return ++_refCount;
 }
 
 //+---------------------------------------------------------------------------
@@ -435,18 +434,19 @@ STDAPI_(ULONG) CCandidateListUIPresenter::AddRef()
 
 STDAPI_(ULONG) CCandidateListUIPresenter::Release()
 {
-    CTfTextLayoutSink::Release();
+    return CTfTextLayoutSink::Release();
 
-    LONG cr = --_refCount;
-
-    assert(_refCount >= 0);
-
-    if (_refCount == 0)
-    {
-        delete this;
-    }
-
-    return cr;
+// Bug?? double free
+//    LONG cr = --_refCount;
+//
+//    assert(_refCount >= 0);
+//
+//    if (_refCount == 0)
+//    {
+//        delete this;
+//    }
+//
+//    return cr;
 }
 
 //+---------------------------------------------------------------------------

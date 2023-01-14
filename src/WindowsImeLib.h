@@ -141,6 +141,27 @@ struct IWindowsIMEInprocClient
 
 struct ICompositionProcessorEngine;
 
+struct IWindowsIMECandidateList : public IUnknown
+{
+    virtual ITfContext* _GetContextDocument() = 0;
+
+    virtual HRESULT _StartCandidateList(TfClientId tfClientId, _In_ ITfDocumentMgr *pDocumentMgr, _In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth) = 0;
+    virtual void _EndCandidateList() = 0;
+    virtual void _ClearList() = 0;
+    virtual void _SetText(_In_ std::vector<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode) = 0;
+    virtual VOID _SetTextColor(COLORREF crColor, COLORREF crBkColor) = 0;
+    virtual VOID _SetFillColor(HBRUSH hBrush) = 0;
+
+    virtual DWORD_PTR _GetSelectedCandidateString(_Outptr_result_maybenull_ const WCHAR **ppwchCandidateString) = 0;
+    virtual BOOL _SetSelectionInPage(int nPos) = 0;
+
+    virtual HRESULT OnSetThreadFocus() = 0;
+    virtual HRESULT OnKillThreadFocus() = 0;
+
+    virtual void RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, _In_ CStringRange &srgCandidateString) = 0;
+    virtual void AdviseUIChangedByArrowKey(_In_ KEYSTROKE_FUNCTION arrowKey) = 0;
+};
+
 struct IWindowsIMECompositionBuffer
 {
     // functions for the composition object.
@@ -190,6 +211,12 @@ struct IWindowsIMECompositionBuffer
     virtual BOOL _SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute) = 0;
 
     virtual BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover) = 0;
+
+    //
+    virtual wil::com_ptr<IWindowsIMECandidateList> GetCandidateList() = 0;
+    virtual CANDIDATE_MODE CandidateMode() = 0;
+    virtual bool IsCandidateWithWildcard() = 0;
+    virtual void ResetCandidateState() = 0;
 };
 
 struct ICompositionProcessorEngineOwner
@@ -200,14 +227,12 @@ struct ICompositionProcessorEngineOwner
     virtual UINT VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch) = 0;
     virtual bool _IsKeyboardDisabled() = 0;
     virtual BOOL _IsComposing() = 0;
-    virtual CANDIDATE_MODE _CandidateMode() = 0;
-    virtual bool IsCandidateWithWildcard() = 0;
     virtual std::shared_ptr<IWindowsIMECompositionBuffer> GetCompositionBuffer() = 0;
 
     virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, IWindowsIMECompositionBuffer* pv)>& editSesisonTask, DWORD tfEsFlags) = 0;
 
 //    virtual void _StartComposition(_In_ ITfContext *pContext) = 0;
-    virtual void _EndComposition(_In_opt_ ITfContext *pContext) = 0;
+//    virtual void _EndComposition(_In_opt_ ITfContext *pContext) = 0;
     virtual VOID _DeleteCandidateList(BOOL fForce, _In_opt_ ITfContext *pContext) = 0;
     virtual void* GetTextService() = 0;
 };
@@ -241,6 +266,8 @@ struct ICompositionProcessorEngine
 
     virtual BOOL IsDoubleSingleByte(WCHAR wch) = 0;
     virtual BOOL IsMakePhraseFromText() = 0;
+
+    virtual void EndComposition(_In_opt_ ITfContext* pContext) = 0;
 
     // Language bar control
 //     virtual void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) = 0;

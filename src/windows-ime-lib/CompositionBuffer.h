@@ -17,21 +17,15 @@ public:
         const TfClientId& tfClientId,
         const TfGuidAtom& gaDisplayAttributeInput,
         // need to sync with m_textService
-        CCandidateListUIPresenter*& pCandidateListUIPresenter,
         ITfComposition*& pComposition,
-        ITfContext*& pContext,
-        CANDIDATE_MODE& candidateMode,
-        BOOL& isCandidateWithWildcard
+        ITfContext*& pContext
     ) :
         _textService(textService),
         _pCompositionProcessorEngine(pCompositionProcessorEngine),
         _tfClientId(tfClientId),
         _gaDisplayAttributeInput(gaDisplayAttributeInput),
-        _pCandidateListUIPresenter(pCandidateListUIPresenter),
         _pComposition(pComposition),
-        _pContext(pContext),
-        _candidateMode(candidateMode),
-        _isCandidateWithWildcard(isCandidateWithWildcard)
+        _pContext(pContext)
     {}
     virtual ~CompositionBuffer() {}
 
@@ -86,6 +80,15 @@ private:
 
     BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover) override;
 
+    virtual wil::com_ptr<WindowsImeLib::IWindowsIMECandidateList> GetCandidateList() override { return _pCandidateListUIPresenter; }
+    CANDIDATE_MODE CandidateMode() override { return _candidateMode; }
+    bool IsCandidateWithWildcard() override  { return !!_isCandidateWithWildcard; }
+    void ResetCandidateState() override
+    {
+        _candidateMode  = CANDIDATE_NONE;
+        _isCandidateWithWildcard = FALSE;
+    }
+
 private:
     WindowsImeLib::ICompositionProcessorEngineOwner* _textService = nullptr;
     std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> _pCompositionProcessorEngine;
@@ -94,9 +97,9 @@ private:
     TfGuidAtom _gaDisplayAttributeInput = {};
 
     // need to sync with m_textService
-    CCandidateListUIPresenter*& _pCandidateListUIPresenter;
+    wil::com_ptr<WindowsImeLib::IWindowsIMECandidateList> _pCandidateListUIPresenter;
     ITfComposition*& _pComposition;
     ITfContext*& _pContext;
-    CANDIDATE_MODE& _candidateMode;
-    BOOL& _isCandidateWithWildcard;
+    CANDIDATE_MODE _candidateMode = CANDIDATE_NONE;
+    BOOL _isCandidateWithWildcard = FALSE;
 };

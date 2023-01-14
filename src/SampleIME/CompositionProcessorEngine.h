@@ -52,6 +52,8 @@ public:
     BOOL IsDoubleSingleByte(WCHAR wch) override;
     BOOL IsMakePhraseFromText()  override { return _hasMakePhraseFromText; }
 
+    void EndComposition(_In_opt_ ITfContext* pContext) override;
+
     // Language bar control
 //    void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) override;
 

@@ -61,6 +61,7 @@ BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT codeIn, _Out_ UINT *pCode
     BOOL isOpen = m_compartmentIsOpen;
     BOOL isDoubleSingleByte = m_compartmentIsDoubleSingleByte;
     BOOL isPunctuation = m_compartmentIsPunctuation;
+    const auto candidateMode = m_owner->GetCompositionBuffer()->CandidateMode();
 
     if (pKeyState)
     {
@@ -115,7 +116,9 @@ BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT codeIn, _Out_ UINT *pCode
         //
         // eat only keys that CKeyHandlerEditSession can handles.
         //
-        if (IsVirtualKeyNeed(*pCodeOut, pwch, m_owner->_IsComposing(), m_owner->_CandidateMode(), m_owner->IsCandidateWithWildcard(), pKeyState))
+        const auto isCandidateWithWildcard = m_owner->GetCompositionBuffer()->IsCandidateWithWildcard();
+
+        if (IsVirtualKeyNeed(*pCodeOut, pwch, m_owner->_IsComposing(), candidateMode, isCandidateWithWildcard, pKeyState))
         {
             return TRUE;
         }
@@ -126,7 +129,7 @@ BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT codeIn, _Out_ UINT *pCode
     //
     if (IsPunctuation(wch))
     {
-        if ((m_owner->_CandidateMode() == CANDIDATE_NONE) && isPunctuation)
+        if ((candidateMode == CANDIDATE_NONE) && isPunctuation)
         {
             if (pKeyState)
             {
@@ -142,7 +145,7 @@ BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT codeIn, _Out_ UINT *pCode
     //
     if (isDoubleSingleByte && IsDoubleSingleByte(wch))
     {
-        if (m_owner->_CandidateMode() == CANDIDATE_NONE)
+        if (candidateMode == CANDIDATE_NONE)
         {
             if (pKeyState)
             {

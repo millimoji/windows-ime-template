@@ -31,7 +31,7 @@ STDAPI CWindowsIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfCompos
         pContext->AddRef();
     }
 
-    _EndComposition(_pContext);
+    _pCompositionProcessorEngine->EndComposition(_pContext);
 
     _DeleteCandidateList(FALSE, pContext);
 

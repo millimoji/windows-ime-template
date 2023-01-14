@@ -148,11 +148,11 @@ private:
 //    HRESULT _HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext);
 
 //    void _StartComposition(_In_ ITfContext *pContext) override;
-    void _EndComposition(_In_opt_ ITfContext *pContext) override;
+//    void _EndComposition(_In_opt_ ITfContext *pContext) override;
     BOOL _IsComposing() override;
     bool _IsKeyboardDisabled() override;
-    CANDIDATE_MODE _CandidateMode() override { return _candidateMode; }
-    bool IsCandidateWithWildcard() override { return _isCandidateWithWildcard; }
+//    CANDIDATE_MODE _CandidateMode() override { return _candidateMode; }
+//    bool IsCandidateWithWildcard() override { return _isCandidateWithWildcard; }
 
 //    HRESULT _AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString);
 //    HRESULT _AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString);
@@ -264,9 +264,10 @@ private:
     TfGuidAtom _gaDisplayAttributeInput = {};
     TfGuidAtom _gaDisplayAttributeConverted = {};
 
-    CANDIDATE_MODE _candidateMode;
-    CCandidateListUIPresenter *_pCandidateListUIPresenter;
-    BOOL _isCandidateWithWildcard;
+//    CANDIDATE_MODE _candidateMode;
+//    CCandidateListUIPresenter *_pCandidateListUIPresenter;
+//    BOOL _isCandidateWithWildcard;
+//    wil::com_ptr<WindowsImeLib::IWindowsIMECandidateList> _pCandidateListUIPresenter;
 
     ITfDocumentMgr* _pDocMgrLastFocused;
 

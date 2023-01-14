@@ -1794,6 +1794,21 @@ BOOL CompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_S
     return FALSE;
 }
 
+
+void CompositionProcessorEngine::EndComposition(_In_opt_ ITfContext *pContext)
+{
+    if (!pContext)
+    {
+        return;
+    }
+
+    m_owner->_SubmitEditSessionTask(pContext, [pContext](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
+    {
+        textService->_TerminateComposition(ec, pContext, TRUE);
+        return S_OK;
+    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+}
+
 // void CompositionProcessorEngine::ClearCompartment(ITfThreadMgr* /*pThreadMgr*/, TfClientId /*tfClientId*/)
 // {
 //     const auto owner = m_owner.lock();

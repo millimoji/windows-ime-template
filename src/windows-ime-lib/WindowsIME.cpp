@@ -69,9 +69,9 @@ CWindowsIME::CWindowsIME()
 
 //    _pCompositionProcessorEngine = nullptr;
 
-    _candidateMode = CANDIDATE_NONE;
-    _pCandidateListUIPresenter = nullptr;
-    _isCandidateWithWildcard = FALSE;
+//    _candidateMode = CANDIDATE_NONE;
+//    _pCandidateListUIPresenter = nullptr;
+//    _isCandidateWithWildcard = FALSE;
 
     _pDocMgrLastFocused = nullptr;
 
@@ -94,11 +94,13 @@ CWindowsIME::~CWindowsIME()
 {
     m_singletonProcessor.reset();
 
-    if (_pCandidateListUIPresenter)
-    {
-        delete _pCandidateListUIPresenter;
-        _pCandidateListUIPresenter = nullptr;
-    }
+//    if (_pCandidateListUIPresenter)
+//    {
+//        // delete _pCandidateListUIPresenter;
+//        // _pCandidateListUIPresenter = nullptr;
+//        _pCandidateListUIPresenter.reset();
+//    }
+
     DllRelease();
 }
 
@@ -177,11 +179,8 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
         _pCompositionProcessorEngine,
         _tfClientId,
         _gaDisplayAttributeInput,
-        _pCandidateListUIPresenter,
         _pComposition,
-        _pContext,
-        _candidateMode,
-        _isCandidateWithWildcard
+        _pContext
         );
 
     activity.Stop();
@@ -202,31 +201,33 @@ STDAPI CWindowsIME::Deactivate()
 {
     auto activity = WindowsImeLibTelemetry::ITfTextInputProcessorEx_Deactivate();
 
+    ITfContext* pContext = _pContext;
+    if (_pContext)
+    {
+        pContext->AddRef();
+        _pCompositionProcessorEngine->EndComposition(pContext);
+    }
+
     if (_pCompositionProcessorEngine)
     {
 //        _pCompositionProcessorEngine->ClearCompartment(_pThreadMgr, _tfClientId);
         _pCompositionProcessorEngine.reset();
     }
 
-    ITfContext* pContext = _pContext;
-    if (_pContext)
+    // if (_pCandidateListUIPresenter)
     {
-        pContext->AddRef();
-        _EndComposition(_pContext);
-    }
-
-    if (_pCandidateListUIPresenter)
-    {
-        delete _pCandidateListUIPresenter;
-        _pCandidateListUIPresenter = nullptr;
+        // delete _pCandidateListUIPresenter;
+        // _pCandidateListUIPresenter = nullptr;
+        // _pCandidateListUIPresenter.reset();
 
         if (pContext)
         {
             pContext->Release();
         }
 
-        _candidateMode = CANDIDATE_NONE;
-        _isCandidateWithWildcard = FALSE;
+        m_compositionBuffer->ResetCandidateState();
+//        _candidateMode = CANDIDATE_NONE;
+//        _isCandidateWithWildcard = FALSE;
     }
 
     if (m_inprocClient)
