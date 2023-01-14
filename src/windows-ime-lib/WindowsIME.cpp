@@ -75,11 +75,11 @@ CWindowsIME::CWindowsIME()
 
     _pDocMgrLastFocused = nullptr;
 
-    _pSIPIMEOnOffCompartment = nullptr;
-    _dwSIPIMEOnOffCompartmentSinkCookie = 0;
-    _msgWndHandle = nullptr;
+//    _pSIPIMEOnOffCompartment = nullptr;
+//    _dwSIPIMEOnOffCompartmentSinkCookie = 0;
+//    _msgWndHandle = nullptr;
 
-    _pContext = nullptr;
+//    _pContext = nullptr;
 
     // _refCount = 1;
 }
@@ -179,8 +179,7 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
         _pCompositionProcessorEngine,
         _tfClientId,
         _gaDisplayAttributeInput,
-        _pComposition,
-        _pContext
+        _pComposition
         );
 
     activity.Stop();
@@ -201,11 +200,12 @@ STDAPI CWindowsIME::Deactivate()
 {
     auto activity = WindowsImeLibTelemetry::ITfTextInputProcessorEx_Deactivate();
 
-    ITfContext* pContext = _pContext;
-    if (_pContext)
+    // ITfContext* pContext = _pContext;
+    auto pContext = m_compositionBuffer->GetContext();
+    if (pContext)
     {
-        pContext->AddRef();
-        _pCompositionProcessorEngine->EndComposition(pContext);
+        // pContext->AddRef();
+        _pCompositionProcessorEngine->EndComposition(pContext.get());
     }
 
     if (_pCompositionProcessorEngine)
@@ -220,10 +220,10 @@ STDAPI CWindowsIME::Deactivate()
         // _pCandidateListUIPresenter = nullptr;
         // _pCandidateListUIPresenter.reset();
 
-        if (pContext)
-        {
-            pContext->Release();
-        }
+//        if (pContext)
+//        {
+//            pContext->Release();
+//        }
 
         m_compositionBuffer->ResetCandidateState();
 //        _candidateMode = CANDIDATE_NONE;

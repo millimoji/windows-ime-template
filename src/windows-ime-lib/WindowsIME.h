@@ -104,7 +104,7 @@ public:
     // functions for the composition object.
     void _SetComposition(_In_ ITfComposition *pComposition);
 //    void _TerminateComposition(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCalledFromDeactivate = FALSE);
-    void _SaveCompositionContext(_In_ ITfContext *pContext);
+//    void _SaveCompositionContext(_In_ ITfContext *pContext);
 
     // key event handlers for composition/candidate/phrase common objects.
 //    HRESULT _HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext);
@@ -271,12 +271,12 @@ private:
 
     ITfDocumentMgr* _pDocMgrLastFocused;
 
-    ITfContext* _pContext;
+//    ITfContext* _pContext;
 
-    ITfCompartment* _pSIPIMEOnOffCompartment;
-    DWORD _dwSIPIMEOnOffCompartmentSinkCookie;
+//    ITfCompartment* _pSIPIMEOnOffCompartment;
+//    DWORD _dwSIPIMEOnOffCompartmentSinkCookie;
 
-    HWND _msgWndHandle;
+//    HWND _msgWndHandle;
 
     // LONG _refCount;
 

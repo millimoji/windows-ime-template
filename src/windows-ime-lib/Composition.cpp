@@ -25,21 +25,22 @@ STDAPI CWindowsIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfCompos
     m_compositionBuffer->_RemoveDummyCompositionForComposing(ecWrite, pComposition);
 
     // Clear display attribute and end composition, _EndComposition will release composition for us
-    ITfContext* pContext = _pContext;
-    if (pContext)
-    {
-        pContext->AddRef();
-    }
+    // ITfContext* pContext = _pContext;
+    auto pContext = m_compositionBuffer->GetContext();
+//    if (pContext)
+//    {
+//        pContext->AddRef();
+//    }
 
-    _pCompositionProcessorEngine->EndComposition(_pContext);
+    _pCompositionProcessorEngine->EndComposition(pContext.get());
 
-    _DeleteCandidateList(FALSE, pContext);
+    _DeleteCandidateList(FALSE, pContext.get());
 
-    if (pContext)
-    {
-        pContext->Release();
-        pContext = nullptr;
-    }
+//    if (pContext)
+//    {
+//        pContext->Release();
+//        pContext = nullptr;
+//    }
 
     activity.Stop();
     return S_OK;

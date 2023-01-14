@@ -214,6 +214,7 @@ struct IWindowsIMECompositionBuffer
 
     //
     virtual wil::com_ptr<IWindowsIMECandidateList> GetCandidateList() = 0;
+    virtual wil::com_ptr<ITfContext> GetContext() = 0;
     virtual CANDIDATE_MODE CandidateMode() = 0;
     virtual bool IsCandidateWithWildcard() = 0;
     virtual void ResetCandidateState() = 0;

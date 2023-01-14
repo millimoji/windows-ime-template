@@ -60,7 +60,7 @@ void CompositionBuffer::_TerminateComposition(TfEditCookie ec, _In_ ITfContext *
     {
         if (!pContext)
         {
-            pContext = _pContext;
+            pContext = _pContext.get();
         }
 
         // remove the display attribute from the composition range.
@@ -75,11 +75,12 @@ void CompositionBuffer::_TerminateComposition(TfEditCookie ec, _In_ ITfContext *
         _pComposition->Release();
         _pComposition = nullptr;
 
-        if (_pContext)
-        {
-            _pContext->Release();
-            _pContext = nullptr;
-        }
+//        if (_pContext)
+//        {
+//            _pContext->Release();
+//            _pContext = nullptr;
+//        }
+        _pContext.reset();
     }
 }
 

@@ -68,7 +68,7 @@ HRESULT CompositionBuffer::_StartComposition(TfEditCookie ec, _In_ ITfContext *p
         tfSelection.style.fInterimChar = FALSE;
 
         pContext->SetSelection(ec, 1, &tfSelection);
-        _pTextService->_SaveCompositionContext(pContext);
+        _SaveCompositionContext(pContext);
     }
 
 Exit:
@@ -126,10 +126,10 @@ Exit:
 // deactivation
 //----------------------------------------------------------------------------
 
-void CWindowsIME::_SaveCompositionContext(_In_ ITfContext *pContext)
+void CompositionBuffer::_SaveCompositionContext(_In_ ITfContext *pContext)
 {
     assert(_pContext == nullptr);
 
-    pContext->AddRef();
+//    pContext->AddRef();
     _pContext = pContext;
 } 
