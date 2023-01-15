@@ -14,11 +14,13 @@ public:
     CompositionBuffer(
         WindowsImeLib::ICompositionProcessorEngineOwner* textService,
         const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine,
+        const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& candidateListView,
         const TfClientId& tfClientId,
         const TfGuidAtom& gaDisplayAttributeInput
     ) :
         _textService(textService),
         _pCompositionProcessorEngine(pCompositionProcessorEngine),
+        _pCandidateListUIPresenter(candidateListView),
         _tfClientId(tfClientId),
         _gaDisplayAttributeInput(gaDisplayAttributeInput)
     {}
@@ -76,7 +78,7 @@ private:
     BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover) override;
     BOOL _IsComposing() override;
 
-    wil::com_ptr<WindowsImeLib::IWindowsIMECandidateList> GetCandidateList() override { return _pCandidateListUIPresenter; }
+    std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> GetCandidateList() override { return _pCandidateListUIPresenter; }
     wil::com_ptr<ITfContext> GetContext() override { return _pContext; }
     wil::com_ptr<ITfComposition> GetComposition() override { return _pComposition; }
     CANDIDATE_MODE CandidateMode() override { return _candidateMode; }
@@ -86,6 +88,11 @@ private:
         _candidateMode  = CANDIDATE_NONE;
         _isCandidateWithWildcard = FALSE;
     }
+    void DestroyCandidateView() override
+    {
+        _pCandidateListUIPresenter->_EndCandidateList();
+        _pCandidateListUIPresenter->DestroyView();
+    }
 
 private:
     void _SetComposition(_In_ ITfComposition *pComposition);
@@ -94,12 +101,12 @@ private:
 private:
     WindowsImeLib::ICompositionProcessorEngineOwner* _textService = nullptr;
     std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> _pCompositionProcessorEngine;
+    std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> _pCandidateListUIPresenter;
 
     TfClientId _tfClientId = TF_CLIENTID_NULL;
     TfGuidAtom _gaDisplayAttributeInput = {};
 
     // need to sync with m_textService
-    wil::com_ptr<WindowsImeLib::IWindowsIMECandidateList> _pCandidateListUIPresenter;
     wil::com_ptr<ITfContext> _pContext;
     wil::com_ptr<ITfComposition> _pComposition;
     CANDIDATE_MODE _candidateMode = CANDIDATE_NONE;

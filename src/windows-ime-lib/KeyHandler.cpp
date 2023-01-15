@@ -58,7 +58,7 @@ VOID CWindowsIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pConte
     pCompositionProcessorEngine->PurgeVirtualKey();
 
     auto _pCandidateListUIPresenter = m_compositionBuffer->GetCandidateList();
-    if (_pCandidateListUIPresenter)
+    if (_pCandidateListUIPresenter->IsCreated())
     {
         _pCandidateListUIPresenter->_EndCandidateList();
 
@@ -119,7 +119,7 @@ HRESULT CompositionBuffer::_HandleCompositionInput(TfEditCookie ec, _In_ ITfCont
 
     auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
 
-    if ((_pCandidateListUIPresenter != nullptr) && (_candidateMode != CANDIDATE_INCREMENTAL))
+    if (_pCandidateListUIPresenter->IsCreated() && (_candidateMode != CANDIDATE_INCREMENTAL))
     {
         _HandleCompositionFinalize(ec, pContext, FALSE);
     }
@@ -203,7 +203,7 @@ HRESULT CompositionBuffer::_HandleCompositionInputWorker(_In_ WindowsImeLib::ICo
             _pCandidateListUIPresenter->_SetText(&candidateList, TRUE);
         }
     }
-    else if (_pCandidateListUIPresenter)
+    else if (_pCandidateListUIPresenter->IsCreated())
     {
         _pCandidateListUIPresenter->_ClearList();
     }
@@ -223,35 +223,44 @@ HRESULT CompositionBuffer::_HandleCompositionInputWorker(_In_ WindowsImeLib::ICo
 //
 //----------------------------------------------------------------------------
 
-HRESULT CompositionBuffer::_CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CompositionBuffer::_CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine* /*pCompositionProcessorEngine*/, TfEditCookie ec, _In_ ITfContext* pContext)
 {
     HRESULT hr = S_OK;
 
-    if (((_candidateMode == CANDIDATE_PHRASE) && (_pCandidateListUIPresenter))
-        || ((_candidateMode == CANDIDATE_NONE) && (_pCandidateListUIPresenter)))
+    if (((_candidateMode == CANDIDATE_PHRASE) && _pCandidateListUIPresenter->IsCreated())
+        || ((_candidateMode == CANDIDATE_NONE) && _pCandidateListUIPresenter->IsCreated()))
     {
         // Recreate candidate list
         _pCandidateListUIPresenter->_EndCandidateList();
         // delete _pCandidateListUIPresenter;
         // _pCandidateListUIPresenter = nullptr;
-        _pCandidateListUIPresenter.reset();
+        // _pCandidateListUIPresenter.reset();
+        _pCandidateListUIPresenter->DestroyView();
 
         _candidateMode = CANDIDATE_NONE;
         _isCandidateWithWildcard = FALSE;
     }
 
-    if (_pCandidateListUIPresenter == nullptr)
+//    if (_pCandidateListUIPresenter == nullptr)
+    if (!_pCandidateListUIPresenter->IsCreated())
     {
-        _pCandidateListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(
-            reinterpret_cast<CWindowsIME*>(_textService->GetTextService()),
+        _pCandidateListUIPresenter->CreateView(
+            _textService,
             Global::AtomCandidateWindow,
             CATEGORY_CANDIDATE,
-            pCompositionProcessorEngine->GetCandidateListIndexRange(),
+            _pCompositionProcessorEngine->GetCandidateListIndexRange(),
             FALSE);
-        if (!_pCandidateListUIPresenter)
-        {
-            return E_OUTOFMEMORY;
-        }
+
+//        _pCandidateListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(
+//            reinterpret_cast<CWindowsIME*>(_textService->GetTextService()),
+//            Global::AtomCandidateWindow,
+//            CATEGORY_CANDIDATE,
+//            pCompositionProcessorEngine->GetCandidateListIndexRange(),
+//            FALSE);
+//        if (!_pCandidateListUIPresenter)
+//        {
+//            return E_OUTOFMEMORY;
+//        }
 
         _candidateMode = CANDIDATE_INCREMENTAL;
         _isCandidateWithWildcard = FALSE;
@@ -285,7 +294,7 @@ HRESULT CompositionBuffer::_HandleCompositionFinalize(TfEditCookie ec, _In_ ITfC
 {
     HRESULT hr = S_OK;
 
-    if (isCandidateList && _pCandidateListUIPresenter)
+    if (isCandidateList && _pCandidateListUIPresenter->IsCreated())
     {
         // Finalize selected candidate string from CCandidateListUIPresenter
         DWORD_PTR candidateLen = 0;
@@ -363,33 +372,48 @@ HRESULT CompositionBuffer::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfCo
     int nCount = static_cast<int>(candidateList.size());
     if (nCount)
     {
-        if (_pCandidateListUIPresenter)
+//        if (_pCandidateListUIPresenter)
+//        {
+//            _pCandidateListUIPresenter->_EndCandidateList();
+//            // delete _pCandidateListUIPresenter;
+//            // _pCandidateListUIPresenter = nullptr;
+//            _pCandidateListUIPresenter.reset();
+//
+//            _candidateMode = CANDIDATE_NONE;
+//            _isCandidateWithWildcard = FALSE;
+//        }
+        if (_pCandidateListUIPresenter->IsCreated())
         {
             _pCandidateListUIPresenter->_EndCandidateList();
-            // delete _pCandidateListUIPresenter;
-            // _pCandidateListUIPresenter = nullptr;
-            _pCandidateListUIPresenter.reset();
-
-            _candidateMode = CANDIDATE_NONE;
-            _isCandidateWithWildcard = FALSE;
+            _pCandidateListUIPresenter->DestroyView();
+            this->ResetCandidateState();
         }
 
         // 
         // create an instance of the candidate list class.
         // 
-        if (_pCandidateListUIPresenter == nullptr)
+//        if (_pCandidateListUIPresenter == nullptr)
+//        {
+//            _pCandidateListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(
+//                reinterpret_cast<CWindowsIME*>(_textService->GetTextService()),
+//                Global::AtomCandidateWindow,
+//                CATEGORY_CANDIDATE,
+//                pCompositionProcessorEngine->GetCandidateListIndexRange(),
+//                FALSE);
+//            if (!_pCandidateListUIPresenter)
+//            {
+//                return E_OUTOFMEMORY;
+//            }
+//
+//            _candidateMode = CANDIDATE_ORIGINAL;
+//        }
+        if (!_pCandidateListUIPresenter->IsCreated())
         {
-            _pCandidateListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(
-                reinterpret_cast<CWindowsIME*>(_textService->GetTextService()),
-                Global::AtomCandidateWindow,
-                CATEGORY_CANDIDATE,
-                pCompositionProcessorEngine->GetCandidateListIndexRange(),
-                FALSE);
-            if (!_pCandidateListUIPresenter)
-            {
-                return E_OUTOFMEMORY;
-            }
-
+            _pCandidateListUIPresenter->CreateView(_textService,
+                                            Global::AtomCandidateWindow,
+                                            CATEGORY_CANDIDATE,
+                                            pCompositionProcessorEngine->GetCandidateListIndexRange(),
+                                            FALSE);
             _candidateMode = CANDIDATE_ORIGINAL;
         }
 
@@ -513,7 +537,7 @@ HRESULT CompositionBuffer::_HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfC
     }
 
     // For incremental candidate list
-    if (_pCandidateListUIPresenter)
+    if (_pCandidateListUIPresenter->IsCreated())
     {
         _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
     }
@@ -537,7 +561,7 @@ HRESULT CompositionBuffer::_HandleCompositionPunctuation(TfEditCookie ec, _In_ I
 {
     HRESULT hr = S_OK;
 
-    if (_candidateMode != CANDIDATE_NONE && _pCandidateListUIPresenter)
+    if (_candidateMode != CANDIDATE_NONE && _pCandidateListUIPresenter->IsCreated())
     {
         DWORD_PTR candidateLen = 0;
         const WCHAR* pCandidateString = nullptr;

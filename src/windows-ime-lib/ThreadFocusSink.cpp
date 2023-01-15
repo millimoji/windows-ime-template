@@ -25,7 +25,7 @@ STDAPI CWindowsIME::OnSetThreadFocus() try
     }
 
     auto _pCandidateListUIPresenter = m_compositionBuffer->GetCandidateList();
-    if (_pCandidateListUIPresenter)
+    if (_pCandidateListUIPresenter->IsCreated())
     {
         ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
         ITfContext* pTfContext = _pCandidateListUIPresenter->_GetContextDocument();
@@ -62,7 +62,7 @@ STDAPI CWindowsIME::OnKillThreadFocus() try
     }
 
     auto _pCandidateListUIPresenter = m_compositionBuffer->GetCandidateList();
-    if (_pCandidateListUIPresenter)
+    if (_pCandidateListUIPresenter->IsCreated())
     {
         ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
         ITfContext* pTfContext = _pCandidateListUIPresenter->_GetContextDocument();

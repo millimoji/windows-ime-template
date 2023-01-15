@@ -131,9 +131,15 @@ struct IWindowsIMEInprocClient
 };
 
 struct ICompositionProcessorEngine;
+struct ICompositionProcessorEngineOwner;
 
-struct IWindowsIMECandidateList : public IUnknown
+struct IWindowsIMECandidateListView
 {
+    virtual ~IWindowsIMECandidateListView() {}
+
+    virtual void CreateView(_In_ ICompositionProcessorEngineOwner *pTextService, ATOM atom, KEYSTROKE_CATEGORY Category, _In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) = 0;
+    virtual void DestroyView() = 0;
+    virtual bool IsCreated() = 0;
     virtual ITfContext* _GetContextDocument() = 0;
 
     virtual HRESULT _StartCandidateList(TfClientId tfClientId, _In_ ITfDocumentMgr *pDocumentMgr, _In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth) = 0;
@@ -204,12 +210,13 @@ struct IWindowsIMECompositionBuffer
     virtual BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover) = 0;
 
     //
-    virtual wil::com_ptr<IWindowsIMECandidateList> GetCandidateList() = 0;
+    virtual std::shared_ptr<IWindowsIMECandidateListView> GetCandidateList() = 0;
     virtual wil::com_ptr<ITfContext> GetContext() = 0;
     virtual wil::com_ptr<ITfComposition> GetComposition() = 0;
     virtual CANDIDATE_MODE CandidateMode() = 0;
     virtual bool IsCandidateWithWildcard() = 0;
     virtual void ResetCandidateState() = 0;
+    virtual void DestroyCandidateView() = 0;
     virtual BOOL _IsComposing() = 0;
 };
 

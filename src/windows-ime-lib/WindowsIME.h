@@ -13,7 +13,7 @@
 #include "CompositionBuffer.h"
 
 class CLangBarItemButton;
-class CCandidateListUIPresenter;
+//class CCandidateListUIPresenter;
 struct SingletonProcessorBridge;
 
 // const DWORD WM_CheckGlobalCompartment = WM_USER;
@@ -262,6 +262,7 @@ private:
     wil::com_ptr<ITfFnSearchCandidateProvider> _pITfFnSearchCandidateProvider;
 
     std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> m_compositionBuffer;
+    std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> m_candidateListView;
     std::shared_ptr<WindowsImeLib::IWindowsIMEInprocClient> m_inprocClient;
     wil::com_ptr<ITextInputProcessor> m_singletonProcessor;
 
@@ -275,7 +276,7 @@ private:
 //    CANDIDATE_MODE _candidateMode;
 //    CCandidateListUIPresenter *_pCandidateListUIPresenter;
 //    BOOL _isCandidateWithWildcard;
-//    wil::com_ptr<WindowsImeLib::IWindowsIMECandidateList> _pCandidateListUIPresenter;
+//    wil::com_ptr<WindowsImeLib::IWindowsIMECandidateListVeiw> _pCandidateListUIPresenter;
 
 //    ITfContext* _pContext;
 //    ITfCompartment* _pSIPIMEOnOffCompartment;

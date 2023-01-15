@@ -62,7 +62,7 @@ STDAPI CWindowsIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocume
     // associated with pDocMgrFocus.
     //
     auto _pCandidateListUIPresenter = m_compositionBuffer->GetCandidateList();
-    if (_pCandidateListUIPresenter)
+    if (_pCandidateListUIPresenter->IsCreated())
     {
         ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
         ITfContext* pTfContext = _pCandidateListUIPresenter->_GetContextDocument();

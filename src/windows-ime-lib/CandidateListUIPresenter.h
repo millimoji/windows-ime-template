@@ -29,7 +29,7 @@ class CReadingLine;
 class CCandidateListUIPresenter : public CTfTextLayoutSink,
     public ITfCandidateListUIElementBehavior,
     public ITfIntegratableCandidateListUIElement,
-    public WindowsImeLib::IWindowsIMECandidateList
+    public WindowsImeLib::IWindowsIMECandidateListView
 {
 public:
     CCandidateListUIPresenter(_In_ CWindowsIME *pTextService, ATOM atom,
@@ -39,11 +39,24 @@ public:
     virtual ~CCandidateListUIPresenter();
 
 private:
+    void CreateView(_In_ WindowsImeLib::ICompositionProcessorEngineOwner*, ATOM, KEYSTROKE_CATEGORY, _In_ std::vector<DWORD>*, BOOL) override {
+        assert(false);
+    }
+    void DestroyView() override {
+        assert(false);
+    }
+    bool IsCreated() override {
+        assert(false);
+        return false;
+    }
+
+public:
     // IUnknown
     STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);
     STDMETHODIMP_(ULONG) AddRef(void);
     STDMETHODIMP_(ULONG) Release(void);
 
+private:
     // ITfUIElement
     STDMETHODIMP GetDescription(BSTR *pbstr);
     STDMETHODIMP GetGUID(GUID *pguid);

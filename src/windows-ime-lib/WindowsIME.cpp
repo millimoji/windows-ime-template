@@ -9,6 +9,7 @@
 #include "Globals.h"
 #include "WindowsIME.h"
 #include "CandidateListUIPresenter.h"
+#include "CandidateListView.h"
 #include "../Compartment.h"
 #include "TfInputProcessorProfile.h"
 #include "RegKey.h"
@@ -162,9 +163,12 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
         goto ExitError;
     }
 
+    m_candidateListView = std::make_shared<CandidateListView>();
+
     m_compositionBuffer = std::make_shared<CompositionBuffer>(
         this,
         _pCompositionProcessorEngine,
+        m_candidateListView,
         _tfClientId,
         _gaDisplayAttributeInput
         );
@@ -201,18 +205,19 @@ STDAPI CWindowsIME::Deactivate()
         _pCompositionProcessorEngine.reset();
     }
 
-    // if (_pCandidateListUIPresenter)
+//    if (_pCandidateListUIPresenter)
     {
-        // delete _pCandidateListUIPresenter;
-        // _pCandidateListUIPresenter = nullptr;
-        // _pCandidateListUIPresenter.reset();
-
+//        delete _pCandidateListUIPresenter;
+//        _pCandidateListUIPresenter = nullptr;
+//        _pCandidateListUIPresenter.reset();
+//
 //        if (pContext)
 //        {
 //            pContext->Release();
 //        }
 
         m_compositionBuffer->ResetCandidateState();
+        m_compositionBuffer->DestroyCandidateView();
 //        _candidateMode = CANDIDATE_NONE;
 //        _isCandidateWithWildcard = FALSE;
     }
