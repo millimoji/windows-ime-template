@@ -32,16 +32,16 @@ private:
 
 typedef struct KeyHandlerEditSessionDTO
 {
-    KeyHandlerEditSessionDTO(TfEditCookie tFEC, _In_ ITfContext *pTfContext, UINT virualCode, WCHAR inputChar, KEYSTROKE_FUNCTION arrowKeyFunction)
+    KeyHandlerEditSessionDTO(_In_ WindowsImeLib::ICompositionProcessorEngineOwner* _owner, _In_ ITfContext *pTfContext, UINT virualCode, WCHAR inputChar, KEYSTROKE_FUNCTION arrowKeyFunction)
     {
-        ec = tFEC;
+        owner = _owner;
         pContext = pTfContext;
         code = virualCode;
         wch = inputChar;
         arrowKey = arrowKeyFunction;
     }
 
-    TfEditCookie ec;
+    WindowsImeLib::ICompositionProcessorEngineOwner* owner;
     ITfContext* pContext;
     UINT code;
     WCHAR wch;

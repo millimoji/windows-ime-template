@@ -68,15 +68,6 @@ enum KEYSTROKE_FUNCTION
     FUNCTION_PUNCTUATION
 };
 
-//---------------------------------------------------------------------
-// structure
-//---------------------------------------------------------------------
-struct _KEYSTROKE_STATE
-{
-    KEYSTROKE_CATEGORY Category;
-    KEYSTROKE_FUNCTION Function;
-};
-
 class CStringRange
 {
 public:
@@ -230,11 +221,7 @@ struct ICompositionProcessorEngineOwner
     virtual UINT VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch) = 0;
     virtual bool _IsKeyboardDisabled() = 0;
     virtual std::shared_ptr<IWindowsIMECompositionBuffer> GetCompositionBuffer() = 0;
-
     virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, IWindowsIMECompositionBuffer* pv)>& editSesisonTask, DWORD tfEsFlags) = 0;
-
-//    virtual void _StartComposition(_In_ ITfContext *pContext) = 0;
-//    virtual void _EndComposition(_In_opt_ ITfContext *pContext) = 0;
     virtual VOID _DeleteCandidateList(BOOL fForce, _In_opt_ ITfContext *pContext) = 0;
     virtual void* GetTextService() = 0;
 };
@@ -246,8 +233,8 @@ struct ICompositionProcessorEngine
     virtual BOOL Initialize() = 0;
 
     virtual void OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, DWORD modifiers, DWORD uniqueModifiers, bool isTest, bool isDown) = 0;
-    virtual HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch,
-        _In_ WindowsImeLib::IWindowsIMECompositionBuffer* textService) = 0;
+//    virtual HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch,
+//        _In_ WindowsImeLib::IWindowsIMECompositionBuffer* textService) = 0;
 
     virtual BOOL AddVirtualKey(WCHAR wch) = 0;
     virtual void RemoveVirtualKey(DWORD_PTR dwIndex) = 0;
@@ -259,9 +246,6 @@ struct ICompositionProcessorEngine
     virtual void GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) = 0;
     virtual void GetCandidateStringInConverted(CStringRange &searchString, _In_ std::vector<CCandidateListItem> *pCandidateList) = 0;
 
-//     // Preserved key handler
-//     virtual void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId) = 0;
-
     // Punctuation
     // virtual BOOL IsPunctuation(WCHAR wch) = 0;
     virtual WCHAR GetPunctuation(WCHAR wch) = 0;
@@ -272,14 +256,7 @@ struct ICompositionProcessorEngine
     virtual void EndComposition(_In_opt_ ITfContext* pContext) = 0;
     virtual void FinalizeCandidateList(_In_ ITfContext* pContext, KEYSTROKE_CATEGORY Category) = 0;
 
-    // Language bar control
-//     virtual void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) = 0;
-
     virtual std::vector<DWORD>* GetCandidateListIndexRange() = 0;
-
-//    // Compartment
-//    virtual HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept = 0;
-//    virtual void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) = 0;
 
 	virtual void UpdateCustomState(const std::string& customStateJson) = 0;
 };

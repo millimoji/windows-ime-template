@@ -27,18 +27,22 @@
 //
 //----------------------------------------------------------------------------
 
-HRESULT CompositionProcessorEngine::KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* pContext, UINT _uCode, WCHAR _wch,
-    _In_ WindowsImeLib::IWindowsIMECompositionBuffer* textService)
+HRESULT CompositionProcessorEngine::KeyHandlerEditSession_DoEditSession(_KEYSTROKE_STATE _KeyState, _In_ ITfContext* pContext, UINT _uCode, WCHAR _wch)
 {
     HRESULT hResult = S_OK;
 
     CKeyStateCategoryFactory* pKeyStateCategoryFactory = CKeyStateCategoryFactory::Instance();
-    CKeyStateCategory* pKeyStateCategory = pKeyStateCategoryFactory->MakeKeyStateCategory(_KeyState.Category, textService);
+    CKeyStateCategory* pKeyStateCategory = pKeyStateCategoryFactory->MakeKeyStateCategory(_KeyState.Category, m_owner->GetCompositionBuffer().get());
 
     if (pKeyStateCategory)
     {
-        KeyHandlerEditSessionDTO keyHandlerEditSessioDTO(ec, pContext, _uCode, _wch, _KeyState.Function);
-        hResult = pKeyStateCategory->KeyStateHandler(_KeyState.Function, keyHandlerEditSessioDTO);
+        KeyHandlerEditSessionDTO keyHandlerEditSessioDTO(m_owner, pContext, _uCode, _wch, _KeyState.Function);
+        pKeyStateCategory->KeyStateHandler(_KeyState.Function, keyHandlerEditSessioDTO);
+
+//        return m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, _In_ WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//        {
+//            return pKeyStateCategory->KeyStateHandler(_KeyState.Function, keyHandlerEditSessioDTO);
+//        }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 
         pKeyStateCategory->Release();
         pKeyStateCategoryFactory->Release();

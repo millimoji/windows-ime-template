@@ -15,9 +15,9 @@ public:
 
     void OnKeyEvent(ITfContext*, WPARAM, LPARAM, BOOL*, DWORD, DWORD, bool, bool) override {
     }
-    HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie, _KEYSTROKE_STATE, _In_ ITfContext*, UINT, WCHAR, _In_ WindowsImeLib::IWindowsIMECompositionBuffer*) override {
-        return S_OK;
-    }
+//    HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie, _KEYSTROKE_STATE, _In_ ITfContext*, UINT, WCHAR, _In_ WindowsImeLib::IWindowsIMECompositionBuffer*) override {
+//        return S_OK;
+//    }
 
     BOOL AddVirtualKey(WCHAR wch) override;
     void RemoveVirtualKey(DWORD_PTR dwIndex) override;

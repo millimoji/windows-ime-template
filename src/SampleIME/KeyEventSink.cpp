@@ -278,10 +278,12 @@ HRESULT CompositionProcessorEngine::OnTestKeyDown(ITfContext *pContext, WPARAM w
         //
         KeystrokeState.Category = CATEGORY_COMPOSING;
 //        m_owner->_InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
-        m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, _In_ WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
-            {
-                return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, textService);
-            }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+//        m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, _In_ WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
+//            {
+//                return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, textService);
+//            }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+
+        return KeyHandlerEditSession_DoEditSession(KeystrokeState, pContext, code, wch);
     }
 
     return S_OK;
@@ -323,10 +325,11 @@ HRESULT CompositionProcessorEngine::OnKeyDown(ITfContext *pContext, WPARAM wPara
         if (needInvokeKeyHandler)
         {
 //            m_owner->_InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
-            m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, _In_ WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
-                {
-                    return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, textService);
-                }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+//            m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, _In_ WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
+//                {
+//                    return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, textService);
+//                }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+                KeyHandlerEditSession_DoEditSession(KeystrokeState, pContext, code, wch);
         }
     }
     else if (KeystrokeState.Category == CATEGORY_INVOKE_COMPOSITION_EDIT_SESSION)
@@ -334,10 +337,11 @@ HRESULT CompositionProcessorEngine::OnKeyDown(ITfContext *pContext, WPARAM wPara
         // Invoke key handler edit session
         KeystrokeState.Category = CATEGORY_COMPOSING;
 //        m_owner->_InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
-        m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, _In_ WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
-            {
-                return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, textService);
-            }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+//        m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, _In_ WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
+//            {
+//                return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, textService);
+//            }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+        KeyHandlerEditSession_DoEditSession(KeystrokeState, pContext, code, wch);
     }
 
     return S_OK;

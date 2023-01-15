@@ -1814,10 +1814,11 @@ void CompositionProcessorEngine::FinalizeCandidateList(_In_ ITfContext *pContext
     KeystrokeState.Category = Category;
     KeystrokeState.Function = FUNCTION_FINALIZE_CANDIDATELIST;
 
-    m_owner->_SubmitEditSessionTask(pContext, [this, KeystrokeState, pContext](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
-    {
-        return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, 0, 0, textService);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+//    m_owner->_SubmitEditSessionTask(pContext, [this, KeystrokeState, pContext](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
+//    {
+//        return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, 0, 0, textService);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+	KeyHandlerEditSession_DoEditSession(KeystrokeState, pContext, 0, 0);
 }
 
 // void CompositionProcessorEngine::ClearCompartment(ITfThreadMgr* /*pThreadMgr*/, TfClientId /*tfClientId*/)
