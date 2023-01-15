@@ -50,14 +50,12 @@ BOOL CompositionBuffer::_IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTe
 //
 //----------------------------------------------------------------------------
 
-VOID CWindowsIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext)
+VOID CompositionBuffer::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext)
 {
     isForce;pContext;
 
-    auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
-    pCompositionProcessorEngine->PurgeVirtualKey();
+    _pCompositionProcessorEngine->PurgeVirtualKey();
 
-    auto _pCandidateListUIPresenter = m_compositionBuffer->GetCandidateList();
     if (_pCandidateListUIPresenter->IsCreated())
     {
         _pCandidateListUIPresenter->_EndCandidateList();
@@ -65,7 +63,7 @@ VOID CWindowsIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pConte
         // _candidateMode = CANDIDATE_NONE;
         // _isCandidateWithWildcard = FALSE;
 
-        m_compositionBuffer->ResetCandidateState();
+        ResetCandidateState();
     }
 }
 
@@ -77,7 +75,7 @@ VOID CWindowsIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pConte
 
 HRESULT CompositionBuffer::_HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext)
 {
-    _textService->_DeleteCandidateList(FALSE, pContext);
+    _DeleteCandidateList(FALSE, pContext);
 
     // just terminate the composition
     _TerminateComposition(ec, pContext);
@@ -95,7 +93,7 @@ HRESULT CompositionBuffer::_HandleCancel(TfEditCookie ec, _In_ ITfContext *pCont
 {
     _RemoveDummyCompositionForComposing(ec, _pComposition.get());
 
-    _textService->_DeleteCandidateList(FALSE, pContext);
+    _DeleteCandidateList(FALSE, pContext);
 
     _TerminateComposition(ec, pContext);
 

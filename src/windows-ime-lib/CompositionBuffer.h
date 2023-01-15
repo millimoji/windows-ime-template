@@ -76,6 +76,7 @@ private:
     BOOL _SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute) override;
 
     BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover) override;
+    VOID _DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext) override;
     BOOL _IsComposing() override;
 
     std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> GetCandidateList() override { return _pCandidateListUIPresenter; }

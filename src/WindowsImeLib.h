@@ -208,6 +208,7 @@ struct IWindowsIMECompositionBuffer
     virtual BOOL _SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute) = 0;
 
     virtual BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover) = 0;
+    virtual VOID _DeleteCandidateList(BOOL fForce, _In_opt_ ITfContext *pContext) = 0;
 
     //
     virtual std::shared_ptr<IWindowsIMECandidateListView> GetCandidateList() = 0;
@@ -229,7 +230,6 @@ struct ICompositionProcessorEngineOwner
     virtual bool _IsKeyboardDisabled() = 0;
     virtual std::shared_ptr<IWindowsIMECompositionBuffer> GetCompositionBuffer() = 0;
     virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, IWindowsIMECompositionBuffer* pv)>& editSesisonTask, DWORD tfEsFlags) = 0;
-    virtual VOID _DeleteCandidateList(BOOL fForce, _In_opt_ ITfContext *pContext) = 0;
     virtual void* GetTextService() = 0;
 };
 

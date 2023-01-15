@@ -34,7 +34,7 @@ STDAPI CWindowsIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfCompos
 
     _pCompositionProcessorEngine->EndComposition(pContext.get());
 
-    _DeleteCandidateList(FALSE, pContext.get());
+    m_compositionBuffer->_DeleteCandidateList(FALSE, pContext.get());
 
 //    if (pContext)
 //    {

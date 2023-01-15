@@ -191,7 +191,7 @@ private:
 
 //    BOOL _IsKeyEaten(_In_ ITfContext *pContext, UINT codeIn, _Out_ UINT *pCodeOut, _Out_writes_(1) WCHAR *pwch, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
 //    BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover);
-    VOID _DeleteCandidateList(BOOL fForce, _In_opt_ ITfContext *pContext) override;
+//    VOID _DeleteCandidateList(BOOL fForce, _In_opt_ ITfContext *pContext) override;
 
     wchar_t ConvertVKey(UINT code) override;
     UINT VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch) override;
