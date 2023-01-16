@@ -10,6 +10,12 @@
 #include "../WindowsImeLib.h"
 #include "SingletonProcessor.h"
 #include "BaseStructure.h"
+
+struct IInternalFrameworkService
+{
+    virtual void* GetTextService() = 0;
+};
+
 #include "CompositionBuffer.h"
 
 class CLangBarItemButton;
@@ -34,7 +40,8 @@ class CWindowsIME :
                                         ITfFnGetPreferredTouchKeyboardLayout,
                                         Microsoft::WRL::FtmBase>,
     public WindowsImeLib::ICompositionProcessorEngineOwner,
-    WindowsImeLib::IWindowsIMEInprocFramework
+    public WindowsImeLib::IWindowsIMEInprocFramework,
+    public IInternalFrameworkService
 {
 public:
     CWindowsIME();

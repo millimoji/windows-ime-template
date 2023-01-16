@@ -40,7 +40,7 @@ HRESULT CompositionBuffer::_StartComposition(TfEditCookie ec, _In_ ITfContext *p
     ITfRange* pRangeInsert = nullptr;
     ITfContextComposition* pContextComposition = nullptr;
     ITfComposition* pComposition = nullptr;
-    auto _pTextService = reinterpret_cast<CWindowsIME*>(_textService->GetTextService());
+    auto _pTextService = reinterpret_cast<CWindowsIME*>(m_framework->GetTextService());
 
     if (FAILED(pContext->QueryInterface(IID_ITfInsertAtSelection, (void **)&pInsertAtSelection)))
     {

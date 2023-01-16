@@ -39,7 +39,7 @@ public:
     virtual ~CCandidateListUIPresenter();
 
 private:
-    void CreateView(_In_ WindowsImeLib::ICompositionProcessorEngineOwner*, ATOM, KEYSTROKE_CATEGORY, _In_ std::vector<DWORD>*, BOOL) override {
+    void CreateView(ATOM, KEYSTROKE_CATEGORY, _In_ std::vector<DWORD>*, BOOL) override {
         assert(false);
     }
     void DestroyView() override {

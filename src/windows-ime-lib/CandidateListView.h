@@ -12,12 +12,11 @@ class CandidateListView :
     public std::enable_shared_from_this<CandidateListView>
 {
 public:
-    CandidateListView() {}
+    CandidateListView(IInternalFrameworkService* framework) : m_framework(framework) {}
 private:
-    void CreateView(_In_ WindowsImeLib::ICompositionProcessorEngineOwner* _textService,
-        ATOM atom, KEYSTROKE_CATEGORY Category, _In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) override
+    void CreateView(ATOM atom, KEYSTROKE_CATEGORY Category, _In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) override
     {
-        auto textService = reinterpret_cast<CWindowsIME*>(_textService->GetTextService());
+        auto textService = reinterpret_cast<CWindowsIME*>(m_framework->GetTextService());
         m_mainPresenter.reset();
         m_mainPresenter.attach(new CCandidateListUIPresenter(textService, atom, Category, pIndexRange, hideWindow));
         m_presenter = static_cast<WindowsImeLib::IWindowsIMECandidateListView*>(m_mainPresenter.get());
@@ -73,6 +72,7 @@ private:
     }
 
 private:
+    IInternalFrameworkService* m_framework;
     wil::com_ptr<CCandidateListUIPresenter> m_mainPresenter;
     WindowsImeLib::IWindowsIMECandidateListView* m_presenter = nullptr;
 };

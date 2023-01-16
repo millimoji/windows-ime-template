@@ -137,7 +137,7 @@ struct IWindowsIMECandidateListView
 {
     virtual ~IWindowsIMECandidateListView() {}
 
-    virtual void CreateView(_In_ ICompositionProcessorEngineOwner *pTextService, ATOM atom, KEYSTROKE_CATEGORY Category, _In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) = 0;
+    virtual void CreateView(ATOM atom, KEYSTROKE_CATEGORY Category, _In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) = 0;
     virtual void DestroyView() = 0;
     virtual bool IsCreated() = 0;
     virtual ITfContext* _GetContextDocument() = 0;
@@ -230,7 +230,6 @@ struct ICompositionProcessorEngineOwner
     virtual bool _IsKeyboardDisabled() = 0;
     virtual std::shared_ptr<IWindowsIMECompositionBuffer> GetCompositionBuffer() = 0;
     virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, IWindowsIMECompositionBuffer* pv)>& editSesisonTask, DWORD tfEsFlags) = 0;
-    virtual void* GetTextService() = 0;
 };
 
 struct ICompositionProcessorEngine

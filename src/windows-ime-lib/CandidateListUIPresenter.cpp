@@ -141,7 +141,6 @@ HRESULT CompositionBuffer::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfConte
 //        }
 
         _pCandidateListUIPresenter->CreateView(
-            _textService,
             Global::AtomCandidateWindow,
             CATEGORY_CANDIDATE,
             _pCompositionProcessorEngine->GetCandidateListIndexRange(),

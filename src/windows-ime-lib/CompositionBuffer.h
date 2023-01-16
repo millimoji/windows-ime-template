@@ -4,6 +4,7 @@
 #include "Private.h"
 #include "Globals.h"
 #include "../WindowsImeLib.h"
+#include "WindowsIME.h"
 #include "CandidateListUIPresenter.h"
 
 class CompositionBuffer :
@@ -12,12 +13,14 @@ class CompositionBuffer :
 {
 public:
     CompositionBuffer(
+        IInternalFrameworkService* framework,
         WindowsImeLib::ICompositionProcessorEngineOwner* textService,
         const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine,
         const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& candidateListView,
         const TfClientId& tfClientId,
         const TfGuidAtom& gaDisplayAttributeInput
     ) :
+        m_framework(framework),
         _textService(textService),
         _pCompositionProcessorEngine(pCompositionProcessorEngine),
         _pCandidateListUIPresenter(candidateListView),
@@ -100,6 +103,7 @@ private:
     void _SaveCompositionContext(_In_ ITfContext *pContext);
 
 private:
+    IInternalFrameworkService* m_framework = nullptr;
     WindowsImeLib::ICompositionProcessorEngineOwner* _textService = nullptr;
     std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> _pCompositionProcessorEngine;
     std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> _pCandidateListUIPresenter;

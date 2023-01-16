@@ -243,7 +243,6 @@ HRESULT CompositionBuffer::_CreateAndStartCandidate(_In_ WindowsImeLib::IComposi
     if (!_pCandidateListUIPresenter->IsCreated())
     {
         _pCandidateListUIPresenter->CreateView(
-            _textService,
             Global::AtomCandidateWindow,
             CATEGORY_CANDIDATE,
             _pCompositionProcessorEngine->GetCandidateListIndexRange(),
@@ -407,7 +406,7 @@ HRESULT CompositionBuffer::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfCo
 //        }
         if (!_pCandidateListUIPresenter->IsCreated())
         {
-            _pCandidateListUIPresenter->CreateView(_textService,
+            _pCandidateListUIPresenter->CreateView(
                                             Global::AtomCandidateWindow,
                                             CATEGORY_CANDIDATE,
                                             pCompositionProcessorEngine->GetCandidateListIndexRange(),

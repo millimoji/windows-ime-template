@@ -7,8 +7,8 @@
 
 #include "Private.h"
 #include "Globals.h"
-#include "WindowsIME.h"
 #include "../WindowsImeLib.h"
+#include "WindowsIME.h"
 
 BOOL CWindowsIME::VerifyIMECLSID(_In_ REFCLSID clsid)
 {
