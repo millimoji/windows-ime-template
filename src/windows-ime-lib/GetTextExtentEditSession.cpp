@@ -10,34 +10,34 @@
 #include "GetTextExtentEditSession.h"
 #include "TfTextLayoutSink.h"
 
-//+---------------------------------------------------------------------------
-//
-// ctor
-//
-//----------------------------------------------------------------------------
-
-CGetTextExtentEditSession::CGetTextExtentEditSession(_In_ CWindowsIME *pTextService, _In_ ITfContext *pContext, _In_ ITfContextView *pContextView, _In_ ITfRange *pRangeComposition, _In_ CTfTextLayoutSink *pTfTextLayoutSink) : CEditSessionBase(pTextService, pContext)
-{
-    _pContextView = pContextView;
-    _pRangeComposition = pRangeComposition;
-    _pTfTextLayoutSink = pTfTextLayoutSink;
-}
-
-//+---------------------------------------------------------------------------
-//
-// ITfEditSession::DoEditSession
-//
-//----------------------------------------------------------------------------
-
-STDAPI CGetTextExtentEditSession::DoEditSession(TfEditCookie ec)
-{
-    RECT rc = {0, 0, 0, 0};
-    BOOL isClipped = TRUE;
-
-    if (SUCCEEDED(_pContextView->GetTextExt(ec, _pRangeComposition, &rc, &isClipped)))
-    {
-        _pTfTextLayoutSink->_LayoutChangeNotification(&rc);
-    }
-
-    return S_OK;
-}
+// //+---------------------------------------------------------------------------
+// //
+// // ctor
+// //
+// //----------------------------------------------------------------------------
+// 
+// CGetTextExtentEditSession::CGetTextExtentEditSession(_In_ CWindowsIME *pTextService, _In_ ITfContext *pContext, _In_ ITfContextView *pContextView, _In_ ITfRange *pRangeComposition, _In_ CTfTextLayoutSink *pTfTextLayoutSink) : CEditSessionBase(pTextService, pContext)
+// {
+//     _pContextView = pContextView;
+//     _pRangeComposition = pRangeComposition;
+//     _pTfTextLayoutSink = pTfTextLayoutSink;
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // ITfEditSession::DoEditSession
+// //
+// //----------------------------------------------------------------------------
+// 
+// STDAPI CGetTextExtentEditSession::DoEditSession(TfEditCookie ec)
+// {
+//     RECT rc = {0, 0, 0, 0};
+//     BOOL isClipped = TRUE;
+// 
+//     if (SUCCEEDED(_pContextView->GetTextExt(ec, _pRangeComposition, &rc, &isClipped)))
+//     {
+//         _pTfTextLayoutSink->_LayoutChangeNotification(&rc);
+//     }
+// 
+//     return S_OK;
+// }

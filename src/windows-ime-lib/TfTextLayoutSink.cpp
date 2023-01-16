@@ -98,15 +98,31 @@ STDAPI CTfTextLayoutSink::OnLayoutChange(_In_ ITfContext *pContext, TfLayoutCode
     {
     case TF_LC_CHANGE:
         {
-            CGetTextExtentEditSession* pEditSession = nullptr;
-            pEditSession = new (std::nothrow) CGetTextExtentEditSession(_pTextService, pContext, pContextView, _pRangeComposition, this);
-            if (nullptr != (pEditSession))
-            {
-                HRESULT hr = S_OK;
-                pContext->RequestEditSession(_pTextService->_GetClientId(), pEditSession, TF_ES_SYNC | TF_ES_READ, &hr);
+//            CGetTextExtentEditSession* pEditSession = nullptr;
+//            pEditSession = new (std::nothrow) CGetTextExtentEditSession(_pTextService, pContext, pContextView, _pRangeComposition, this);
+//            if (nullptr != (pEditSession))
+//            {
+//                HRESULT hr = S_OK;
+//                pContext->RequestEditSession(_pTextService->_GetClientId(), pEditSession, TF_ES_SYNC | TF_ES_READ, &hr);
+//
+//                pEditSession->Release();
+//            }
 
-                pEditSession->Release();
-            }
+            wil::com_ptr<ITfEditSession> editSessionTask;
+            // assuming TF_ES_SYNC, copy no variables.
+            RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CEditSessionTask>(&editSessionTask,
+                [&](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT {
+                    RECT rc = {0, 0, 0, 0};
+                    BOOL isClipped = TRUE;
+                    if (SUCCEEDED_LOG(pContextView->GetTextExt(ec, _pRangeComposition, &rc, &isClipped)))
+                    {
+                        _LayoutChangeNotification(&rc);
+                    }
+                    return S_OK;
+                }, nullptr));
+
+            HRESULT hr = S_OK;
+            RETURN_IF_FAILED(pContext->RequestEditSession(_pTextService->_GetClientId(), editSessionTask.get(), TF_ES_SYNC | TF_ES_READ, &hr));
         }
         break;
 
