@@ -32,8 +32,8 @@ private:
     void _TerminateComposition(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCalledFromDeactivate = FALSE) override;
 
     // key event handlers for composition/candidate/phrase common objects.
-    HRESULT _HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext) override;
-    HRESULT _HandleCancel(TfEditCookie ec, _In_ ITfContext* pContext) override;
+    HRESULT _HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext);
+    HRESULT _HandleCancel(TfEditCookie ec, _In_ ITfContext* pContext);
     // key event handlers for composition object.
     HRESULT _HandleCompositionInput(TfEditCookie ec, _In_ ITfContext* pContext, WCHAR wch) override;
     HRESULT _HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext* pContext, BOOL fCandidateList) override;
@@ -42,7 +42,7 @@ private:
     HRESULT _HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext* pContext) override;
     HRESULT _HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext* pContext, KEYSTROKE_FUNCTION keyFunction) override;
     HRESULT _HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfContext* pContext, WCHAR wch) override;
-    HRESULT _HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext* pContext, WCHAR wch) override;
+//    HRESULT _HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext* pContext, WCHAR wch) override;
     // key event handlers for candidate object.
     HRESULT _HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext* pContext) override;
     HRESULT _HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext* pContext) override;

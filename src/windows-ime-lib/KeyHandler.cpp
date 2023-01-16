@@ -595,33 +595,33 @@ HRESULT CompositionBuffer::_HandleCompositionPunctuation(TfEditCookie ec, _In_ I
     return S_OK;
 }
 
-//+---------------------------------------------------------------------------
-//
-// _HandleCompositionDoubleSingleByte
-//
-//----------------------------------------------------------------------------
-
-HRESULT CompositionBuffer::_HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch)
-{
-    HRESULT hr = S_OK;
-
-    WCHAR fullWidth = Global::FullWidthCharTable[wch - 0x20];
-
-    CStringRange fullWidthString;
-    fullWidthString.Set(&fullWidth, 1);
-
-    // Finalize character
-    hr = _AddCharAndFinalize(ec, pContext, &fullWidthString);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    _HandleCancel(ec, pContext);
-
-    return S_OK;
-}
-
+// //+---------------------------------------------------------------------------
+// //
+// // _HandleCompositionDoubleSingleByte
+// //
+// //----------------------------------------------------------------------------
+// 
+// HRESULT CompositionBuffer::_HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch)
+// {
+//     HRESULT hr = S_OK;
+// 
+//     WCHAR fullWidth = Global::FullWidthCharTable[wch - 0x20];
+// 
+//     CStringRange fullWidthString;
+//     fullWidthString.Set(&fullWidth, 1);
+// 
+//     // Finalize character
+//     hr = _AddCharAndFinalize(ec, pContext, &fullWidthString);
+//     if (FAILED(hr))
+//     {
+//         return hr;
+//     }
+// 
+//     _HandleCancel(ec, pContext);
+// 
+//     return S_OK;
+// }
+// 
 // //+---------------------------------------------------------------------------
 // //
 // // _InvokeKeyHandler

@@ -293,10 +293,12 @@ HRESULT CKeyStateComposing::HandleKeyConvertWildCard(KeyHandlerEditSessionDTO dt
 
 HRESULT CKeyStateComposing::HandleKeyCancel(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
-    {
-        return textService->_HandleCancel(ec, dto.pContext);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _HandleCancel(dto);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
+//    {
+//        return textService->_HandleCancel(ec, dto.pContext);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 HRESULT CKeyStateComposing::HandleKeyBackspace(KeyHandlerEditSessionDTO dto)
@@ -317,10 +319,11 @@ HRESULT CKeyStateComposing::HandleKeyArrow(KeyHandlerEditSessionDTO dto)
 
 HRESULT CKeyStateComposing::HandleKeyDoubleSingleByte(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
-    {
-        return textService->_HandleCompositionDoubleSingleByte(ec, dto.pContext, dto.wch);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _HandleCompositionDoubleSingleByte(dto);
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
+//    {
+//        return textService->_HandleCompositionDoubleSingleByte(ec, dto.pContext, dto.wch);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 HRESULT CKeyStateComposing::HandleKeyPunctuation(KeyHandlerEditSessionDTO dto)
@@ -369,10 +372,12 @@ HRESULT CKeyStateCandidate::HandleKeyConvert(KeyHandlerEditSessionDTO dto)
 //_HandleCancel
 HRESULT CKeyStateCandidate::HandleKeyCancel(KeyHandlerEditSessionDTO dto)    
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
-    {
-        return textService->_HandleCancel(ec, dto.pContext);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _HandleCancel(dto);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
+//    {
+//        return textService->_HandleCancel(ec, dto.pContext);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 //_HandleCandidateArrowKey
@@ -413,10 +418,12 @@ HRESULT CKeyStatePhrase::HandleKeyFinalizeCandidatelist(KeyHandlerEditSessionDTO
 //HandleKeyCancel
 HRESULT CKeyStatePhrase::HandleKeyCancel(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
-    {
-        return textService->_HandleCancel(ec, dto.pContext);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _HandleCancel(dto);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
+//    {
+//        return textService->_HandleCancel(ec, dto.pContext);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 //HandleKeyArrow
@@ -436,3 +443,4 @@ HRESULT CKeyStatePhrase::HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto)
         return textService->_HandlePhraseSelectByNumber(ec, dto.pContext, dto.code);
     }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
+

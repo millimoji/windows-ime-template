@@ -76,7 +76,7 @@ extern CRITICAL_SECTION CS;
 
 BOOL UpdateModifiers(WPARAM wParam, LPARAM lParam);
 
-extern const WCHAR FullWidthCharTable[];
+// extern const WCHAR FullWidthCharTable[];
 
 }
 } // namespace WindowsImeLibLocal

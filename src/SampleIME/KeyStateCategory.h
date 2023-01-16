@@ -101,6 +101,11 @@ protected:
     virtual HRESULT HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto);
 
 protected:
+    HRESULT _HandleComplete(const KeyHandlerEditSessionDTO& dto);
+    HRESULT _HandleCancel(const KeyHandlerEditSessionDTO& dto);
+    HRESULT _HandleCompositionDoubleSingleByte(const KeyHandlerEditSessionDTO& dto);
+
+protected:
     WindowsImeLib::IWindowsIMECompositionBuffer* _pTextService;
 };
 

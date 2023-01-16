@@ -146,6 +146,7 @@ class ConstantProvider :
     }
 };
 
+extern const WCHAR FullWidthCharTable[];
 }
 }
 using namespace SampleIMENS;

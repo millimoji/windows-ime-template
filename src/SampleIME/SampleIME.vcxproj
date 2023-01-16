@@ -37,6 +37,7 @@
     <ClCompile Include="FileMapping.cpp" />
     <ClCompile Include="CompositionProcessorEngine.cpp" />
     <ClCompile Include="KeyEventSink.cpp" />
+    <ClCompile Include="KeyHandler.cpp" />
     <ClCompile Include="KeyHandlerEditSession.cpp" />
     <ClCompile Include="KeyStateCategory.cpp" />
     <ClCompile Include="SampleIMEBaseStructure.cpp" />

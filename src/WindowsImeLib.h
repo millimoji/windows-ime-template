@@ -166,7 +166,7 @@ struct IWindowsIMECompositionBuffer
 
     // key event handlers for composition/candidate/phrase common objects.
     virtual HRESULT _HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext) = 0;
-    virtual HRESULT _HandleCancel(TfEditCookie ec, _In_ ITfContext* pContext) = 0;
+//    virtual HRESULT _HandleCancel(TfEditCookie ec, _In_ ITfContext* pContext) = 0;
     // key event handlers for composition object.
     virtual HRESULT _HandleCompositionInput(TfEditCookie ec, _In_ ITfContext* pContext, WCHAR wch) = 0;
     virtual HRESULT _HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext* pContext, BOOL fCandidateList) = 0;
@@ -175,7 +175,7 @@ struct IWindowsIMECompositionBuffer
     virtual HRESULT _HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext* pContext) = 0;
     virtual HRESULT _HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext* pContext, KEYSTROKE_FUNCTION keyFunction) = 0;
     virtual HRESULT _HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfContext* pContext, WCHAR wch) = 0;
-    virtual HRESULT _HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext* pContext, WCHAR wch) = 0;
+//    virtual HRESULT _HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext* pContext, WCHAR wch) = 0;
     // key event handlers for candidate object.
     virtual HRESULT _HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext* pContext) = 0;
     virtual HRESULT _HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext* pContext) = 0;
