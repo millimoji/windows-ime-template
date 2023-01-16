@@ -16,9 +16,8 @@ public:
 private:
     void CreateView(ATOM atom, KEYSTROKE_CATEGORY Category, _In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) override
     {
-        auto textService = reinterpret_cast<CWindowsIME*>(m_framework->GetTextService());
         m_mainPresenter.reset();
-        m_mainPresenter.attach(new CCandidateListUIPresenter(textService, atom, Category, pIndexRange, hideWindow));
+        m_mainPresenter.attach(new CCandidateListUIPresenter(m_framework, atom, Category, pIndexRange, hideWindow));
         m_presenter = static_cast<WindowsImeLib::IWindowsIMECandidateListView*>(m_mainPresenter.get());
     }
     void DestroyView() override {

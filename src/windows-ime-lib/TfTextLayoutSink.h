@@ -7,12 +7,12 @@
 
 #pragma once
 
-class CWindowsIME;
+struct IInternalFrameworkService;
 
 class CTfTextLayoutSink : public ITfTextLayoutSink
 {
 public:
-    CTfTextLayoutSink(_In_ CWindowsIME *pTextService);
+    CTfTextLayoutSink(_In_ IInternalFrameworkService *pTextService);
     virtual ~CTfTextLayoutSink();
 
     // IUnknown methods
@@ -40,7 +40,7 @@ private:
     ITfRange* _pRangeComposition;
     ITfContext* _pContextDocument;
     TfEditCookie _tfEditCookie;
-    CWindowsIME* _pTextService;
+    IInternalFrameworkService* _pTextService;
     DWORD _dwCookieTextLayoutSink;
     LONG _refCount;
 };

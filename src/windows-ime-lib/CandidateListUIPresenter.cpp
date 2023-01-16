@@ -348,7 +348,7 @@ HRESULT CompositionBuffer::_HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITf
 //
 //----------------------------------------------------------------------------
 
-CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ CWindowsIME *pTextService, ATOM atom, KEYSTROKE_CATEGORY Category, _In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) : CTfTextLayoutSink(pTextService)
+CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ IInternalFrameworkService* pTextService, ATOM atom, KEYSTROKE_CATEGORY Category, _In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) : CTfTextLayoutSink(pTextService)
 {
     _atom = atom;
 
@@ -366,7 +366,7 @@ CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ CWindowsIME *pTextServ
     _hideWindow = hideWindow;     // Hide window flag from [Configuration] CandidateList.Phrase.HideWindow
 
     _pTextService = pTextService;
-    _pTextService->AddRef();
+//    _pTextService->AddRef();
 
     // _refCount = 1;
 }
@@ -380,7 +380,7 @@ CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ CWindowsIME *pTextServ
 CCandidateListUIPresenter::~CCandidateListUIPresenter()
 {
     _EndCandidateList();
-    _pTextService->Release();
+//    _pTextService->Release();
 }
 
 //+---------------------------------------------------------------------------

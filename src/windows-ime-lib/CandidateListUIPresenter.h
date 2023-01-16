@@ -15,6 +15,7 @@
 #include "BaseStructure.h"
 
 class CReadingLine;
+struct IInternalFrameworkService;
 
 //+---------------------------------------------------------------------------
 //
@@ -32,7 +33,7 @@ class CCandidateListUIPresenter : public CTfTextLayoutSink,
     public WindowsImeLib::IWindowsIMECandidateListView
 {
 public:
-    CCandidateListUIPresenter(_In_ CWindowsIME *pTextService, ATOM atom,
+    CCandidateListUIPresenter(_In_ IInternalFrameworkService *pTextService, ATOM atom,
         KEYSTROKE_CATEGORY Category,
         _In_ std::vector<DWORD> *pIndexRange,
         BOOL hideWindow);
@@ -152,6 +153,6 @@ private:
     KEYSTROKE_CATEGORY _Category;
     DWORD _updatedFlags;
     DWORD _uiElementId;
-    CWindowsIME* _pTextService;
+    IInternalFrameworkService* _pTextService;
     // LONG _refCount;
 };

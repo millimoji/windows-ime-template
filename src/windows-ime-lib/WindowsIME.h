@@ -14,7 +14,10 @@
 struct IInternalFrameworkService
 {
     virtual ITfCompositionSink* GetCompositionSink() = 0;
-    virtual void* GetTextService() = 0;
+    virtual TfClientId _GetClientId() = 0;
+    virtual wil::com_ptr<ITfThreadMgr> _GetThreadMgr() = 0;
+    virtual BOOL _IsStoreAppMode() = 0;
+    virtual std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() = 0;
 };
 
 #include "CompositionBuffer.h"
@@ -106,8 +109,8 @@ public:
     static HRESULT CreateInstance(_In_ IUnknown *pUnkOuter, REFIID riid, _Outptr_ void **ppvObj);
 
     // utility function for thread manager.
-    wil::com_ptr<ITfThreadMgr> _GetThreadMgr() { return _pThreadMgr; }
-    TfClientId _GetClientId() { return _tfClientId; }
+    wil::com_ptr<ITfThreadMgr> _GetThreadMgr() override { return _pThreadMgr; }
+    TfClientId _GetClientId() override { return _tfClientId; }
 
     // functions for the composition object.
 //    void _SetComposition(_In_ ITfComposition *pComposition);
@@ -140,9 +143,9 @@ public:
 
     BOOL _IsSecureMode(void) { return (_dwActivateFlags & TF_TMAE_SECUREMODE) ? TRUE : FALSE; }
     BOOL _IsComLess(void) { return (_dwActivateFlags & TF_TMAE_COMLESS) ? TRUE : FALSE; }
-    BOOL _IsStoreAppMode(void) { return (_dwActivateFlags & TF_TMF_IMMERSIVEMODE) ? TRUE : FALSE; };
+    BOOL _IsStoreAppMode(void) override { return (_dwActivateFlags & TF_TMF_IMMERSIVEMODE) ? TRUE : FALSE; };
 
-    std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() { return (_pCompositionProcessorEngine); };
+    std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() override { return (_pCompositionProcessorEngine); };
 
     // comless helpers
     static HRESULT CreateInstance(REFCLSID rclsid, REFIID riid, _Outptr_result_maybenull_ LPVOID* ppv, _Out_opt_ HINSTANCE* phInst, BOOL isComLessMode);
@@ -231,7 +234,7 @@ private:
         }
     }
     ITfCompositionSink* GetCompositionSink() override { return this;  }
-    void* GetTextService() override { return (void*)this; }
+//    void* GetTextService() override { return (void*)this; }
 public:
     std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> GetCompositionBuffer() override
     {

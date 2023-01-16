@@ -11,10 +11,10 @@
 #include "TfTextLayoutSink.h"
 #include "GetTextExtentEditSession.h"
 
-CTfTextLayoutSink::CTfTextLayoutSink(_In_ CWindowsIME *pTextService)
+CTfTextLayoutSink::CTfTextLayoutSink(_In_ IInternalFrameworkService *pTextService)
 {
     _pTextService = pTextService;
-    _pTextService->AddRef();
+//    _pTextService->AddRef();
 
     _pRangeComposition = nullptr;
     _pContextDocument = nullptr;
@@ -29,10 +29,10 @@ CTfTextLayoutSink::CTfTextLayoutSink(_In_ CWindowsIME *pTextService)
 
 CTfTextLayoutSink::~CTfTextLayoutSink()
 {
-    if (_pTextService)
-    {
-        _pTextService->Release();
-    }
+//    if (_pTextService)
+//    {
+//        _pTextService->Release();
+//    }
 
     DllRelease();
 }
