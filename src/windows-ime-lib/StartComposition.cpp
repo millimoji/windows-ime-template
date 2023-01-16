@@ -40,7 +40,6 @@ HRESULT CompositionBuffer::_StartComposition(TfEditCookie ec, _In_ ITfContext *p
     ITfRange* pRangeInsert = nullptr;
     ITfContextComposition* pContextComposition = nullptr;
     ITfComposition* pComposition = nullptr;
-    auto _pTextService = reinterpret_cast<CWindowsIME*>(m_framework->GetTextService());
 
     if (FAILED(pContext->QueryInterface(IID_ITfInsertAtSelection, (void **)&pInsertAtSelection)))
     {
@@ -57,7 +56,7 @@ HRESULT CompositionBuffer::_StartComposition(TfEditCookie ec, _In_ ITfContext *p
         goto Exit;
     }
 
-    if (SUCCEEDED(pContextComposition->StartComposition(ec, pRangeInsert, _pTextService, &pComposition)) && (nullptr != pComposition))
+    if (SUCCEEDED(pContextComposition->StartComposition(ec, pRangeInsert, m_framework->GetCompositionSink(), &pComposition)) && (nullptr != pComposition))
     {
         _SetComposition(pComposition);
 

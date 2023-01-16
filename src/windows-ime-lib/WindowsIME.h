@@ -13,6 +13,7 @@
 
 struct IInternalFrameworkService
 {
+    virtual ITfCompositionSink* GetCompositionSink() = 0;
     virtual void* GetTextService() = 0;
 };
 
@@ -229,10 +230,8 @@ private:
             }
         }
     }
-    void* GetTextService() override
-    {
-        return (void*)this;
-    }
+    ITfCompositionSink* GetCompositionSink() override { return this;  }
+    void* GetTextService() override { return (void*)this; }
 public:
     std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> GetCompositionBuffer() override
     {

@@ -166,7 +166,7 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
     m_candidateListView = std::make_shared<CandidateListView>(this);
 
     m_compositionBuffer = std::make_shared<CompositionBuffer>(
-        this, this,
+        this,
         _pCompositionProcessorEngine,
         m_candidateListView,
         _tfClientId,
