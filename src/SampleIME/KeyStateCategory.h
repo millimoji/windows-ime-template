@@ -19,7 +19,11 @@ class CKeyStateCategoryFactory
 {
 public:
     static CKeyStateCategoryFactory* Instance();
-    CKeyStateCategory* MakeKeyStateCategory(KEYSTROKE_CATEGORY keyCategory, _In_ WindowsImeLib::IWindowsIMECompositionBuffer*pTextService);
+    CKeyStateCategory* MakeKeyStateCategory(
+        KEYSTROKE_CATEGORY keyCategory,
+        _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
+        const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
+        const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine);
     void Release();
 
 protected:
@@ -51,7 +55,10 @@ typedef struct KeyHandlerEditSessionDTO
 class CKeyStateCategory
 {
 public:
-    CKeyStateCategory(_In_ WindowsImeLib::IWindowsIMECompositionBuffer* _pTextService);
+    CKeyStateCategory(
+        _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
+        const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
+        const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine);
 
 protected:
     ~CKeyStateCategory(void);
@@ -136,7 +143,10 @@ protected:
 class CKeyStateComposing : public CKeyStateCategory
 {
 public:
-    CKeyStateComposing(_In_ WindowsImeLib::IWindowsIMECompositionBuffer *pTextService);
+    CKeyStateComposing(
+        _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
+        const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
+        const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine);
 
 protected:
     // _HandleCompositionInput
@@ -179,7 +189,10 @@ protected:
 class CKeyStateCandidate : public CKeyStateCategory
 {
 public:
-    CKeyStateCandidate(_In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService);
+    CKeyStateCandidate(
+        _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
+        const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
+        const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine);
 
 protected:
     // HandleKeyFinalizeCandidatelist
@@ -204,7 +217,10 @@ protected:
 class CKeyStatePhrase : public CKeyStateCategory
 {
 public:
-    CKeyStatePhrase(_In_ WindowsImeLib::IWindowsIMECompositionBuffer*pTextService);
+    CKeyStatePhrase(
+        _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
+        const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
+        const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine);
 
 protected:
     //_HandleCancel
@@ -224,7 +240,11 @@ protected:
 class CKeyStateNull : public CKeyStateCategory
 {
 public:
-    CKeyStateNull(_In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService) : CKeyStateCategory(pTextService) {};
+    CKeyStateNull(
+        _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
+        const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
+        const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine) :
+        CKeyStateCategory(pTextService, pCandidateListUIPresenter, pCompositionProcessorEngine) {}
 
 protected:
     // _HandleNullInput

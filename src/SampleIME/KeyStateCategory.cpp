@@ -26,30 +26,34 @@ CKeyStateCategoryFactory* CKeyStateCategoryFactory::Instance()
     return _instance;
 }
 
-CKeyStateCategory* CKeyStateCategoryFactory::MakeKeyStateCategory(KEYSTROKE_CATEGORY keyCategory, _In_ WindowsImeLib::IWindowsIMECompositionBuffer *pTextService)
+CKeyStateCategory* CKeyStateCategoryFactory::MakeKeyStateCategory(
+    KEYSTROKE_CATEGORY keyCategory,
+    _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
+    const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
+    const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine)
 {
     CKeyStateCategory* pKeyState = nullptr;
 
     switch (keyCategory)
     {
     case CATEGORY_NONE:
-        pKeyState = new (std::nothrow) CKeyStateNull(pTextService);
+        pKeyState = new (std::nothrow) CKeyStateNull(pTextService, pCandidateListUIPresenter, pCompositionProcessorEngine);
         break;
 
     case CATEGORY_COMPOSING:
-        pKeyState = new (std::nothrow) CKeyStateComposing(pTextService);
+        pKeyState = new (std::nothrow) CKeyStateComposing(pTextService, pCandidateListUIPresenter, pCompositionProcessorEngine);
         break;
 
     case CATEGORY_CANDIDATE:
-        pKeyState = new (std::nothrow) CKeyStateCandidate(pTextService);
+        pKeyState = new (std::nothrow) CKeyStateCandidate(pTextService, pCandidateListUIPresenter, pCompositionProcessorEngine);
         break;
 
     case CATEGORY_PHRASE:
-        pKeyState = new (std::nothrow) CKeyStatePhrase(pTextService);
+        pKeyState = new (std::nothrow) CKeyStatePhrase(pTextService, pCandidateListUIPresenter, pCompositionProcessorEngine);
         break;
 
     default:
-        pKeyState = new (std::nothrow) CKeyStateNull(pTextService);
+        pKeyState = new (std::nothrow) CKeyStateNull(pTextService, pCandidateListUIPresenter, pCompositionProcessorEngine);
         break;
     }
     return pKeyState;
@@ -67,9 +71,14 @@ void CKeyStateCategoryFactory::Release()
 /*
 class CKeyStateCategory
 */
-CKeyStateCategory::CKeyStateCategory(_In_ WindowsImeLib::IWindowsIMECompositionBuffer*pTextService)
+CKeyStateCategory::CKeyStateCategory(
+        _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
+        const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
+        const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine) :
+        _pTextService(pTextService),
+        _pCandidateListUIPresenter(pCandidateListUIPresenter),
+        _pCompositionProcessorEngine(pCompositionProcessorEngine)
 {
-    _pTextService = pTextService;
 }
 
 CKeyStateCategory::~CKeyStateCategory(void)
@@ -229,7 +238,11 @@ HRESULT CKeyStateCategory::HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto)
 /*
 class CKeyStateComposing
 */
-CKeyStateComposing::CKeyStateComposing(_In_ WindowsImeLib::IWindowsIMECompositionBuffer*pTextService) : CKeyStateCategory(pTextService)
+CKeyStateComposing::CKeyStateComposing(
+    _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
+    const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
+    const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine) :
+    CKeyStateCategory(pTextService, pCandidateListUIPresenter, pCompositionProcessorEngine)
 {
 }
 
@@ -334,7 +347,11 @@ HRESULT CKeyStateComposing::HandleKeyPunctuation(KeyHandlerEditSessionDTO dto)
 /*
 class CKeyStateCandidate
 */
-CKeyStateCandidate::CKeyStateCandidate(_In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService) : CKeyStateCategory(pTextService)
+CKeyStateCandidate::CKeyStateCandidate(
+    _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
+    const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
+    const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine) :
+    CKeyStateCategory(pTextService, pCandidateListUIPresenter, pCompositionProcessorEngine)
 {
 }
 
@@ -397,7 +414,11 @@ HRESULT CKeyStateCandidate::HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto
 class CKeyStatePhrase
 */
 
-CKeyStatePhrase::CKeyStatePhrase(_In_ WindowsImeLib::IWindowsIMECompositionBuffer*pTextService) : CKeyStateCategory(pTextService)
+CKeyStatePhrase::CKeyStatePhrase(
+    _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
+    const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
+    const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine) :
+    CKeyStateCategory(pTextService, pCandidateListUIPresenter, pCompositionProcessorEngine)
 {
 }
 

@@ -32,7 +32,10 @@ HRESULT CompositionProcessorEngine::KeyHandlerEditSession_DoEditSession(_KEYSTRO
     HRESULT hResult = S_OK;
 
     CKeyStateCategoryFactory* pKeyStateCategoryFactory = CKeyStateCategoryFactory::Instance();
-    CKeyStateCategory* pKeyStateCategory = pKeyStateCategoryFactory->MakeKeyStateCategory(_KeyState.Category, m_owner->GetCompositionBuffer().get());
+    CKeyStateCategory* pKeyStateCategory = pKeyStateCategoryFactory->MakeKeyStateCategory(_KeyState.Category,
+        m_owner->GetCompositionBuffer().get(), 
+        m_owner->GetCompositionBuffer()->GetCandidateList(),
+        shared_from_this());
 
     if (pKeyStateCategory)
     {
