@@ -109,31 +109,32 @@ protected:
     virtual HRESULT HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto);
 
 protected:
-    HRESULT _HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext);
-    HRESULT _HandleCancel(TfEditCookie ec, _In_ ITfContext* pContext);
+    HRESULT _HandleCancel(const KeyHandlerEditSessionDTO& dto);
     // key event handlers for composition object.
-    HRESULT _HandleCompositionInput(TfEditCookie ec, _In_ ITfContext* pContext, WCHAR wch);
-    HRESULT _HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext* pContext, BOOL fCandidateList);
+    HRESULT _HandleCompositionInput(const KeyHandlerEditSessionDTO& dto, WCHAR wch);
+    HRESULT _HandleCompositionFinalize(const KeyHandlerEditSessionDTO& dto, BOOL fCandidateList);
 
-    HRESULT _HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext* pContext, BOOL isWildcardSearch);
-    HRESULT _HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext* pContext);
-    HRESULT _HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext* pContext, KEYSTROKE_FUNCTION keyFunction);
-    HRESULT _HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfContext* pContext, WCHAR wch);
-    HRESULT _HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext* pContext, WCHAR wch);
+    HRESULT _HandleCompositionConvert(const KeyHandlerEditSessionDTO& dto, BOOL isWildcardSearch);
+    HRESULT _HandleCompositionBackspace(const KeyHandlerEditSessionDTO& dto);
+    HRESULT _HandleCompositionArrowKey(const KeyHandlerEditSessionDTO& dto);
+    HRESULT _HandleCompositionPunctuation(const KeyHandlerEditSessionDTO& dto);
+    HRESULT _HandleCompositionDoubleSingleByte(const KeyHandlerEditSessionDTO& dto);
     // key event handlers for candidate object.
-    HRESULT _HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext* pContext);
-    HRESULT _HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext* pContext);
-    HRESULT _HandleCandidateArrowKey(TfEditCookie ec, _In_ ITfContext* pContext, _In_ KEYSTROKE_FUNCTION keyFunction);
-    HRESULT _HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext* pContext, _In_ UINT uCode);
+    HRESULT _HandleCandidateFinalize(const KeyHandlerEditSessionDTO& dto);
+    HRESULT _HandleCandidateConvert(const KeyHandlerEditSessionDTO& dto);
+    HRESULT _HandleCandidateArrowKey(const KeyHandlerEditSessionDTO& dto);
+    HRESULT _HandleCandidateSelectByNumber(const KeyHandlerEditSessionDTO& dto);
     // key event handlers for phrase object.
-    HRESULT _HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext* pContext);
-    HRESULT _HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext* pContext, _In_ KEYSTROKE_FUNCTION keyFunction);
-    HRESULT _HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext* pContext, _In_ UINT uCode);
+    HRESULT _HandlePhraseFinalize(const KeyHandlerEditSessionDTO& dto);
+    HRESULT _HandlePhraseArrowKey(const KeyHandlerEditSessionDTO& dto);
+    HRESULT _HandlePhraseSelectByNumber(const KeyHandlerEditSessionDTO& dto, UINT uCode);
 
-    // functions for the composition object.
+    // worker functions for the composition object.
+    HRESULT _HandleCandidateFinalizeWorker(TfEditCookie ec, _In_ ITfContext* pContext);
+    HRESULT _HandleCancelWorker(TfEditCookie ec, _In_ ITfContext *pContext);
+    HRESULT _HandleCompleteWorker(TfEditCookie ec, _In_ ITfContext *pContext);
     HRESULT _HandleCompositionInputWorker(_In_ CompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext);
-    HRESULT _CreateAndStartCandidate(_In_ CompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext);
-    HRESULT _HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext);
+    HRESULT _CreateAndStartCandidate(TfEditCookie ec, _In_ ITfContext *pContext);
 
 protected:
     WindowsImeLib::IWindowsIMECompositionBuffer* _pTextService = nullptr;

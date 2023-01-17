@@ -1,4 +1,3 @@
-// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 // ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
 // THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
 // PARTICULAR PURPOSE.
@@ -248,100 +247,126 @@ CKeyStateComposing::CKeyStateComposing(
 
 HRESULT CKeyStateComposing::HandleKeyInput(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandleCompositionInput(ec, dto.pContext, dto.wch);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _HandleCompositionInput(dto, dto.wch);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandleCompositionInput(ec, dto.pContext, dto.wch);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 HRESULT CKeyStateComposing::HandleKeyFinalizeTextStoreAndInput(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        _HandleCompositionFinalize(ec, dto.pContext, FALSE);
-        return _HandleCompositionInput(ec, dto.pContext, dto.wch);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    _HandleCompositionFinalize(dto, FALSE);
+    return _HandleCompositionInput(dto, dto.wch);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        _HandleCompositionFinalize(ec, dto.pContext, FALSE);
+//        return _HandleCompositionInput(ec, dto.pContext, dto.wch);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 HRESULT CKeyStateComposing::HandleKeyFinalizeTextStore(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandleCompositionFinalize(ec, dto.pContext, FALSE);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _HandleCompositionFinalize(dto, FALSE);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandleCompositionFinalize(ec, dto.pContext, FALSE);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 HRESULT CKeyStateComposing::HandleKeyFinalizeCandidatelistAndInput(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        _HandleCompositionFinalize(ec, dto.pContext, TRUE);
-        return _HandleCompositionInput(ec, dto.pContext, dto.wch);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    _HandleCompositionFinalize(dto, TRUE);
+    return _HandleCompositionInput(dto, dto.wch);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        _HandleCompositionFinalize(ec, dto.pContext, TRUE);
+//        return _HandleCompositionInput(ec, dto.pContext, dto.wch);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 HRESULT CKeyStateComposing::HandleKeyFinalizeCandidatelist(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandleCompositionFinalize(ec, dto.pContext, TRUE);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _HandleCompositionFinalize(dto, TRUE);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandleCompositionFinalize(ec, dto.pContext, TRUE);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 HRESULT CKeyStateComposing::HandleKeyConvert(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandleCompositionConvert(ec, dto.pContext, FALSE);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _HandleCompositionConvert(dto, FALSE);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandleCompositionConvert(ec, dto.pContext, FALSE);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 HRESULT CKeyStateComposing::HandleKeyConvertWildCard(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandleCompositionConvert(ec, dto.pContext, TRUE);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _HandleCompositionConvert(dto, TRUE);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandleCompositionConvert(ec, dto.pContext, TRUE);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 HRESULT CKeyStateComposing::HandleKeyCancel(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandleCancel(ec, dto.pContext);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _HandleCancel(dto);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandleCancel(ec, dto.pContext);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 HRESULT CKeyStateComposing::HandleKeyBackspace(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandleCompositionBackspace(ec, dto.pContext);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _HandleCompositionBackspace(dto);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandleCompositionBackspace(ec, dto.pContext);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 HRESULT CKeyStateComposing::HandleKeyArrow(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandleCompositionArrowKey(ec, dto.pContext, dto.arrowKey);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _HandleCompositionArrowKey(dto);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandleCompositionArrowKey(ec, dto.pContext, dto.arrowKey);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 HRESULT CKeyStateComposing::HandleKeyDoubleSingleByte(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandleCompositionDoubleSingleByte(ec, dto.pContext, dto.wch);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _HandleCompositionDoubleSingleByte(dto);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandleCompositionDoubleSingleByte(ec, dto.pContext, dto.wch);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 HRESULT CKeyStateComposing::HandleKeyPunctuation(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandleCompositionPunctuation(ec, dto.pContext, dto.wch);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _HandleCompositionPunctuation(dto);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandleCompositionPunctuation(ec, dto.pContext, dto.wch);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 /*
@@ -358,56 +383,69 @@ CKeyStateCandidate::CKeyStateCandidate(
 // _HandleCandidateInput
 HRESULT CKeyStateCandidate::HandleKeyFinalizeCandidatelist(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandleCandidateFinalize(ec, dto.pContext);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+	return _HandleCandidateFinalize(dto);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandleCandidateFinalize(ec, dto.pContext);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 // HandleKeyFinalizeCandidatelistAndInput
 HRESULT CKeyStateCandidate::HandleKeyFinalizeCandidatelistAndInput(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        _HandleCandidateFinalize(ec, dto.pContext);
-        return _HandleCompositionInput(ec, dto.pContext, dto.wch);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    _HandleCandidateFinalize(dto);
+    return _HandleCompositionInput(dto, dto.wch);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        _HandleCandidateFinalize(ec, dto.pContext);
+//        return _HandleCompositionInput(ec, dto.pContext, dto.wch);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 //_HandleCandidateConvert
 HRESULT CKeyStateCandidate::HandleKeyConvert(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandleCandidateConvert(ec, dto.pContext);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+	return _HandleCandidateConvert(dto);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandleCandidateConvert(ec, dto.pContext);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 //_HandleCancel
 HRESULT CKeyStateCandidate::HandleKeyCancel(KeyHandlerEditSessionDTO dto)    
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandleCancel(ec, dto.pContext);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _HandleCancel(dto);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandleCancel(ec, dto.pContext);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 //_HandleCandidateArrowKey
 HRESULT CKeyStateCandidate::HandleKeyArrow(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandleCandidateArrowKey(ec, dto.pContext, dto.arrowKey);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+	return _HandleCandidateArrowKey(dto);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandleCandidateArrowKey(ec, dto.pContext, dto.arrowKey);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 //_HandleCandidateSelectByNumber
 HRESULT CKeyStateCandidate::HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandleCandidateSelectByNumber(ec, dto.pContext, dto.code);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+	return _HandleCandidateSelectByNumber(dto);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandleCandidateSelectByNumber(ec, dto.pContext, dto.code);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 /*
@@ -425,36 +463,43 @@ CKeyStatePhrase::CKeyStatePhrase(
 //HandleKeyFinalizeCandidatelist
 HRESULT CKeyStatePhrase::HandleKeyFinalizeCandidatelist(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandlePhraseFinalize(ec, dto.pContext);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+	return _HandlePhraseFinalize(dto);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 //HandleKeyCancel
 HRESULT CKeyStatePhrase::HandleKeyCancel(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandleCancel(ec, dto.pContext);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _HandleCancel(dto);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandleCancel(ec, dto.pContext);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 //HandleKeyArrow
 HRESULT CKeyStatePhrase::HandleKeyArrow(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandlePhraseArrowKey(ec, dto.pContext, dto.arrowKey);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+	return _HandlePhraseArrowKey(dto);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandlePhraseArrowKey(ec, dto.pContext, dto.arrowKey);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 //HandleKeySelectByNumber
 HRESULT CKeyStatePhrase::HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto)
 {
-    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-    {
-        return _HandlePhraseSelectByNumber(ec, dto.pContext, dto.code);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+	return _HandlePhraseSelectByNumber(dto, dto.code);
+
+//    return dto.owner->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+//    {
+//        return _HandlePhraseSelectByNumber(ec, dto.pContext, dto.code);
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 

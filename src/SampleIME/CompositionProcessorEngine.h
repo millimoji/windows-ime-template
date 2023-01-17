@@ -73,6 +73,8 @@ public:
         m_compartmentIsPunctuation = json["isPunctuation"].get<bool>();
     }
 
+	WindowsImeLib::ICompositionProcessorEngineOwner* GetOwnerPointer() { return m_owner; }
+
 private:
     BOOL IsVirtualKeyNeed(UINT uCode, _In_reads_(1) WCHAR *pwch, BOOL fComposing, CANDIDATE_MODE candidateMode, BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
     WCHAR GetVirtualKey(DWORD_PTR dwIndex);
