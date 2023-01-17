@@ -165,32 +165,33 @@ struct IWindowsIMECompositionBuffer
     virtual void _TerminateComposition(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCalledFromDeactivate = FALSE) = 0;
 
     // key event handlers for composition/candidate/phrase common objects.
-    virtual HRESULT _HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext) = 0;
+//     virtual HRESULT _HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext) = 0;
 //    virtual HRESULT _HandleCancel(TfEditCookie ec, _In_ ITfContext* pContext) = 0;
     // key event handlers for composition object.
-    virtual HRESULT _HandleCompositionInput(TfEditCookie ec, _In_ ITfContext* pContext, WCHAR wch) = 0;
-    virtual HRESULT _HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext* pContext, BOOL fCandidateList) = 0;
+//     virtual HRESULT _HandleCompositionInput(TfEditCookie ec, _In_ ITfContext* pContext, WCHAR wch) = 0;
+//     virtual HRESULT _HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext* pContext, BOOL fCandidateList) = 0;
 
-    virtual HRESULT _HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext* pContext, BOOL isWildcardSearch) = 0;
-    virtual HRESULT _HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext* pContext) = 0;
-    virtual HRESULT _HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext* pContext, KEYSTROKE_FUNCTION keyFunction) = 0;
-    virtual HRESULT _HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfContext* pContext, WCHAR wch) = 0;
+//     virtual HRESULT _HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext* pContext, BOOL isWildcardSearch) = 0;
+//     virtual HRESULT _HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext* pContext) = 0;
+//     virtual HRESULT _HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext* pContext, KEYSTROKE_FUNCTION keyFunction) = 0;
+//     virtual HRESULT _HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfContext* pContext, WCHAR wch) = 0;
 //    virtual HRESULT _HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext* pContext, WCHAR wch) = 0;
     // key event handlers for candidate object.
-    virtual HRESULT _HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext* pContext) = 0;
-    virtual HRESULT _HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext* pContext) = 0;
-    virtual HRESULT _HandleCandidateArrowKey(TfEditCookie ec, _In_ ITfContext* pContext, _In_ KEYSTROKE_FUNCTION keyFunction) = 0;
-    virtual HRESULT _HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext* pContext, _In_ UINT uCode) = 0;
+//     virtual HRESULT _HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext* pContext) = 0;
+//     virtual HRESULT _HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext* pContext) = 0;
+//     virtual HRESULT _HandleCandidateArrowKey(TfEditCookie ec, _In_ ITfContext* pContext, _In_ KEYSTROKE_FUNCTION keyFunction) = 0;
+//     virtual HRESULT _HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext* pContext, _In_ UINT uCode) = 0;
     // key event handlers for phrase object.
-    virtual HRESULT _HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext* pContext) = 0;
-    virtual HRESULT _HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext* pContext, _In_ KEYSTROKE_FUNCTION keyFunction) = 0;
-    virtual HRESULT _HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext* pContext, _In_ UINT uCode) = 0;
+//     virtual HRESULT _HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext* pContext) = 0;
+//     virtual HRESULT _HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext* pContext, _In_ KEYSTROKE_FUNCTION keyFunction) = 0;
+//     virtual HRESULT _HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext* pContext, _In_ UINT uCode) = 0;
 
     // functions for the composition object.
-    virtual HRESULT _HandleCompositionInputWorker(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext) = 0;
-    virtual HRESULT _CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext) = 0;
-    virtual HRESULT _HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext) = 0;
+//     virtual HRESULT _HandleCompositionInputWorker(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext) = 0;
+//     virtual HRESULT _CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext) = 0;
+//     virtual HRESULT _HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext) = 0;
 
+    virtual HRESULT _StartComposition(TfEditCookie ec, _In_ ITfContext *_pContext) = 0;
     virtual HRESULT _AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString) = 0;
     virtual HRESULT _AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString) = 0;
 
@@ -211,11 +212,14 @@ struct IWindowsIMECompositionBuffer
     virtual VOID _DeleteCandidateList(BOOL fForce, _In_opt_ ITfContext *pContext) = 0;
 
     //
+    virtual TfClientId GetClientId() = 0;
     virtual std::shared_ptr<IWindowsIMECandidateListView> GetCandidateList() = 0;
     virtual wil::com_ptr<ITfContext> GetContext() = 0;
     virtual wil::com_ptr<ITfComposition> GetComposition() = 0;
     virtual CANDIDATE_MODE CandidateMode() = 0;
     virtual bool IsCandidateWithWildcard() = 0;
+    virtual void SetCandidateMode(CANDIDATE_MODE candidateMode) = 0;
+    virtual void SetIsCandidateWithWildcard(bool isCandidateWithWildcard) = 0;
     virtual void ResetCandidateState() = 0;
     virtual void DestroyCandidateView() = 0;
     virtual BOOL _IsComposing() = 0;
@@ -322,4 +326,7 @@ extern HRESULT DllUnregisterServer(void);
 extern HRESULT DllRegisterServer(int textServiceIconIndex);
 extern void TraceLog(const char* format, ...);
 extern void TraceLog(const wchar_t* format, ...);
+
+// TODO: move to local
+extern inline ATOM AtomCandidateWindow = {};
 }

@@ -25,6 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseDictionaryEngine.cpp" />
+    <ClCompile Include="CandidateListUIPresenter.cpp" />
     <ClCompile Include="DictionaryParser.cpp" />
     <ClCompile Include="DictionarySearch.cpp" />
     <ClCompile Include="dllmain.cpp">

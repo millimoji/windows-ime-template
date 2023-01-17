@@ -38,7 +38,7 @@ HFONT defaultlFontHandle;               // Global font object we use everywhere
 // windows class / titile / atom
 //---------------------------------------------------------------------
 extern const WCHAR CandidateClassName[] = L"SampleIME.CandidateWindow";
-ATOM AtomCandidateWindow;
+// ATOM AtomCandidateWindow;
 
 extern const WCHAR ShadowClassName[] = L"SampleIME.ShadowWindow";
 ATOM AtomShadowWindow;
@@ -48,7 +48,7 @@ ATOM AtomScrollBarWindow;
 
 BOOL RegisterWindowClass()
 {
-    if (!CBaseWindow::_InitWindowClass(CandidateClassName, &AtomCandidateWindow))
+    if (!CBaseWindow::_InitWindowClass(CandidateClassName, &WindowsImeLib::AtomCandidateWindow))
     {
         return FALSE;
     }

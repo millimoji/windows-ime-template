@@ -21,320 +21,320 @@ const int MOVEUP_ONE = -1;
 const int MOVEDOWN_ONE = 1;
 const int MOVETO_TOP = 0;
 const int MOVETO_BOTTOM = -1;
-//+---------------------------------------------------------------------------
-//
-// _HandleCandidateFinalize
-//
-//----------------------------------------------------------------------------
-
-HRESULT CompositionBuffer::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext *pContext)
-{
-    HRESULT hr = S_OK;
-    DWORD_PTR candidateLen = 0;
-    const WCHAR* pCandidateString = nullptr;
-    CStringRange candidateString;
-
-    if (!_pCandidateListUIPresenter->IsCreated())
-    {
-        goto NoPresenter;
-    }
-
-    candidateLen = _pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
-
-    candidateString.Set(pCandidateString, candidateLen);
-
-    if (candidateLen)
-    {
-        hr = _AddComposingAndChar(ec, pContext, &candidateString);
-
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-    }
-
-NoPresenter:
-
-    _HandleComplete(ec, pContext);
-
-    return hr;
-}
-
-//+---------------------------------------------------------------------------
-//
-// _HandleCandidateConvert
-//
-//----------------------------------------------------------------------------
-
-HRESULT CompositionBuffer::_HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext *pContext)
-{
-    return _HandleCandidateWorker(ec, pContext);
-}
-
-//+---------------------------------------------------------------------------
-//
-// _HandleCandidateWorker
-//
-//----------------------------------------------------------------------------
-
-HRESULT CompositionBuffer::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext)
-{
-    HRESULT hrReturn = E_FAIL;
-    DWORD_PTR candidateLen = 0;
-    const WCHAR* pCandidateString = nullptr;
-    BSTR pbstr = nullptr;
-    CStringRange candidateString;
-    BOOL fMakePhraseFromText = FALSE;
-    std::vector<CCandidateListItem> candidatePhraseList;
-//    CANDIDATE_MODE tempCandMode = CANDIDATE_NONE;
-//    CCandidateListUIPresenter* pTempCandListUIPresenter = nullptr;
-    ITfDocumentMgr* pDocumentMgr = nullptr;
-//    HRESULT hrStartCandidateList = E_FAIL;
-//    WindowsImeLib::IWindowsIMECandidateListView* candidateListInterface = nullptr;
-
-    if (!_pCandidateListUIPresenter->IsCreated())
-    {
-        hrReturn = S_OK;
-        goto Exit;
-    }
-
-    candidateLen = _pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
-    if (0 == candidateLen)
-    {
-        hrReturn = S_FALSE;
-        goto Exit;
-    }
-
-    candidateString.Set(pCandidateString, candidateLen);
-
-    fMakePhraseFromText = _pCompositionProcessorEngine->IsMakePhraseFromText();
-    if (fMakePhraseFromText)
-    {
-        _pCompositionProcessorEngine->GetCandidateStringInConverted(candidateString, &candidatePhraseList);
-        LCID locale = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLocale();
-        _pCandidateListUIPresenter->RemoveSpecificCandidateFromList(locale, candidatePhraseList, candidateString);
-    }
-
-    // We have a candidate list if candidatePhraseList.Cnt is not 0
-    // If we are showing reverse conversion, use CCandidateListUIPresenter
-    if (candidatePhraseList.size() > 0)
-    {
-        if (_pCandidateListUIPresenter->IsCreated())
-        {
-            _pCandidateListUIPresenter->_EndCandidateList();
-            _pCandidateListUIPresenter->DestroyView();
-            this->ResetCandidateState();
-        }
-
-//        tempCandMode = CANDIDATE_WITH_NEXT_COMPOSITION;
-//
-//        pTempCandListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(
-//            reinterpret_cast<CWindowsIME*>(_textService->GetTextService()),
-//            Global::AtomCandidateWindow,
-//            CATEGORY_CANDIDATE,
-//            _pCompositionProcessorEngine->GetCandidateListIndexRange(),
-//            FALSE);
-//        if (nullptr == pTempCandListUIPresenter)
-//        {
-//            hrReturn = E_OUTOFMEMORY;
-//            goto Exit;
-//        }
-
-        _pCandidateListUIPresenter->CreateView(
-            Global::AtomCandidateWindow,
-            CATEGORY_CANDIDATE,
-            _pCompositionProcessorEngine->GetCandidateListIndexRange(),
-            FALSE);
-
-        _candidateMode = CANDIDATE_WITH_NEXT_COMPOSITION;
-        _isCandidateWithWildcard = FALSE;
-
-        // call _Start*Line for CCandidateListUIPresenter or CReadingLine
-        // we don't cache the document manager object so get it from pContext.
-        if (pContext->GetDocumentMgr(&pDocumentMgr) == S_OK)
-        {
-            ITfRange* pRange = nullptr;
-            if (_pComposition->GetRange(&pRange) == S_OK)
-            {
-//              if (isNewWindowRequired)
-                {
-//                  hrStartCandidateList = candidateListInterface->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, ec, pRange,
-//                          WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
-                    _pCandidateListUIPresenter->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, ec, pRange,
-                        WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
-                }
-    
-                pRange->Release();
-            }
-            pDocumentMgr->Release();
-        }
-
-        // set up candidate list if it is being shown
-        _pCandidateListUIPresenter->_SetTextColor(RGB(0, 0x80, 0), GetSysColor(COLOR_WINDOW));    // Text color is green
-        _pCandidateListUIPresenter->_SetFillColor((HBRUSH)(COLOR_WINDOW+1));    // Background color is window
-        _pCandidateListUIPresenter->_SetText(&candidatePhraseList, FALSE);
-
-        // Add composing character
-        hrReturn = _AddComposingAndChar(ec, pContext, &candidateString);
-
-//        // close candidate list
-//        if (_pCandidateListUIPresenter)
-//        {
-//            _pCandidateListUIPresenter->_EndCandidateList();
-//            _pCandidateListUIPresenter.reset();
-//            ResetCandidateState();
-//        }
-//
-//        if (hrReturn == S_OK)
-//        {
-//            // copy temp candidate
-//            _pCandidateListUIPresenter.attach(pTempCandListUIPresenter);
-//
-//            _candidateMode = tempCandMode;
-//            _isCandidateWithWildcard = FALSE;
-//        }
-    }
-    else
-    {
-        hrReturn = _HandleCandidateFinalize(ec, pContext);
-    }
-
-    if (pbstr)
-    {
-        SysFreeString(pbstr);
-    }
-
-Exit:
-    return hrReturn;
-}
-
-//+---------------------------------------------------------------------------
-//
-// _HandleCandidateArrowKey
-//
-//----------------------------------------------------------------------------
-
-HRESULT CompositionBuffer::_HandleCandidateArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction)
-{
-    ec;
-    pContext;
-
-    _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
-
-    return S_OK;
-}
-
-//+---------------------------------------------------------------------------
-//
-// _HandleCandidateSelectByNumber
-//
-//----------------------------------------------------------------------------
-
-inline int FindVkInVector(const std::vector<DWORD>& srcVkList, UINT vk)
-{
-    bool isVkNumpad = (VK_NUMPAD0 <= vk) && (vk <= VK_NUMPAD9);
-
-    for (auto it = srcVkList.begin(); it != srcVkList.end(); ++it)
-    {
-        if ((*it == vk) || (isVkNumpad && (*it == (vk - VK_NUMPAD0))))
-        {
-            return static_cast<int>(std::distance(srcVkList.begin(), it));
-        }
-    }
-    return -1;
-}
-
-HRESULT CompositionBuffer::_HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode)
-{
-    int iSelectAsNumber = FindVkInVector(*_pCompositionProcessorEngine->GetCandidateListIndexRange(), uCode);
-
-    if (iSelectAsNumber == -1)
-    {
-        return S_FALSE;
-    }
-
-    if (_pCandidateListUIPresenter->IsCreated())
-    {
-        if (_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
-        {
-            return _HandleCandidateConvert(ec, pContext);
-        }
-    }
-
-    return S_FALSE;
-}
-
-//+---------------------------------------------------------------------------
-//
-// _HandlePhraseFinalize
-//
-//----------------------------------------------------------------------------
-
-HRESULT CompositionBuffer::_HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext *pContext)
-{
-    HRESULT hr = S_OK;
-
-    DWORD phraseLen = 0;
-    const WCHAR* pPhraseString = nullptr;
-
-    phraseLen = (DWORD)_pCandidateListUIPresenter->_GetSelectedCandidateString(&pPhraseString);
-
-    CStringRange phraseString;
-    phraseString.Set(pPhraseString, phraseLen);
-
-    if (phraseLen)
-    {
-        if ((hr = _AddCharAndFinalize(ec, pContext, &phraseString)) != S_OK)
-        {
-            return hr;
-        }
-    }
-
-    _HandleComplete(ec, pContext);
-
-    return S_OK;
-}
-
-//+---------------------------------------------------------------------------
-//
-// _HandlePhraseArrowKey
-//
-//----------------------------------------------------------------------------
-
-HRESULT CompositionBuffer::_HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction)
-{
-    ec;
-    pContext;
-
-    _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
-
-    return S_OK;
-}
-
-//+---------------------------------------------------------------------------
-//
-// _HandlePhraseSelectByNumber
-//
-//----------------------------------------------------------------------------
-
-HRESULT CompositionBuffer::_HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode)
-{
-    int iSelectAsNumber = FindVkInVector(*_pCompositionProcessorEngine->GetCandidateListIndexRange(), uCode);
-    if (iSelectAsNumber == -1)
-    {
-        return S_FALSE;
-    }
-
-    if (_pCandidateListUIPresenter->IsCreated())
-    {
-        if (_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
-        {
-            return _HandlePhraseFinalize(ec, pContext);
-        }
-    }
-
-    return S_FALSE;
-}
+// //+---------------------------------------------------------------------------
+// //
+// // _HandleCandidateFinalize
+// //
+// //----------------------------------------------------------------------------
+// 
+// HRESULT CompositionBuffer::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext *pContext)
+// {
+//     HRESULT hr = S_OK;
+//     DWORD_PTR candidateLen = 0;
+//     const WCHAR* pCandidateString = nullptr;
+//     CStringRange candidateString;
+// 
+//     if (!_pCandidateListUIPresenter->IsCreated())
+//     {
+//         goto NoPresenter;
+//     }
+// 
+//     candidateLen = _pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
+// 
+//     candidateString.Set(pCandidateString, candidateLen);
+// 
+//     if (candidateLen)
+//     {
+//         hr = _AddComposingAndChar(ec, pContext, &candidateString);
+// 
+//         if (FAILED(hr))
+//         {
+//             return hr;
+//         }
+//     }
+// 
+// NoPresenter:
+// 
+//     _HandleComplete(ec, pContext);
+// 
+//     return hr;
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // _HandleCandidateConvert
+// //
+// //----------------------------------------------------------------------------
+// 
+// HRESULT CompositionBuffer::_HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext *pContext)
+// {
+//     return _HandleCandidateWorker(ec, pContext);
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // _HandleCandidateWorker
+// //
+// //----------------------------------------------------------------------------
+// 
+// HRESULT CompositionBuffer::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext)
+// {
+//     HRESULT hrReturn = E_FAIL;
+//     DWORD_PTR candidateLen = 0;
+//     const WCHAR* pCandidateString = nullptr;
+//     BSTR pbstr = nullptr;
+//     CStringRange candidateString;
+//     BOOL fMakePhraseFromText = FALSE;
+//     std::vector<CCandidateListItem> candidatePhraseList;
+// //    CANDIDATE_MODE tempCandMode = CANDIDATE_NONE;
+// //    CCandidateListUIPresenter* pTempCandListUIPresenter = nullptr;
+//     ITfDocumentMgr* pDocumentMgr = nullptr;
+// //    HRESULT hrStartCandidateList = E_FAIL;
+// //    WindowsImeLib::IWindowsIMECandidateListView* candidateListInterface = nullptr;
+// 
+//     if (!_pCandidateListUIPresenter->IsCreated())
+//     {
+//         hrReturn = S_OK;
+//         goto Exit;
+//     }
+// 
+//     candidateLen = _pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
+//     if (0 == candidateLen)
+//     {
+//         hrReturn = S_FALSE;
+//         goto Exit;
+//     }
+// 
+//     candidateString.Set(pCandidateString, candidateLen);
+// 
+//     fMakePhraseFromText = _pCompositionProcessorEngine->IsMakePhraseFromText();
+//     if (fMakePhraseFromText)
+//     {
+//         _pCompositionProcessorEngine->GetCandidateStringInConverted(candidateString, &candidatePhraseList);
+//         LCID locale = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLocale();
+//         _pCandidateListUIPresenter->RemoveSpecificCandidateFromList(locale, candidatePhraseList, candidateString);
+//     }
+// 
+//     // We have a candidate list if candidatePhraseList.Cnt is not 0
+//     // If we are showing reverse conversion, use CCandidateListUIPresenter
+//     if (candidatePhraseList.size() > 0)
+//     {
+//         if (_pCandidateListUIPresenter->IsCreated())
+//         {
+//             _pCandidateListUIPresenter->_EndCandidateList();
+//             _pCandidateListUIPresenter->DestroyView();
+//             this->ResetCandidateState();
+//         }
+// 
+// //        tempCandMode = CANDIDATE_WITH_NEXT_COMPOSITION;
+// //
+// //        pTempCandListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(
+// //            reinterpret_cast<CWindowsIME*>(_textService->GetTextService()),
+// //            Global::AtomCandidateWindow,
+// //            CATEGORY_CANDIDATE,
+// //            _pCompositionProcessorEngine->GetCandidateListIndexRange(),
+// //            FALSE);
+// //        if (nullptr == pTempCandListUIPresenter)
+// //        {
+// //            hrReturn = E_OUTOFMEMORY;
+// //            goto Exit;
+// //        }
+// 
+//         _pCandidateListUIPresenter->CreateView(
+//             Global::AtomCandidateWindow,
+//             CATEGORY_CANDIDATE,
+//             _pCompositionProcessorEngine->GetCandidateListIndexRange(),
+//             FALSE);
+// 
+//         _candidateMode = CANDIDATE_WITH_NEXT_COMPOSITION;
+//         _isCandidateWithWildcard = FALSE;
+// 
+//         // call _Start*Line for CCandidateListUIPresenter or CReadingLine
+//         // we don't cache the document manager object so get it from pContext.
+//         if (pContext->GetDocumentMgr(&pDocumentMgr) == S_OK)
+//         {
+//             ITfRange* pRange = nullptr;
+//             if (_pComposition->GetRange(&pRange) == S_OK)
+//             {
+// //              if (isNewWindowRequired)
+//                 {
+// //                  hrStartCandidateList = candidateListInterface->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, ec, pRange,
+// //                          WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
+//                     _pCandidateListUIPresenter->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, ec, pRange,
+//                         WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
+//                 }
+//     
+//                 pRange->Release();
+//             }
+//             pDocumentMgr->Release();
+//         }
+// 
+//         // set up candidate list if it is being shown
+//         _pCandidateListUIPresenter->_SetTextColor(RGB(0, 0x80, 0), GetSysColor(COLOR_WINDOW));    // Text color is green
+//         _pCandidateListUIPresenter->_SetFillColor((HBRUSH)(COLOR_WINDOW+1));    // Background color is window
+//         _pCandidateListUIPresenter->_SetText(&candidatePhraseList, FALSE);
+// 
+//         // Add composing character
+//         hrReturn = _AddComposingAndChar(ec, pContext, &candidateString);
+// 
+// //        // close candidate list
+// //        if (_pCandidateListUIPresenter)
+// //        {
+// //            _pCandidateListUIPresenter->_EndCandidateList();
+// //            _pCandidateListUIPresenter.reset();
+// //            ResetCandidateState();
+// //        }
+// //
+// //        if (hrReturn == S_OK)
+// //        {
+// //            // copy temp candidate
+// //            _pCandidateListUIPresenter.attach(pTempCandListUIPresenter);
+// //
+// //            _candidateMode = tempCandMode;
+// //            _isCandidateWithWildcard = FALSE;
+// //        }
+//     }
+//     else
+//     {
+//         hrReturn = _HandleCandidateFinalize(ec, pContext);
+//     }
+// 
+//     if (pbstr)
+//     {
+//         SysFreeString(pbstr);
+//     }
+// 
+// Exit:
+//     return hrReturn;
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // _HandleCandidateArrowKey
+// //
+// //----------------------------------------------------------------------------
+// 
+// HRESULT CompositionBuffer::_HandleCandidateArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction)
+// {
+//     ec;
+//     pContext;
+// 
+//     _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
+// 
+//     return S_OK;
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // _HandleCandidateSelectByNumber
+// //
+// //----------------------------------------------------------------------------
+// 
+// inline int FindVkInVector(const std::vector<DWORD>& srcVkList, UINT vk)
+// {
+//     bool isVkNumpad = (VK_NUMPAD0 <= vk) && (vk <= VK_NUMPAD9);
+// 
+//     for (auto it = srcVkList.begin(); it != srcVkList.end(); ++it)
+//     {
+//         if ((*it == vk) || (isVkNumpad && (*it == (vk - VK_NUMPAD0))))
+//         {
+//             return static_cast<int>(std::distance(srcVkList.begin(), it));
+//         }
+//     }
+//     return -1;
+// }
+// 
+// HRESULT CompositionBuffer::_HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode)
+// {
+//     int iSelectAsNumber = FindVkInVector(*_pCompositionProcessorEngine->GetCandidateListIndexRange(), uCode);
+// 
+//     if (iSelectAsNumber == -1)
+//     {
+//         return S_FALSE;
+//     }
+// 
+//     if (_pCandidateListUIPresenter->IsCreated())
+//     {
+//         if (_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
+//         {
+//             return _HandleCandidateConvert(ec, pContext);
+//         }
+//     }
+// 
+//     return S_FALSE;
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // _HandlePhraseFinalize
+// //
+// //----------------------------------------------------------------------------
+// 
+// HRESULT CompositionBuffer::_HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext *pContext)
+// {
+//     HRESULT hr = S_OK;
+// 
+//     DWORD phraseLen = 0;
+//     const WCHAR* pPhraseString = nullptr;
+// 
+//     phraseLen = (DWORD)_pCandidateListUIPresenter->_GetSelectedCandidateString(&pPhraseString);
+// 
+//     CStringRange phraseString;
+//     phraseString.Set(pPhraseString, phraseLen);
+// 
+//     if (phraseLen)
+//     {
+//         if ((hr = _AddCharAndFinalize(ec, pContext, &phraseString)) != S_OK)
+//         {
+//             return hr;
+//         }
+//     }
+// 
+//     _HandleComplete(ec, pContext);
+// 
+//     return S_OK;
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // _HandlePhraseArrowKey
+// //
+// //----------------------------------------------------------------------------
+// 
+// HRESULT CompositionBuffer::_HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction)
+// {
+//     ec;
+//     pContext;
+// 
+//     _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
+// 
+//     return S_OK;
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // _HandlePhraseSelectByNumber
+// //
+// //----------------------------------------------------------------------------
+// 
+// HRESULT CompositionBuffer::_HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode)
+// {
+//     int iSelectAsNumber = FindVkInVector(*_pCompositionProcessorEngine->GetCandidateListIndexRange(), uCode);
+//     if (iSelectAsNumber == -1)
+//     {
+//         return S_FALSE;
+//     }
+// 
+//     if (_pCandidateListUIPresenter->IsCreated())
+//     {
+//         if (_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
+//         {
+//             return _HandlePhraseFinalize(ec, pContext);
+//         }
+//     }
+// 
+//     return S_FALSE;
+// }
 
 //////////////////////////////////////////////////////////////////////
 //
