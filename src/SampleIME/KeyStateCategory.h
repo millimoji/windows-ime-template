@@ -9,6 +9,7 @@
 #include "SampleIMEDefine.h"
 #include "SampleIMEGlobals.h"
 #include "../WindowsImeLib.h"
+#include "CompositionProcessorEngine.h"
 // #include "Globals.h"
 // #include "Private.h"
 // #include "WindowsIME.h"
@@ -23,7 +24,7 @@ public:
         KEYSTROKE_CATEGORY keyCategory,
         _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
         const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
-        const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine);
+        const std::shared_ptr<CompositionProcessorEngine>& pCompositionProcessorEngine);
     void Release();
 
 protected:
@@ -58,7 +59,7 @@ public:
     CKeyStateCategory(
         _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
         const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
-        const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine);
+        const std::shared_ptr<CompositionProcessorEngine>& pCompositionProcessorEngine);
 
 protected:
     ~CKeyStateCategory(void);
@@ -130,14 +131,14 @@ protected:
     HRESULT _HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext* pContext, _In_ UINT uCode);
 
     // functions for the composition object.
-    HRESULT _HandleCompositionInputWorker(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext);
-    HRESULT _CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext);
+    HRESULT _HandleCompositionInputWorker(_In_ CompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext);
+    HRESULT _CreateAndStartCandidate(_In_ CompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext);
     HRESULT _HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext);
 
 protected:
     WindowsImeLib::IWindowsIMECompositionBuffer* _pTextService = nullptr;
     std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> _pCandidateListUIPresenter;
-    std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> _pCompositionProcessorEngine;
+    std::shared_ptr<CompositionProcessorEngine> _pCompositionProcessorEngine;
 };
 
 class CKeyStateComposing : public CKeyStateCategory
@@ -146,7 +147,7 @@ public:
     CKeyStateComposing(
         _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
         const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
-        const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine);
+        const std::shared_ptr<CompositionProcessorEngine>& pCompositionProcessorEngine);
 
 protected:
     // _HandleCompositionInput
@@ -192,7 +193,7 @@ public:
     CKeyStateCandidate(
         _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
         const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
-        const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine);
+        const std::shared_ptr<CompositionProcessorEngine>& pCompositionProcessorEngine);
 
 protected:
     // HandleKeyFinalizeCandidatelist
@@ -220,7 +221,7 @@ public:
     CKeyStatePhrase(
         _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
         const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
-        const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine);
+        const std::shared_ptr<CompositionProcessorEngine>& pCompositionProcessorEngine);
 
 protected:
     //_HandleCancel
@@ -243,7 +244,7 @@ public:
     CKeyStateNull(
         _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
         const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
-        const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine) :
+        const std::shared_ptr<CompositionProcessorEngine>& pCompositionProcessorEngine) :
         CKeyStateCategory(pTextService, pCandidateListUIPresenter, pCompositionProcessorEngine) {}
 
 protected:

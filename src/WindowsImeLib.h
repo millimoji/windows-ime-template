@@ -221,7 +221,6 @@ struct IWindowsIMECompositionBuffer
     virtual void SetCandidateMode(CANDIDATE_MODE candidateMode) = 0;
     virtual void SetIsCandidateWithWildcard(bool isCandidateWithWildcard) = 0;
     virtual void ResetCandidateState() = 0;
-    virtual void DestroyCandidateView() = 0;
     virtual BOOL _IsComposing() = 0;
 };
 
@@ -246,27 +245,27 @@ struct ICompositionProcessorEngine
 //    virtual HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch,
 //        _In_ WindowsImeLib::IWindowsIMECompositionBuffer* textService) = 0;
 
-    virtual BOOL AddVirtualKey(WCHAR wch) = 0;
-    virtual void RemoveVirtualKey(DWORD_PTR dwIndex) = 0;
+//    virtual BOOL AddVirtualKey(WCHAR wch) = 0;
+//    virtual void RemoveVirtualKey(DWORD_PTR dwIndex) = 0;
     virtual void PurgeVirtualKey() = 0;
 
-    virtual DWORD_PTR GetVirtualKeyLength() = 0;
+//    virtual DWORD_PTR GetVirtualKeyLength() = 0;
 
-    virtual void GetReadingStrings(_Inout_ std::vector<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded) = 0;
+//    virtual void GetReadingStrings(_Inout_ std::vector<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded) = 0;
     virtual void GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) = 0;
-    virtual void GetCandidateStringInConverted(CStringRange &searchString, _In_ std::vector<CCandidateListItem> *pCandidateList) = 0;
+//    virtual void GetCandidateStringInConverted(CStringRange &searchString, _In_ std::vector<CCandidateListItem> *pCandidateList) = 0;
 
     // Punctuation
-    // virtual BOOL IsPunctuation(WCHAR wch) = 0;
-    virtual WCHAR GetPunctuation(WCHAR wch) = 0;
+//    virtual BOOL IsPunctuation(WCHAR wch) = 0;
+//    virtual WCHAR GetPunctuation(WCHAR wch) = 0;
 
-    virtual BOOL IsDoubleSingleByte(WCHAR wch) = 0;
-    virtual BOOL IsMakePhraseFromText() = 0;
+//    virtual BOOL IsDoubleSingleByte(WCHAR wch) = 0;
+//    virtual BOOL IsMakePhraseFromText() = 0;
 
     virtual void EndComposition(_In_opt_ ITfContext* pContext) = 0;
     virtual void FinalizeCandidateList(_In_ ITfContext* pContext, KEYSTROKE_CATEGORY Category) = 0;
 
-    virtual std::vector<DWORD>* GetCandidateListIndexRange() = 0;
+//    virtual std::vector<DWORD>* GetCandidateListIndexRange() = 0;
 
 	virtual void UpdateCustomState(const std::string& customStateJson) = 0;
 };

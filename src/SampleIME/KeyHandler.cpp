@@ -169,7 +169,7 @@ Exit:
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_HandleCompositionInputWorker(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CKeyStateCategory::_HandleCompositionInputWorker(_In_ CompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
 {
     HRESULT hr = S_OK;
     std::vector<CStringRange> readingStrings;
@@ -225,7 +225,7 @@ HRESULT CKeyStateCategory::_HandleCompositionInputWorker(_In_ WindowsImeLib::ICo
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine* /*pCompositionProcessorEngine*/, TfEditCookie ec, _In_ ITfContext* pContext)
+HRESULT CKeyStateCategory::_CreateAndStartCandidate(_In_ CompositionProcessorEngine* /*pCompositionProcessorEngine*/, TfEditCookie ec, _In_ ITfContext* pContext)
 {
     HRESULT hr = S_OK;
 
@@ -498,7 +498,7 @@ HRESULT CKeyStateCategory::_HandleCompositionBackspace(TfEditCookie ec, _In_ ITf
         {
             pCompositionProcessorEngine->RemoveVirtualKey(vKeyLen - 1);
 
-            if (pCompositionProcessorEngine->GetVirtualKeyLength())
+            if (pCompositionProcessorEngine->GetVirtualKeyLength() > 0)
             {
                 _HandleCompositionInputWorker(pCompositionProcessorEngine, ec, pContext);
             }

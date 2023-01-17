@@ -93,11 +93,6 @@ private:
         _candidateMode  = CANDIDATE_NONE;
         _isCandidateWithWildcard = FALSE;
     }
-    void DestroyCandidateView() override
-    {
-        _pCandidateListUIPresenter->_EndCandidateList();
-        _pCandidateListUIPresenter->DestroyView();
-    }
 
 private:
     void _SetComposition(_In_ ITfComposition *pComposition);

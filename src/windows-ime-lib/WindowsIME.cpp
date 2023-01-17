@@ -216,10 +216,13 @@ STDAPI CWindowsIME::Deactivate()
 //            pContext->Release();
 //        }
 
-        m_compositionBuffer->ResetCandidateState();
-        m_compositionBuffer->DestroyCandidateView();
 //        _candidateMode = CANDIDATE_NONE;
 //        _isCandidateWithWildcard = FALSE;
+        m_compositionBuffer->ResetCandidateState();
+
+//        m_compositionBuffer->DestroyCandidateView();
+        m_candidateListView->_EndCandidateList();
+        m_candidateListView->DestroyView();
     }
 
     if (m_inprocClient)

@@ -34,25 +34,25 @@ private:
 	HRESULT KeyHandlerEditSession_DoEditSession(_KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch);
 
 public:
-    BOOL AddVirtualKey(WCHAR wch) override;
-    void RemoveVirtualKey(DWORD_PTR dwIndex) override;
-    void PurgeVirtualKey() override;
+    BOOL AddVirtualKey(WCHAR wch);
+    void RemoveVirtualKey(DWORD_PTR dwIndex);
+    void PurgeVirtualKey();
 
-    DWORD_PTR GetVirtualKeyLength()  override { return _keystrokeBuffer.GetLength(); }
+    DWORD_PTR GetVirtualKeyLength() { return _keystrokeBuffer.GetLength(); }
 
-    void GetReadingStrings(_Inout_ std::vector<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded) override;
+    void GetReadingStrings(_Inout_ std::vector<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded);
     void GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) override;
-    void GetCandidateStringInConverted(CStringRange &searchString, _In_ std::vector<CCandidateListItem> *pCandidateList) override;
+    void GetCandidateStringInConverted(CStringRange &searchString, _In_ std::vector<CCandidateListItem> *pCandidateList);
 
 //    // Preserved key handler
 //    void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
 
     // Punctuation
     BOOL IsPunctuation(WCHAR wch);
-    WCHAR GetPunctuation(WCHAR wch) override;
+    WCHAR GetPunctuation(WCHAR wch);
 
-    BOOL IsDoubleSingleByte(WCHAR wch) override;
-    BOOL IsMakePhraseFromText()  override { return _hasMakePhraseFromText; }
+    BOOL IsDoubleSingleByte(WCHAR wch);
+    BOOL IsMakePhraseFromText() { return _hasMakePhraseFromText; }
 
     void EndComposition(_In_opt_ ITfContext* pContext) override;
     void FinalizeCandidateList(_In_ ITfContext *pContext, KEYSTROKE_CATEGORY Category) override;
@@ -60,7 +60,7 @@ public:
     // Language bar control
 //    void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) override;
 
-    inline std::vector<DWORD> *GetCandidateListIndexRange()  override { return &_candidateListIndexRange; }
+    inline std::vector<DWORD> *GetCandidateListIndexRange() { return &_candidateListIndexRange; }
 
 //    HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept override;
 //    void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;

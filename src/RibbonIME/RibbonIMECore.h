@@ -19,30 +19,15 @@ public:
 //        return S_OK;
 //    }
 
-    BOOL AddVirtualKey(WCHAR wch) override;
-    void RemoveVirtualKey(DWORD_PTR dwIndex) override;
     void PurgeVirtualKey() override;
 
-    DWORD_PTR GetVirtualKeyLength() override;
-
-    void GetReadingStrings(_Inout_ std::vector<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded) override;
     void GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) override;
-    void GetCandidateStringInConverted(CStringRange &searchString, _In_ std::vector<CCandidateListItem> *pCandidateList) override;
 
 //     // Preserved key handler
 //     void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
 
-    // Punctuation
-//     BOOL IsPunctuation(WCHAR wch) override;
-    WCHAR GetPunctuation(WCHAR wch) override;
-
-    BOOL IsDoubleSingleByte(WCHAR wch) override;
-    BOOL IsMakePhraseFromText() override;
-
     // Language bar control
 //     void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) override;
-
-    std::vector<DWORD>* GetCandidateListIndexRange() override;
 
 //    // Compartment
 //    HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept override;

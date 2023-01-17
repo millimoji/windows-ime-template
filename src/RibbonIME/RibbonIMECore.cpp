@@ -17,31 +17,8 @@ BOOL RibbonIMECore::Initialize()
     return TRUE;
 }
 
-BOOL RibbonIMECore::AddVirtualKey(WCHAR wch)
-{
-    (void)wch;
-
-    return TRUE;
-}
-
-void RibbonIMECore::RemoveVirtualKey(DWORD_PTR dwIndex)
-{
-    (void)dwIndex;
-}
-
 void RibbonIMECore::PurgeVirtualKey()
 {
-}
-
-DWORD_PTR RibbonIMECore::GetVirtualKeyLength()
-{
-    return 0;
-}
-
-void RibbonIMECore::GetReadingStrings(_Inout_ std::vector<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded)
-{
-    (void)pReadingStrings;
-    *pIsWildcardIncluded = FALSE;
 }
 
 void RibbonIMECore::GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch)
@@ -49,12 +26,6 @@ void RibbonIMECore::GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pC
     (void)pCandidateList;
     (void)isIncrementalWordSearch;
     (void)isWildcardSearch;
-}
-
-void RibbonIMECore::GetCandidateStringInConverted(CStringRange &searchString, _In_ std::vector<CCandidateListItem> *pCandidateList)
-{
-    (void)searchString;
-    (void)pCandidateList;
 }
 
 // // Preserved key handler
@@ -66,40 +37,11 @@ void RibbonIMECore::GetCandidateStringInConverted(CStringRange &searchString, _I
 //     *pIsEaten = FALSE;
 // }
 
-// // Punctuation
-// BOOL RibbonIMECore::IsPunctuation(WCHAR wch)
-// {
-//     (void)wch;
-//     return FALSE;
-// }
-
-WCHAR RibbonIMECore::GetPunctuation(WCHAR wch)
-{
-    (void)wch;
-    return 0;
-}
-
-BOOL RibbonIMECore::IsDoubleSingleByte(WCHAR wch)
-{
-    (void)wch;
-    return FALSE;
-}
-
-BOOL RibbonIMECore::IsMakePhraseFromText()
-{
-    return FALSE;
-}
-
 // // Language bar control
 // void RibbonIMECore::ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr)
 // {
 //     (void)pThreadMgr;
 // }
-
-std::vector<DWORD>* RibbonIMECore::GetCandidateListIndexRange()
-{
-    return nullptr;
-}
 
 // // Compartment
 // HRESULT RibbonIMECore::CompartmentCallback(REFGUID guidCompartment) noexcept
