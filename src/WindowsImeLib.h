@@ -113,12 +113,7 @@ struct CCandidateListItem
 namespace WindowsImeLib
 {
 
-struct IWindowsIMEInprocFramework
-{
-    virtual ~IWindowsIMEInprocFramework() {}
-    virtual void UpdateCustomState() = 0;
-};
-
+// Hard to make data driven setup for compartment, langbar button and preserved key. so allow customize by code
 struct IWindowsIMEInprocClient
 {
     virtual ~IWindowsIMEInprocClient() {}
@@ -130,8 +125,11 @@ struct IWindowsIMEInprocClient
     virtual std::string EncodeCustomState() = 0;
 };
 
-struct ICompositionProcessorEngine;
-struct ICompositionProcessorEngineOwner;
+struct IWindowsIMEInprocFramework
+{
+    virtual ~IWindowsIMEInprocFramework() {}
+    virtual void UpdateCustomState() = 0;
+};
 
 struct IWindowsIMECandidateListView
 {
@@ -208,12 +206,10 @@ struct IWindowsIMECompositionBuffer
     virtual void _ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext) = 0;
     virtual BOOL _SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute) = 0;
 
-    virtual BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover) = 0;
-    virtual VOID _DeleteCandidateList(BOOL fForce, _In_opt_ ITfContext *pContext) = 0;
+//    virtual BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover) = 0;
 
     //
     virtual TfClientId GetClientId() = 0;
-    virtual std::shared_ptr<IWindowsIMECandidateListView> GetCandidateList() = 0;
     virtual wil::com_ptr<ITfContext> GetContext() = 0;
     virtual wil::com_ptr<ITfComposition> GetComposition() = 0;
     virtual CANDIDATE_MODE CandidateMode() = 0;
@@ -222,17 +218,7 @@ struct IWindowsIMECompositionBuffer
     virtual void SetIsCandidateWithWildcard(bool isCandidateWithWildcard) = 0;
     virtual void ResetCandidateState() = 0;
     virtual BOOL _IsComposing() = 0;
-};
-
-struct ICompositionProcessorEngineOwner
-{
-    virtual ~ICompositionProcessorEngineOwner() {}
-
-    virtual wchar_t ConvertVKey(UINT code) = 0;
-    virtual UINT VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch) = 0;
-    virtual bool _IsKeyboardDisabled() = 0;
-    virtual std::shared_ptr<IWindowsIMECompositionBuffer> GetCompositionBuffer() = 0;
-    virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, IWindowsIMECompositionBuffer* pv)>& editSesisonTask, DWORD tfEsFlags) = 0;
+    virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags) = 0;
 };
 
 struct ICompositionProcessorEngine
@@ -241,7 +227,10 @@ struct ICompositionProcessorEngine
 
     virtual BOOL Initialize() = 0;
 
-    virtual void OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, DWORD modifiers, DWORD uniqueModifiers, bool isTest, bool isDown) = 0;
+    // wch: converted character from VK and keyboard state
+    // vkPackSource: estimated VK from wch for VK_PACKET
+    virtual void OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled,
+        DWORD modifiers, DWORD uniqueModifiers, bool isTest, bool isDown) = 0;
 //    virtual HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch,
 //        _In_ WindowsImeLib::IWindowsIMECompositionBuffer* textService) = 0;
 
@@ -264,6 +253,7 @@ struct ICompositionProcessorEngine
 
     virtual void EndComposition(_In_opt_ ITfContext* pContext) = 0;
     virtual void FinalizeCandidateList(_In_ ITfContext* pContext, KEYSTROKE_CATEGORY Category) = 0;
+    virtual VOID _DeleteCandidateList(BOOL fForce, _In_opt_ ITfContext *pContext) = 0;
 
 //    virtual std::vector<DWORD>* GetCandidateListIndexRange() = 0;
 
@@ -308,7 +298,9 @@ struct IProcessorFactory
 {
     virtual ~IProcessorFactory() {}
 
-    virtual std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(ICompositionProcessorEngineOwner* owner) = 0;
+    virtual std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(
+        const std::shared_ptr<IWindowsIMECompositionBuffer>& compositionBuffer,
+        const std::shared_ptr<IWindowsIMECandidateListView>& candidateListView) = 0;
     virtual std::shared_ptr<IConstantProvider> GetConstantProvider() = 0;
     virtual std::shared_ptr<ITextInputProcessor> CreateTextInputProcessor(ITextInputFramework* framework) = 0;
     virtual std::shared_ptr<IWindowsIMEInprocClient> CreateIMEInprocClient(IWindowsIMEInprocFramework* framework) = 0;

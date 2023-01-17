@@ -37,16 +37,14 @@ private:
 
 typedef struct KeyHandlerEditSessionDTO
 {
-    KeyHandlerEditSessionDTO(_In_ WindowsImeLib::ICompositionProcessorEngineOwner* _owner, _In_ ITfContext *pTfContext, UINT virualCode, WCHAR inputChar, KEYSTROKE_FUNCTION arrowKeyFunction)
+    KeyHandlerEditSessionDTO(_In_ ITfContext *pTfContext, UINT virualCode, WCHAR inputChar, KEYSTROKE_FUNCTION arrowKeyFunction)
     {
-        owner = _owner;
         pContext = pTfContext;
         code = virualCode;
         wch = inputChar;
         arrowKey = arrowKeyFunction;
     }
 
-    WindowsImeLib::ICompositionProcessorEngineOwner* owner;
     ITfContext* pContext;
     UINT code;
     WCHAR wch;
@@ -135,6 +133,8 @@ protected:
     HRESULT _HandleCompleteWorker(TfEditCookie ec, _In_ ITfContext *pContext);
     HRESULT _HandleCompositionInputWorker(_In_ CompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext);
     HRESULT _CreateAndStartCandidate(TfEditCookie ec, _In_ ITfContext *pContext);
+
+    BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover);
 
 protected:
     WindowsImeLib::IWindowsIMECompositionBuffer* _pTextService = nullptr;

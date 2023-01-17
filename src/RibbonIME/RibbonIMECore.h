@@ -8,12 +8,15 @@ class RibbonIMECore :
     public std::enable_shared_from_this<RibbonIMECore>
 {
 public:
-    RibbonIMECore(WindowsImeLib::ICompositionProcessorEngineOwner* owner);
+    RibbonIMECore(
+        const std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer>& compositionBuffer,
+        const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& candidateListView);
+
     virtual ~RibbonIMECore();
 
     BOOL Initialize() override;
 
-    void OnKeyEvent(ITfContext*, WPARAM, LPARAM, BOOL*, DWORD, DWORD, bool, bool) override {
+    void OnKeyEvent(ITfContext*, WPARAM, LPARAM, BOOL*, wchar_t, UINT, bool, DWORD, DWORD, bool, bool) override {
     }
 //    HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie, _KEYSTROKE_STATE, _In_ ITfContext*, UINT, WCHAR, _In_ WindowsImeLib::IWindowsIMECompositionBuffer*) override {
 //        return S_OK;
@@ -34,11 +37,13 @@ public:
 //    void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
     void EndComposition(_In_opt_ ITfContext* pContext) override {}
     void FinalizeCandidateList(_In_ ITfContext *pContext, KEYSTROKE_CATEGORY Category) override {}
+    VOID _DeleteCandidateList(BOOL fForce, _In_opt_ ITfContext* pContext) override {}
 
     void UpdateCustomState(const std::string& /* customStateJson */) override {}
 
 private:
-    WindowsImeLib::ICompositionProcessorEngineOwner* m_owner;
+    const std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> m_compositionBuffer;
+    const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> m_candidateListView;
 };
 
 class RibbonTextInputProcessor :

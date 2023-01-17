@@ -54,27 +54,21 @@
 //
 //----------------------------------------------------------------------------
 
-BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT codeIn, _Out_ UINT *pCodeOut, _Out_writes_(1) WCHAR *pwch, _Out_opt_ _KEYSTROKE_STATE *pKeyState)
+BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT /*codeIn*/, wchar_t wch, UINT vkPackSource, bool isKbdDisabled, _Out_opt_ _KEYSTROKE_STATE* pKeyState)
 {
-    *pCodeOut = codeIn;
-
     BOOL isOpen = m_compartmentIsOpen;
     BOOL isDoubleSingleByte = m_compartmentIsDoubleSingleByte;
     BOOL isPunctuation = m_compartmentIsPunctuation;
-    const auto candidateMode = m_owner->GetCompositionBuffer()->CandidateMode();
+    const auto candidateMode = m_compositionBuffer->CandidateMode();
 
     if (pKeyState)
     {
         pKeyState->Category = CATEGORY_NONE;
         pKeyState->Function = FUNCTION_NONE;
     }
-    if (pwch)
-    {
-        *pwch = L'\0';
-    }
 
     // if the keyboard is disabled, we don't eat keys.
-    if (m_owner->_IsKeyboardDisabled())
+    if (isKbdDisabled)
     {
         return FALSE;
     }
@@ -83,16 +77,16 @@ BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT codeIn, _Out_ UINT *pCode
     // Map virtual key to character code
     //
     BOOL isTouchKeyboardSpecialKeys = FALSE;
-    WCHAR wch = m_owner->ConvertVKey(codeIn);
-    *pCodeOut = m_owner->VKeyFromVKPacketAndWchar(codeIn, wch);
+//    WCHAR wch = m_owner->ConvertVKey(codeIn);
+//    *pCodeOut = m_owner->VKeyFromVKPacketAndWchar(codeIn, wch);
     if ((wch == THIRDPARTY_NEXTPAGE) || (wch == THIRDPARTY_PREVPAGE))
     {
         // We always eat the above softkeyboard special keys
         isTouchKeyboardSpecialKeys = TRUE;
-        if (pwch)
-        {
-            *pwch = wch;
-        }
+//        if (pwch)
+//        {
+//            *pwch = wch;
+//        }
     }
 
     // if the keyboard is closed, we don't eat keys, with the exception of the touch keyboard specials keys
@@ -101,10 +95,10 @@ BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT codeIn, _Out_ UINT *pCode
         return isTouchKeyboardSpecialKeys;
     }
 
-    if (pwch)
-    {
-        *pwch = wch;
-    }
+//    if (pwch)
+//    {
+//        *pwch = wch;
+//    }
 
     //
     // Get composition engine
@@ -116,10 +110,10 @@ BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT codeIn, _Out_ UINT *pCode
         //
         // eat only keys that CKeyHandlerEditSession can handles.
         //
-        const auto isCandidateWithWildcard = m_owner->GetCompositionBuffer()->IsCandidateWithWildcard();
-        const auto isComposing = m_owner->GetCompositionBuffer()->_IsComposing();
+        const auto isCandidateWithWildcard = m_compositionBuffer->IsCandidateWithWildcard();
+        const auto isComposing = m_compositionBuffer->_IsComposing();
 
-        if (IsVirtualKeyNeed(*pCodeOut, pwch, isComposing, candidateMode, isCandidateWithWildcard, pKeyState))
+        if (IsVirtualKeyNeed(vkPackSource, wch, isComposing, candidateMode, isCandidateWithWildcard, pKeyState))
         {
             return TRUE;
         }
@@ -264,12 +258,12 @@ BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT codeIn, _Out_ UINT *pCode
 // Called by the system to query this service wants a potential keystroke.
 //----------------------------------------------------------------------------
 
-HRESULT CompositionProcessorEngine::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten)
+HRESULT CompositionProcessorEngine::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled)
 {
     _KEYSTROKE_STATE KeystrokeState;
-    WCHAR wch = '\0';
+    //WCHAR wch = '\0';
     UINT code = 0;
-    *pIsEaten = _IsKeyEaten((UINT)wParam, &code, &wch, &KeystrokeState);
+    *pIsEaten = _IsKeyEaten((UINT)wParam, wch, vkPackSource, isKbdDisabled, &KeystrokeState);
 
     if (KeystrokeState.Category == CATEGORY_INVOKE_COMPOSITION_EDIT_SESSION)
     {
@@ -297,13 +291,11 @@ HRESULT CompositionProcessorEngine::OnTestKeyDown(ITfContext *pContext, WPARAM w
 // on exit, the application will not handle the keystroke.
 //----------------------------------------------------------------------------
 
-HRESULT CompositionProcessorEngine::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten)
+HRESULT CompositionProcessorEngine::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled)
 {
     _KEYSTROKE_STATE KeystrokeState;
-    WCHAR wch = '\0';
-    UINT code = 0;
 
-    *pIsEaten = _IsKeyEaten((UINT)wParam, &code, &wch, &KeystrokeState);
+    *pIsEaten = _IsKeyEaten((UINT)wParam, wch, vkPackSource, isKbdDisabled, &KeystrokeState);
 
     if (*pIsEaten)
     {
@@ -311,7 +303,7 @@ HRESULT CompositionProcessorEngine::OnKeyDown(ITfContext *pContext, WPARAM wPara
         //
         // Invoke key handler edit session
         //
-        if (code == VK_ESCAPE)
+        if (vkPackSource == VK_ESCAPE)
         {
             KeystrokeState.Category = CATEGORY_COMPOSING;
         }
@@ -329,7 +321,7 @@ HRESULT CompositionProcessorEngine::OnKeyDown(ITfContext *pContext, WPARAM wPara
 //                {
 //                    return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, textService);
 //                }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
-                KeyHandlerEditSession_DoEditSession(KeystrokeState, pContext, code, wch);
+                KeyHandlerEditSession_DoEditSession(KeystrokeState, pContext, vkPackSource, wch);
         }
     }
     else if (KeystrokeState.Category == CATEGORY_INVOKE_COMPOSITION_EDIT_SESSION)
@@ -341,7 +333,7 @@ HRESULT CompositionProcessorEngine::OnKeyDown(ITfContext *pContext, WPARAM wPara
 //            {
 //                return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, textService);
 //            }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
-        KeyHandlerEditSession_DoEditSession(KeystrokeState, pContext, code, wch);
+        KeyHandlerEditSession_DoEditSession(KeystrokeState, pContext, vkPackSource, wch);
     }
 
     return S_OK;
@@ -354,13 +346,9 @@ HRESULT CompositionProcessorEngine::OnKeyDown(ITfContext *pContext, WPARAM wPara
 // Called by the system to query this service wants a potential keystroke.
 //----------------------------------------------------------------------------
 
-HRESULT CompositionProcessorEngine::OnTestKeyUp(ITfContext* /*pContext*/, WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten)
+HRESULT CompositionProcessorEngine::OnTestKeyUp(ITfContext* /*pContext*/, WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled)
 {
-    WCHAR wch = '\0';
-    UINT code = 0;
-
-    *pIsEaten = _IsKeyEaten((UINT)wParam, &code, &wch, NULL);
-
+    *pIsEaten = _IsKeyEaten((UINT)wParam, wch, vkPackSource, isKbdDisabled, NULL);
     return S_OK;
 }
 
@@ -372,13 +360,9 @@ HRESULT CompositionProcessorEngine::OnTestKeyUp(ITfContext* /*pContext*/, WPARAM
 // on exit, the application will not handle the keystroke.
 //----------------------------------------------------------------------------
 
-HRESULT CompositionProcessorEngine::OnKeyUp(ITfContext* /*pContext*/, WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten)
+HRESULT CompositionProcessorEngine::OnKeyUp(ITfContext* /*pContext*/, WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled)
 {
-    WCHAR wch = '\0';
-    UINT code = 0;
-
-    *pIsEaten = _IsKeyEaten((UINT)wParam, &code, &wch, NULL);
-
+    *pIsEaten = _IsKeyEaten((UINT)wParam, wch, vkPackSource, isKbdDisabled, NULL);
     return S_OK;
 }
 

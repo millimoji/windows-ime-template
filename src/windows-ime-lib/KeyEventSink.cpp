@@ -339,7 +339,10 @@ STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
 
     if (_pCompositionProcessorEngine)
     {
-        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, Global::ModifiersValue, Global::UniqueModifiersValue, true /*test*/, true /*down*/);
+        WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
+        UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
+        bool isKbdDisabled = _IsKeyboardDisabled();
+        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, true /*test*/, true /*down*/);
     }
 
 //    _KEYSTROKE_STATE KeystrokeState;
@@ -377,7 +380,10 @@ STDAPI CWindowsIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam
 
     if (_pCompositionProcessorEngine)
     {
-        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, Global::ModifiersValue, Global::UniqueModifiersValue, false /*test*/, true /*down*/);
+        WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
+        UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
+        bool isKbdDisabled = _IsKeyboardDisabled();
+        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, false /*test*/, true /*down*/);
     }
 
 //    _KEYSTROKE_STATE KeystrokeState;
@@ -434,7 +440,10 @@ STDAPI CWindowsIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lPar
 
     if (_pCompositionProcessorEngine)
     {
-        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, Global::ModifiersValue, Global::UniqueModifiersValue, true /*test*/, false /*down*/);
+        WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
+        UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
+        bool isKbdDisabled = _IsKeyboardDisabled();
+        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, true /*test*/, false /*down*/);
     }
 
 //    if (pIsEaten == nullptr)
@@ -469,7 +478,10 @@ STDAPI CWindowsIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, 
 
     if (_pCompositionProcessorEngine)
     {
-        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, Global::ModifiersValue, Global::UniqueModifiersValue, false /*test*/, false /*down*/);
+        WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
+        UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
+        bool isKbdDisabled = _IsKeyboardDisabled();
+        _pCompositionProcessorEngine->OnKeyEvent(pContext, wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, false /*test*/, false /*down*/);
     }
 
 //    WCHAR wch = '\0';

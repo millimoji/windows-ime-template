@@ -61,20 +61,19 @@ STDAPI CWindowsIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocume
     // We have to hide/unhide candidate list depending on whether they are 
     // associated with pDocMgrFocus.
     //
-    auto _pCandidateListUIPresenter = m_compositionBuffer->GetCandidateList();
-    if (_pCandidateListUIPresenter->IsCreated())
+    if (m_candidateListView->IsCreated())
     {
         ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
-        ITfContext* pTfContext = _pCandidateListUIPresenter->_GetContextDocument();
+        ITfContext* pTfContext = m_candidateListView->_GetContextDocument();
         if ((nullptr != pTfContext) && SUCCEEDED(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr)))
         {
             if (pCandidateListDocumentMgr != pDocMgrFocus)
             {
-                _pCandidateListUIPresenter->OnKillThreadFocus();
+                m_candidateListView->OnKillThreadFocus();
             }
             else 
             {
-                _pCandidateListUIPresenter->OnSetThreadFocus();
+                m_candidateListView->OnSetThreadFocus();
             }
 
             pCandidateListDocumentMgr->Release();

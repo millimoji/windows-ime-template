@@ -17,56 +17,56 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-//+---------------------------------------------------------------------------
-//
-// _IsRangeCovered
-//
-// Returns TRUE if pRangeTest is entirely contained within pRangeCover.
-//
-//----------------------------------------------------------------------------
-
-BOOL CompositionBuffer::_IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover)
-{
-    LONG lResult = 0;;
-
-    if (FAILED(pRangeCover->CompareStart(ec, pRangeTest, TF_ANCHOR_START, &lResult)) 
-        || (lResult > 0))
-    {
-        return FALSE;
-    }
-
-    if (FAILED(pRangeCover->CompareEnd(ec, pRangeTest, TF_ANCHOR_END, &lResult)) 
-        || (lResult < 0))
-    {
-        return FALSE;
-    }
-
-    return TRUE;
-}
-
-//+---------------------------------------------------------------------------
-//
-// _DeleteCandidateList
-//
-//----------------------------------------------------------------------------
-
-VOID CompositionBuffer::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext)
-{
-    isForce;pContext;
-
-    _pCompositionProcessorEngine->PurgeVirtualKey();
-
-    if (_pCandidateListUIPresenter->IsCreated())
-    {
-        _pCandidateListUIPresenter->_EndCandidateList();
-
-        // _candidateMode = CANDIDATE_NONE;
-        // _isCandidateWithWildcard = FALSE;
-
-        ResetCandidateState();
-    }
-}
-
+// //+---------------------------------------------------------------------------
+// //
+// // _IsRangeCovered
+// //
+// // Returns TRUE if pRangeTest is entirely contained within pRangeCover.
+// //
+// //----------------------------------------------------------------------------
+// 
+// BOOL CompositionBuffer::_IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover)
+// {
+//     LONG lResult = 0;;
+// 
+//     if (FAILED(pRangeCover->CompareStart(ec, pRangeTest, TF_ANCHOR_START, &lResult)) 
+//         || (lResult > 0))
+//     {
+//         return FALSE;
+//     }
+// 
+//     if (FAILED(pRangeCover->CompareEnd(ec, pRangeTest, TF_ANCHOR_END, &lResult)) 
+//         || (lResult < 0))
+//     {
+//         return FALSE;
+//     }
+// 
+//     return TRUE;
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // _DeleteCandidateList
+// //
+// //----------------------------------------------------------------------------
+// 
+// VOID CompositionBuffer::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext)
+// {
+//     isForce;pContext;
+// 
+//     _pCompositionProcessorEngine->PurgeVirtualKey();
+// 
+//     if (_pCandidateListUIPresenter->IsCreated())
+//     {
+//         _pCandidateListUIPresenter->_EndCandidateList();
+// 
+//         // _candidateMode = CANDIDATE_NONE;
+//         // _isCandidateWithWildcard = FALSE;
+// 
+//         ResetCandidateState();
+//     }
+// }
+// 
 // //+---------------------------------------------------------------------------
 // //
 // // _HandleComplete

@@ -6,6 +6,7 @@
 #include "../WindowsImeLib.h"
 #include "WindowsIME.h"
 #include "CandidateListUIPresenter.h"
+#include "EditSession.h"
 
 class CompositionBuffer :
     public WindowsImeLib::IWindowsIMECompositionBuffer,
@@ -14,13 +15,11 @@ class CompositionBuffer :
 public:
     CompositionBuffer(
         IInternalFrameworkService* framework,
-        const std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine>& pCompositionProcessorEngine,
         const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& candidateListView,
         const TfClientId& tfClientId,
         const TfGuidAtom& gaDisplayAttributeInput
     ) :
         m_framework(framework),
-        _pCompositionProcessorEngine(pCompositionProcessorEngine),
         _pCandidateListUIPresenter(candidateListView),
         _tfClientId(tfClientId),
         _gaDisplayAttributeInput(gaDisplayAttributeInput)
@@ -76,12 +75,11 @@ private:
     void _ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext) override;
     BOOL _SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute) override;
 
-    BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover) override;
-    VOID _DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext) override;
+//    BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover) override;
+//    VOID _DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext) override;
     BOOL _IsComposing() override;
 
     TfClientId GetClientId() override { return _tfClientId; }
-    std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> GetCandidateList() override { return _pCandidateListUIPresenter; }
     wil::com_ptr<ITfContext> GetContext() override { return _pContext; }
     wil::com_ptr<ITfComposition> GetComposition() override { return _pComposition; }
     CANDIDATE_MODE CandidateMode() override { return _candidateMode; }
@@ -93,14 +91,16 @@ private:
         _candidateMode  = CANDIDATE_NONE;
         _isCandidateWithWildcard = FALSE;
     }
-
+    HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags) override
+    {
+        return m_framework->_SubmitEditSessionTask(context, editSesisonTask, tfEsFlags);
+    }
 private:
     void _SetComposition(_In_ ITfComposition *pComposition);
     void _SaveCompositionContext(_In_ ITfContext *pContext);
 
 private:
     IInternalFrameworkService* m_framework = nullptr;
-    std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> _pCompositionProcessorEngine;
     std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> _pCandidateListUIPresenter;
 
     TfClientId _tfClientId = TF_CLIENTID_NULL;

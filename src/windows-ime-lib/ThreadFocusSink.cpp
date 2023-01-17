@@ -24,17 +24,16 @@ STDAPI CWindowsIME::OnSetThreadFocus() try
         m_singletonProcessor->SetFocus(true);
     }
 
-    auto _pCandidateListUIPresenter = m_compositionBuffer->GetCandidateList();
-    if (_pCandidateListUIPresenter->IsCreated())
+    if (m_candidateListView->IsCreated())
     {
         ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
-        ITfContext* pTfContext = _pCandidateListUIPresenter->_GetContextDocument();
+        ITfContext* pTfContext = m_candidateListView->_GetContextDocument();
 
         if ((nullptr != pTfContext) && SUCCEEDED(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr)))
         {
             if (pCandidateListDocumentMgr == _pDocMgrLastFocused.get())
             {
-                _pCandidateListUIPresenter->OnSetThreadFocus();
+                m_candidateListView->OnSetThreadFocus();
             }
 
             pCandidateListDocumentMgr->Release();
@@ -61,11 +60,10 @@ STDAPI CWindowsIME::OnKillThreadFocus() try
         m_singletonProcessor->SetFocus(false);
     }
 
-    auto _pCandidateListUIPresenter = m_compositionBuffer->GetCandidateList();
-    if (_pCandidateListUIPresenter->IsCreated())
+    if (m_candidateListView->IsCreated())
     {
         ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
-        ITfContext* pTfContext = _pCandidateListUIPresenter->_GetContextDocument();
+        ITfContext* pTfContext = m_candidateListView->_GetContextDocument();
 
         if ((nullptr != pTfContext) && SUCCEEDED(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr)))
         {
@@ -80,7 +78,7 @@ STDAPI CWindowsIME::OnKillThreadFocus() try
 //                _pDocMgrLastFocused->AddRef();
 //            }
         }
-        _pCandidateListUIPresenter->OnKillThreadFocus();
+        m_candidateListView->OnKillThreadFocus();
     }
 
     activity.Stop();

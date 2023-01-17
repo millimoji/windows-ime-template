@@ -18,6 +18,7 @@ struct IInternalFrameworkService
     virtual wil::com_ptr<ITfThreadMgr> _GetThreadMgr() = 0;
     virtual BOOL _IsStoreAppMode() = 0;
     virtual std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() = 0;
+    virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags) = 0;
 };
 
 #include "CompositionBuffer.h"
@@ -43,7 +44,6 @@ class CWindowsIME :
                                         ITfFunctionProvider,
                                         ITfFnGetPreferredTouchKeyboardLayout,
                                         Microsoft::WRL::FtmBase>,
-    public WindowsImeLib::ICompositionProcessorEngineOwner,
     public WindowsImeLib::IWindowsIMEInprocFramework,
     public IInternalFrameworkService
 {
@@ -161,7 +161,7 @@ private:
 //    void _StartComposition(_In_ ITfContext *pContext) override;
 //    void _EndComposition(_In_opt_ ITfContext *pContext) override;
 //    BOOL _IsComposing() override;
-    bool _IsKeyboardDisabled() override;
+    bool _IsKeyboardDisabled();
 //    CANDIDATE_MODE _CandidateMode() override { return _candidateMode; }
 //    bool IsCandidateWithWildcard() override { return _isCandidateWithWildcard; }
 
@@ -175,9 +175,9 @@ private:
 //    HRESULT _RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition);
 
     // Invoke key handler edit session
-    // HRESULT _InvokeKeyHandler(_In_ ITfContext *pContext, UINT code, WCHAR wch, DWORD flags, _KEYSTROKE_STATE keyState) override;
-    HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService)>& editSesisonTask, DWORD tfEsFlags) override;
-    // HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch, void* /*pv*/)  override;
+//    HRESULT _InvokeKeyHandler(_In_ ITfContext *pContext, UINT code, WCHAR wch, DWORD flags, _KEYSTROKE_STATE keyState) override;
+    HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags) override;
+//    HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch, void* /*pv*/)  override;
 
     // function for the language property
 //    BOOL _SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pContext);
@@ -204,8 +204,8 @@ private:
 //    BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover);
 //    VOID _DeleteCandidateList(BOOL fForce, _In_opt_ ITfContext *pContext) override;
 
-    wchar_t ConvertVKey(UINT code) override;
-    UINT VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch) override;
+    wchar_t ConvertVKey(UINT code);
+    UINT VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch);
 
     BOOL _InitThreadFocusSink();
     void _UninitThreadFocusSink();
@@ -236,10 +236,8 @@ private:
     ITfCompositionSink* GetCompositionSink() override { return this;  }
 //    void* GetTextService() override { return (void*)this; }
 public:
-    std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> GetCompositionBuffer() override
-    {
-        return m_compositionBuffer;
-    }
+//    std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> GetCompositionBuffer() override { return m_compositionBuffer; }
+//    std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> GetCandidateListView() override { return m_candidateListView; }
 
 private:
     wil::com_ptr<ITfThreadMgr> _pThreadMgr;
@@ -272,6 +270,7 @@ private:
 
     std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> m_compositionBuffer;
     std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> m_candidateListView;
+
     std::shared_ptr<WindowsImeLib::IWindowsIMEInprocClient> m_inprocClient;
     wil::com_ptr<ITextInputProcessor> m_singletonProcessor;
 

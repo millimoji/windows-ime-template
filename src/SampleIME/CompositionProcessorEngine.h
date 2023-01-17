@@ -21,13 +21,15 @@ class CompositionProcessorEngine :
     public std::enable_shared_from_this<CompositionProcessorEngine>
 {
 public:
-    CompositionProcessorEngine(WindowsImeLib::ICompositionProcessorEngineOwner* owner);
+    CompositionProcessorEngine(
+        const std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer>& compositionBuffer,
+        const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& candidateListView);
     ~CompositionProcessorEngine(void);
 
     BOOL Initialize() override;
     // BOOL SetupLanguageProfile() override; // LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode) override;
 
-	void OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, DWORD modifiers, DWORD uniqueModifiers, bool isTest, bool isUp) override;
+	void OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled, DWORD modifiers, DWORD uniqueModifiers, bool isTest, bool isUp) override;
 
 private:
 	// in KeyHandlerEditSession.cpp
@@ -56,6 +58,7 @@ public:
 
     void EndComposition(_In_opt_ ITfContext* pContext) override;
     void FinalizeCandidateList(_In_ ITfContext *pContext, KEYSTROKE_CATEGORY Category) override;
+    VOID _DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext) override;
 
     // Language bar control
 //    void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) override;
@@ -73,10 +76,8 @@ public:
         m_compartmentIsPunctuation = json["isPunctuation"].get<bool>();
     }
 
-	WindowsImeLib::ICompositionProcessorEngineOwner* GetOwnerPointer() { return m_owner; }
-
 private:
-    BOOL IsVirtualKeyNeed(UINT uCode, _In_reads_(1) WCHAR *pwch, BOOL fComposing, CANDIDATE_MODE candidateMode, BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
+    BOOL IsVirtualKeyNeed(UINT uCode, wchar_t wch, BOOL fComposing, CANDIDATE_MODE candidateMode, BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
     WCHAR GetVirtualKey(DWORD_PTR dwIndex);
     BOOL IsWildcard() { return _isWildcard; }
     BOOL IsDisableWildcardAtFirst() { return _isDisableWildcardAtFirst; }
@@ -123,14 +124,15 @@ private:
 
 
     // in KeyEventSink.cpp
-    BOOL _IsKeyEaten(_In_ UINT codeIn, _Out_ UINT *pCodeOut, _Out_writes_(1) WCHAR *pwch, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
-    HRESULT OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten);
-    HRESULT OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten);
-    HRESULT OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten);
-    HRESULT OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten);
+    BOOL _IsKeyEaten(_In_ UINT codeIn, wchar_t wch, UINT vkPackSource, bool isKbdDisabled, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
+    HRESULT OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled);
+    HRESULT OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled);
+    HRESULT OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled);
+    HRESULT OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled);
 
 private:
-    WindowsImeLib::ICompositionProcessorEngineOwner* m_owner;
+    const std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> m_compositionBuffer;
+    const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> m_candidateListView;
 
     struct _KEYSTROKE
     {

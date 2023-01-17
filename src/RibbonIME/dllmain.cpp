@@ -53,9 +53,11 @@ namespace WindowsImeLib
     class ProcessorFactory : public std::enable_shared_from_this<ProcessorFactory>, public IProcessorFactory
     {
     public:
-        std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(ICompositionProcessorEngineOwner* owner) override
+        std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(
+            const std::shared_ptr<IWindowsIMECompositionBuffer>& compositionBuffer,
+            const std::shared_ptr<IWindowsIMECandidateListView>& candidateListView) override
         {
-            auto engine = std::make_shared<RibbonIMECore>(owner);
+            auto engine = std::make_shared<RibbonIMECore>(compositionBuffer, candidateListView);
             return std::static_pointer_cast<ICompositionProcessorEngine>(engine);
         }
 

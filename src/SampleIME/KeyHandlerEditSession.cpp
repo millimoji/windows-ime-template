@@ -33,13 +33,13 @@ HRESULT CompositionProcessorEngine::KeyHandlerEditSession_DoEditSession(_KEYSTRO
 
     CKeyStateCategoryFactory* pKeyStateCategoryFactory = CKeyStateCategoryFactory::Instance();
     CKeyStateCategory* pKeyStateCategory = pKeyStateCategoryFactory->MakeKeyStateCategory(_KeyState.Category,
-        m_owner->GetCompositionBuffer().get(), 
-        m_owner->GetCompositionBuffer()->GetCandidateList(),
+        m_compositionBuffer.get(),
+        m_candidateListView,
         shared_from_this());
 
     if (pKeyStateCategory)
     {
-        KeyHandlerEditSessionDTO keyHandlerEditSessioDTO(m_owner, pContext, _uCode, _wch, _KeyState.Function);
+        KeyHandlerEditSessionDTO keyHandlerEditSessioDTO(pContext, _uCode, _wch, _KeyState.Function);
         pKeyStateCategory->KeyStateHandler(_KeyState.Function, keyHandlerEditSessioDTO);
 
 //        return m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, _In_ WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT

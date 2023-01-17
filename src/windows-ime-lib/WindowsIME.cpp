@@ -158,20 +158,18 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
         goto ExitError;
     }
 
-    if (!_AddTextProcessorEngine())
-    {
-        goto ExitError;
-    }
-
     m_candidateListView = std::make_shared<CandidateListView>(this);
 
     m_compositionBuffer = std::make_shared<CompositionBuffer>(
         this,
-        _pCompositionProcessorEngine,
         m_candidateListView,
         _tfClientId,
-        _gaDisplayAttributeInput
-        );
+        _gaDisplayAttributeInput);
+
+    if (!_AddTextProcessorEngine())
+    {
+        goto ExitError;
+    }
 
     activity.Stop();
     return S_OK;
@@ -426,8 +424,8 @@ BOOL CWindowsIME::_AddTextProcessorEngine()
     {
         m_singletonProcessor = CreateSingletonProcessorBridge();
 
-        _pCompositionProcessorEngine = WindowsImeLib::g_processorFactory->CreateCompositionProcessorEngine(this);
-        
+        _pCompositionProcessorEngine = WindowsImeLib::g_processorFactory->CreateCompositionProcessorEngine(m_compositionBuffer, m_candidateListView);
+
         _pCompositionProcessorEngine->Initialize();
         UpdateCustomState();
         SetDefaultCandidateTextFont();

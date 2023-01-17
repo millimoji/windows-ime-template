@@ -46,20 +46,18 @@ public:
     CEditSessionTask() {}
     virtual ~CEditSessionTask() {}
 
-    HRESULT RuntimeClassInitialize(const std::function<HRESULT (TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService)>& editSesisonTask, WindowsImeLib::IWindowsIMECompositionBuffer* textService)
+    HRESULT RuntimeClassInitialize(const std::function<HRESULT (TfEditCookie ec)>& editSesisonTask)
     {
         m_editSesisonTask = editSesisonTask;
-        m_textService = textService;
         return S_OK;
     }
 
     // ITfEditSession
     IFACEMETHODIMP DoEditSession(TfEditCookie ec) override
     {
-        return m_editSesisonTask(ec, m_textService);
+        return m_editSesisonTask(ec);
     }
 
 private:
-    std::function<HRESULT (TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService)> m_editSesisonTask;
-    WindowsImeLib::IWindowsIMECompositionBuffer* m_textService = nullptr;
+    std::function<HRESULT (TfEditCookie ec)> m_editSesisonTask;
 };

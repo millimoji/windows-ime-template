@@ -69,7 +69,7 @@ void CompositionBuffer::_TerminateComposition(TfEditCookie ec, _In_ ITfContext *
         if (FAILED(_pComposition->EndComposition(ec)))
         {
             // if we fail to EndComposition, then we need to close the reverse reading window.
-            _DeleteCandidateList(TRUE, pContext);
+            m_framework->GetCompositionProcessorEngine()->_DeleteCandidateList(TRUE, pContext);
         }
 
         _pComposition->Release();

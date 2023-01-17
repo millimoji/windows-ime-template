@@ -98,16 +98,11 @@
 //     return cr;
 // }
 
-HRESULT CWindowsIME::_SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT (TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService)>& editSesisonTask, DWORD tfEsFlags)
+HRESULT CWindowsIME::_SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags)
 {
-    wil::com_ptr<CEditSessionTask> editSessionTaskObj;
-    RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CEditSessionTask>(&editSessionTaskObj, editSesisonTask, m_compositionBuffer.get()));
-
-    auto editSession = editSessionTaskObj.query<ITfEditSession>();
-
-    HRESULT hr = S_OK;
+    wil::com_ptr<ITfEditSession> editSession;
+    RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CEditSessionTask>(&editSession, editSesisonTask));
+    HRESULT hr;
     RETURN_IF_FAILED(context->RequestEditSession(_tfClientId, editSession.get(), tfEsFlags, &hr));
-
-    return S_OK;
+    return hr;
 }
-

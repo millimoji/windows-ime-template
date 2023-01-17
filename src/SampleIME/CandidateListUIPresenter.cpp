@@ -33,7 +33,7 @@ const int MOVETO_BOTTOM = -1;
 
 HRESULT CKeyStateCategory::_HandleCandidateFinalize(const KeyHandlerEditSessionDTO& dto)
 {
-    return _pCompositionProcessorEngine->GetOwnerPointer()->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
     {
         return _HandleCandidateFinalizeWorker(ec, dto.pContext);
     }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
@@ -79,7 +79,7 @@ NoPresenter:
 
 HRESULT CKeyStateCategory::_HandleCandidateConvert(const KeyHandlerEditSessionDTO& dto)
 {
-    return _pCompositionProcessorEngine->GetOwnerPointer()->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
     {
         HRESULT hrReturn = E_FAIL;
         DWORD_PTR candidateLen = 0;
@@ -283,7 +283,7 @@ HRESULT CKeyStateCategory::_HandlePhraseFinalize(const KeyHandlerEditSessionDTO&
     CStringRange phraseString;
     phraseString.Set(pPhraseString, phraseLen);
 
-    return _pCompositionProcessorEngine->GetOwnerPointer()->_SubmitEditSessionTask(dto.pContext, [this, dto, phraseString](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, phraseString](TfEditCookie ec) -> HRESULT
     {
         if (phraseString.GetLength() > 0)
         {

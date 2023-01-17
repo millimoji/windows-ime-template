@@ -108,10 +108,7 @@ STDAPI CTfTextLayoutSink::OnLayoutChange(_In_ ITfContext *pContext, TfLayoutCode
 //                pEditSession->Release();
 //            }
 
-            wil::com_ptr<ITfEditSession> editSessionTask;
-            // assuming TF_ES_SYNC, copy no variables.
-            RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CEditSessionTask>(&editSessionTask,
-                [&](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT {
+            _pTextService->_SubmitEditSessionTask(pContext, [&](TfEditCookie ec) -> HRESULT {
                     RECT rc = {0, 0, 0, 0};
                     BOOL isClipped = TRUE;
                     if (SUCCEEDED_LOG(pContextView->GetTextExt(ec, _pRangeComposition, &rc, &isClipped)))
@@ -119,10 +116,7 @@ STDAPI CTfTextLayoutSink::OnLayoutChange(_In_ ITfContext *pContext, TfLayoutCode
                         _LayoutChangeNotification(&rc);
                     }
                     return S_OK;
-                }, nullptr));
-
-            HRESULT hr = S_OK;
-            RETURN_IF_FAILED(pContext->RequestEditSession(_pTextService->_GetClientId(), editSessionTask.get(), TF_ES_SYNC | TF_ES_READ, &hr));
+                }, TF_ES_SYNC | TF_ES_READ);
         }
         break;
 

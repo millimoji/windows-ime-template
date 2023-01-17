@@ -9,6 +9,18 @@
 #include "Globals.h"
 #include "WindowsIME.h"
 
+BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover)
+{
+    LONG lResult = 0;
+    if (FAILED(pRangeCover->CompareStart(ec, pRangeTest, TF_ANCHOR_START, &lResult)) || (lResult > 0)) {
+        return FALSE;
+    }
+    if (FAILED(pRangeCover->CompareEnd(ec, pRangeTest, TF_ANCHOR_END, &lResult)) || (lResult < 0)) {
+        return FALSE;
+    }
+    return TRUE;
+}
+
 //+---------------------------------------------------------------------------
 //
 // ITfTextEditSink::OnEndEdit
@@ -56,7 +68,7 @@ STDAPI CWindowsIME::OnEndEdit(__RPC__in_opt ITfContext *pContext, TfEditCookie e
             ITfRange* pRangeComposition = nullptr;
             if (SUCCEEDED(_pComposition->GetRange(&pRangeComposition)))
             {
-                if (!m_compositionBuffer->_IsRangeCovered(ecReadOnly, tfSelection.range, pRangeComposition))
+                if (!_IsRangeCovered(ecReadOnly, tfSelection.range, pRangeComposition))
                 {
                     _pCompositionProcessorEngine->EndComposition(pContext);
                 }

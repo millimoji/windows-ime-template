@@ -21,55 +21,55 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-// //+---------------------------------------------------------------------------
-// //
-// // _IsRangeCovered
-// //
-// // Returns TRUE if pRangeTest is entirely contained within pRangeCover.
-// //
-// //----------------------------------------------------------------------------
-// 
-// BOOL CKeyStateCategory::_IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover)
-// {
-//     LONG lResult = 0;;
-// 
-//     if (FAILED(pRangeCover->CompareStart(ec, pRangeTest, TF_ANCHOR_START, &lResult)) 
-//         || (lResult > 0))
-//     {
-//         return FALSE;
-//     }
-// 
-//     if (FAILED(pRangeCover->CompareEnd(ec, pRangeTest, TF_ANCHOR_END, &lResult)) 
-//         || (lResult < 0))
-//     {
-//         return FALSE;
-//     }
-// 
-//     return TRUE;
-// }
-// 
-// //+---------------------------------------------------------------------------
-// //
-// // _DeleteCandidateList
-// //
-// //----------------------------------------------------------------------------
-// 
-// VOID CKeyStateCategory::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext)
-// {
-//     isForce;pContext;
-// 
-//     _pCompositionProcessorEngine->PurgeVirtualKey();
-// 
-//     if (_pCandidateListUIPresenter->IsCreated())
-//     {
-//         _pCandidateListUIPresenter->_EndCandidateList();
-// 
-//         // _candidateMode = CANDIDATE_NONE;
-//         // _isCandidateWithWildcard = FALSE;
-// 
-//         ResetCandidateState();
-//     }
-// }
+//+---------------------------------------------------------------------------
+//
+// _IsRangeCovered
+//
+// Returns TRUE if pRangeTest is entirely contained within pRangeCover.
+//
+//----------------------------------------------------------------------------
+
+BOOL CKeyStateCategory::_IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover)
+{
+    LONG lResult = 0;;
+
+    if (FAILED(pRangeCover->CompareStart(ec, pRangeTest, TF_ANCHOR_START, &lResult)) 
+        || (lResult > 0))
+    {
+        return FALSE;
+    }
+
+    if (FAILED(pRangeCover->CompareEnd(ec, pRangeTest, TF_ANCHOR_END, &lResult)) 
+        || (lResult < 0))
+    {
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+//+---------------------------------------------------------------------------
+//
+// _DeleteCandidateList
+//
+//----------------------------------------------------------------------------
+
+VOID CompositionProcessorEngine::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext)
+{
+    isForce;pContext;
+
+    PurgeVirtualKey();
+
+    if (m_candidateListView->IsCreated())
+    {
+        m_candidateListView->_EndCandidateList();
+
+        // _candidateMode = CANDIDATE_NONE;
+        // _isCandidateWithWildcard = FALSE;
+
+        m_compositionBuffer->ResetCandidateState();
+    }
+}
 
 //+---------------------------------------------------------------------------
 //
@@ -79,7 +79,7 @@
 
 HRESULT CKeyStateCategory::_HandleCompleteWorker(TfEditCookie ec, _In_ ITfContext *pContext)
 {
-    _pTextService->_DeleteCandidateList(FALSE, pContext);
+    _pCompositionProcessorEngine->_DeleteCandidateList(FALSE, pContext);
 
     // just terminate the composition
     _pTextService->_TerminateComposition(ec, pContext);
@@ -95,7 +95,7 @@ HRESULT CKeyStateCategory::_HandleCompleteWorker(TfEditCookie ec, _In_ ITfContex
 
 HRESULT CKeyStateCategory::_HandleCancel(const KeyHandlerEditSessionDTO& dto)
 {
-    return _pCompositionProcessorEngine->GetOwnerPointer()->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
     {
         return _HandleCancelWorker(ec, dto.pContext);
     }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
@@ -104,7 +104,7 @@ HRESULT CKeyStateCategory::_HandleCancel(const KeyHandlerEditSessionDTO& dto)
 HRESULT CKeyStateCategory::_HandleCancelWorker(TfEditCookie ec, _In_ ITfContext *pContext)
 {
     _pTextService->_RemoveDummyCompositionForComposing(ec, _pTextService->GetComposition().get());
-    _pTextService->_DeleteCandidateList(FALSE, pContext);
+    _pCompositionProcessorEngine->_DeleteCandidateList(FALSE, pContext);
     _pTextService->_TerminateComposition(ec, pContext);
 
     return S_OK;
@@ -120,7 +120,12 @@ HRESULT CKeyStateCategory::_HandleCancelWorker(TfEditCookie ec, _In_ ITfContext 
 
 HRESULT CKeyStateCategory::_HandleCompositionInput(const KeyHandlerEditSessionDTO& dto, WCHAR wch)
 {
-    return _pCompositionProcessorEngine->GetOwnerPointer()->_SubmitEditSessionTask(dto.pContext, [this, dto, wch](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+    if (_pCandidateListUIPresenter->IsCreated() && (_pTextService->CandidateMode() != CANDIDATE_INCREMENTAL))
+    {
+        _HandleCompositionFinalize(dto, FALSE);
+    }
+
+    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, wch](TfEditCookie ec) -> HRESULT
     {
         ITfRange* pRangeComposition = nullptr;
         TF_SELECTION tfSelection;
@@ -128,11 +133,6 @@ HRESULT CKeyStateCategory::_HandleCompositionInput(const KeyHandlerEditSessionDT
         BOOL isCovered = TRUE;
 
         auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
-
-        if (_pCandidateListUIPresenter->IsCreated() && (_pTextService->CandidateMode() != CANDIDATE_INCREMENTAL))
-        {
-            _HandleCompositionFinalize(dto, FALSE);
-        }
 
         // Start the new (std::nothrow) compositon if there is no composition.
         if (!_pTextService->_IsComposing())
@@ -149,7 +149,7 @@ HRESULT CKeyStateCategory::_HandleCompositionInput(const KeyHandlerEditSessionDT
         // is the insertion point covered by a composition?
         if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
         {
-            isCovered = _pTextService->_IsRangeCovered(ec, tfSelection.range, pRangeComposition);
+            isCovered = _IsRangeCovered(ec, tfSelection.range, pRangeComposition);
 
             pRangeComposition->Release();
 
@@ -305,7 +305,7 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate(TfEditCookie ec, _In_ ITfCon
 
 HRESULT CKeyStateCategory::_HandleCompositionFinalize(const KeyHandlerEditSessionDTO& dto, BOOL isCandidateList)
 {
-    return _pCompositionProcessorEngine->GetOwnerPointer()->_SubmitEditSessionTask(dto.pContext, [this, dto, isCandidateList](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, isCandidateList](TfEditCookie ec) -> HRESULT
     {
         HRESULT hr = S_OK;
 
@@ -346,7 +346,7 @@ HRESULT CKeyStateCategory::_HandleCompositionFinalize(const KeyHandlerEditSessio
                 ITfRange* pRangeComposition = nullptr;
                 if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
                 {
-                    if (_pTextService->_IsRangeCovered(ec, tfSelection.range, pRangeComposition))
+                    if (_IsRangeCovered(ec, tfSelection.range, pRangeComposition))
                     {
                         _pTextService->_TerminateComposition(ec, dto.pContext, FALSE);
                         // _textService->_EndComposition(pContext);
@@ -373,7 +373,7 @@ HRESULT CKeyStateCategory::_HandleCompositionFinalize(const KeyHandlerEditSessio
 
 HRESULT CKeyStateCategory::_HandleCompositionConvert(const KeyHandlerEditSessionDTO& dto, BOOL isWildcardSearch)
 {
-    return _pCompositionProcessorEngine->GetOwnerPointer()->_SubmitEditSessionTask(dto.pContext, [this, dto, isWildcardSearch](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, isWildcardSearch](TfEditCookie ec) -> HRESULT
     {
         HRESULT hr = S_OK;
 
@@ -471,7 +471,7 @@ HRESULT CKeyStateCategory::_HandleCompositionConvert(const KeyHandlerEditSession
 
 HRESULT CKeyStateCategory::_HandleCompositionBackspace(const KeyHandlerEditSessionDTO& dto)
 {
-    return _pCompositionProcessorEngine->GetOwnerPointer()->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
     {
         ITfRange* pRangeComposition = nullptr;
         TF_SELECTION tfSelection;
@@ -493,7 +493,7 @@ HRESULT CKeyStateCategory::_HandleCompositionBackspace(const KeyHandlerEditSessi
         // is the insertion point covered by a composition?
         if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
         {
-            isCovered = _pTextService->_IsRangeCovered(ec, tfSelection.range, pRangeComposition);
+            isCovered = _IsRangeCovered(ec, tfSelection.range, pRangeComposition);
 
             pRangeComposition->Release();
 
@@ -542,7 +542,7 @@ Exit:
 
 HRESULT CKeyStateCategory::_HandleCompositionArrowKey(const KeyHandlerEditSessionDTO& dto)
 {
-    return _pCompositionProcessorEngine->GetOwnerPointer()->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
     {
         ITfRange* pRangeComposition = nullptr;
         TF_SELECTION tfSelection;
@@ -586,7 +586,7 @@ Exit:
 
 HRESULT CKeyStateCategory::_HandleCompositionPunctuation(const KeyHandlerEditSessionDTO& dto)
 {
-    return _pCompositionProcessorEngine->GetOwnerPointer()->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
     {
         HRESULT hr = S_OK;
 
@@ -636,21 +636,15 @@ HRESULT CKeyStateCategory::_HandleCompositionPunctuation(const KeyHandlerEditSes
 
 HRESULT CKeyStateCategory::_HandleCompositionDoubleSingleByte(const KeyHandlerEditSessionDTO& dto)
 {
-    return _pCompositionProcessorEngine->GetOwnerPointer()->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
+    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
     {
-        HRESULT hr = S_OK;
-
         WCHAR fullWidth = Global::FullWidthCharTable[dto.wch - 0x20];
 
         CStringRange fullWidthString;
         fullWidthString.Set(&fullWidth, 1);
 
         // Finalize character
-        hr = _pTextService->_AddCharAndFinalize(ec, dto.pContext, &fullWidthString);
-        if (FAILED(hr))
-        {
-            return hr;
-        }
+        RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(ec, dto.pContext, &fullWidthString));
 
         _HandleCancelWorker(ec, dto.pContext);
 

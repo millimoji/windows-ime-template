@@ -2,8 +2,10 @@
 
 #include "RibbonIMECore.h"
 
-RibbonIMECore::RibbonIMECore(WindowsImeLib::ICompositionProcessorEngineOwner* owner)
-    : m_owner(owner)
+RibbonIMECore::RibbonIMECore(
+    const std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer>& compositionBuffer,
+    const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& candidateListView)
+    : m_compositionBuffer(compositionBuffer), m_candidateListView(candidateListView)
 {
 }
 
@@ -27,34 +29,6 @@ void RibbonIMECore::GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pC
     (void)isIncrementalWordSearch;
     (void)isWildcardSearch;
 }
-
-// // Preserved key handler
-// void RibbonIMECore::OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId)
-// {
-//     (void)rguid;
-//     (void)pThreadMgr;
-//     (void)tfClientId;
-//     *pIsEaten = FALSE;
-// }
-
-// // Language bar control
-// void RibbonIMECore::ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr)
-// {
-//     (void)pThreadMgr;
-// }
-
-// // Compartment
-// HRESULT RibbonIMECore::CompartmentCallback(REFGUID guidCompartment) noexcept
-// {
-//     return S_OK;
-// }
-// 
-// void RibbonIMECore::ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId)
-// {
-//     (void)pThreadMgr;
-//     (void)tfClientId;
-// }
-
 
 RibbonTextInputProcessor::RibbonTextInputProcessor(WindowsImeLib::ITextInputFramework* framework) :
 	m_framework(framework)
