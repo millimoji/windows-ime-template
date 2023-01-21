@@ -216,7 +216,7 @@ STDAPI CWindowsIME::Deactivate()
 
 //        _candidateMode = CANDIDATE_NONE;
 //        _isCandidateWithWildcard = FALSE;
-        m_compositionBuffer->ResetCandidateState();
+//        m_compositionBuffer->ResetCandidateState();
 
 //        m_compositionBuffer->DestroyCandidateView();
         m_candidateListView->_EndCandidateList();

@@ -67,7 +67,7 @@ VOID CompositionProcessorEngine::_DeleteCandidateList(BOOL isForce, _In_opt_ ITf
         // _candidateMode = CANDIDATE_NONE;
         // _isCandidateWithWildcard = FALSE;
 
-        m_compositionBuffer->ResetCandidateState();
+        ResetCandidateState();
     }
 }
 
@@ -120,7 +120,7 @@ HRESULT CKeyStateCategory::_HandleCancelWorker(TfEditCookie ec, _In_ ITfContext 
 
 HRESULT CKeyStateCategory::_HandleCompositionInput(const KeyHandlerEditSessionDTO& dto, WCHAR wch)
 {
-    if (_pCandidateListUIPresenter->IsCreated() && (_pTextService->CandidateMode() != CANDIDATE_INCREMENTAL))
+    if (_pCandidateListUIPresenter->IsCreated() && (_pCompositionProcessorEngine->CandidateMode() != CANDIDATE_INCREMENTAL))
     {
         _HandleCompositionFinalize(dto, FALSE);
     }
@@ -238,8 +238,8 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate(TfEditCookie ec, _In_ ITfCon
 {
     HRESULT hr = S_OK;
 
-    if (((_pTextService->CandidateMode() == CANDIDATE_PHRASE) && _pCandidateListUIPresenter->IsCreated())
-        || ((_pTextService->CandidateMode() == CANDIDATE_NONE) && _pCandidateListUIPresenter->IsCreated()))
+    if (((_pCompositionProcessorEngine->CandidateMode() == CANDIDATE_PHRASE) && _pCandidateListUIPresenter->IsCreated())
+        || ((_pCompositionProcessorEngine->CandidateMode() == CANDIDATE_NONE) && _pCandidateListUIPresenter->IsCreated()))
     {
         // Recreate candidate list
         _pCandidateListUIPresenter->_EndCandidateList();
@@ -248,7 +248,7 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate(TfEditCookie ec, _In_ ITfCon
         // _pCandidateListUIPresenter.reset();
         _pCandidateListUIPresenter->DestroyView();
 
-        _pTextService->ResetCandidateState();
+        _pCompositionProcessorEngine->ResetCandidateState();
         // _candidateMode = CANDIDATE_NONE;
         // _isCandidateWithWildcard = FALSE;
     }
@@ -257,8 +257,6 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate(TfEditCookie ec, _In_ ITfCon
     if (!_pCandidateListUIPresenter->IsCreated())
     {
         _pCandidateListUIPresenter->CreateView(
-            WindowsImeLib::AtomCandidateWindow,
-            CATEGORY_CANDIDATE,
             _pCompositionProcessorEngine->GetCandidateListIndexRange(),
             FALSE);
 
@@ -273,8 +271,9 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate(TfEditCookie ec, _In_ ITfCon
 //            return E_OUTOFMEMORY;
 //        }
 
-        _pTextService->SetCandidateMode(CANDIDATE_INCREMENTAL);
-        _pTextService->SetIsCandidateWithWildcard(false);
+        _pCompositionProcessorEngine->SetCandidateKeyStrokeCategory(CATEGORY_CANDIDATE);
+        _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_INCREMENTAL);
+        _pCompositionProcessorEngine->SetIsCandidateWithWildcard(false);
 
         // we don't cache the document manager object. So get it from pContext.
         ITfDocumentMgr* pDocumentMgr = nullptr;
@@ -284,9 +283,7 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate(TfEditCookie ec, _In_ ITfCon
             ITfRange* pRange = nullptr;
             if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRange)))
             {
-                hr = _pCandidateListUIPresenter->_StartCandidateList(
-                        _pTextService->GetClientId(),
-                        pDocumentMgr, pContext, ec, pRange,
+                hr = _pCandidateListUIPresenter->_StartCandidateList(pContext, ec, pRange,
                         WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
                 pRange->Release();
             }
@@ -404,7 +401,7 @@ HRESULT CKeyStateCategory::_HandleCompositionConvert(const KeyHandlerEditSession
             {
                 _pCandidateListUIPresenter->_EndCandidateList();
                 _pCandidateListUIPresenter->DestroyView();
-                _pTextService->ResetCandidateState();
+                _pCompositionProcessorEngine->ResetCandidateState();
             }
 
             // 
@@ -428,14 +425,13 @@ HRESULT CKeyStateCategory::_HandleCompositionConvert(const KeyHandlerEditSession
             if (!_pCandidateListUIPresenter->IsCreated())
             {
                 _pCandidateListUIPresenter->CreateView(
-                                                WindowsImeLib::AtomCandidateWindow,
-                                                CATEGORY_CANDIDATE,
                                                 pCompositionProcessorEngine->GetCandidateListIndexRange(),
                                                 FALSE);
-                _pTextService->SetCandidateMode(CANDIDATE_ORIGINAL);
+                _pCompositionProcessorEngine->SetCandidateKeyStrokeCategory(CATEGORY_CANDIDATE);
+                _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_ORIGINAL);
             }
 
-            _pTextService->SetIsCandidateWithWildcard(isWildcardSearch);
+            _pCompositionProcessorEngine->SetIsCandidateWithWildcard(isWildcardSearch);
 
             // we don't cache the document manager object. So get it from pContext.
             ITfDocumentMgr* pDocumentMgr = nullptr;
@@ -445,9 +441,7 @@ HRESULT CKeyStateCategory::_HandleCompositionConvert(const KeyHandlerEditSession
                 ITfRange* pRange = nullptr;
                 if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRange)))
                 {
-                    hr = _pCandidateListUIPresenter->_StartCandidateList(
-                            _pTextService->GetClientId(),
-                            pDocumentMgr, dto.pContext, ec, pRange,
+                    hr = _pCandidateListUIPresenter->_StartCandidateList(dto.pContext, ec, pRange,
                             WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
                     pRange->Release();
                 }
@@ -565,7 +559,11 @@ HRESULT CKeyStateCategory::_HandleCompositionArrowKey(const KeyHandlerEditSessio
         // For incremental candidate list
         if (_pCandidateListUIPresenter->IsCreated())
         {
-            _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(dto.arrowKey);
+            const auto candidateListFuntion = KeyStrokeFunctionToCandidateListFunction(dto.arrowKey);
+            if (candidateListFuntion != CANDIDATELIST_FUNCTION_NONE)
+            {
+                _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(candidateListFuntion);
+            }
         }
 
         dto.pContext->SetSelection(ec, 1, &tfSelection);
@@ -590,7 +588,7 @@ HRESULT CKeyStateCategory::_HandleCompositionPunctuation(const KeyHandlerEditSes
     {
         HRESULT hr = S_OK;
 
-        if (_pTextService->CandidateMode() != CANDIDATE_NONE && _pCandidateListUIPresenter->IsCreated())
+        if (_pCompositionProcessorEngine->CandidateMode() != CANDIDATE_NONE && _pCandidateListUIPresenter->IsCreated())
         {
             DWORD_PTR candidateLen = 0;
             const WCHAR* pCandidateString = nullptr;

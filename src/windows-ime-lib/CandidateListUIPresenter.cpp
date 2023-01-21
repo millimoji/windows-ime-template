@@ -348,7 +348,7 @@ const int MOVETO_BOTTOM = -1;
 //
 //----------------------------------------------------------------------------
 
-CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ IInternalFrameworkService* pTextService, ATOM atom, KEYSTROKE_CATEGORY Category, _In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) : CTfTextLayoutSink(pTextService)
+CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ IInternalFrameworkService* pTextService, ATOM atom, _In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) : CTfTextLayoutSink(pTextService)
 {
     _atom = atom;
 
@@ -356,8 +356,6 @@ CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ IInternalFrameworkServ
 
     _parentWndHandle = nullptr;
     _pCandidateWnd = nullptr;
-
-    _Category = Category;
 
     _updatedFlags = 0;
 
@@ -516,7 +514,7 @@ HRESULT CCandidateListUIPresenter::ToShowCandidateWindow()
     }
     else
     {
-        _MoveWindowToTextExt();
+        _MoveWindowToTextExt(_tfEditCookie);
 
         _pCandidateWnd->_Show(TRUE);
     }
@@ -793,10 +791,8 @@ STDAPI CCandidateListUIPresenter::FinalizeExactCompositionString()
 //
 //----------------------------------------------------------------------------
 
-HRESULT CCandidateListUIPresenter::_StartCandidateList(TfClientId tfClientId, _In_ ITfDocumentMgr *pDocumentMgr, _In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth)
+HRESULT CCandidateListUIPresenter::_StartCandidateList(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth)
 {
-    pDocumentMgr;tfClientId;
-
     HRESULT hr = E_FAIL;
 
     if (FAILED(_StartLayout(pContextDocument, ec, pRangeComposition)))
@@ -815,7 +811,7 @@ HRESULT CCandidateListUIPresenter::_StartCandidateList(TfClientId tfClientId, _I
     Show(_isShowMode);
 
     RECT rcTextExt;
-    if (SUCCEEDED(_GetTextExt(&rcTextExt)))
+    if (SUCCEEDED(_GetTextExt(ec, &rcTextExt)))
     {
         _LayoutChangeNotification(&rcTextExt);
     }
@@ -1016,11 +1012,11 @@ BOOL CCandidateListUIPresenter::_MovePage(_In_ int offSet)
 //
 //----------------------------------------------------------------------------
 
-void CCandidateListUIPresenter::_MoveWindowToTextExt()
+void CCandidateListUIPresenter::_MoveWindowToTextExt(TfEditCookie ec)
 {
     RECT rc;
 
-    if (FAILED(_GetTextExt(&rc)))
+    if (FAILED(_GetTextExt(ec, &rc)))
     {
         return;
     }
@@ -1086,7 +1082,7 @@ HRESULT CCandidateListUIPresenter::_CandidateChangeNotification(_In_ enum CANDWN
         RETURN_IF_FAILED(pDocumentMgr->GetTop(&pContext));
 
         auto compositionBuffer = _pTextService->GetCompositionProcessorEngine();
-        compositionBuffer->FinalizeCandidateList(pContext.get(), _Category);
+        compositionBuffer->FinalizeCandidateList(pContext.get());
     }
 
 //    pThreadMgr = _pTextService->_GetThreadMgr();
@@ -1228,36 +1224,36 @@ void CCandidateListUIPresenter::RemoveSpecificCandidateFromList(_In_ LCID Locale
     }
 }
 
-void CCandidateListUIPresenter::AdviseUIChangedByArrowKey(_In_ KEYSTROKE_FUNCTION arrowKey)
+void CCandidateListUIPresenter::AdviseUIChangedByArrowKey(_In_ CANDIDATELIST_FUNCTION arrowKey)
 {
     switch (arrowKey)
     {
-    case FUNCTION_MOVE_UP:
+    case CANDIDATELIST_FUNCTION_MOVE_UP:
         {
             _MoveSelection(MOVEUP_ONE);
             break;
         }
-    case FUNCTION_MOVE_DOWN:
+    case CANDIDATELIST_FUNCTION_MOVE_DOWN:
         {
             _MoveSelection(MOVEDOWN_ONE);
             break;
         }
-    case FUNCTION_MOVE_PAGE_UP:
+    case CANDIDATELIST_FUNCTION_MOVE_PAGE_UP:
         {
             _MovePage(MOVEUP_ONE);
             break;
         }
-    case FUNCTION_MOVE_PAGE_DOWN:
+    case CANDIDATELIST_FUNCTION_MOVE_PAGE_DOWN:
         {
             _MovePage(MOVEDOWN_ONE);
             break;
         }
-    case FUNCTION_MOVE_PAGE_TOP:
+    case CANDIDATELIST_FUNCTION_MOVE_PAGE_TOP:
         {
             _SetSelection(MOVETO_TOP);
             break;
         }
-    case FUNCTION_MOVE_PAGE_BOTTOM:
+    case CANDIDATELIST_FUNCTION_MOVE_PAGE_BOTTOM:
         {
             _SetSelection(MOVETO_BOTTOM);
             break;

@@ -62,41 +62,33 @@ private:
     HRESULT _AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString) override;
     HRESULT _AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString) override;
 
-    BOOL _FindComposingRange(TfEditCookie ec, _In_ ITfContext *pContext, _In_ ITfRange *pSelection, _Outptr_result_maybenull_ ITfRange **ppRange) override;
-    HRESULT _SetInputString(TfEditCookie ec, _In_ ITfContext *pContext, _Out_opt_ ITfRange *pRange, _In_ CStringRange *pstrAddString, BOOL exist_composing) override;
     HRESULT _InsertAtSelection(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString, _Outptr_ ITfRange **ppCompRange) override;
 
-    HRESULT _RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition) override;
-
+    BOOL _FindComposingRange(TfEditCookie ec, _In_ ITfContext *pContext, _In_ ITfRange *pSelection, _Outptr_result_maybenull_ ITfRange **ppRange);
+    HRESULT _SetInputString(TfEditCookie ec, _In_ ITfContext *pContext, _Out_opt_ ITfRange *pRange, _In_ CStringRange *pstrAddString, BOOL exist_composing);
     // function for the language property
-    BOOL _SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pContext) override;
+    BOOL _SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pContext);
 
     // function for the display attribute
-    void _ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext) override;
-    BOOL _SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute) override;
+    void _ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext);
+    BOOL _SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute);
 
 //    BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover) override;
 //    VOID _DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext) override;
-    BOOL _IsComposing() override;
 
-    TfClientId GetClientId() override { return _tfClientId; }
-    wil::com_ptr<ITfContext> GetContext() override { return _pContext; }
+//    TfClientId GetClientId() override { return _tfClientId; }
+public:
+    bool _IsComposing() override { return !!_pComposition; }
+    wil::com_ptr<ITfContext> GetContext() { return _pContext; }
     wil::com_ptr<ITfComposition> GetComposition() override { return _pComposition; }
-    CANDIDATE_MODE CandidateMode() override { return _candidateMode; }
-    bool IsCandidateWithWildcard() override  { return !!_isCandidateWithWildcard; }
-    void SetCandidateMode(CANDIDATE_MODE candidateMode) override  { _candidateMode = candidateMode; }
-    void SetIsCandidateWithWildcard(bool isCandidateWithWildcard) override  { _isCandidateWithWildcard = (isCandidateWithWildcard ? TRUE : FALSE); }
-    void ResetCandidateState() override
-    {
-        _candidateMode  = CANDIDATE_NONE;
-        _isCandidateWithWildcard = FALSE;
-    }
+    HRESULT _RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition) override;
+private:
     HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags) override
     {
         return m_framework->_SubmitEditSessionTask(context, editSesisonTask, tfEsFlags);
     }
 private:
-    void _SetComposition(_In_ ITfComposition *pComposition);
+    void _SetComposition(_In_ ITfComposition *pComposition) { _pComposition = pComposition; }
     void _SaveCompositionContext(_In_ ITfContext *pContext);
 
 private:
@@ -109,6 +101,4 @@ private:
     // need to sync with m_textService
     wil::com_ptr<ITfContext> _pContext;
     wil::com_ptr<ITfComposition> _pComposition;
-    CANDIDATE_MODE _candidateMode = CANDIDATE_NONE;
-    BOOL _isCandidateWithWildcard = FALSE;
 };

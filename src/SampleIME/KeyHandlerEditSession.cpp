@@ -42,11 +42,6 @@ HRESULT CompositionProcessorEngine::KeyHandlerEditSession_DoEditSession(_KEYSTRO
         KeyHandlerEditSessionDTO keyHandlerEditSessioDTO(pContext, _uCode, _wch, _KeyState.Function);
         pKeyStateCategory->KeyStateHandler(_KeyState.Function, keyHandlerEditSessioDTO);
 
-//        return m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, _In_ WindowsImeLib::IWindowsIMECompositionBuffer*) -> HRESULT
-//        {
-//            return pKeyStateCategory->KeyStateHandler(_KeyState.Function, keyHandlerEditSessioDTO);
-//        }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
-
         pKeyStateCategory->Release();
         pKeyStateCategoryFactory->Release();
     }

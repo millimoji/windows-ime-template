@@ -978,7 +978,7 @@ void CompositionProcessorEngine::OnKeyEvent(ITfContext *pContext, WPARAM wParam,
 //     If engine need this virtual key code, returns true. Otherwise returns false.
 //----------------------------------------------------------------------------
 
-BOOL CompositionProcessorEngine::IsVirtualKeyNeed(UINT uCode, WCHAR wch, BOOL fComposing, CANDIDATE_MODE candidateMode, BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState)
+BOOL CompositionProcessorEngine::IsVirtualKeyNeed(UINT uCode, WCHAR wch, BOOL fComposing, BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState)
 {
     if (pKeyState)
     {
@@ -986,12 +986,12 @@ BOOL CompositionProcessorEngine::IsVirtualKeyNeed(UINT uCode, WCHAR wch, BOOL fC
         pKeyState->Function = FUNCTION_NONE;
     }
 
-    if (candidateMode == CANDIDATE_ORIGINAL || candidateMode == CANDIDATE_PHRASE || candidateMode == CANDIDATE_WITH_NEXT_COMPOSITION)
+    if (_candidateMode == CANDIDATE_ORIGINAL || _candidateMode == CANDIDATE_PHRASE || _candidateMode == CANDIDATE_WITH_NEXT_COMPOSITION)
     {
         fComposing = FALSE;
     }
 
-    if (fComposing || candidateMode == CANDIDATE_INCREMENTAL || candidateMode == CANDIDATE_NONE)
+    if (fComposing || _candidateMode == CANDIDATE_INCREMENTAL || _candidateMode == CANDIDATE_NONE)
     {
         if (IsVirtualKeyKeystrokeComposition(uCode, pKeyState, FUNCTION_NONE))
         {
@@ -1013,17 +1013,17 @@ BOOL CompositionProcessorEngine::IsVirtualKeyNeed(UINT uCode, WCHAR wch, BOOL fC
         }
     }
 
-    if (candidateMode == CANDIDATE_ORIGINAL || candidateMode == CANDIDATE_PHRASE || candidateMode == CANDIDATE_WITH_NEXT_COMPOSITION)
+    if (_candidateMode == CANDIDATE_ORIGINAL || _candidateMode == CANDIDATE_PHRASE || _candidateMode == CANDIDATE_WITH_NEXT_COMPOSITION)
     {
         BOOL isRetCode = TRUE;
-        if (IsVirtualKeyKeystrokeCandidate(uCode, pKeyState, candidateMode, &isRetCode, &_KeystrokeCandidate))
+        if (IsVirtualKeyKeystrokeCandidate(uCode, pKeyState, &isRetCode, &_KeystrokeCandidate))
         {
             return isRetCode;
         }
 
         if (hasCandidateWithWildcard)
         {
-            if (IsVirtualKeyKeystrokeCandidate(uCode, pKeyState, candidateMode, &isRetCode, &_KeystrokeCandidateWildcard))
+            if (IsVirtualKeyKeystrokeCandidate(uCode, pKeyState, &isRetCode, &_KeystrokeCandidateWildcard))
             {
                 return isRetCode;
             }
@@ -1032,7 +1032,7 @@ BOOL CompositionProcessorEngine::IsVirtualKeyNeed(UINT uCode, WCHAR wch, BOOL fC
         // Candidate list could not handle key. We can try to restart the composition.
         if (IsVirtualKeyKeystrokeComposition(uCode, pKeyState, FUNCTION_INPUT))
         {
-            if (candidateMode != CANDIDATE_ORIGINAL)
+            if (_candidateMode != CANDIDATE_ORIGINAL)
             {
                 return TRUE;
             }
@@ -1045,16 +1045,16 @@ BOOL CompositionProcessorEngine::IsVirtualKeyNeed(UINT uCode, WCHAR wch, BOOL fC
     } 
 
     // CANDIDATE_INCREMENTAL should process Keystroke.Candidate virtual keys.
-    else if (candidateMode == CANDIDATE_INCREMENTAL)
+    else if (_candidateMode == CANDIDATE_INCREMENTAL)
     {
         BOOL isRetCode = TRUE;
-        if (IsVirtualKeyKeystrokeCandidate(uCode, pKeyState, candidateMode, &isRetCode, &_KeystrokeCandidate))
+        if (IsVirtualKeyKeystrokeCandidate(uCode, pKeyState, &isRetCode, &_KeystrokeCandidate))
         {
             return isRetCode;
         }
     }
 
-    if (!fComposing && candidateMode != CANDIDATE_ORIGINAL && candidateMode != CANDIDATE_PHRASE && candidateMode != CANDIDATE_WITH_NEXT_COMPOSITION) 
+    if (!fComposing && _candidateMode != CANDIDATE_ORIGINAL && _candidateMode != CANDIDATE_PHRASE && _candidateMode != CANDIDATE_WITH_NEXT_COMPOSITION)
     {
         if (IsVirtualKeyKeystrokeComposition(uCode, pKeyState, FUNCTION_INPUT))
         {
@@ -1065,7 +1065,7 @@ BOOL CompositionProcessorEngine::IsVirtualKeyNeed(UINT uCode, WCHAR wch, BOOL fC
     // System pre-defined keystroke
     if (fComposing)
     {
-        if ((candidateMode != CANDIDATE_INCREMENTAL))
+        if ((_candidateMode != CANDIDATE_INCREMENTAL))
         {
             switch (uCode)
             {
@@ -1086,7 +1086,7 @@ BOOL CompositionProcessorEngine::IsVirtualKeyNeed(UINT uCode, WCHAR wch, BOOL fC
             case VK_SPACE:  if (pKeyState) { pKeyState->Category = CATEGORY_COMPOSING; pKeyState->Function = FUNCTION_CONVERT; } return TRUE;
             }
         }
-        else if ((candidateMode == CANDIDATE_INCREMENTAL))
+        else if ((_candidateMode == CANDIDATE_INCREMENTAL))
         {
             switch (uCode)
             {
@@ -1119,7 +1119,7 @@ BOOL CompositionProcessorEngine::IsVirtualKeyNeed(UINT uCode, WCHAR wch, BOOL fC
 
             case VK_SPACE:
                 {
-                    if (candidateMode == CANDIDATE_INCREMENTAL)
+                    if (_candidateMode == CANDIDATE_INCREMENTAL)
                     {
                         if (pKeyState) { pKeyState->Category = CATEGORY_CANDIDATE; pKeyState->Function = FUNCTION_CONVERT; } return TRUE;
                     }
@@ -1132,7 +1132,7 @@ BOOL CompositionProcessorEngine::IsVirtualKeyNeed(UINT uCode, WCHAR wch, BOOL fC
         }
     }
 
-    if ((candidateMode == CANDIDATE_ORIGINAL) || (candidateMode == CANDIDATE_WITH_NEXT_COMPOSITION))
+    if ((_candidateMode == CANDIDATE_ORIGINAL) || (_candidateMode == CANDIDATE_WITH_NEXT_COMPOSITION))
     {
         switch (uCode)
         {
@@ -1148,7 +1148,7 @@ BOOL CompositionProcessorEngine::IsVirtualKeyNeed(UINT uCode, WCHAR wch, BOOL fC
 
         case VK_ESCAPE:
             {
-                if (candidateMode == CANDIDATE_WITH_NEXT_COMPOSITION)
+                if (_candidateMode == CANDIDATE_WITH_NEXT_COMPOSITION)
                 {
                     if (pKeyState)
                     {
@@ -1169,7 +1169,7 @@ BOOL CompositionProcessorEngine::IsVirtualKeyNeed(UINT uCode, WCHAR wch, BOOL fC
             }
         }
 
-        if (candidateMode == CANDIDATE_WITH_NEXT_COMPOSITION)
+        if (_candidateMode == CANDIDATE_WITH_NEXT_COMPOSITION)
         {
             if (IsVirtualKeyKeystrokeComposition(uCode, NULL, FUNCTION_NONE))
             {
@@ -1178,7 +1178,7 @@ BOOL CompositionProcessorEngine::IsVirtualKeyNeed(UINT uCode, WCHAR wch, BOOL fC
         }
     }
 
-    if (candidateMode == CANDIDATE_PHRASE)
+    if (_candidateMode == CANDIDATE_PHRASE)
     {
         switch (uCode)
         {
@@ -1195,7 +1195,7 @@ BOOL CompositionProcessorEngine::IsVirtualKeyNeed(UINT uCode, WCHAR wch, BOOL fC
         }
     }
 
-    if (IsKeystrokeRange(uCode, pKeyState, candidateMode))
+    if (IsKeystrokeRange(uCode, pKeyState))
     {
         return TRUE;
     }
@@ -1265,7 +1265,7 @@ BOOL CompositionProcessorEngine::IsVirtualKeyKeystrokeComposition(UINT uCode, _O
 //
 //----------------------------------------------------------------------------
 
-BOOL CompositionProcessorEngine::IsVirtualKeyKeystrokeCandidate(UINT uCode, _In_ _KEYSTROKE_STATE *pKeyState, CANDIDATE_MODE candidateMode, _Out_ BOOL *pfRetCode, _In_ std::vector<_KEYSTROKE> *pKeystrokeMetric)
+BOOL CompositionProcessorEngine::IsVirtualKeyKeystrokeCandidate(UINT uCode, _In_ _KEYSTROKE_STATE *pKeyState, _Out_ BOOL *pfRetCode, _In_ std::vector<_KEYSTROKE> *pKeystrokeMetric)
 {
     if (pfRetCode == nullptr)
     {
@@ -1284,8 +1284,8 @@ BOOL CompositionProcessorEngine::IsVirtualKeyKeystrokeCandidate(UINT uCode, _In_
             *pfRetCode = TRUE;
             if (pKeyState)
             {
-                pKeyState->Category = (candidateMode == CANDIDATE_ORIGINAL ? CATEGORY_CANDIDATE :
-                    candidateMode == CANDIDATE_PHRASE ? CATEGORY_PHRASE : CATEGORY_CANDIDATE);
+                pKeyState->Category = (_candidateMode == CANDIDATE_ORIGINAL ? CATEGORY_CANDIDATE :
+                    _candidateMode == CANDIDATE_PHRASE ? CATEGORY_PHRASE : CATEGORY_CANDIDATE);
 
                 pKeyState->Function = pKeystroke->Function;
             }
@@ -1316,7 +1316,7 @@ inline int FindVkInVector(const std::vector<DWORD>& srcVkList, UINT vk)
     return -1;
 }
 
-BOOL CompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_STATE *pKeyState, CANDIDATE_MODE candidateMode)
+BOOL CompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_STATE *pKeyState)
 {
     if (pKeyState == nullptr)
     {
@@ -1328,7 +1328,7 @@ BOOL CompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_S
 
     if (FindVkInVector(_candidateListIndexRange, uCode) != -1)
     {
-        if (candidateMode == CANDIDATE_PHRASE)
+        if (_candidateMode == CANDIDATE_PHRASE)
         {
             // Candidate phrase could specify modifier
             if ((GetCandidateListPhraseModifier() == 0 && Global::ModifiersValue == 0) ||
@@ -1343,7 +1343,7 @@ BOOL CompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_S
                 return FALSE;
             }
         }
-        else if (candidateMode == CANDIDATE_WITH_NEXT_COMPOSITION)
+        else if (_candidateMode == CANDIDATE_WITH_NEXT_COMPOSITION)
         {
             // Candidate phrase could specify modifier
             if ((GetCandidateListPhraseModifier() == 0 && Global::ModifiersValue == 0) ||
@@ -1354,7 +1354,7 @@ BOOL CompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_S
             }
             // else next composition
         }
-        else if (candidateMode != CANDIDATE_NONE)
+        else if (_candidateMode != CANDIDATE_NONE)
         {
             pKeyState->Category = CATEGORY_CANDIDATE; pKeyState->Function = FUNCTION_SELECT_BY_NUMBER;
             return TRUE;
@@ -1377,16 +1377,12 @@ void CompositionProcessorEngine::EndComposition(_In_opt_ ITfContext *pContext)
     }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
-void CompositionProcessorEngine::FinalizeCandidateList(_In_ ITfContext *pContext, KEYSTROKE_CATEGORY Category)
+void CompositionProcessorEngine::FinalizeCandidateList(_In_ ITfContext *pContext)
 {
     _KEYSTROKE_STATE KeystrokeState = {};
-    KeystrokeState.Category = Category;
+    KeystrokeState.Category = _keyStrokeCategory;
     KeystrokeState.Function = FUNCTION_FINALIZE_CANDIDATELIST;
 
-//    m_owner->_SubmitEditSessionTask(pContext, [this, KeystrokeState, pContext](TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
-//    {
-//        return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, 0, 0, textService);
-//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 	KeyHandlerEditSession_DoEditSession(KeystrokeState, pContext, 0, 0);
 }
 

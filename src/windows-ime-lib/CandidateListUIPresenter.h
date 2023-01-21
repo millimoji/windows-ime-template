@@ -29,27 +29,13 @@ struct IInternalFrameworkService;
 
 class CCandidateListUIPresenter : public CTfTextLayoutSink,
     public ITfCandidateListUIElementBehavior,
-    public ITfIntegratableCandidateListUIElement,
-    public WindowsImeLib::IWindowsIMECandidateListView
+    public ITfIntegratableCandidateListUIElement
 {
 public:
     CCandidateListUIPresenter(_In_ IInternalFrameworkService *pTextService, ATOM atom,
-        KEYSTROKE_CATEGORY Category,
         _In_ std::vector<DWORD> *pIndexRange,
         BOOL hideWindow);
     virtual ~CCandidateListUIPresenter();
-
-private:
-    void CreateView(ATOM, KEYSTROKE_CATEGORY, _In_ std::vector<DWORD>*, BOOL) override {
-        assert(false);
-    }
-    void DestroyView() override {
-        assert(false);
-    }
-    bool IsCreated() override {
-        assert(false);
-        return false;
-    }
 
 public:
     // IUnknown
@@ -86,38 +72,38 @@ private:
     STDMETHODIMP ShowCandidateNumbers(_Out_ BOOL *pIsShow); 
     STDMETHODIMP FinalizeExactCompositionString();
 
-private:
+public: // WindowsImeLib::IWindowsIMECandidateListView
     // transfer from parent class
-    ITfContext* _GetContextDocument() override { return CTfTextLayoutSink::_GetContextDocument(); };
+    ITfContext* _GetContextDocument() { return CTfTextLayoutSink::_GetContextDocument(); };
 
-    HRESULT _StartCandidateList(TfClientId tfClientId, _In_ ITfDocumentMgr *pDocumentMgr, _In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth) override;
-    void _EndCandidateList() override;
+    HRESULT _StartCandidateList(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth);
+    void _EndCandidateList();
 
-    void _SetText(_In_ std::vector<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode) override;
-    void _ClearList() override;
-    VOID _SetTextColor(COLORREF crColor, COLORREF crBkColor) override;
-    VOID _SetFillColor(HBRUSH hBrush) override;;
+    void _SetText(_In_ std::vector<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode) ;
+    void _ClearList();
+    VOID _SetTextColor(COLORREF crColor, COLORREF crBkColor);
+    VOID _SetFillColor(HBRUSH hBrush);
 
-    DWORD_PTR _GetSelectedCandidateString(_Outptr_result_maybenull_ const WCHAR **ppwchCandidateString) override;
+    DWORD_PTR _GetSelectedCandidateString(_Outptr_result_maybenull_ const WCHAR **ppwchCandidateString);
 
-    BOOL _SetSelectionInPage(int nPos) override { return _pCandidateWnd->_SetSelectionInPage(nPos); }
+    BOOL _SetSelectionInPage(int nPos) { return _pCandidateWnd->_SetSelectionInPage(nPos); }
 
     BOOL _MoveSelection(_In_ int offSet);
     BOOL _SetSelection(_In_ int selectedIndex);
     BOOL _MovePage(_In_ int offSet);
 
-    void _MoveWindowToTextExt();
+    void _MoveWindowToTextExt(TfEditCookie ec);
 
     // CTfTextLayoutSink
     virtual VOID _LayoutChangeNotification(_In_ RECT *lpRect);
     virtual VOID _LayoutDestroyNotification();
 
     // Event for ITfThreadFocusSink
-    virtual HRESULT OnSetThreadFocus() override;
-    virtual HRESULT OnKillThreadFocus() override;
+    virtual HRESULT OnSetThreadFocus();
+    virtual HRESULT OnKillThreadFocus();
 
-    void RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, _In_ CStringRange &srgCandidateString) override;
-    void AdviseUIChangedByArrowKey(_In_ KEYSTROKE_FUNCTION arrowKey) override;
+    void RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, _In_ CStringRange &srgCandidateString);
+    void AdviseUIChangedByArrowKey(_In_ CANDIDATELIST_FUNCTION arrowKey);
 
 private:
     virtual HRESULT CALLBACK _CandidateChangeNotification(_In_ enum CANDWND_ACTION action);
@@ -127,7 +113,6 @@ private:
     HRESULT _UpdateUIElement();
 
     HRESULT ToShowCandidateWindow();
-
     HRESULT ToHideCandidateWindow();
 
     HRESULT BeginUIElement();
@@ -150,7 +135,6 @@ private:
     HWND _parentWndHandle;
     ATOM _atom;
     std::vector<DWORD>* _pIndexRange;
-    KEYSTROKE_CATEGORY _Category;
     DWORD _updatedFlags;
     DWORD _uiElementId;
     IInternalFrameworkService* _pTextService;

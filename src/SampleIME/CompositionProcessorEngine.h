@@ -57,7 +57,7 @@ public:
     BOOL IsMakePhraseFromText() { return _hasMakePhraseFromText; }
 
     void EndComposition(_In_opt_ ITfContext* pContext) override;
-    void FinalizeCandidateList(_In_ ITfContext *pContext, KEYSTROKE_CATEGORY Category) override;
+    void FinalizeCandidateList(_In_ ITfContext *pContext) override;
     VOID _DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext) override;
 
     // Language bar control
@@ -76,8 +76,19 @@ public:
         m_compartmentIsPunctuation = json["isPunctuation"].get<bool>();
     }
 
+    void SetCandidateKeyStrokeCategory(KEYSTROKE_CATEGORY keyStrokeCategory) { _keyStrokeCategory = keyStrokeCategory; }
+    CANDIDATE_MODE CandidateMode() { return _candidateMode; }
+    void SetCandidateMode(CANDIDATE_MODE candidateMode) { _candidateMode = candidateMode; }
+    bool IsCandidateWithWildcard() { return _isCandidateWithWildcard; }
+    void SetIsCandidateWithWildcard(BOOL f) { _isCandidateWithWildcard = f; }
+    void ResetCandidateState()
+    {
+        _candidateMode  = CANDIDATE_NONE;
+        _isCandidateWithWildcard = FALSE;
+    }
+
 private:
-    BOOL IsVirtualKeyNeed(UINT uCode, wchar_t wch, BOOL fComposing, CANDIDATE_MODE candidateMode, BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
+    BOOL IsVirtualKeyNeed(UINT uCode, wchar_t wch, BOOL fComposing, BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
     WCHAR GetVirtualKey(DWORD_PTR dwIndex);
     BOOL IsWildcard() { return _isWildcard; }
     BOOL IsDisableWildcardAtFirst() { return _isDisableWildcardAtFirst; }
@@ -97,8 +108,8 @@ private:
 
     struct _KEYSTROKE;
     BOOL IsVirtualKeyKeystrokeComposition(UINT uCode, _Out_opt_ _KEYSTROKE_STATE *pKeyState, KEYSTROKE_FUNCTION function);
-    BOOL IsVirtualKeyKeystrokeCandidate(UINT uCode, _In_ _KEYSTROKE_STATE *pKeyState, CANDIDATE_MODE candidateMode, _Out_ BOOL *pfRetCode, _In_ std::vector<_KEYSTROKE> *pKeystrokeMetric);
-    BOOL IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_STATE *pKeyState, CANDIDATE_MODE candidateMode);
+    BOOL IsVirtualKeyKeystrokeCandidate(UINT uCode, _In_ _KEYSTROKE_STATE *pKeyState, _Out_ BOOL *pfRetCode, _In_ std::vector<_KEYSTROKE> *pKeystrokeMetric);
+    BOOL IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_STATE *pKeyState);
 
     void SetupKeystroke();
 //    void SetupPreserved(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
@@ -121,7 +132,6 @@ private:
     
     BOOL SetupDictionaryFile();
     CFile* GetDictionaryFile();
-
 
     // in KeyEventSink.cpp
     BOOL _IsKeyEaten(_In_ UINT codeIn, wchar_t wch, UINT vkPackSource, bool isKbdDisabled, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
@@ -211,6 +221,10 @@ private:
     std::vector<DWORD> _candidateListIndexRange;
     UINT _candidateListPhraseModifier;
 //    UINT _candidateWndWidth;
+
+    KEYSTROKE_CATEGORY _keyStrokeCategory;
+    CANDIDATE_MODE _candidateMode;
+    BOOL _isCandidateWithWildcard = FALSE;
 
     CFileMapping* _pDictionaryFile;
 

@@ -14,7 +14,6 @@
 struct IInternalFrameworkService
 {
     virtual ITfCompositionSink* GetCompositionSink() = 0;
-    virtual TfClientId _GetClientId() = 0;
     virtual wil::com_ptr<ITfThreadMgr> _GetThreadMgr() = 0;
     virtual BOOL _IsStoreAppMode() = 0;
     virtual std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() = 0;
@@ -22,6 +21,7 @@ struct IInternalFrameworkService
 };
 
 #include "CompositionBuffer.h"
+#include "CandidateListView.h"
 
 class CLangBarItemButton;
 //class CCandidateListUIPresenter;
@@ -110,7 +110,6 @@ public:
 
     // utility function for thread manager.
     wil::com_ptr<ITfThreadMgr> _GetThreadMgr() override { return _pThreadMgr; }
-    TfClientId _GetClientId() override { return _tfClientId; }
 
     // functions for the composition object.
 //    void _SetComposition(_In_ ITfComposition *pComposition);
@@ -160,7 +159,6 @@ private:
 
 //    void _StartComposition(_In_ ITfContext *pContext) override;
 //    void _EndComposition(_In_opt_ ITfContext *pContext) override;
-//    BOOL _IsComposing() override;
     bool _IsKeyboardDisabled();
 //    CANDIDATE_MODE _CandidateMode() override { return _candidateMode; }
 //    bool IsCandidateWithWildcard() override { return _isCandidateWithWildcard; }
@@ -268,8 +266,8 @@ private:
     // Support the search integration
     wil::com_ptr<ITfFnSearchCandidateProvider> _pITfFnSearchCandidateProvider;
 
-    std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> m_compositionBuffer;
-    std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> m_candidateListView;
+    std::shared_ptr<CompositionBuffer> m_compositionBuffer;
+    std::shared_ptr<CandidateListView> m_candidateListView;
 
     std::shared_ptr<WindowsImeLib::IWindowsIMEInprocClient> m_inprocClient;
     wil::com_ptr<ITextInputProcessor> m_singletonProcessor;

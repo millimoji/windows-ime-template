@@ -59,7 +59,6 @@ BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT /*codeIn*/, wchar_t wch, 
     BOOL isOpen = m_compartmentIsOpen;
     BOOL isDoubleSingleByte = m_compartmentIsDoubleSingleByte;
     BOOL isPunctuation = m_compartmentIsPunctuation;
-    const auto candidateMode = m_compositionBuffer->CandidateMode();
 
     if (pKeyState)
     {
@@ -110,10 +109,10 @@ BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT /*codeIn*/, wchar_t wch, 
         //
         // eat only keys that CKeyHandlerEditSession can handles.
         //
-        const auto isCandidateWithWildcard = m_compositionBuffer->IsCandidateWithWildcard();
+        const auto isCandidateWithWildcard = _isCandidateWithWildcard;
         const auto isComposing = m_compositionBuffer->_IsComposing();
 
-        if (IsVirtualKeyNeed(vkPackSource, wch, isComposing, candidateMode, isCandidateWithWildcard, pKeyState))
+        if (IsVirtualKeyNeed(vkPackSource, wch, isComposing, isCandidateWithWildcard, pKeyState))
         {
             return TRUE;
         }
@@ -124,7 +123,7 @@ BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT /*codeIn*/, wchar_t wch, 
     //
     if (IsPunctuation(wch))
     {
-        if ((candidateMode == CANDIDATE_NONE) && isPunctuation)
+        if ((_candidateMode == CANDIDATE_NONE) && isPunctuation)
         {
             if (pKeyState)
             {
@@ -140,7 +139,7 @@ BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT /*codeIn*/, wchar_t wch, 
     //
     if (isDoubleSingleByte && IsDoubleSingleByte(wch))
     {
-        if (candidateMode == CANDIDATE_NONE)
+        if (_candidateMode == CANDIDATE_NONE)
         {
             if (pKeyState)
             {
@@ -271,12 +270,6 @@ HRESULT CompositionProcessorEngine::OnTestKeyDown(ITfContext *pContext, WPARAM w
         // Invoke key handler edit session
         //
         KeystrokeState.Category = CATEGORY_COMPOSING;
-//        m_owner->_InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
-//        m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, _In_ WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
-//            {
-//                return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, textService);
-//            }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
-
         return KeyHandlerEditSession_DoEditSession(KeystrokeState, pContext, code, wch);
     }
 
@@ -316,23 +309,13 @@ HRESULT CompositionProcessorEngine::OnKeyDown(ITfContext *pContext, WPARAM wPara
 
         if (needInvokeKeyHandler)
         {
-//            m_owner->_InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
-//            m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, _In_ WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
-//                {
-//                    return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, textService);
-//                }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
-                KeyHandlerEditSession_DoEditSession(KeystrokeState, pContext, vkPackSource, wch);
+            KeyHandlerEditSession_DoEditSession(KeystrokeState, pContext, vkPackSource, wch);
         }
     }
     else if (KeystrokeState.Category == CATEGORY_INVOKE_COMPOSITION_EDIT_SESSION)
     {
         // Invoke key handler edit session
         KeystrokeState.Category = CATEGORY_COMPOSING;
-//        m_owner->_InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
-//        m_owner->_SubmitEditSessionTask(pContext, [=](TfEditCookie ec, _In_ WindowsImeLib::IWindowsIMECompositionBuffer* textService) -> HRESULT
-//            {
-//                return KeyHandlerEditSession_DoEditSession(ec, KeystrokeState, pContext, code, wch, textService);
-//            }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
         KeyHandlerEditSession_DoEditSession(KeystrokeState, pContext, vkPackSource, wch);
     }
 

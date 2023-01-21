@@ -48,28 +48,6 @@ STDAPI CWindowsIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfCompos
 
 //+---------------------------------------------------------------------------
 //
-// _IsComposing
-//
-//----------------------------------------------------------------------------
-
-BOOL CompositionBuffer::_IsComposing()
-{
-    return !!_pComposition;
-}
-
-//+---------------------------------------------------------------------------
-//
-// _SetComposition
-//
-//----------------------------------------------------------------------------
-
-void CompositionBuffer::_SetComposition(_In_ ITfComposition *pComposition)
-{
-    _pComposition = pComposition;
-}
-
-//+---------------------------------------------------------------------------
-//
 // _AddComposingAndChar
 //
 //----------------------------------------------------------------------------

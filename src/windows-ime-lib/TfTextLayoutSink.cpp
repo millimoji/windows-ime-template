@@ -18,7 +18,7 @@ CTfTextLayoutSink::CTfTextLayoutSink(_In_ IInternalFrameworkService *pTextServic
 
     _pRangeComposition = nullptr;
     _pContextDocument = nullptr;
-    _tfEditCookie = TF_INVALID_EDIT_COOKIE;
+//    _tfEditCookie = TF_INVALID_EDIT_COOKIE;
 
     _dwCookieTextLayoutSink = TF_INVALID_COOKIE;
 
@@ -109,8 +109,8 @@ STDAPI CTfTextLayoutSink::OnLayoutChange(_In_ ITfContext *pContext, TfLayoutCode
 //            }
 
             _pTextService->_SubmitEditSessionTask(pContext, [&](TfEditCookie ec) -> HRESULT {
-                    RECT rc = {0, 0, 0, 0};
-                    BOOL isClipped = TRUE;
+                    RECT rc = {};
+                    BOOL isClipped = {};
                     if (SUCCEEDED_LOG(pContextView->GetTextExt(ec, _pRangeComposition, &rc, &isClipped)))
                     {
                         _LayoutChangeNotification(&rc);
@@ -208,7 +208,7 @@ HRESULT CTfTextLayoutSink::_UnadviseTextLayoutSink()
     return hr;
 }
 
-HRESULT CTfTextLayoutSink::_GetTextExt(_Out_ RECT *lpRect)
+HRESULT CTfTextLayoutSink::_GetTextExt(TfEditCookie ec, _Out_ RECT *lpRect)
 {
     HRESULT hr = S_OK;
     BOOL isClipped = TRUE;
@@ -220,7 +220,7 @@ HRESULT CTfTextLayoutSink::_GetTextExt(_Out_ RECT *lpRect)
         return hr;
     }
 
-    if (FAILED(hr = pContextView->GetTextExt(_tfEditCookie, _pRangeComposition, lpRect, &isClipped)))
+    if (FAILED(hr = pContextView->GetTextExt(ec, _pRangeComposition, lpRect, &isClipped)))
     {
         return hr;
     }

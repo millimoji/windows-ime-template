@@ -14,24 +14,24 @@ class CandidateListView :
 public:
     CandidateListView(IInternalFrameworkService* framework) : m_framework(framework) {}
 private:
-    void CreateView(ATOM atom, KEYSTROKE_CATEGORY Category, _In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) override
+    void CreateView(_In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) override
     {
-        m_mainPresenter.reset();
-        m_mainPresenter.attach(new CCandidateListUIPresenter(m_framework, atom, Category, pIndexRange, hideWindow));
-        m_presenter = static_cast<WindowsImeLib::IWindowsIMECandidateListView*>(m_mainPresenter.get());
+        m_presenter.reset();
+        m_presenter.attach(new CCandidateListUIPresenter(m_framework, Global::AtomCandidateWindow, pIndexRange, hideWindow));
     }
+public:
     void DestroyView() override {
-        m_mainPresenter.reset();
+        m_presenter.reset();
     }
     bool IsCreated() override {
-        return !!m_mainPresenter;
+        return !!m_presenter;
     }
     ITfContext* _GetContextDocument() override {
         return m_presenter->_GetContextDocument();
     }
-    HRESULT _StartCandidateList(TfClientId tfClientId, _In_ ITfDocumentMgr *pDocumentMgr, _In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth) override
+    HRESULT _StartCandidateList(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth) override
     {
-        return m_presenter->_StartCandidateList(tfClientId, pDocumentMgr, pContextDocument, ec, pRangeComposition, wndWidth);
+        return m_presenter->_StartCandidateList(pContextDocument, ec, pRangeComposition, wndWidth);
     }
     void _EndCandidateList() override {
         if (m_presenter) { m_presenter->_EndCandidateList(); }
@@ -56,22 +56,23 @@ private:
         return m_presenter->_SetSelectionInPage(nPos);
     }
 
-    HRESULT OnSetThreadFocus() override {
+public:
+    HRESULT OnSetThreadFocus() {
         return m_presenter->OnSetThreadFocus();
     }
-    HRESULT OnKillThreadFocus() override {
+    HRESULT OnKillThreadFocus() {
         return m_presenter->OnKillThreadFocus();
     }
 
+private:
     void RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, _In_ CStringRange &srgCandidateString) override {
         return m_presenter->RemoveSpecificCandidateFromList(Locale, candidateList, srgCandidateString);
     }
-    void AdviseUIChangedByArrowKey(_In_ KEYSTROKE_FUNCTION arrowKey) override {
+    void AdviseUIChangedByArrowKey(_In_ CANDIDATELIST_FUNCTION arrowKey) override {
         return m_presenter->AdviseUIChangedByArrowKey(arrowKey);
     }
 
 private:
     IInternalFrameworkService* m_framework;
-    wil::com_ptr<CCandidateListUIPresenter> m_mainPresenter;
-    WindowsImeLib::IWindowsIMECandidateListView* m_presenter = nullptr;
+    wil::com_ptr<CCandidateListUIPresenter> m_presenter;
 };
