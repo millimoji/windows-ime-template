@@ -8,6 +8,7 @@
 #include "Private.h"
 #include "Globals.h"
 #include "WindowsIME.h"
+#include "CompositionBuffer.h"
 
 //+---------------------------------------------------------------------------
 //

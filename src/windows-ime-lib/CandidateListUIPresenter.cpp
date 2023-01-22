@@ -6,10 +6,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #include "Private.h"
-#include "WindowsIME.h"
 #include "Globals.h"
+#include "CandidateListUIPresenter.h"
 #include "CandidateListView.h"
-#include "BaseStructure.h"
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -21,6 +20,7 @@ const int MOVEUP_ONE = -1;
 const int MOVEDOWN_ONE = 1;
 const int MOVETO_TOP = 0;
 const int MOVETO_BOTTOM = -1;
+
 // //+---------------------------------------------------------------------------
 // //
 // // _HandleCandidateFinalize
@@ -348,7 +348,8 @@ const int MOVETO_BOTTOM = -1;
 //
 //----------------------------------------------------------------------------
 
-CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ IInternalFrameworkService* pTextService, ATOM atom, _In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) : CTfTextLayoutSink(pTextService)
+HRESULT CCandidateListUIPresenter::RuntimeClassInitialize(_In_ ICandidateListViewOwner* pTextService, ATOM atom, _In_ std::vector<DWORD>* pIndexRange, BOOL hideWindow)
+    // : CTfTextLayoutSink(pTextService)
 {
     _atom = atom;
 
@@ -367,6 +368,7 @@ CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ IInternalFrameworkServ
 //    _pTextService->AddRef();
 
     // _refCount = 1;
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -381,84 +383,84 @@ CCandidateListUIPresenter::~CCandidateListUIPresenter()
 //    _pTextService->Release();
 }
 
-//+---------------------------------------------------------------------------
-//
-// ITfCandidateListUIElement::IUnknown::QueryInterface
-//
-//----------------------------------------------------------------------------
-
-STDAPI CCandidateListUIPresenter::QueryInterface(REFIID riid, _Outptr_ void **ppvObj)
-{
-    if (CTfTextLayoutSink::QueryInterface(riid, ppvObj) == S_OK)
-    {
-        return S_OK;
-    }
-
-    if (ppvObj == nullptr)
-    {
-        return E_INVALIDARG;
-    }
-
-    *ppvObj = nullptr;
-
-    if (IsEqualIID(riid, IID_ITfUIElement) ||
-        IsEqualIID(riid, IID_ITfCandidateListUIElement))
-    {
-        *ppvObj = (ITfCandidateListUIElement*)this;
-    }
-    else if (IsEqualIID(riid, IID_IUnknown) || 
-        IsEqualIID(riid, IID_ITfCandidateListUIElementBehavior)) 
-    {
-        *ppvObj = (ITfCandidateListUIElementBehavior*)this;
-    }
-    else if (IsEqualIID(riid, __uuidof(ITfIntegratableCandidateListUIElement))) 
-    {
-        *ppvObj = (ITfIntegratableCandidateListUIElement*)this;
-    }
-
-    if (*ppvObj)
-    {
-        AddRef();
-        return S_OK;
-    }
-
-    return E_NOINTERFACE;
-}
-
-//+---------------------------------------------------------------------------
-//
-// ITfCandidateListUIElement::IUnknown::AddRef
-//
-//----------------------------------------------------------------------------
-
-STDAPI_(ULONG) CCandidateListUIPresenter::AddRef()
-{
-    return CTfTextLayoutSink::AddRef();
-    // return ++_refCount;
-}
-
-//+---------------------------------------------------------------------------
-//
-// ITfCandidateListUIElement::IUnknown::Release
-//
-//----------------------------------------------------------------------------
-
-STDAPI_(ULONG) CCandidateListUIPresenter::Release()
-{
-    return CTfTextLayoutSink::Release();
-
-// Bug?? double free
-//    LONG cr = --_refCount;
-//
-//    assert(_refCount >= 0);
-//
-//    if (_refCount == 0)
-//    {
-//        delete this;
-//    }
-//
-//    return cr;
-}
+// //+---------------------------------------------------------------------------
+// //
+// // ITfCandidateListUIElement::IUnknown::QueryInterface
+// //
+// //----------------------------------------------------------------------------
+// 
+// STDAPI CCandidateListUIPresenter::QueryInterface(REFIID riid, _Outptr_ void **ppvObj)
+// {
+//     if (CTfTextLayoutSink::QueryInterface(riid, ppvObj) == S_OK)
+//     {
+//         return S_OK;
+//     }
+// 
+//     if (ppvObj == nullptr)
+//     {
+//         return E_INVALIDARG;
+//     }
+// 
+//     *ppvObj = nullptr;
+// 
+//     if (IsEqualIID(riid, IID_ITfUIElement) ||
+//         IsEqualIID(riid, IID_ITfCandidateListUIElement))
+//     {
+//         *ppvObj = (ITfCandidateListUIElement*)this;
+//     }
+//     else if (IsEqualIID(riid, IID_IUnknown) || 
+//         IsEqualIID(riid, IID_ITfCandidateListUIElementBehavior)) 
+//     {
+//         *ppvObj = (ITfCandidateListUIElementBehavior*)this;
+//     }
+//     else if (IsEqualIID(riid, __uuidof(ITfIntegratableCandidateListUIElement))) 
+//     {
+//         *ppvObj = (ITfIntegratableCandidateListUIElement*)this;
+//     }
+// 
+//     if (*ppvObj)
+//     {
+//         AddRef();
+//         return S_OK;
+//     }
+// 
+//     return E_NOINTERFACE;
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // ITfCandidateListUIElement::IUnknown::AddRef
+// //
+// //----------------------------------------------------------------------------
+// 
+// STDAPI_(ULONG) CCandidateListUIPresenter::AddRef()
+// {
+//     return CTfTextLayoutSink::AddRef();
+//     // return ++_refCount;
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // ITfCandidateListUIElement::IUnknown::Release
+// //
+// //----------------------------------------------------------------------------
+// 
+// STDAPI_(ULONG) CCandidateListUIPresenter::Release()
+// {
+//     return CTfTextLayoutSink::Release();
+// 
+// // Bug?? double free
+// //    LONG cr = --_refCount;
+// //
+// //    assert(_refCount >= 0);
+// //
+// //    if (_refCount == 0)
+// //    {
+// //        delete this;
+// //    }
+// //
+// //    return cr;
+// }
 
 //+---------------------------------------------------------------------------
 //
@@ -514,7 +516,7 @@ HRESULT CCandidateListUIPresenter::ToShowCandidateWindow()
     }
     else
     {
-        _MoveWindowToTextExt(_tfEditCookie);
+        _MoveWindowToTextExt(_pTextService->GetCachedEditCookie());
 
         _pCandidateWnd->_Show(TRUE);
     }
@@ -795,7 +797,7 @@ HRESULT CCandidateListUIPresenter::_StartCandidateList(_In_ ITfContext *pContext
 {
     HRESULT hr = E_FAIL;
 
-    if (FAILED(_StartLayout(pContextDocument, ec, pRangeComposition)))
+    if (FAILED(_pTextService->_StartLayout(pContextDocument, ec, pRangeComposition)))
     {
         goto Exit;
     }
@@ -811,7 +813,7 @@ HRESULT CCandidateListUIPresenter::_StartCandidateList(_In_ ITfContext *pContext
     Show(_isShowMode);
 
     RECT rcTextExt;
-    if (SUCCEEDED(_GetTextExt(ec, &rcTextExt)))
+    if (SUCCEEDED(_pTextService->_GetTextExt(ec, &rcTextExt)))
     {
         _LayoutChangeNotification(&rcTextExt);
     }
@@ -836,7 +838,7 @@ void CCandidateListUIPresenter::_EndCandidateList()
 
     DisposeCandidateWindow();
 
-    _EndLayout();
+    _pTextService->_EndLayout();
 }
 
 //+---------------------------------------------------------------------------
@@ -1016,7 +1018,7 @@ void CCandidateListUIPresenter::_MoveWindowToTextExt(TfEditCookie ec)
 {
     RECT rc;
 
-    if (FAILED(_GetTextExt(ec, &rc)))
+    if (FAILED(_pTextService->_GetTextExt(ec, &rc)))
     {
         return;
     }
@@ -1279,7 +1281,9 @@ HRESULT CCandidateListUIPresenter::BeginUIElement()
         hr = pThreadMgr->QueryInterface(IID_ITfUIElementMgr, (void**)&pUIElementMgr);
         if (hr == S_OK)
         {
-            pUIElementMgr->BeginUIElement(this, &_isShowMode, &_uiElementId);
+            wil::com_ptr<ITfUIElement> uiElement;
+            RETURN_IF_FAILED(QueryInterface(IID_PPV_ARGS(&uiElement)));
+            pUIElementMgr->BeginUIElement(uiElement.get(), &_isShowMode, &_uiElementId);
             pUIElementMgr->Release();
         }
     }

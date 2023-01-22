@@ -26,7 +26,7 @@ BOOL CWindowsIME::_InitFunctionProviderSink()
         {
             if (SUCCEEDED(pSourceSingle->AdviseSingleSink(_tfClientId, IID_ITfFunctionProvider, punk)))
             {
-                if (SUCCEEDED(CSearchCandidateProvider::CreateInstance(&_pITfFnSearchCandidateProvider, (ITfTextInputProcessorEx*)this)))
+                if (SUCCEEDED(CSearchCandidateProvider::CreateInstance(&_pITfFnSearchCandidateProvider, (ITfTextInputProcessorEx*)this, (ISearchCandidateProviderOwner*)this)))
                 {
                     ret = TRUE;
                 }

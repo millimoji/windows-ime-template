@@ -4,30 +4,55 @@
 #include "Private.h"
 #include "Globals.h"
 #include "../WindowsImeLib.h"
-#include "WindowsIME.h"
 #include "CandidateListUIPresenter.h"
+
+struct ICandidateListViewOwner
+{
+    virtual HRESULT _StartLayout(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition) = 0;
+    virtual void _EndLayout() = 0;
+    virtual HRESULT _GetTextExt(TfEditCookie ec, _Out_ RECT *lpRect) = 0;
+    virtual BOOL _IsStoreAppMode() = 0;
+    virtual wil::com_ptr<ITfThreadMgr> _GetThreadMgr() = 0;
+    virtual TfEditCookie GetCachedEditCookie() = 0;
+
+    virtual std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() = 0;
+};
+
+struct ICandidateListViewInternal
+{
+    virtual std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> GetClientInterface() = 0;
+    virtual VOID _LayoutChangeNotification(_In_ RECT *lpRect) = 0;
+    virtual VOID _LayoutDestroyNotification() = 0;
+    virtual HRESULT OnSetThreadFocus() = 0;
+    virtual HRESULT OnKillThreadFocus() = 0;
+    virtual void _EndCandidateList() = 0;
+
+    // both?
+    virtual void DestroyView() = 0;
+    virtual bool IsCreated() = 0;
+};
 
 class CandidateListView :
     public WindowsImeLib::IWindowsIMECandidateListView,
+    public ICandidateListViewInternal,
     public std::enable_shared_from_this<CandidateListView>
 {
 public:
-    CandidateListView(IInternalFrameworkService* framework) : m_framework(framework) {}
+    CandidateListView(ICandidateListViewOwner* framework) : m_framework(framework) {}
 private:
     void CreateView(_In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) override
     {
         m_presenter.reset();
-        m_presenter.attach(new CCandidateListUIPresenter(m_framework, Global::AtomCandidateWindow, pIndexRange, hideWindow));
+        THROW_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CCandidateListUIPresenter>(
+            &m_presenter, m_framework, Global::AtomCandidateWindow, pIndexRange, hideWindow));
     }
-public:
+private:
+    // WindowsImeLib::IWindowsIMECandidateListView
     void DestroyView() override {
         m_presenter.reset();
     }
     bool IsCreated() override {
         return !!m_presenter;
-    }
-    ITfContext* _GetContextDocument() override {
-        return m_presenter->_GetContextDocument();
     }
     HRESULT _StartCandidateList(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth) override
     {
@@ -56,12 +81,22 @@ public:
         return m_presenter->_SetSelectionInPage(nPos);
     }
 
-public:
-    HRESULT OnSetThreadFocus() {
-        return m_presenter->OnSetThreadFocus();
+private:
+    // ICandidateListViewInternal
+    std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> GetClientInterface() override {
+		return std::static_pointer_cast<WindowsImeLib::IWindowsIMECandidateListView>(shared_from_this());
+	}
+    VOID _LayoutChangeNotification(_In_ RECT *lpRect) override {
+        if (m_presenter) { return m_presenter->_LayoutChangeNotification(lpRect); }
     }
-    HRESULT OnKillThreadFocus() {
-        return m_presenter->OnKillThreadFocus();
+    VOID _LayoutDestroyNotification() override {
+        if (m_presenter) { return m_presenter->_LayoutDestroyNotification(); }
+    }
+    HRESULT OnSetThreadFocus() override {
+        if (m_presenter) { return m_presenter->OnSetThreadFocus(); } else { return S_OK; }
+    }
+    HRESULT OnKillThreadFocus() override {
+        if (m_presenter) { return m_presenter->OnKillThreadFocus(); } else { return S_OK; }
     }
 
 private:
@@ -73,6 +108,6 @@ private:
     }
 
 private:
-    IInternalFrameworkService* m_framework;
+    ICandidateListViewOwner* m_framework;
     wil::com_ptr<CCandidateListUIPresenter> m_presenter;
 };

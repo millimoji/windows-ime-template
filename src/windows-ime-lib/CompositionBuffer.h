@@ -4,17 +4,36 @@
 #include "Private.h"
 #include "Globals.h"
 #include "../WindowsImeLib.h"
-#include "WindowsIME.h"
-#include "CandidateListUIPresenter.h"
 #include "EditSession.h"
+
+struct ICompositionBufferOwner
+{
+    virtual ~ICompositionBufferOwner() {}
+
+    virtual ITfCompositionSink* GetCompositionSink() = 0;
+    virtual std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() = 0;
+    virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags) = 0;
+};
+
+struct ICompositionBufferInternal
+{
+    virtual ~ICompositionBufferInternal() {}
+
+    virtual std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> GetClientInterface() = 0;
+    virtual wil::com_ptr<ITfComposition> GetComposition() = 0;
+    virtual wil::com_ptr<ITfContext> GetContext() = 0;
+    virtual bool _IsComposing() = 0;
+    virtual HRESULT _RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition) = 0;
+};
 
 class CompositionBuffer :
     public WindowsImeLib::IWindowsIMECompositionBuffer,
+    public ICompositionBufferInternal,
     public std::enable_shared_from_this<CompositionBuffer>
 {
 public:
     CompositionBuffer(
-        IInternalFrameworkService* framework,
+        ICompositionBufferOwner* framework,
         const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& candidateListView,
         const TfClientId& tfClientId,
         const TfGuidAtom& gaDisplayAttributeInput
@@ -77,11 +96,14 @@ private:
 //    VOID _DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext) override;
 
 //    TfClientId GetClientId() override { return _tfClientId; }
-public:
-    bool _IsComposing() override { return !!_pComposition; }
-    wil::com_ptr<ITfContext> GetContext() { return _pContext; }
+
+private: // ICompositionBufferInternal
+    std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> GetClientInterface() override { return std::static_pointer_cast<WindowsImeLib::IWindowsIMECompositionBuffer>(shared_from_this()); }
     wil::com_ptr<ITfComposition> GetComposition() override { return _pComposition; }
+    wil::com_ptr<ITfContext> GetContext() override { return _pContext; }
+    bool _IsComposing() override { return !!_pComposition; }
     HRESULT _RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition) override;
+
 private:
     HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags) override
     {
@@ -92,13 +114,12 @@ private:
     void _SaveCompositionContext(_In_ ITfContext *pContext);
 
 private:
-    IInternalFrameworkService* m_framework = nullptr;
+    ICompositionBufferOwner* m_framework = nullptr;
     std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> _pCandidateListUIPresenter;
 
     TfClientId _tfClientId = TF_CLIENTID_NULL;
     TfGuidAtom _gaDisplayAttributeInput = {};
 
-    // need to sync with m_textService
     wil::com_ptr<ITfContext> _pContext;
     wil::com_ptr<ITfComposition> _pComposition;
 };

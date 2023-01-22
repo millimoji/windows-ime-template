@@ -16,56 +16,48 @@
 create instance of CSearchCandidateProvider
 
 ------------------------------------------------------------------------------*/
-HRESULT CSearchCandidateProvider::CreateInstance(_Outptr_ ITfFnSearchCandidateProvider **ppobj, _In_ ITfTextInputProcessorEx *ptip)
-{  
-    if (ppobj == nullptr)
-    {
-        return E_INVALIDARG;
-    }
+HRESULT CSearchCandidateProvider::CreateInstance(_Outptr_ ITfFnSearchCandidateProvider **ppobj, _In_ ITfTextInputProcessorEx *ptip, _In_ ISearchCandidateProviderOwner *owner)
+{
+    RETURN_HR_IF(E_INVALIDARG, ppobj == nullptr);
     *ppobj = nullptr;
 
-    *ppobj = new (std::nothrow) CSearchCandidateProvider(ptip);
-    if (nullptr == *ppobj)
-    {
-        return E_OUTOFMEMORY;
-    }
+    wil::com_ptr<ITfFnSearchCandidateProvider> provider;
+    RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CSearchCandidateProvider>(&provider, ptip, owner));
+    RETURN_IF_FAILED(provider->QueryInterface(IID_PPV_ARGS(ppobj)));
 
     return S_OK;
 }
 
-/*------------------------------------------------------------------------------
-
-create instance of CSearchCandidateProvider
-
-------------------------------------------------------------------------------*/
-HRESULT CSearchCandidateProvider::CreateInstance(REFIID riid, _Outptr_ void **ppvObj, _In_ ITfTextInputProcessorEx *ptip)
-{ 
-    if (ppvObj == nullptr)
-    {
-        return E_INVALIDARG;
-    }
-    *ppvObj = nullptr;
-
-    *ppvObj = new (std::nothrow) CSearchCandidateProvider(ptip);
-    if (nullptr == *ppvObj)
-    {
-        return E_OUTOFMEMORY;
-    }
-
-    return ((CSearchCandidateProvider*)(*ppvObj))->QueryInterface(riid, ppvObj);
-}
+// /*------------------------------------------------------------------------------
+// 
+// create instance of CSearchCandidateProvider
+// 
+// ------------------------------------------------------------------------------*/
+// HRESULT CSearchCandidateProvider::CreateInstance(REFIID riid, _Outptr_ void **ppvObj, _In_ ITfTextInputProcessorEx *ptip, _In_ ISearchCandidateProviderOwner *owner)
+// { 
+//     RETURN_HR_IF(E_INVALIDARG, ppobj == nullptr);
+//     *ppobj = nullptr;
+// 
+//     wil::com_ptr<ITfFnSearchCandidateProvider> provider;
+//     RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CSearchCandidateProvider>(&provider, ptip));
+//     RETURN_IF_FAILED(provider->QueryInterface(riid, ppvObj));
+// 
+//     return S_OK;
+// }
 
 /*------------------------------------------------------------------------------
 
 constructor of CSearchCandidateProvider
 
 ------------------------------------------------------------------------------*/
-CSearchCandidateProvider::CSearchCandidateProvider(_In_ ITfTextInputProcessorEx *ptip)
+HRESULT CSearchCandidateProvider::RuntimeClassInitialize(_In_ ITfTextInputProcessorEx *ptip, _In_ ISearchCandidateProviderOwner *owner)
 {
-    assert(ptip != nullptr);
+    RETURN_HR_IF(E_INVALIDARG, ptip == nullptr);
 
     _pTip = ptip;
-    _refCount = 0;
+    m_owner = owner;
+
+    return S_OK;
 }
 
 /*------------------------------------------------------------------------------
@@ -75,67 +67,6 @@ destructor of CSearchCandidateProvider
 ------------------------------------------------------------------------------*/
 CSearchCandidateProvider::~CSearchCandidateProvider(void)
 {  
-}
-
-/*------------------------------------------------------------------------------
-
-query interface
-(IUnknown method)
-
-------------------------------------------------------------------------------*/
-STDMETHODIMP CSearchCandidateProvider::QueryInterface(REFIID riid, _Outptr_ void **ppvObj)
-{
-    if (ppvObj == nullptr)
-    {
-        return E_POINTER;
-    }
-    *ppvObj = nullptr;
-
-    if (IsEqualIID(riid, IID_IUnknown) || IsEqualIID(riid, __uuidof(ITfFnSearchCandidateProvider)))
-    {
-        *ppvObj = (ITfFnSearchCandidateProvider*)this;
-    }
-    else if (IsEqualIID(riid, IID_ITfFunction))
-    {
-        *ppvObj = (ITfFunction*)this;
-    }
-
-    if (*ppvObj == nullptr)
-    {
-        return E_NOINTERFACE;
-    }
-
-    AddRef();
-    return S_OK;
-}
-
-/*------------------------------------------------------------------------------
-
-increment reference count
-(IUnknown method)
-
-------------------------------------------------------------------------------*/
-STDMETHODIMP_(ULONG) CSearchCandidateProvider::AddRef()
-{
-    return (ULONG)InterlockedIncrement(&_refCount);
-}
-
-/*------------------------------------------------------------------------------
-
-decrement reference count and release object
-(IUnknown method)
-
-------------------------------------------------------------------------------*/
-STDMETHODIMP_(ULONG) CSearchCandidateProvider::Release()
-{
-    ULONG ref = (ULONG)InterlockedDecrement(&_refCount);
-    if (0 < ref)
-    {
-        return ref;
-    }
-
-    delete this;
-    return 0;
 }
 
 STDMETHODIMP CSearchCandidateProvider::GetDisplayName(_Out_ BSTR *pbstrName)
@@ -160,8 +91,8 @@ STDMETHODIMP CSearchCandidateProvider::GetSearchCandidates(BSTR bstrQuery, BSTR 
         return hr;
     }
 
-    auto pCompositionProcessorEngine = ((CWindowsIME*)_pTip)->GetCompositionProcessorEngine();
-    if (nullptr == pCompositionProcessorEngine)
+    auto pCompositionProcessorEngine = m_owner->GetCompositionProcessorEngine();
+    if (!pCompositionProcessorEngine)
     {
         return hr;
     }
@@ -169,7 +100,7 @@ STDMETHODIMP CSearchCandidateProvider::GetSearchCandidates(BSTR bstrQuery, BSTR 
     std::vector<CCandidateListItem> candidateList;
     pCompositionProcessorEngine->GetCandidateList(&candidateList, TRUE, FALSE);
 
-    int cCand = min(static_cast<int>(candidateList.size()), FAKECANDIDATENUMBER);
+    int cCand = std::min(static_cast<int>(candidateList.size()), FAKECANDIDATENUMBER);
     if (0 < cCand)
     {
         hr = CTipCandidateList::CreateInstance(pplist, cCand);

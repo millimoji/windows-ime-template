@@ -97,7 +97,6 @@ struct IWindowsIMECandidateListView
     virtual void CreateView(_In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) = 0;
     virtual void DestroyView() = 0;
     virtual bool IsCreated() = 0;
-    virtual ITfContext* _GetContextDocument() = 0;
 
     virtual HRESULT _StartCandidateList(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth) = 0;
     virtual void _EndCandidateList() = 0;

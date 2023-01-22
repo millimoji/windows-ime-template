@@ -27,7 +27,7 @@ STDAPI CWindowsIME::OnSetThreadFocus() try
     if (m_candidateListView->IsCreated())
     {
         ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
-        ITfContext* pTfContext = m_candidateListView->_GetContextDocument();
+        ITfContext* pTfContext = m_textLayoutSink._pContextDocument.get();
 
         if ((nullptr != pTfContext) && SUCCEEDED(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr)))
         {
@@ -63,7 +63,7 @@ STDAPI CWindowsIME::OnKillThreadFocus() try
     if (m_candidateListView->IsCreated())
     {
         ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
-        ITfContext* pTfContext = m_candidateListView->_GetContextDocument();
+        ITfContext* pTfContext = m_textLayoutSink._pContextDocument.get();
 
         if ((nullptr != pTfContext) && SUCCEEDED(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr)))
         {

@@ -158,11 +158,14 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
         goto ExitError;
     }
 
-    m_candidateListView = std::make_shared<CandidateListView>(this);
+    {
+        auto candidateListView = std::make_shared<CandidateListView>(this);
+        m_candidateListView = std::static_pointer_cast<ICandidateListViewInternal>(candidateListView);
+    }
 
     m_compositionBuffer = std::make_shared<CompositionBuffer>(
         this,
-        m_candidateListView,
+        m_candidateListView->GetClientInterface(),
         _tfClientId,
         _gaDisplayAttributeInput);
 
@@ -424,7 +427,9 @@ BOOL CWindowsIME::_AddTextProcessorEngine()
     {
         m_singletonProcessor = CreateSingletonProcessorBridge();
 
-        _pCompositionProcessorEngine = WindowsImeLib::g_processorFactory->CreateCompositionProcessorEngine(m_compositionBuffer, m_candidateListView);
+        _pCompositionProcessorEngine = WindowsImeLib::g_processorFactory->CreateCompositionProcessorEngine(
+            m_compositionBuffer->GetClientInterface(),
+            m_candidateListView->GetClientInterface());
 
         _pCompositionProcessorEngine->Initialize();
         UpdateCustomState();

@@ -64,7 +64,7 @@ STDAPI CWindowsIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocume
     if (m_candidateListView->IsCreated())
     {
         ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
-        ITfContext* pTfContext = m_candidateListView->_GetContextDocument();
+        ITfContext* pTfContext = m_textLayoutSink._pContextDocument.get();
         if ((nullptr != pTfContext) && SUCCEEDED(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr)))
         {
             if (pCandidateListDocumentMgr != pDocMgrFocus)

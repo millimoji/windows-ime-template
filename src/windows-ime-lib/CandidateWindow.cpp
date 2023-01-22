@@ -159,7 +159,7 @@ void CCandidateWindow::_ResizeWindow()
 {
     SIZE size = {0, 0};
 
-    _cxTitle = max(_cxTitle, size.cx + 2 * GetSystemMetrics(SM_CXFRAME));
+    _cxTitle = std::max(_cxTitle, static_cast<int>(size.cx + 2 * GetSystemMetrics(SM_CXFRAME)));
 
     int candidateListPageCnt = static_cast<int>(_pIndexRange->size());
     CBaseWindow::_Resize(0, 0, _cxTitle, _cyRow * candidateListPageCnt);
@@ -610,7 +610,7 @@ void CCandidateWindow::_DrawList(_In_ HDC dcHandle, _In_ UINT iIndex, _In_ RECT 
     int candidateListPageCnt = static_cast<int>(_pIndexRange->size());
 
     int cxLine = _TextMetric.tmAveCharWidth;
-    int cyLine = max(_cyRow, _TextMetric.tmHeight);
+    int cyLine = std::max(_cyRow, static_cast<int>(_TextMetric.tmHeight));
     int cyOffset = (cyLine == _cyRow ? (cyLine-_TextMetric.tmHeight)/2 : 0);
 
     RECT rc = {};

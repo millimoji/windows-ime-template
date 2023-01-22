@@ -11,17 +11,9 @@
 #include "SingletonProcessor.h"
 #include "BaseStructure.h"
 
-struct IInternalFrameworkService
-{
-    virtual ITfCompositionSink* GetCompositionSink() = 0;
-    virtual wil::com_ptr<ITfThreadMgr> _GetThreadMgr() = 0;
-    virtual BOOL _IsStoreAppMode() = 0;
-    virtual std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() = 0;
-    virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags) = 0;
-};
-
 #include "CompositionBuffer.h"
 #include "CandidateListView.h"
+#include "SearchCandidateProvider.h"
 
 class CLangBarItemButton;
 //class CCandidateListUIPresenter;
@@ -42,74 +34,74 @@ class CWindowsIME :
                                         ITfActiveLanguageProfileNotifySink,
                                         ITfThreadFocusSink,
                                         ITfFunctionProvider,
+                                        ITfTextLayoutSink,
                                         ITfFnGetPreferredTouchKeyboardLayout,
                                         Microsoft::WRL::FtmBase>,
     public WindowsImeLib::IWindowsIMEInprocFramework,
-    public IInternalFrameworkService
+    public ICandidateListViewOwner,
+    public ICompositionBufferOwner,
+    public ISearchCandidateProviderOwner
 {
 public:
     CWindowsIME();
     virtual ~CWindowsIME();
 
-    // IUnknown
-    // STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);
-    // STDMETHODIMP_(ULONG) AddRef(void);
-    // STDMETHODIMP_(ULONG) Release(void);
+    // CClassFactory factory callback
+    static HRESULT CreateInstance(_In_ IUnknown* pUnkOuter, REFIID riid, _Outptr_ void** ppvObj);
 
+private:
     // ITfTextInputProcessor
-    STDMETHODIMP Activate(ITfThreadMgr* pThreadMgr, TfClientId tfClientId) { return ActivateEx(pThreadMgr, tfClientId, 0); }
+    STDMETHODIMP Activate(ITfThreadMgr* pThreadMgr, TfClientId tfClientId)  override { return ActivateEx(pThreadMgr, tfClientId, 0); }
     // ITfTextInputProcessorEx
-    STDMETHODIMP ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, DWORD dwFlags);
-    STDMETHODIMP Deactivate();
+    STDMETHODIMP ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, DWORD dwFlags) override;
+    STDMETHODIMP Deactivate() override;
 
     // ITfThreadMgrEventSink
-    STDMETHODIMP OnInitDocumentMgr(_In_ ITfDocumentMgr *pDocMgr);
-    STDMETHODIMP OnUninitDocumentMgr(_In_ ITfDocumentMgr *pDocMgr);
-    STDMETHODIMP OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocumentMgr *pDocMgrPrevFocus);
-    STDMETHODIMP OnPushContext(_In_ ITfContext *pContext);
-    STDMETHODIMP OnPopContext(_In_ ITfContext *pContext);
+    STDMETHODIMP OnInitDocumentMgr(_In_ ITfDocumentMgr *pDocMgr) override;
+    STDMETHODIMP OnUninitDocumentMgr(_In_ ITfDocumentMgr *pDocMgr) override;
+    STDMETHODIMP OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocumentMgr *pDocMgrPrevFocus) override;
+    STDMETHODIMP OnPushContext(_In_ ITfContext *pContext) override;
+    STDMETHODIMP OnPopContext(_In_ ITfContext *pContext) override;
 
     // ITfTextEditSink
-    STDMETHODIMP OnEndEdit(__RPC__in_opt ITfContext *pContext, TfEditCookie ecReadOnly, __RPC__in_opt ITfEditRecord *pEditRecord);
+    STDMETHODIMP OnEndEdit(__RPC__in_opt ITfContext *pContext, TfEditCookie ecReadOnly, __RPC__in_opt ITfEditRecord *pEditRecord) override;
 
     // ITfKeyEventSink
-    STDMETHODIMP OnSetFocus(BOOL fForeground);
-    STDMETHODIMP OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten);
-    STDMETHODIMP OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten);
-    STDMETHODIMP OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten);
-    STDMETHODIMP OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten);
-    STDMETHODIMP OnPreservedKey(ITfContext *pContext, REFGUID rguid, BOOL *pIsEaten);
+    STDMETHODIMP OnSetFocus(BOOL fForeground) override;
+    STDMETHODIMP OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten) override;
+    STDMETHODIMP OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten) override;
+    STDMETHODIMP OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten) override;
+    STDMETHODIMP OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten) override;
+    STDMETHODIMP OnPreservedKey(ITfContext *pContext, REFGUID rguid, BOOL *pIsEaten) override;
 
     // ITfCompositionSink
-    STDMETHODIMP OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfComposition *pComposition);
+    STDMETHODIMP OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfComposition *pComposition) override;
 
     // ITfDisplayAttributeProvider
-    STDMETHODIMP EnumDisplayAttributeInfo(__RPC__deref_out_opt IEnumTfDisplayAttributeInfo **ppEnum);
-    STDMETHODIMP GetDisplayAttributeInfo(__RPC__in REFGUID guidInfo, __RPC__deref_out_opt ITfDisplayAttributeInfo **ppInfo);
+    STDMETHODIMP EnumDisplayAttributeInfo(__RPC__deref_out_opt IEnumTfDisplayAttributeInfo **ppEnum) override;
+    STDMETHODIMP GetDisplayAttributeInfo(__RPC__in REFGUID guidInfo, __RPC__deref_out_opt ITfDisplayAttributeInfo **ppInfo) override;
 
     // ITfActiveLanguageProfileNotifySink
-    STDMETHODIMP OnActivated(_In_ REFCLSID clsid, _In_ REFGUID guidProfile, _In_ BOOL isActivated);
+    STDMETHODIMP OnActivated(_In_ REFCLSID clsid, _In_ REFGUID guidProfile, _In_ BOOL isActivated) override;
 
     // ITfThreadFocusSink
-    STDMETHODIMP OnSetThreadFocus();
-    STDMETHODIMP OnKillThreadFocus();
+    STDMETHODIMP OnSetThreadFocus() override;
+    STDMETHODIMP OnKillThreadFocus() override;
 
     // ITfFunctionProvider
-    STDMETHODIMP GetType(__RPC__out GUID *pguid);
-    STDMETHODIMP GetDescription(__RPC__deref_out_opt BSTR *pbstrDesc);
-    STDMETHODIMP GetFunction(__RPC__in REFGUID rguid, __RPC__in REFIID riid, __RPC__deref_out_opt IUnknown **ppunk);
+    STDMETHODIMP GetType(__RPC__out GUID *pguid) override;
+    STDMETHODIMP GetDescription(__RPC__deref_out_opt BSTR *pbstrDesc)  override;
+    STDMETHODIMP GetFunction(__RPC__in REFGUID rguid, __RPC__in REFIID riid, __RPC__deref_out_opt IUnknown **ppunk) override;
 
     // ITfFunction
-    STDMETHODIMP GetDisplayName(_Out_ BSTR *pbstrDisplayName);
+    STDMETHODIMP GetDisplayName(_Out_ BSTR *pbstrDisplayName) override;
 
     // ITfFnGetPreferredTouchKeyboardLayout, it is the Optimized layout feature.
-    STDMETHODIMP GetLayout(_Out_ TKBLayoutType *ptkblayoutType, _Out_ WORD *pwPreferredLayoutId);
+    STDMETHODIMP GetLayout(_Out_ TKBLayoutType *ptkblayoutType, _Out_ WORD *pwPreferredLayoutId) override;
 
-    // CClassFactory factory callback
-    static HRESULT CreateInstance(_In_ IUnknown *pUnkOuter, REFIID riid, _Outptr_ void **ppvObj);
+	// ITfTextLayoutSink
+	IFACEMETHODIMP OnLayoutChange(_In_ ITfContext *pic, TfLayoutCode lcode, _In_ ITfContextView *pView) override;
 
-    // utility function for thread manager.
-    wil::com_ptr<ITfThreadMgr> _GetThreadMgr() override { return _pThreadMgr; }
 
     // functions for the composition object.
 //    void _SetComposition(_In_ ITfComposition *pComposition);
@@ -142,9 +134,6 @@ public:
 
     BOOL _IsSecureMode(void) { return (_dwActivateFlags & TF_TMAE_SECUREMODE) ? TRUE : FALSE; }
     BOOL _IsComLess(void) { return (_dwActivateFlags & TF_TMAE_COMLESS) ? TRUE : FALSE; }
-    BOOL _IsStoreAppMode(void) override { return (_dwActivateFlags & TF_TMF_IMMERSIVEMODE) ? TRUE : FALSE; };
-
-    std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() override { return (_pCompositionProcessorEngine); };
 
     // comless helpers
     static HRESULT CreateInstance(REFCLSID rclsid, REFIID riid, _Outptr_result_maybenull_ LPVOID* ppv, _Out_opt_ HINSTANCE* phInst, BOOL isComLessMode);
@@ -233,9 +222,17 @@ private:
     }
     ITfCompositionSink* GetCompositionSink() override { return this;  }
 //    void* GetTextService() override { return (void*)this; }
-public:
-//    std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> GetCompositionBuffer() override { return m_compositionBuffer; }
-//    std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> GetCandidateListView() override { return m_candidateListView; }
+
+    // ICandidateListViewOwner
+    HRESULT _StartLayout(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition) override;
+    void _EndLayout() override;
+    HRESULT _GetTextExt(TfEditCookie ec, _Out_ RECT *lpRect) override;
+    BOOL _IsStoreAppMode(void) override { return (_dwActivateFlags & TF_TMF_IMMERSIVEMODE) ? TRUE : FALSE; };
+    wil::com_ptr<ITfThreadMgr> _GetThreadMgr() override { return _pThreadMgr; }
+    TfEditCookie GetCachedEditCookie() override { return m_textLayoutSink._tfEditCookie; } // Is this Ok???
+
+    // ICompositionBufferOwner && ICandidateListViewOwner
+    std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() override { return (_pCompositionProcessorEngine); };
 
 private:
     wil::com_ptr<ITfThreadMgr> _pThreadMgr;
@@ -266,12 +263,19 @@ private:
     // Support the search integration
     wil::com_ptr<ITfFnSearchCandidateProvider> _pITfFnSearchCandidateProvider;
 
-    std::shared_ptr<CompositionBuffer> m_compositionBuffer;
-    std::shared_ptr<CandidateListView> m_candidateListView;
+    std::shared_ptr<ICompositionBufferInternal> m_compositionBuffer;
+    std::shared_ptr<ICandidateListViewInternal> m_candidateListView;
 
     std::shared_ptr<WindowsImeLib::IWindowsIMEInprocClient> m_inprocClient;
     wil::com_ptr<ITextInputProcessor> m_singletonProcessor;
 
+    struct TextLayoutSinkState
+    {
+        TfEditCookie _tfEditCookie = TF_INVALID_EDIT_COOKIE;
+        wil::com_ptr<ITfContext> _pContextDocument;
+        wil::com_ptr<ITfRange> _pRangeComposition;
+        DWORD _dwCookieTextLayoutSink = 0;
+    } m_textLayoutSink;
 
     // Language bar item object.
     // CLangBarItemButton* _pLangBarItem = {};

@@ -15,6 +15,7 @@
 #pragma warning(disable: 26451)
 #pragma warning(disable: 26495)
 
+#define NOMINMAX
 #include <windows.h>
 #include <initguid.h>
 #include <combaseapi.h>
@@ -27,6 +28,7 @@
 
 #define _SILENCE_CXX20_CISO646_REMOVED_WARNING
 
+#include <algorithm>
 #include <functional>
 #include <memory>
 #include <new>

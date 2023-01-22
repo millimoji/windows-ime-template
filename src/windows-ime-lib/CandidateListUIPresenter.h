@@ -11,11 +11,11 @@
 // #include "KeyHandlerEditSession.h"
 #include "CandidateWindow.h"
 #include "TfTextLayoutSink.h"
-#include "WindowsIME.h"
 #include "BaseStructure.h"
 
 class CReadingLine;
-struct IInternalFrameworkService;
+struct ICandidateListViewOwner;
+
 
 //+---------------------------------------------------------------------------
 //
@@ -27,21 +27,22 @@ struct IInternalFrameworkService;
 // 3rd party IME.
 //----------------------------------------------------------------------------
 
-class CCandidateListUIPresenter : public CTfTextLayoutSink,
-    public ITfCandidateListUIElementBehavior,
-    public ITfIntegratableCandidateListUIElement
+class CCandidateListUIPresenter :
+    public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
+                                        ITfUIElement,
+                                        ITfCandidateListUIElement,
+                                        ITfCandidateListUIElementBehavior,
+                                        ITfIntegratableCandidateListUIElement,
+                                        Microsoft::WRL::FtmBase>
 {
 public:
-    CCandidateListUIPresenter(_In_ IInternalFrameworkService *pTextService, ATOM atom,
-        _In_ std::vector<DWORD> *pIndexRange,
-        BOOL hideWindow);
+    CCandidateListUIPresenter() {}
     virtual ~CCandidateListUIPresenter();
-
-public:
-    // IUnknown
-    STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);
-    STDMETHODIMP_(ULONG) AddRef(void);
-    STDMETHODIMP_(ULONG) Release(void);
+    HRESULT RuntimeClassInitialize(
+        _In_ ICandidateListViewOwner* pTextService,
+        ATOM atom,
+        _In_ std::vector<DWORD>* pIndexRange,
+        BOOL hideWindow);
 
 private:
     // ITfUIElement
@@ -74,8 +75,6 @@ private:
 
 public: // WindowsImeLib::IWindowsIMECandidateListView
     // transfer from parent class
-    ITfContext* _GetContextDocument() { return CTfTextLayoutSink::_GetContextDocument(); };
-
     HRESULT _StartCandidateList(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth);
     void _EndCandidateList();
 
@@ -126,17 +125,15 @@ private:
     void SetPageIndexWithScrollInfo(_In_ std::vector<CCandidateListItem> *pCandidateList);
 
 protected:
-    CCandidateWindow *_pCandidateWnd;
-    BOOL _isShowMode;
-    BOOL _hideWindow;
+    CCandidateWindow* _pCandidateWnd = {};
+    BOOL _isShowMode = {};
+    BOOL _hideWindow = {};
 
 private:
-
-    HWND _parentWndHandle;
-    ATOM _atom;
-    std::vector<DWORD>* _pIndexRange;
-    DWORD _updatedFlags;
-    DWORD _uiElementId;
-    IInternalFrameworkService* _pTextService;
-    // LONG _refCount;
+    HWND _parentWndHandle = {};
+    ATOM _atom = {};
+    std::vector<DWORD>* _pIndexRange = {};
+    DWORD _updatedFlags = {};
+    DWORD _uiElementId = {};
+    ICandidateListViewOwner* _pTextService = {};
 };
