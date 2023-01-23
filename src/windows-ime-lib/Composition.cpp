@@ -53,7 +53,7 @@ STDAPI CWindowsIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfCompos
 //
 //----------------------------------------------------------------------------
 
-HRESULT CompositionBuffer::_AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString)
+HRESULT CompositionBuffer::_AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, const shared_wstring& pstrAddString)
 {
     HRESULT hr = S_OK;
 
@@ -101,7 +101,7 @@ HRESULT CompositionBuffer::_AddComposingAndChar(TfEditCookie ec, _In_ ITfContext
 //
 //----------------------------------------------------------------------------
 
-HRESULT CompositionBuffer::_AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString)
+HRESULT CompositionBuffer::_AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, const shared_wstring& pstrAddString)
 {
     HRESULT hr = E_FAIL;
 
@@ -113,7 +113,7 @@ HRESULT CompositionBuffer::_AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext 
 
     // we use SetText here instead of InsertTextAtSelection because we've already started a composition
     // we don't want to the app to adjust the insertion point inside our composition
-    hr = tfSelection.range->SetText(ec, 0, pstrAddString->Get(), (LONG)pstrAddString->GetLength());
+    hr = tfSelection.range->SetText(ec, 0, pstrAddString->c_str(), (LONG)pstrAddString->length());
     if (hr == S_OK)
     {
         // update the selection, we'll make it an insertion point just past
@@ -190,7 +190,7 @@ BOOL CompositionBuffer::_FindComposingRange(TfEditCookie ec, _In_ ITfContext *pC
 //
 //----------------------------------------------------------------------------
 
-HRESULT CompositionBuffer::_SetInputString(TfEditCookie ec, _In_ ITfContext *pContext, _Out_opt_ ITfRange *pRange, _In_ CStringRange *pstrAddString, BOOL exist_composing)
+HRESULT CompositionBuffer::_SetInputString(TfEditCookie ec, _In_ ITfContext *pContext, _Out_opt_ ITfRange *pRange, const shared_wstring& pstrAddString, BOOL exist_composing)
 {
     ITfRange* pRangeInsert = nullptr;
     if (!exist_composing)
@@ -204,7 +204,7 @@ HRESULT CompositionBuffer::_SetInputString(TfEditCookie ec, _In_ ITfContext *pCo
     }
     if (pRange != nullptr)
     {
-        pRange->SetText(ec, 0, pstrAddString->Get(), (LONG)pstrAddString->GetLength());
+        pRange->SetText(ec, 0, pstrAddString->c_str(), (LONG)pstrAddString->length());
     }
 
     _SetCompositionLanguage(ec, pContext);
@@ -242,7 +242,7 @@ HRESULT CompositionBuffer::_SetInputString(TfEditCookie ec, _In_ ITfContext *pCo
 //
 //----------------------------------------------------------------------------
 
-HRESULT CompositionBuffer::_InsertAtSelection(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString, _Outptr_ ITfRange **ppCompRange)
+HRESULT CompositionBuffer::_InsertAtSelection(TfEditCookie ec, _In_ ITfContext *pContext, const shared_wstring& pstrAddString, _Outptr_ ITfRange **ppCompRange)
 {
     ITfRange* rangeInsert = nullptr;
     ITfInsertAtSelection* pias = nullptr;
@@ -262,7 +262,7 @@ HRESULT CompositionBuffer::_InsertAtSelection(TfEditCookie ec, _In_ ITfContext *
         goto Exit;
     }
 
-    hr = pias->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, pstrAddString->Get(), (LONG)pstrAddString->GetLength(), &rangeInsert);
+    hr = pias->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, pstrAddString->c_str(), (LONG)pstrAddString->length(), &rangeInsert);
 
     if ( FAILED(hr) || rangeInsert == nullptr)
     {

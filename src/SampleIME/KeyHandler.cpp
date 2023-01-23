@@ -191,7 +191,9 @@ HRESULT CKeyStateCategory::_HandleCompositionInputWorker(_In_ CompositionProcess
 
     for (UINT index = 0; index < readingStrings.size(); index++)
     {
-        hr = _pTextService->_AddComposingAndChar(ec, pContext, &readingStrings.at(index));
+        auto readingSubString = readingStrings.at(index).ToSharedWstring();
+
+        hr = _pTextService->_AddComposingAndChar(ec, pContext, readingSubString);
         if (FAILED(hr))
         {
             return hr;
@@ -314,13 +316,12 @@ HRESULT CKeyStateCategory::_HandleCompositionFinalize(const KeyHandlerEditSessio
 
             candidateLen = _pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
 
-            CStringRange candidateString;
-            candidateString.Set(pCandidateString, candidateLen);
+            auto candidateString = std::make_shared<const std::wstring>(pCandidateString, candidateLen);
 
             if (candidateLen)
             {
                 // Finalize character
-                hr = _pTextService->_AddCharAndFinalize(ec, dto.pContext, &candidateString);
+                hr = _pTextService->_AddCharAndFinalize(ec, dto.pContext, candidateString);
                 if (FAILED(hr))
                 {
                     return hr;
@@ -595,12 +596,11 @@ HRESULT CKeyStateCategory::_HandleCompositionPunctuation(const KeyHandlerEditSes
 
             candidateLen = _pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
 
-            CStringRange candidateString;
-            candidateString.Set(pCandidateString, candidateLen);
+            shared_wstring candidateString(std::make_shared<std::wstring>(pCandidateString, candidateLen));
 
             if (candidateLen)
             {
-                _pTextService->_AddComposingAndChar(ec, dto.pContext, &candidateString);
+                _pTextService->_AddComposingAndChar(ec, dto.pContext, candidateString);
             }
         }
         //
@@ -610,11 +610,10 @@ HRESULT CKeyStateCategory::_HandleCompositionPunctuation(const KeyHandlerEditSes
 
         WCHAR punctuation = pCompositionProcessorEngine->GetPunctuation(dto.wch);
 
-        CStringRange punctuationString;
-        punctuationString.Set(&punctuation, 1);
+        auto punctuationString = std::make_shared<const std::wstring>(&punctuation, 1);
 
         // Finalize character
-        hr = _pTextService->_AddCharAndFinalize(ec, dto.pContext, &punctuationString);
+        hr = _pTextService->_AddCharAndFinalize(ec, dto.pContext, punctuationString);
         if (FAILED(hr))
         {
             return hr;
@@ -642,7 +641,7 @@ HRESULT CKeyStateCategory::_HandleCompositionDoubleSingleByte(const KeyHandlerEd
         fullWidthString.Set(&fullWidth, 1);
 
         // Finalize character
-        RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(ec, dto.pContext, &fullWidthString));
+        RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(ec, dto.pContext, fullWidthString.ToSharedWstring()));
 
         _HandleCancelWorker(ec, dto.pContext);
 

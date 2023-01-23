@@ -101,7 +101,6 @@ public: // WindowsImeLib::IWindowsIMECandidateListView
     virtual HRESULT OnSetThreadFocus();
     virtual HRESULT OnKillThreadFocus();
 
-    void RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, _In_ CStringRange &srgCandidateString);
     void AdviseUIChangedByArrowKey(_In_ CANDIDATELIST_FUNCTION arrowKey);
 
 private:

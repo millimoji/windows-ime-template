@@ -100,9 +100,6 @@ private:
     }
 
 private:
-    void RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, _In_ CStringRange &srgCandidateString) override {
-        return m_presenter->RemoveSpecificCandidateFromList(Locale, candidateList, srgCandidateString);
-    }
     void AdviseUIChangedByArrowKey(_In_ CANDIDATELIST_FUNCTION arrowKey) override {
         return m_presenter->AdviseUIChangedByArrowKey(arrowKey);
     }

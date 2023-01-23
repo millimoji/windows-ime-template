@@ -57,7 +57,7 @@ HRESULT CKeyStateCategory::_HandleCandidateFinalizeWorker(TfEditCookie ec, _In_ 
 
         if (candidateLen)
         {
-            hr = _pTextService->_AddComposingAndChar(ec, pContext, &candidateString);
+            hr = _pTextService->_AddComposingAndChar(ec, pContext, candidateString.ToSharedWstring());
 
             if (FAILED(hr))
             {
@@ -114,7 +114,7 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert(const KeyHandlerEditSessionDT
         {
             _pCompositionProcessorEngine->GetCandidateStringInConverted(candidateString, &candidatePhraseList);
             LCID locale = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLocale();
-            _pCandidateListUIPresenter->RemoveSpecificCandidateFromList(locale, candidatePhraseList, candidateString);
+            RemoveSpecificCandidateFromList(locale, candidatePhraseList, candidateString);
         }
 
         // We have a candidate list if candidatePhraseList.Cnt is not 0
@@ -178,7 +178,7 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert(const KeyHandlerEditSessionDT
             _pCandidateListUIPresenter->_SetText(&candidatePhraseList, FALSE);
 
             // Add composing character
-            hrReturn = _pTextService->_AddComposingAndChar(ec, dto.pContext, &candidateString);
+            hrReturn = _pTextService->_AddComposingAndChar(ec, dto.pContext, candidateString.ToSharedWstring());
 
     //        // close candidate list
     //        if (_pCandidateListUIPresenter)
@@ -281,14 +281,13 @@ HRESULT CKeyStateCategory::_HandlePhraseFinalize(const KeyHandlerEditSessionDTO&
 
     phraseLen = (DWORD)_pCandidateListUIPresenter->_GetSelectedCandidateString(&pPhraseString);
 
-    CStringRange phraseString;
-    phraseString.Set(pPhraseString, phraseLen);
+    auto phraseString = std::make_shared<const std::wstring>(pPhraseString, phraseLen);
 
     return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, phraseString](TfEditCookie ec) -> HRESULT
     {
-        if (phraseString.GetLength() > 0)
+        if (phraseString->length() > 0)
         {
-            RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(ec, dto.pContext, const_cast<CStringRange*>(&phraseString)));
+            RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(ec, dto.pContext, phraseString));
         }
         return _HandleCompleteWorker(ec, dto.pContext);
     }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
@@ -334,4 +333,20 @@ HRESULT CKeyStateCategory::_HandlePhraseSelectByNumber(const KeyHandlerEditSessi
 
     return S_FALSE;
 
+}
+
+void CKeyStateCategory::RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, _In_ CStringRange &candidateString)
+{
+    for (UINT index = 0; index < candidateList.size();)
+    {
+        CCandidateListItem* pLI = &candidateList.at(index);
+
+        if (CStringRange::Compare(Locale, &candidateString, &pLI->_ItemString) == CSTR_EQUAL)
+        {
+            candidateList.erase(candidateList.begin() + index);
+            continue;
+        }
+
+        index++;
+    }
 }

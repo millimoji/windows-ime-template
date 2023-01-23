@@ -96,7 +96,7 @@ VOID CBaseDictionaryEngine::MergeSortByFindKeyCode(_Inout_ std::vector<CCandidat
         CStringRange *psrgLeft = nullptr;
         CStringRange *psrgLeftNext = nullptr;
 
-        psrgLeft = &pItemList->at(leftRange )._FindKeyCode;
+        psrgLeft = &pItemList->at(leftRange)._FindKeyCode;
         psrgLeftNext = &pItemList->at(static_cast<size_t>(leftRange) + 1)._FindKeyCode;
 
         if (CStringRange::Compare(_locale, psrgLeft, psrgLeftNext) == CSTR_GREATER_THAN)

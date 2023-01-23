@@ -26,6 +26,8 @@ enum CANDIDATELIST_FUNCTION
     CANDIDATELIST_FUNCTION_MOVE_PAGE_BOTTOM,
 };
 
+typedef std::shared_ptr<const std::wstring> shared_wstring;
+
 class CStringRange
 {
 public:
@@ -41,6 +43,7 @@ public:
     void CharNext(_Inout_ CStringRange* pCharNext);
     static int Compare(LCID locale, _In_ CStringRange* pString1, _In_ CStringRange* pString2);
     static BOOL WildcardCompare(LCID locale, _In_ CStringRange* stringWithWildcard, _In_ CStringRange* targetString);
+    shared_wstring ToSharedWstring() { return std::make_shared<const std::wstring>(_pStringBuf, _stringBufLen); }
 
 protected:
     DWORD_PTR _stringBufLen;         // Length is in character count.
@@ -108,7 +111,6 @@ struct IWindowsIMECandidateListView
     virtual DWORD_PTR _GetSelectedCandidateString(_Outptr_result_maybenull_ const WCHAR **ppwchCandidateString) = 0;
     virtual BOOL _SetSelectionInPage(int nPos) = 0;
 
-    virtual void RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, _In_ CStringRange &srgCandidateString) = 0;
     virtual void AdviseUIChangedByArrowKey(_In_ CANDIDATELIST_FUNCTION arrowKey) = 0;
 };
 
@@ -119,9 +121,9 @@ struct IWindowsIMECompositionBuffer
     // functions for the composition object.
     virtual HRESULT _StartComposition(TfEditCookie ec, _In_ ITfContext *_pContext) = 0;
     virtual void _TerminateComposition(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCalledFromDeactivate = FALSE) = 0;
-    virtual HRESULT _AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString) = 0;
-    virtual HRESULT _AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString) = 0;
-    virtual HRESULT _InsertAtSelection(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString, _Outptr_ ITfRange **ppCompRange) = 0;
+    virtual HRESULT _AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, const shared_wstring& pstrAddString) = 0;
+    virtual HRESULT _AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, const shared_wstring& pstrAddString) = 0;
+    virtual HRESULT _InsertAtSelection(TfEditCookie ec, _In_ ITfContext *pContext, const shared_wstring& pstrAddString, _Outptr_ ITfRange **ppCompRange) = 0;
     virtual HRESULT _RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition) = 0;
 
     // function for the display attribute
