@@ -58,39 +58,25 @@ HRESULT CompositionBuffer::_AddComposingAndChar(TfEditCookie ec, _In_ ITfContext
     HRESULT hr = S_OK;
 
     ULONG fetched = 0;
-    TF_SELECTION tfSelection;
+    TF_SELECTION tfSelection = {};
+    RETURN_IF_FAILED(pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched));
 
-    if (pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched) != S_OK || fetched == 0)
-        return S_FALSE;
+    wil::com_ptr<ITfRange> selectionRange;
+    selectionRange.attach(tfSelection.range);
+
+    RETURN_HR_IF(S_FALSE, fetched != 1);
 
     //
     // make range start to selection
     //
-    ITfRange* pAheadSelection = nullptr;
-    hr = pContext->GetStart(ec, &pAheadSelection);
-    if (SUCCEEDED(hr))
-    {
-        hr = pAheadSelection->ShiftEndToRange(ec, tfSelection.range, TF_ANCHOR_START);
-        if (SUCCEEDED(hr))
-        {
-            ITfRange* pRange = nullptr;
-            BOOL exist_composing = _FindComposingRange(ec, pContext, pAheadSelection, &pRange);
+    wil::com_ptr<ITfRange> pAheadSelection;
+    RETURN_IF_FAILED(pContext->GetStart(ec, &pAheadSelection));
+    RETURN_IF_FAILED(pAheadSelection->ShiftEndToRange(ec, tfSelection.range, TF_ANCHOR_START));
 
-            _SetInputString(ec, pContext, pRange, pstrAddString, exist_composing);
+    wil::com_ptr<ITfRange> pRange;
+    BOOL exist_composing = _FindComposingRange(ec, pContext, pAheadSelection.get(), &pRange);
 
-            if (pRange)
-            {
-                pRange->Release();
-            }
-        }
-    }
-
-    tfSelection.range->Release();
-
-    if (pAheadSelection)
-    {
-        pAheadSelection->Release();
-    }
+    _SetInputString(ec, pContext, pRange.get(), pstrAddString, exist_composing);
 
     return S_OK;
 }
@@ -103,28 +89,25 @@ HRESULT CompositionBuffer::_AddComposingAndChar(TfEditCookie ec, _In_ ITfContext
 
 HRESULT CompositionBuffer::_AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, const shared_wstring& pstrAddString)
 {
-    HRESULT hr = E_FAIL;
-
     ULONG fetched = 0;
     TF_SELECTION tfSelection;
+    RETURN_IF_FAILED(pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched));
 
-    if ((hr = pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched)) != S_OK || fetched != 1)
-        return hr;
+    wil::com_ptr<ITfRange> selectionRange;
+    selectionRange.attach(tfSelection.range);
+
+    RETURN_HR_IF(E_FAIL, fetched != 1);
 
     // we use SetText here instead of InsertTextAtSelection because we've already started a composition
     // we don't want to the app to adjust the insertion point inside our composition
-    hr = tfSelection.range->SetText(ec, 0, pstrAddString->c_str(), (LONG)pstrAddString->length());
-    if (hr == S_OK)
-    {
-        // update the selection, we'll make it an insertion point just past
-        // the inserted text.
-        tfSelection.range->Collapse(ec, TF_ANCHOR_END);
-        pContext->SetSelection(ec, 1, &tfSelection);
-    }
+    RETURN_IF_FAILED(selectionRange->SetText(ec, 0, pstrAddString->c_str(), (LONG)pstrAddString->length()));
 
-    tfSelection.range->Release();
+    // update the selection, we'll make it an insertion point just past
+    // the inserted text.
+    RETURN_IF_FAILED(selectionRange->Collapse(ec, TF_ANCHOR_END));
+    RETURN_IF_FAILED(pContext->SetSelection(ec, 1, &tfSelection));
 
-    return hr;
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -244,39 +227,14 @@ HRESULT CompositionBuffer::_SetInputString(TfEditCookie ec, _In_ ITfContext *pCo
 
 HRESULT CompositionBuffer::_InsertAtSelection(TfEditCookie ec, _In_ ITfContext *pContext, const shared_wstring& pstrAddString, _Outptr_ ITfRange **ppCompRange)
 {
-    ITfRange* rangeInsert = nullptr;
-    ITfInsertAtSelection* pias = nullptr;
-    HRESULT hr = S_OK;
-
-    if (ppCompRange == nullptr)
-    {
-        hr = E_INVALIDARG;
-        goto Exit;
-    }
-
+    RETURN_HR_IF(E_INVALIDARG, ppCompRange == nullptr);
     *ppCompRange = nullptr;
 
-    hr = pContext->QueryInterface(IID_ITfInsertAtSelection, (void **)&pias);
-    if (FAILED(hr))
-    {
-        goto Exit;
-    }
+    wil::com_ptr<ITfInsertAtSelection> pias;
+    RETURN_IF_FAILED(pContext->QueryInterface(IID_PPV_ARGS(&pias)));
+    RETURN_IF_FAILED(pias->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, pstrAddString->c_str(), (LONG)pstrAddString->length(), ppCompRange));
 
-    hr = pias->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, pstrAddString->c_str(), (LONG)pstrAddString->length(), &rangeInsert);
-
-    if ( FAILED(hr) || rangeInsert == nullptr)
-    {
-        rangeInsert = nullptr;
-        pias->Release();
-        goto Exit;
-    }
-
-    *ppCompRange = rangeInsert;
-    pias->Release();
-    hr = S_OK;
-
-Exit:
-    return hr;
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -287,21 +245,15 @@ Exit:
 
 HRESULT CompositionBuffer::_RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition)
 {
-    HRESULT hr = S_OK;
+    wil::com_ptr<ITfRange> range;
 
-    ITfRange* pRange = nullptr;
-    
     if (pComposition)
     {
-        hr = pComposition->GetRange(&pRange);
-        if (SUCCEEDED(hr))
-        {
-            pRange->SetText(ec, 0, nullptr, 0);
-            pRange->Release();
-        }
+        RETURN_IF_FAILED(pComposition->GetRange(&range));
+        RETURN_IF_FAILED(range->SetText(ec, 0, nullptr, 0));
     }
 
-    return hr;
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------

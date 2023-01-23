@@ -306,21 +306,15 @@ HRESULT CKeyStateCategory::_HandleCompositionFinalize(const KeyHandlerEditSessio
 {
     return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, isCandidateList](TfEditCookie ec) -> HRESULT
     {
-        HRESULT hr = S_OK;
-
         if (isCandidateList && _pCandidateListUIPresenter->IsCreated())
         {
             // Finalize selected candidate string from CCandidateListUIPresenter
             auto candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
 
-            if (candidateString->length())
+            if (candidateString->length() > 0)
             {
                 // Finalize character
-                hr = _pTextService->_AddCharAndFinalize(ec, dto.pContext, candidateString);
-                if (FAILED(hr))
-                {
-                    return hr;
-                }
+                RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(ec, dto.pContext, candidateString));
             }
         }
         else
@@ -532,45 +526,55 @@ Exit:
 
 HRESULT CKeyStateCategory::_HandleCompositionArrowKey(const KeyHandlerEditSessionDTO& dto)
 {
-    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
-    {
-        ITfRange* pRangeComposition = nullptr;
-        TF_SELECTION tfSelection;
-        ULONG fetched = 0;
+    // For incremental candidate list
+    RETURN_HR_IF(S_OK, !_pCandidateListUIPresenter->IsCreated());
 
-        // get the selection
-        if (FAILED(dto.pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched))
-            || fetched != 1)
-        {
-            // no selection, eat the keystroke
-            return S_OK;
-        }
+    const auto candidateListFuntion = KeyStrokeFunctionToCandidateListFunction(dto.arrowKey);
+    RETURN_HR_IF(S_OK, candidateListFuntion != CANDIDATELIST_FUNCTION_NONE);
 
-        // get the composition range
-        if (FAILED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
-        {
-            goto Exit;
-        }
-
-        // For incremental candidate list
-        if (_pCandidateListUIPresenter->IsCreated())
-        {
-            const auto candidateListFuntion = KeyStrokeFunctionToCandidateListFunction(dto.arrowKey);
-            if (candidateListFuntion != CANDIDATELIST_FUNCTION_NONE)
-            {
-                _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(candidateListFuntion);
-            }
-        }
-
-        dto.pContext->SetSelection(ec, 1, &tfSelection);
-
-        pRangeComposition->Release();
-
-Exit:
-        tfSelection.range->Release();
-        return S_OK;
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(candidateListFuntion);
+    return S_OK;
 }
+
+//    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
+//    {
+//        ITfRange* pRangeComposition = nullptr;
+//        TF_SELECTION tfSelection;
+//        ULONG fetched = 0;
+//
+//        // get the selection
+//        if (FAILED(dto.pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched))
+//            || fetched != 1)
+//        {
+//            // no selection, eat the keystroke
+//            return S_OK;
+//        }
+//
+//        // get the composition range
+//        if (FAILED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
+//        {
+//            goto Exit;
+//        }
+//
+//        // For incremental candidate list
+//        if (_pCandidateListUIPresenter->IsCreated())
+//        {
+//            const auto candidateListFuntion = KeyStrokeFunctionToCandidateListFunction(dto.arrowKey);
+//            if (candidateListFuntion != CANDIDATELIST_FUNCTION_NONE)
+//            {
+//                _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(candidateListFuntion);
+//            }
+//        }
+//
+//        dto.pContext->SetSelection(ec, 1, &tfSelection);
+//
+//        pRangeComposition->Release();
+//
+//Exit:
+//        tfSelection.range->Release();
+//        return S_OK;
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+//}
 
 //+---------------------------------------------------------------------------
 //
@@ -603,11 +607,7 @@ HRESULT CKeyStateCategory::_HandleCompositionPunctuation(const KeyHandlerEditSes
         auto punctuationString = std::make_shared<const std::wstring>(&punctuation, 1);
 
         // Finalize character
-        hr = _pTextService->_AddCharAndFinalize(ec, dto.pContext, punctuationString);
-        if (FAILED(hr))
-        {
-            return hr;
-        }
+        RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(ec, dto.pContext, punctuationString));
 
         _HandleCancelWorker(ec, dto.pContext);
 
