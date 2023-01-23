@@ -838,22 +838,17 @@ DWORD CCandidateWindow::_GetCandidateString(_In_ int iIndex, _Outptr_result_mayb
 //
 //----------------------------------------------------------------------------
 
-DWORD CCandidateWindow::_GetSelectedCandidateString(_Outptr_result_maybenull_ const WCHAR **ppwchCandidateString)
+shared_wstring CCandidateWindow::_GetSelectedCandidateString()
 {
     CCandidateListItem* pItemList = nullptr;
 
     if (_currentSelection >= _candidateList.size())
     {
-        *ppwchCandidateString = nullptr;
-        return 0;
+        return std::make_shared<const std::wstring>();
     }
 
     pItemList = &_candidateList.at(_currentSelection);
-    if (ppwchCandidateString)
-    {
-        *ppwchCandidateString = pItemList->_ItemString.Get();
-    }
-    return (DWORD)pItemList->_ItemString.GetLength();
+    return std::make_shared<const std::wstring>(pItemList->_ItemString.Get(), pItemList->_ItemString.GetLength());
 }
 
 //+---------------------------------------------------------------------------

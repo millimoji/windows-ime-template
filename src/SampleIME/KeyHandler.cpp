@@ -311,14 +311,9 @@ HRESULT CKeyStateCategory::_HandleCompositionFinalize(const KeyHandlerEditSessio
         if (isCandidateList && _pCandidateListUIPresenter->IsCreated())
         {
             // Finalize selected candidate string from CCandidateListUIPresenter
-            DWORD_PTR candidateLen = 0;
-            const WCHAR *pCandidateString = nullptr;
+            auto candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
 
-            candidateLen = _pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
-
-            auto candidateString = std::make_shared<const std::wstring>(pCandidateString, candidateLen);
-
-            if (candidateLen)
+            if (candidateString->length())
             {
                 // Finalize character
                 hr = _pTextService->_AddCharAndFinalize(ec, dto.pContext, candidateString);
@@ -591,14 +586,9 @@ HRESULT CKeyStateCategory::_HandleCompositionPunctuation(const KeyHandlerEditSes
 
         if (_pCompositionProcessorEngine->CandidateMode() != CANDIDATE_NONE && _pCandidateListUIPresenter->IsCreated())
         {
-            DWORD_PTR candidateLen = 0;
-            const WCHAR* pCandidateString = nullptr;
+            auto candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
 
-            candidateLen = _pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
-
-            shared_wstring candidateString(std::make_shared<std::wstring>(pCandidateString, candidateLen));
-
-            if (candidateLen)
+            if (candidateString->length() > 0)
             {
                 _pTextService->_AddComposingAndChar(ec, dto.pContext, candidateString);
             }

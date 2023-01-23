@@ -42,22 +42,18 @@ HRESULT CKeyStateCategory::_HandleCandidateFinalize(const KeyHandlerEditSessionD
 HRESULT CKeyStateCategory::_HandleCandidateFinalizeWorker(TfEditCookie ec, _In_ ITfContext *pContext)
 {
         HRESULT hr = S_OK;
-        DWORD_PTR candidateLen = 0;
-        const WCHAR* pCandidateString = nullptr;
-        CStringRange candidateString;
+        shared_wstring candidateString;
 
         if (!_pCandidateListUIPresenter->IsCreated())
         {
             goto NoPresenter;
         }
 
-        candidateLen = _pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
+        candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
 
-        candidateString.Set(pCandidateString, candidateLen);
-
-        if (candidateLen)
+        if (candidateString->length() > 0)
         {
-            hr = _pTextService->_AddComposingAndChar(ec, pContext, candidateString.ToSharedWstring());
+            hr = _pTextService->_AddComposingAndChar(ec, pContext, candidateString);
 
             if (FAILED(hr))
             {
@@ -82,17 +78,11 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert(const KeyHandlerEditSessionDT
     return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
     {
         HRESULT hrReturn = E_FAIL;
-        DWORD_PTR candidateLen = 0;
-        const WCHAR* pCandidateString = nullptr;
+        shared_wstring pCandidateString;
         BSTR pbstr = nullptr;
-        CStringRange candidateString;
         BOOL fMakePhraseFromText = FALSE;
         std::vector<CCandidateListItem> candidatePhraseList;
-    //    CANDIDATE_MODE tempCandMode = CANDIDATE_NONE;
-    //    CCandidateListUIPresenter* pTempCandListUIPresenter = nullptr;
         ITfDocumentMgr* pDocumentMgr = nullptr;
-    //    HRESULT hrStartCandidateList = E_FAIL;
-    //    WindowsImeLib::IWindowsIMECandidateListView* candidateListInterface = nullptr;
 
         if (!_pCandidateListUIPresenter->IsCreated())
         {
@@ -100,21 +90,19 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert(const KeyHandlerEditSessionDT
             goto Exit;
         }
 
-        candidateLen = _pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
-        if (0 == candidateLen)
+        pCandidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
+        if (pCandidateString->length() == 0)
         {
             hrReturn = S_FALSE;
             goto Exit;
         }
 
-        candidateString.Set(pCandidateString, candidateLen);
-
         fMakePhraseFromText = _pCompositionProcessorEngine->IsMakePhraseFromText();
         if (fMakePhraseFromText)
         {
-            _pCompositionProcessorEngine->GetCandidateStringInConverted(candidateString, &candidatePhraseList);
+            _pCompositionProcessorEngine->GetCandidateStringInConverted(pCandidateString, &candidatePhraseList);
             LCID locale = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLocale();
-            RemoveSpecificCandidateFromList(locale, candidatePhraseList, candidateString);
+            RemoveSpecificCandidateFromList(locale, candidatePhraseList, pCandidateString);
         }
 
         // We have a candidate list if candidatePhraseList.Cnt is not 0
@@ -178,7 +166,7 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert(const KeyHandlerEditSessionDT
             _pCandidateListUIPresenter->_SetText(&candidatePhraseList, FALSE);
 
             // Add composing character
-            hrReturn = _pTextService->_AddComposingAndChar(ec, dto.pContext, candidateString.ToSharedWstring());
+            hrReturn = _pTextService->_AddComposingAndChar(ec, dto.pContext, pCandidateString);
 
     //        // close candidate list
     //        if (_pCandidateListUIPresenter)
@@ -276,12 +264,7 @@ HRESULT CKeyStateCategory::_HandleCandidateSelectByNumber(const KeyHandlerEditSe
 
 HRESULT CKeyStateCategory::_HandlePhraseFinalize(const KeyHandlerEditSessionDTO& dto)
 {
-    DWORD phraseLen = 0;
-    const WCHAR* pPhraseString = nullptr;
-
-    phraseLen = (DWORD)_pCandidateListUIPresenter->_GetSelectedCandidateString(&pPhraseString);
-
-    auto phraseString = std::make_shared<const std::wstring>(pPhraseString, phraseLen);
+    auto phraseString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
 
     return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, phraseString](TfEditCookie ec) -> HRESULT
     {
@@ -335,13 +318,13 @@ HRESULT CKeyStateCategory::_HandlePhraseSelectByNumber(const KeyHandlerEditSessi
 
 }
 
-void CKeyStateCategory::RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, _In_ CStringRange &candidateString)
+void CKeyStateCategory::RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, const shared_wstring& candidateString)
 {
-    for (UINT index = 0; index < candidateList.size();)
+    for (UINT index = 0; index < candidateList.size(); ++index)
     {
         CCandidateListItem* pLI = &candidateList.at(index);
 
-        if (CStringRange::Compare(Locale, &candidateString, &pLI->_ItemString) == CSTR_EQUAL)
+        if (CStringRange::Compare(Locale, *candidateString, &pLI->_ItemString) == CSTR_EQUAL)
         {
             candidateList.erase(candidateList.begin() + index);
             continue;

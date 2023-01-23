@@ -722,9 +722,9 @@ void CCandidateListUIPresenter::_SetFillColor(HBRUSH hBrush)
 //
 //----------------------------------------------------------------------------
 
-DWORD_PTR CCandidateListUIPresenter::_GetSelectedCandidateString(_Outptr_result_maybenull_ const WCHAR **ppwchCandidateString)
+shared_wstring CCandidateListUIPresenter::_GetSelectedCandidateString()
 {
-    return _pCandidateWnd->_GetSelectedCandidateString(ppwchCandidateString);
+    return _pCandidateWnd->_GetSelectedCandidateString();
 }
 
 //+---------------------------------------------------------------------------

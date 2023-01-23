@@ -135,7 +135,7 @@ protected:
     HRESULT _CreateAndStartCandidate(TfEditCookie ec, _In_ ITfContext *pContext);
 
     BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover);
-    void RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, _In_ CStringRange &candidateString);
+    void RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, const shared_wstring& candidateString);
 
 protected:
     WindowsImeLib::IWindowsIMECompositionBuffer* _pTextService = nullptr;

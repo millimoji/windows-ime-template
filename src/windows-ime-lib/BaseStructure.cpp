@@ -197,6 +197,16 @@ int CStringRange::Compare(LCID locale, _In_ CStringRange* pString1, _In_ CString
         (DWORD)pString2->GetLength());
 }
 
+int CStringRange::Compare(LCID locale, const std::wstring& pString1, _In_ CStringRange* pString2)
+{
+    return CompareString(locale, 
+        NORM_IGNORECASE, 
+        pString1.c_str(),
+        (DWORD)pString1.length(),
+        pString2->Get(), 
+        (DWORD)pString2->GetLength());
+}
+
 BOOL CStringRange::WildcardCompare(LCID locale, _In_ CStringRange* stringWithWildcard, _In_ CStringRange* targetString)
 {
     if (stringWithWildcard->GetLength() == 0)

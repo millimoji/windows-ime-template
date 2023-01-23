@@ -74,8 +74,8 @@ private:
         return m_presenter->_SetFillColor(hBrush);
     }
 
-    DWORD_PTR _GetSelectedCandidateString(_Outptr_result_maybenull_ const WCHAR **ppwchCandidateString) override {
-        return m_presenter->_GetSelectedCandidateString(ppwchCandidateString);
+    shared_wstring _GetSelectedCandidateString() override {
+        return m_presenter->_GetSelectedCandidateString();
     }
     BOOL _SetSelectionInPage(int nPos) override {
         return m_presenter->_SetSelectionInPage(nPos);

@@ -427,7 +427,7 @@ void CompositionProcessorEngine::GetCandidateList(_Inout_ std::vector<CCandidate
 //
 //----------------------------------------------------------------------------
 
-void CompositionProcessorEngine::GetCandidateStringInConverted(CStringRange &searchString, _In_ std::vector<CCandidateListItem> *pCandidateList)
+void CompositionProcessorEngine::GetCandidateStringInConverted(const shared_wstring& searchString, _In_ std::vector<CCandidateListItem> *pCandidateList)
 {
     if (!IsDictionaryAvailable())
     {
@@ -436,14 +436,14 @@ void CompositionProcessorEngine::GetCandidateStringInConverted(CStringRange &sea
 
     // Search phrase from SECTION_TEXT's converted string list
     CStringRange wildcardSearch;
-    DWORD_PTR srgKeystrokeBufLen = searchString.GetLength() + 2;
+    DWORD_PTR srgKeystrokeBufLen = searchString->length() + 2;
     PWCHAR pwch = new (std::nothrow) WCHAR[ srgKeystrokeBufLen ];
     if (!pwch)
     {
         return;
     }
 
-    StringCchCopyN(pwch, srgKeystrokeBufLen, searchString.Get(), searchString.GetLength());
+    StringCchCopyN(pwch, srgKeystrokeBufLen, searchString->c_str(), searchString->length());
     StringCchCat(pwch, srgKeystrokeBufLen, L"*");
 
     // add wildcard char

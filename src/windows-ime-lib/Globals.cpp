@@ -11,8 +11,7 @@ g// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 #include "Globals.h"
 #include "../WindowsImeLib.h"
 
-namespace WindowsImeLibLocal
-{
+namespace WindowsImeLibLocal {
 namespace Global {
 
 HINSTANCE dllInstanceHandle;
@@ -232,3 +231,6 @@ BOOL UpdateModifiers(WPARAM wParam, LPARAM lParam)
 
     return TRUE;
 }
+
+} // Global
+} // WindowsImeLibLocal

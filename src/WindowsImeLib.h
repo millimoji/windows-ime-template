@@ -42,6 +42,7 @@ public:
     CStringRange& operator=(const CStringRange& sr);
     void CharNext(_Inout_ CStringRange* pCharNext);
     static int Compare(LCID locale, _In_ CStringRange* pString1, _In_ CStringRange* pString2);
+    static int Compare(LCID locale, const std::wstring& pString1, _In_ CStringRange* pString2);
     static BOOL WildcardCompare(LCID locale, _In_ CStringRange* stringWithWildcard, _In_ CStringRange* targetString);
     shared_wstring ToSharedWstring() { return std::make_shared<const std::wstring>(_pStringBuf, _stringBufLen); }
 
@@ -108,9 +109,8 @@ struct IWindowsIMECandidateListView
     virtual VOID _SetTextColor(COLORREF crColor, COLORREF crBkColor) = 0;
     virtual VOID _SetFillColor(HBRUSH hBrush) = 0;
 
-    virtual DWORD_PTR _GetSelectedCandidateString(_Outptr_result_maybenull_ const WCHAR **ppwchCandidateString) = 0;
+    virtual shared_wstring _GetSelectedCandidateString() = 0;
     virtual BOOL _SetSelectionInPage(int nPos) = 0;
-
     virtual void AdviseUIChangedByArrowKey(_In_ CANDIDATELIST_FUNCTION arrowKey) = 0;
 };
 
