@@ -97,8 +97,8 @@ STDMETHODIMP CSearchCandidateProvider::GetSearchCandidates(BSTR bstrQuery, BSTR 
         return hr;
     }
 
-    std::vector<CCandidateListItem> candidateList;
-    pCompositionProcessorEngine->GetCandidateList(&candidateList, TRUE, FALSE);
+    std::vector<shared_wstring> candidateList;
+    pCompositionProcessorEngine->GetCandidateList(candidateList, TRUE, FALSE);
 
     int cCand = std::min(static_cast<int>(candidateList.size()), FAKECANDIDATENUMBER);
     if (0 < cCand)
@@ -110,13 +110,12 @@ STDMETHODIMP CSearchCandidateProvider::GetSearchCandidates(BSTR bstrQuery, BSTR 
         }
         for (int iCand = 0; iCand < cCand; iCand++)
         {
-            ITfCandidateString* pCandStr = nullptr;
-            CTipCandidateString::CreateInstance(IID_ITfCandidateString, (void**)&pCandStr);
+            wil::com_ptr<CTipCandidateString> pCandStr;
+            RETURN_IF_FAILED(CTipCandidateString::CreateInstance(&pCandStr));
 
-            ((CTipCandidateString*)pCandStr)->SetIndex(iCand);
-            ((CTipCandidateString*)pCandStr)->SetString(candidateList.at(iCand)._ItemString.Get(), candidateList.at(iCand)._ItemString.GetLength());
-
-            ((CTipCandidateList*)(*pplist))->SetCandidate(&pCandStr);
+            RETURN_IF_FAILED(pCandStr->SetIndex(iCand));
+            RETURN_IF_FAILED(pCandStr->SetString(candidateList.at(iCand)));
+            ((CTipCandidateList*)(*pplist))->SetCandidate(pCandStr.get());
         }
     }
     hr = S_OK;

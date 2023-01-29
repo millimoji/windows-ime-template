@@ -418,14 +418,19 @@ STDAPI CCandidateListUIPresenter::GetString(UINT uIndex, BSTR *pbstr)
         return E_FAIL;
     }
 
-    DWORD candidateLen = 0;
-    const WCHAR* pCandidateString = nullptr;
+    const auto candidateString = _pCandidateWnd->_GetCandidateString(uIndex);
 
-    candidateLen = _pCandidateWnd->_GetCandidateString(uIndex, &pCandidateString);
-
-    *pbstr = (candidateLen == 0) ? nullptr : SysAllocStringLen(pCandidateString, candidateLen);
+    *pbstr = candidateString->empty() ? nullptr : SysAllocStringLen(candidateString->c_str(), static_cast<UINT>(candidateString->length()));
 
     return S_OK;
+//    DWORD candidateLen = 0;
+//    const WCHAR* pCandidateString = nullptr;
+//
+//    candidateLen = _pCandidateWnd->_GetCandidateString(uIndex, &pCandidateString);
+//
+//    *pbstr = (candidateLen == 0) ? nullptr : SysAllocStringLen(pCandidateString, candidateLen);
+//
+//    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -640,9 +645,9 @@ void CCandidateListUIPresenter::_EndCandidateList()
 //
 //----------------------------------------------------------------------------
 
-void CCandidateListUIPresenter::_SetText(_In_ std::vector<CCandidateListItem>* pCandidateList, BOOL isAddFindKeyCode)
+void CCandidateListUIPresenter::_SetText(_In_ const std::vector<shared_wstring>& pCandidateList)
 {
-    AddCandidateToCandidateListUI(pCandidateList, isAddFindKeyCode);
+    AddCandidateToCandidateListUI(pCandidateList);
 
     SetPageIndexWithScrollInfo(pCandidateList);
 
@@ -661,18 +666,18 @@ void CCandidateListUIPresenter::_SetText(_In_ std::vector<CCandidateListItem>* p
     }
 }
 
-void CCandidateListUIPresenter::AddCandidateToCandidateListUI(_In_ std::vector<CCandidateListItem>* pCandidateList, BOOL isAddFindKeyCode)
+void CCandidateListUIPresenter::AddCandidateToCandidateListUI(_In_ const std::vector<shared_wstring>& pCandidateList)
 {
-    for (UINT index = 0; index < pCandidateList->size(); index++)
+    for (UINT index = 0; index < pCandidateList.size(); index++)
     {
-        _pCandidateWnd->_AddString(&pCandidateList->at(index), isAddFindKeyCode);
+        _pCandidateWnd->_AddString(pCandidateList.at(index));
     }
 }
 
-void CCandidateListUIPresenter::SetPageIndexWithScrollInfo(_In_ std::vector<CCandidateListItem>* pCandidateList)
+void CCandidateListUIPresenter::SetPageIndexWithScrollInfo(_In_ const std::vector<shared_wstring>& pCandidateList)
 {
     UINT candCntInPage = static_cast<UINT>(_pIndexRange->size());
-    UINT bufferSize = static_cast<UINT>(pCandidateList->size() / candCntInPage + 1);
+    UINT bufferSize = static_cast<UINT>(pCandidateList.size() / candCntInPage + 1);
     UINT* puPageIndex = new (std::nothrow) UINT[ bufferSize ];
     if (puPageIndex != nullptr)
     {
@@ -684,7 +689,7 @@ void CCandidateListUIPresenter::SetPageIndexWithScrollInfo(_In_ std::vector<CCan
         _pCandidateWnd->_SetPageIndex(puPageIndex, bufferSize);
         delete [] puPageIndex;
     }
-    _pCandidateWnd->_SetScrollInfo(static_cast<int>(pCandidateList->size()), candCntInPage);  // nMax:range of max, nPage:number of items in page
+    _pCandidateWnd->_SetScrollInfo(static_cast<int>(pCandidateList.size()), candCntInPage);  // nMax:range of max, nPage:number of items in page
 
 }
 //+---------------------------------------------------------------------------
@@ -1003,36 +1008,36 @@ HRESULT CCandidateListUIPresenter::OnKillThreadFocus()
     return S_OK;
 }
 
-void CCandidateListUIPresenter::AdviseUIChangedByArrowKey(_In_ CANDIDATELIST_FUNCTION arrowKey)
+void CCandidateListUIPresenter::AdviseUIChangedByArrowKey(_In_ WindowsImeLib::CANDIDATELIST_FUNCTION arrowKey)
 {
     switch (arrowKey)
     {
-    case CANDIDATELIST_FUNCTION_MOVE_UP:
+    case WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_UP:
         {
             _MoveSelection(MOVEUP_ONE);
             break;
         }
-    case CANDIDATELIST_FUNCTION_MOVE_DOWN:
+    case WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_DOWN:
         {
             _MoveSelection(MOVEDOWN_ONE);
             break;
         }
-    case CANDIDATELIST_FUNCTION_MOVE_PAGE_UP:
+    case WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_PAGE_UP:
         {
             _MovePage(MOVEUP_ONE);
             break;
         }
-    case CANDIDATELIST_FUNCTION_MOVE_PAGE_DOWN:
+    case WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_PAGE_DOWN:
         {
             _MovePage(MOVEDOWN_ONE);
             break;
         }
-    case CANDIDATELIST_FUNCTION_MOVE_PAGE_TOP:
+    case WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_PAGE_TOP:
         {
             _SetSelection(MOVETO_TOP);
             break;
         }
-    case CANDIDATELIST_FUNCTION_MOVE_PAGE_BOTTOM:
+    case WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_PAGE_BOTTOM:
         {
             _SetSelection(MOVETO_BOTTOM);
             break;

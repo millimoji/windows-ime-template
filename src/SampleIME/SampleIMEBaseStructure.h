@@ -82,6 +82,51 @@ enum KEYSTROKE_FUNCTION
     FUNCTION_PUNCTUATION
 };
 
+
+class CStringRange
+{
+public:
+    CStringRange();
+    ~CStringRange();
+
+    const WCHAR *Get() const;
+    const DWORD_PTR GetLength() const;
+    void Clear();
+    void Set(const WCHAR *pwch, DWORD_PTR dwLength);
+    void Set(CStringRange &sr);
+    CStringRange& operator=(const CStringRange& sr);
+    void CharNext(_Inout_ CStringRange* pCharNext);
+    static int Compare(LCID locale, _In_ CStringRange* pString1, _In_ CStringRange* pString2);
+    static int Compare(LCID locale, const std::wstring& pString1, _In_ CStringRange* pString2);
+    static BOOL WildcardCompare(LCID locale, _In_ CStringRange* stringWithWildcard, _In_ CStringRange* targetString);
+    shared_wstring ToSharedWstring() { return std::make_shared<const std::wstring>(_pStringBuf, _stringBufLen); }
+
+protected:
+    DWORD_PTR _stringBufLen;         // Length is in character count.
+    const WCHAR *_pStringBuf;    // Buffer which is not add zero terminate.
+};
+
+//---------------------------------------------------------------------
+// CCandidateListItem
+//  _ItemString - candidate string
+//  _FindKeyCode - tailing string
+//---------------------------------------------------------------------
+struct CCandidateListItem
+{
+    CStringRange _ItemString;
+    CStringRange _FindKeyCode;
+
+    CCandidateListItem& operator =( const CCandidateListItem& rhs)
+    {
+        _ItemString = rhs._ItemString;
+        _FindKeyCode = rhs._FindKeyCode;
+        return *this;
+    }
+};
+
+// struct ITfThreadMgr;
+// typedef /* [uuid] */  DECLSPEC_UUID("de403c21-89fd-4f85-8b87-64584d063fbc") DWORD TfClientId;
+
 //---------------------------------------------------------------------
 // structure
 //---------------------------------------------------------------------
@@ -91,18 +136,18 @@ struct _KEYSTROKE_STATE
     KEYSTROKE_FUNCTION Function;
 };
 
-static inline CANDIDATELIST_FUNCTION KeyStrokeFunctionToCandidateListFunction(KEYSTROKE_FUNCTION keyStrokeFunction)
+static inline WindowsImeLib::CANDIDATELIST_FUNCTION KeyStrokeFunctionToCandidateListFunction(KEYSTROKE_FUNCTION keyStrokeFunction)
 {
-    CANDIDATELIST_FUNCTION candidateListFuntion = CANDIDATELIST_FUNCTION_NONE;
+    WindowsImeLib::CANDIDATELIST_FUNCTION candidateListFuntion = WindowsImeLib::CANDIDATELIST_FUNCTION::NONE;
     switch (keyStrokeFunction)
     {
-    case FUNCTION_NONE:             candidateListFuntion = CANDIDATELIST_FUNCTION_NONE; break;
-    case FUNCTION_MOVE_UP:          candidateListFuntion = CANDIDATELIST_FUNCTION_MOVE_UP; break;
-    case FUNCTION_MOVE_DOWN:        candidateListFuntion = CANDIDATELIST_FUNCTION_MOVE_DOWN; break;
-    case FUNCTION_MOVE_PAGE_UP:     candidateListFuntion = CANDIDATELIST_FUNCTION_MOVE_PAGE_UP; break;
-    case FUNCTION_MOVE_PAGE_DOWN:   candidateListFuntion = CANDIDATELIST_FUNCTION_MOVE_PAGE_DOWN; break;
-    case FUNCTION_MOVE_PAGE_TOP:    candidateListFuntion = CANDIDATELIST_FUNCTION_MOVE_PAGE_TOP; break;
-    case FUNCTION_MOVE_PAGE_BOTTOM: candidateListFuntion = CANDIDATELIST_FUNCTION_MOVE_PAGE_BOTTOM; break;
+    case FUNCTION_NONE:             candidateListFuntion = WindowsImeLib::CANDIDATELIST_FUNCTION::NONE; break;
+    case FUNCTION_MOVE_UP:          candidateListFuntion = WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_UP; break;
+    case FUNCTION_MOVE_DOWN:        candidateListFuntion = WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_DOWN; break;
+    case FUNCTION_MOVE_PAGE_UP:     candidateListFuntion = WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_PAGE_UP; break;
+    case FUNCTION_MOVE_PAGE_DOWN:   candidateListFuntion = WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_PAGE_DOWN; break;
+    case FUNCTION_MOVE_PAGE_TOP:    candidateListFuntion = WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_PAGE_TOP; break;
+    case FUNCTION_MOVE_PAGE_BOTTOM: candidateListFuntion = WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_PAGE_BOTTOM; break;
     }
     return candidateListFuntion;
 }

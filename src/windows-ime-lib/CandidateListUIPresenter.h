@@ -78,7 +78,7 @@ public: // WindowsImeLib::IWindowsIMECandidateListView
     HRESULT _StartCandidateList(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth);
     void _EndCandidateList();
 
-    void _SetText(_In_ std::vector<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode) ;
+    void _SetText(const std::vector<shared_wstring>& pCandidateList);
     void _ClearList();
     VOID _SetTextColor(COLORREF crColor, COLORREF crBkColor);
     VOID _SetFillColor(HBRUSH hBrush);
@@ -101,7 +101,7 @@ public: // WindowsImeLib::IWindowsIMECandidateListView
     virtual HRESULT OnSetThreadFocus();
     virtual HRESULT OnKillThreadFocus();
 
-    void AdviseUIChangedByArrowKey(_In_ CANDIDATELIST_FUNCTION arrowKey);
+    void AdviseUIChangedByArrowKey(_In_ WindowsImeLib::CANDIDATELIST_FUNCTION arrowKey);
 
 private:
     virtual HRESULT CALLBACK _CandidateChangeNotification(_In_ enum CANDWND_ACTION action);
@@ -118,10 +118,8 @@ private:
 
     HRESULT MakeCandidateWindow(_In_ ITfContext *pContextDocument, _In_ UINT wndWidth);
     void DisposeCandidateWindow();
-
-    void AddCandidateToCandidateListUI(_In_ std::vector<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode);
-
-    void SetPageIndexWithScrollInfo(_In_ std::vector<CCandidateListItem> *pCandidateList);
+    void AddCandidateToCandidateListUI(const std::vector<shared_wstring>& pCandidateList);
+    void SetPageIndexWithScrollInfo(const std::vector<shared_wstring>& pCandidateList);
 
 protected:
     CCandidateWindow* _pCandidateWnd = {};

@@ -64,8 +64,8 @@ private:
     void _ClearList() override {
         return m_presenter->_ClearList();
     }
-    void _SetText(_In_ std::vector<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode) override {
-        return m_presenter->_SetText(pCandidateList, isAddFindKeyCode);
+    void _SetText(const std::vector<shared_wstring>& pCandidateList) override {
+        return m_presenter->_SetText(pCandidateList);
     }
     VOID _SetTextColor(COLORREF crColor, COLORREF crBkColor) override {
         return m_presenter->_SetTextColor(crColor, crBkColor);
@@ -84,8 +84,8 @@ private:
 private:
     // ICandidateListViewInternal
     std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> GetClientInterface() override {
-		return std::static_pointer_cast<WindowsImeLib::IWindowsIMECandidateListView>(shared_from_this());
-	}
+        return std::static_pointer_cast<WindowsImeLib::IWindowsIMECandidateListView>(shared_from_this());
+    }
     VOID _LayoutChangeNotification(_In_ RECT *lpRect) override {
         if (m_presenter) { return m_presenter->_LayoutChangeNotification(lpRect); }
     }
@@ -100,7 +100,7 @@ private:
     }
 
 private:
-    void AdviseUIChangedByArrowKey(_In_ CANDIDATELIST_FUNCTION arrowKey) override {
+    void AdviseUIChangedByArrowKey(_In_ WindowsImeLib::CANDIDATELIST_FUNCTION arrowKey) override {
         return m_presenter->AdviseUIChangedByArrowKey(arrowKey);
     }
 

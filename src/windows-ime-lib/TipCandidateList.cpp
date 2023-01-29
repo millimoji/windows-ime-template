@@ -129,20 +129,16 @@ STDMETHODIMP CTipCandidateList::GetCandidate(ULONG nIndex, _Outptr_result_mayben
         {
             if (nIndex == indexCur)
             {
-                BSTR bstr;
                 CTipCandidateString* pTipCandidateStrCur = (CTipCandidateString*)(*ppCandStrCur);
-                pTipCandidateStrCur->GetString(&bstr);
+                const auto candidateString = pTipCandidateStrCur->GetUnderlyingString();
 
-                CTipCandidateString::CreateInstance(IID_ITfCandidateString, (void**)ppCandStr);
+                RETURN_IF_FAILED(CTipCandidateString::CreateInstance(IID_ITfCandidateString, (void**)ppCandStr));
 
                 if (nullptr != (*ppCandStr))
                 {
                     CTipCandidateString* pTipCandidateStr = (CTipCandidateString*)(*ppCandStr);
-                    pTipCandidateStr->SetString((LPCWSTR)bstr, SysStringLen(bstr));
+                    pTipCandidateStr->SetString(candidateString);
                 }
-
-                SysFreeString(bstr);
-
                 break;
             }
         }
@@ -168,9 +164,9 @@ STDMETHODIMP CTipCandidateList::SetResult(ULONG nIndex, TfCandidateResult imcr)
     return E_NOTIMPL;
 }
 
-STDMETHODIMP CTipCandidateList::SetCandidate(_In_ ITfCandidateString **ppCandStr)
+STDMETHODIMP CTipCandidateList::SetCandidate(_In_ ITfCandidateString* pCandStr)
 {
-    if (ppCandStr == nullptr)
+    if (pCandStr == nullptr)
     {
         return E_POINTER;
     }
@@ -179,7 +175,8 @@ STDMETHODIMP CTipCandidateList::SetCandidate(_In_ ITfCandidateString **ppCandStr
     ITfCandidateString** ppCandLast = &_tfCandStrList.back();
     if (ppCandLast)
     {
-        *ppCandLast = *ppCandStr;
+        *ppCandLast = pCandStr;
+        (*ppCandLast)->AddRef();
     }
 
     return S_OK;

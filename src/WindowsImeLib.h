@@ -12,68 +12,24 @@
 #include "Compartment.h"
 #include "LanguageBar.h"
 
-//---------------------------------------------------------------------
-// enum
-//---------------------------------------------------------------------
-enum CANDIDATELIST_FUNCTION
-{
-    CANDIDATELIST_FUNCTION_NONE = 0,
-    CANDIDATELIST_FUNCTION_MOVE_UP,
-    CANDIDATELIST_FUNCTION_MOVE_DOWN,
-    CANDIDATELIST_FUNCTION_MOVE_PAGE_UP,
-    CANDIDATELIST_FUNCTION_MOVE_PAGE_DOWN,
-    CANDIDATELIST_FUNCTION_MOVE_PAGE_TOP,
-    CANDIDATELIST_FUNCTION_MOVE_PAGE_BOTTOM,
-};
-
 typedef std::shared_ptr<const std::wstring> shared_wstring;
-
-class CStringRange
-{
-public:
-    CStringRange();
-    ~CStringRange();
-
-    const WCHAR *Get() const;
-    const DWORD_PTR GetLength() const;
-    void Clear();
-    void Set(const WCHAR *pwch, DWORD_PTR dwLength);
-    void Set(CStringRange &sr);
-    CStringRange& operator=(const CStringRange& sr);
-    void CharNext(_Inout_ CStringRange* pCharNext);
-    static int Compare(LCID locale, _In_ CStringRange* pString1, _In_ CStringRange* pString2);
-    static int Compare(LCID locale, const std::wstring& pString1, _In_ CStringRange* pString2);
-    static BOOL WildcardCompare(LCID locale, _In_ CStringRange* stringWithWildcard, _In_ CStringRange* targetString);
-    shared_wstring ToSharedWstring() { return std::make_shared<const std::wstring>(_pStringBuf, _stringBufLen); }
-
-protected:
-    DWORD_PTR _stringBufLen;         // Length is in character count.
-    const WCHAR *_pStringBuf;    // Buffer which is not add zero terminate.
-};
-
-//---------------------------------------------------------------------
-// CCandidateListItem
-//  _ItemString - candidate string
-//  _FindKeyCode - tailing string
-//---------------------------------------------------------------------
-struct CCandidateListItem
-{
-    CStringRange _ItemString;
-    CStringRange _FindKeyCode;
-
-    CCandidateListItem& operator =( const CCandidateListItem& rhs)
-    {
-        _ItemString = rhs._ItemString;
-        _FindKeyCode = rhs._FindKeyCode;
-        return *this;
-    }
-};
-
-// struct ITfThreadMgr;
-// typedef /* [uuid] */  DECLSPEC_UUID("de403c21-89fd-4f85-8b87-64584d063fbc") DWORD TfClientId;
 
 namespace WindowsImeLib
 {
+
+//---------------------------------------------------------------------
+// enum
+//---------------------------------------------------------------------
+enum class CANDIDATELIST_FUNCTION
+{
+    NONE = 0,
+    MOVE_UP,
+    MOVE_DOWN,
+    MOVE_PAGE_UP,
+    MOVE_PAGE_DOWN,
+    MOVE_PAGE_TOP,
+    MOVE_PAGE_BOTTOM,
+};
 
 // Hard to make data driven setup for compartment, langbar button and preserved key. so allow customize by code
 struct IWindowsIMEInprocClient
@@ -105,13 +61,13 @@ struct IWindowsIMECandidateListView
     virtual HRESULT _StartCandidateList(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth) = 0;
     virtual void _EndCandidateList() = 0;
     virtual void _ClearList() = 0;
-    virtual void _SetText(_In_ std::vector<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode) = 0;
+    virtual void _SetText(const std::vector<shared_wstring>& pCandidateList) = 0;
     virtual VOID _SetTextColor(COLORREF crColor, COLORREF crBkColor) = 0;
     virtual VOID _SetFillColor(HBRUSH hBrush) = 0;
 
     virtual shared_wstring _GetSelectedCandidateString() = 0;
     virtual BOOL _SetSelectionInPage(int nPos) = 0;
-    virtual void AdviseUIChangedByArrowKey(_In_ CANDIDATELIST_FUNCTION arrowKey) = 0;
+    virtual void AdviseUIChangedByArrowKey(_In_ WindowsImeLib::CANDIDATELIST_FUNCTION arrowKey) = 0;
 };
 
 struct IWindowsIMECompositionBuffer
@@ -138,14 +94,14 @@ struct ICompositionProcessorEngine
     virtual ~ICompositionProcessorEngine() {}
 
     virtual BOOL Initialize() = 0;
-	virtual void UpdateCustomState(const std::string& customStateJson) = 0;
+    virtual void UpdateCustomState(const std::string& customStateJson) = 0;
 
     // wch: converted character from VK and keyboard state
     // vkPackSource: estimated VK from wch for VK_PACKET
     virtual void OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled,
         DWORD modifiers, DWORD uniqueModifiers, bool isTest, bool isDown) = 0;
 
-    virtual void GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) = 0;
+    virtual void GetCandidateList(std::vector<shared_wstring>& pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) = 0;
 
     virtual void PurgeVirtualKey() = 0;
     virtual void EndComposition(_In_opt_ ITfContext* pContext) = 0;

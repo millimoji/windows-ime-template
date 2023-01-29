@@ -23,7 +23,7 @@ void RibbonIMECore::PurgeVirtualKey()
 {
 }
 
-void RibbonIMECore::GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch)
+void RibbonIMECore::GetCandidateList(std::vector<shared_wstring>& pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch)
 {
     (void)pCandidateList;
     (void)isIncrementalWordSearch;

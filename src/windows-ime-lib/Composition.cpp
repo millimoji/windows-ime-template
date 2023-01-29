@@ -55,8 +55,6 @@ STDAPI CWindowsIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfCompos
 
 HRESULT CompositionBuffer::_AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, const shared_wstring& pstrAddString)
 {
-    HRESULT hr = S_OK;
-
     ULONG fetched = 0;
     TF_SELECTION tfSelection = {};
     RETURN_IF_FAILED(pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched));

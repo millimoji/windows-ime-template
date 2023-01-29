@@ -313,12 +313,15 @@ void CompositionProcessorEngine::GetReadingStrings(_Inout_ std::vector<CStringRa
 //
 //----------------------------------------------------------------------------
 
-void CompositionProcessorEngine::GetCandidateList(_Inout_ std::vector<CCandidateListItem> *pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch)
+void CompositionProcessorEngine::GetCandidateList(std::vector<shared_wstring>& resultCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch)
 {
     if (!IsDictionaryAvailable())
     {
         return;
     }
+
+    std::vector<CCandidateListItem> internalCandidateList;
+    std::vector<CCandidateListItem>* pCandidateList = &internalCandidateList;
 
     if (isIncrementalWordSearch)
     {
@@ -418,6 +421,12 @@ void CompositionProcessorEngine::GetCandidateList(_Inout_ std::vector<CCandidate
         endItemString.Set(pLI->_ItemString.Get() + pLI->_ItemString.GetLength() - 1, 1);
 
         index++;
+    }
+
+    for (UINT index = 0; index < pCandidateList->size(); ++index)
+    {
+        CCandidateListItem *pLI = &pCandidateList->at(index);
+        resultCandidateList.emplace_back(std::make_shared<const std::wstring>(pLI->_ItemString.Get(), pLI->_ItemString.GetLength()));
     }
 }
 

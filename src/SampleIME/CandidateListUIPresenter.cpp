@@ -100,6 +100,7 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert(const KeyHandlerEditSessionDT
         fMakePhraseFromText = _pCompositionProcessorEngine->IsMakePhraseFromText();
         if (fMakePhraseFromText)
         {
+
             _pCompositionProcessorEngine->GetCandidateStringInConverted(pCandidateString, &candidatePhraseList);
             LCID locale = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLocale();
             RemoveSpecificCandidateFromList(locale, candidatePhraseList, pCandidateString);
@@ -163,7 +164,13 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert(const KeyHandlerEditSessionDT
             // set up candidate list if it is being shown
             _pCandidateListUIPresenter->_SetTextColor(RGB(0, 0x80, 0), GetSysColor(COLOR_WINDOW));    // Text color is green
             _pCandidateListUIPresenter->_SetFillColor((HBRUSH)(COLOR_WINDOW+1));    // Background color is window
-            _pCandidateListUIPresenter->_SetText(&candidatePhraseList, FALSE);
+
+            std::vector<shared_wstring> candidateConvertedList;
+            for (const auto& candidateSrc : candidatePhraseList) {
+                candidateConvertedList.emplace_back(std::make_shared<std::wstring>(
+                    candidateSrc._ItemString.Get(), candidateSrc._ItemString.GetLength()));
+            }
+            _pCandidateListUIPresenter->_SetText(candidateConvertedList);
 
             // Add composing character
             hrReturn = _pTextService->_AddComposingAndChar(ec, dto.pContext, pCandidateString);
@@ -209,7 +216,7 @@ Exit:
 HRESULT CKeyStateCategory::_HandleCandidateArrowKey(const KeyHandlerEditSessionDTO& dto)
 {
     const auto candidateListFuntion = KeyStrokeFunctionToCandidateListFunction(dto.arrowKey);
-    if (candidateListFuntion != CANDIDATELIST_FUNCTION_NONE)
+    if (candidateListFuntion != WindowsImeLib::CANDIDATELIST_FUNCTION::NONE)
     {
         _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(candidateListFuntion);
     }
@@ -285,7 +292,7 @@ HRESULT CKeyStateCategory::_HandlePhraseFinalize(const KeyHandlerEditSessionDTO&
 HRESULT CKeyStateCategory::_HandlePhraseArrowKey(const KeyHandlerEditSessionDTO& dto)
 {
     const auto candidateListFuntion = KeyStrokeFunctionToCandidateListFunction(dto.arrowKey);
-    if (candidateListFuntion != CANDIDATELIST_FUNCTION_NONE)
+    if (candidateListFuntion != WindowsImeLib::CANDIDATELIST_FUNCTION::NONE)
     {
         _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(candidateListFuntion);
     }

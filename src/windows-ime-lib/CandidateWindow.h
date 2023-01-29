@@ -42,7 +42,7 @@ public:
     void _OnMouseMove(POINT pt);
     void _OnVScroll(DWORD dwSB, _In_ DWORD nPos);
 
-    void _AddString(_Inout_ CCandidateListItem *pCandidateItem, _In_ BOOL isAddFindKeyCode);
+    void _AddString(const shared_wstring& pCandidateItem);
     void _ClearList();
     UINT _GetCount()
     {
@@ -54,7 +54,7 @@ public:
     }
     void _SetScrollInfo(_In_ int nMax, _In_ int nPage);
 
-    DWORD _GetCandidateString(_In_ int iIndex, _Outptr_result_maybenull_z_ const WCHAR **ppwchCandidateString);
+    shared_wstring _GetCandidateString(_In_ int iIndex);
     shared_wstring _GetSelectedCandidateString();
 
     BOOL _MoveSelection(_In_ int offSet, _In_ BOOL isNotify);
@@ -91,7 +91,7 @@ private:
 
 private:
     UINT _currentSelection;
-    std::vector<CCandidateListItem> _candidateList;
+    std::vector<shared_wstring> _candidateList;
     std::vector<UINT> _PageIndex;
 
     COLORREF _crTextColor;

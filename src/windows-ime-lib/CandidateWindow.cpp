@@ -621,7 +621,7 @@ void CCandidateWindow::_DrawList(_In_ HDC dcHandle, _In_ UINT iIndex, _In_ RECT 
         iIndex++, pageCount++)
     {
         WCHAR pageCountString[lenOfPageCount] = {'\0'};
-        CCandidateListItem* pItemList = nullptr;
+        // CCandidateListItem* pItemList = nullptr;
 
         rc.top = prc->top + pageCount * cyLine;
         rc.bottom = rc.top + cyLine;
@@ -651,8 +651,9 @@ void CCandidateWindow::_DrawList(_In_ HDC dcHandle, _In_ UINT iIndex, _In_ RECT 
             SetBkColor(dcHandle, CANDWND_SELECTED_BK_COLOR);
         }
 
-        pItemList = &_candidateList.at(iIndex);
-        ExtTextOut(dcHandle, StringPosition * cxLine, pageCount * cyLine + cyOffset, ETO_OPAQUE, &rc, pItemList->_ItemString.Get(), (DWORD)pItemList->_ItemString.GetLength(), NULL);
+        const auto pItemList = _candidateList.at(iIndex);
+        ExtTextOut(dcHandle, StringPosition * cxLine, pageCount * cyLine + cyOffset, ETO_OPAQUE, &rc,
+            pItemList->c_str(), static_cast<UINT>(pItemList->length()), NULL);
     }
     for (; (pageCount < candidateListPageCnt); pageCount++)
     {
@@ -702,63 +703,15 @@ void CCandidateWindow::_DrawBorder(_In_ HWND wndHandle, _In_ int cx)
 //
 //----------------------------------------------------------------------------
 
-void CCandidateWindow::_AddString(_Inout_ CCandidateListItem *pCandidateItem, _In_ BOOL isAddFindKeyCode)
+// void CCandidateWindow::_AddString(_Inout_ CCandidateListItem *pCandidateItem, _In_ BOOL /* isAddFindKeyCode */)
+void CCandidateWindow::_AddString(const shared_wstring& pCandidateItem)
 {
-    DWORD_PTR dwItemString = pCandidateItem->_ItemString.GetLength();
-    const WCHAR* pwchString = nullptr;
-    if (dwItemString)
+    if (pCandidateItem->length() == 0)
     {
-        pwchString = new (std::nothrow) WCHAR[ dwItemString ];
-        if (!pwchString)
-        {
-            return;
-        }
-        memcpy((void*)pwchString, pCandidateItem->_ItemString.Get(), dwItemString * sizeof(WCHAR));
-    }
-
-    DWORD_PTR itemWildcard = pCandidateItem->_FindKeyCode.GetLength();
-    const WCHAR* pwchWildcard = nullptr;
-    if (itemWildcard && isAddFindKeyCode)
-    {
-        pwchWildcard = new (std::nothrow) WCHAR[ itemWildcard ];
-        if (!pwchWildcard)
-        {
-            if (pwchString)
-            {
-                delete [] pwchString;
-            }
-            return;
-        }
-        memcpy((void*)pwchWildcard, pCandidateItem->_FindKeyCode.Get(), itemWildcard * sizeof(WCHAR));
-    }
-
-    _candidateList.push_back(CCandidateListItem());
-    CCandidateListItem* pLI = &_candidateList.back();
-    if (!pLI)
-    {
-        if (pwchString)
-        {
-            delete [] pwchString;
-            pwchString = nullptr;
-        }
-        if (pwchWildcard)
-        {
-            delete [] pwchWildcard;
-            pwchWildcard = nullptr;
-        }
         return;
     }
 
-    if (pwchString)
-    {
-        pLI->_ItemString.Set(pwchString, dwItemString);
-    }
-    if (pwchWildcard)
-    {
-        pLI->_FindKeyCode.Set(pwchWildcard, itemWildcard);
-    }
-
-    return;
+    _candidateList.emplace_back(pCandidateItem);
 }
 
 //+---------------------------------------------------------------------------
@@ -769,13 +722,6 @@ void CCandidateWindow::_AddString(_Inout_ CCandidateListItem *pCandidateItem, _I
 
 void CCandidateWindow::_ClearList()
 {
-    for (UINT index = 0; index < _candidateList.size(); index++)
-    {
-        CCandidateListItem* pItemList = nullptr;
-        pItemList = &_candidateList.at(index);
-        delete [] pItemList->_ItemString.Get();
-        delete [] pItemList->_FindKeyCode.Get();
-    }
     _currentSelection = 0;
     _candidateList.clear();
     _PageIndex.clear();
@@ -806,30 +752,33 @@ void CCandidateWindow::_SetScrollInfo(_In_ int nMax, _In_ int nPage)
 //
 //----------------------------------------------------------------------------
 
-DWORD CCandidateWindow::_GetCandidateString(_In_ int iIndex, _Outptr_result_maybenull_z_ const WCHAR **ppwchCandidateString)
+shared_wstring CCandidateWindow::_GetCandidateString(_In_ int iIndex)
 {
-    CCandidateListItem* pItemList = nullptr;
+    // CCandidateListItem* pItemList = nullptr;
 
     if (iIndex < 0 )
     {
-        *ppwchCandidateString = nullptr;
-        return 0;
+        return std::make_shared<std::wstring>();
+        // *ppwchCandidateString = nullptr;
+        // return 0;
     }
 
     UINT index = static_cast<UINT>(iIndex);
     
     if (index >= _candidateList.size())
     {
-        *ppwchCandidateString = nullptr;
-        return 0;
+        return std::make_shared<std::wstring>();
+        // *ppwchCandidateString = nullptr;
+        // return 0;
     }
 
-    pItemList = &_candidateList.at(iIndex);
-    if (ppwchCandidateString)
-    {
-        *ppwchCandidateString = pItemList->_ItemString.Get();
-    }
-    return (DWORD)pItemList->_ItemString.GetLength();
+    return _candidateList.at(iIndex);
+
+//    if (ppwchCandidateString)
+//    {
+//        *ppwchCandidateString = pItemList->_ItemString.Get();
+//    }
+//    return (DWORD)pItemList->_ItemString.GetLength();
 }
 
 //+---------------------------------------------------------------------------
@@ -840,15 +789,14 @@ DWORD CCandidateWindow::_GetCandidateString(_In_ int iIndex, _Outptr_result_mayb
 
 shared_wstring CCandidateWindow::_GetSelectedCandidateString()
 {
-    CCandidateListItem* pItemList = nullptr;
+    // CCandidateListItem* pItemList = nullptr;
 
     if (_currentSelection >= _candidateList.size())
     {
         return std::make_shared<const std::wstring>();
     }
 
-    pItemList = &_candidateList.at(_currentSelection);
-    return std::make_shared<const std::wstring>(pItemList->_ItemString.Get(), pItemList->_ItemString.GetLength());
+    return _candidateList.at(_currentSelection);
 }
 
 //+---------------------------------------------------------------------------
