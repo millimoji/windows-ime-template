@@ -217,15 +217,16 @@ private:
 //    void* GetTextService() override { return (void*)this; }
 
     // ICandidateListViewOwner
-    HRESULT _StartLayout(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition) override;
-    void _EndLayout() override;
-    HRESULT _GetTextExt(TfEditCookie ec, _Out_ RECT *lpRect) override;
+    HRESULT _GetLastTextExt(_Out_ HWND* documentWindow, _Out_ RECT *lpRect) override;
     BOOL _IsStoreAppMode(void) override { return (_dwActivateFlags & TF_TMF_IMMERSIVEMODE) ? TRUE : FALSE; };
     wil::com_ptr<ITfThreadMgr> _GetThreadMgr() override { return _pThreadMgr; }
     TfEditCookie GetCachedEditCookie() override { return m_textLayoutSink._tfEditCookie; } // Is this Ok???
 
     // ICompositionBufferOwner && ICandidateListViewOwner
     std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() override { return (_pCompositionProcessorEngine); };
+
+    HRESULT _StartLayoutTracking(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition) override;
+    HRESULT _EndLayoutTracking() override;
 
 private:
     wil::com_ptr<ITfThreadMgr> _pThreadMgr;
@@ -268,6 +269,9 @@ private:
         wil::com_ptr<ITfContext> _pContextDocument;
         wil::com_ptr<ITfRange> _pRangeComposition;
         DWORD _dwCookieTextLayoutSink = 0;
+        RECT compositionRect = {};
+        BOOL isClipped = {};
+        HWND documentWindow = {};
     } m_textLayoutSink;
 
     // Language bar item object.

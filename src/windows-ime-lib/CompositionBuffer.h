@@ -13,6 +13,9 @@ struct ICompositionBufferOwner
     virtual ITfCompositionSink* GetCompositionSink() = 0;
     virtual std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() = 0;
     virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags) = 0;
+
+    virtual HRESULT _StartLayoutTracking(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition) = 0;
+    virtual HRESULT _EndLayoutTracking() = 0;
 };
 
 struct ICompositionBufferInternal
@@ -110,7 +113,7 @@ private:
     }
 private:
     void _SetComposition(_In_ ITfComposition *pComposition) { _pComposition = pComposition; }
-    void _SaveCompositionContext(_In_ ITfContext *pContext);
+    void _SaveCompositionContext(_In_ ITfContext *pContext) { _pContext = pContext; }
 
 private:
     ICompositionBufferOwner* m_framework = nullptr;

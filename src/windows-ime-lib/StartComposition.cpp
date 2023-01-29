@@ -36,55 +36,32 @@
 // STDAPI CStartCompositionEditSession::DoEditSession(TfEditCookie ec)
 HRESULT CompositionBuffer::_StartComposition(TfEditCookie ec, _In_ ITfContext *pContext)
 {
-    ITfInsertAtSelection* pInsertAtSelection = nullptr;
-    ITfRange* pRangeInsert = nullptr;
-    ITfContextComposition* pContextComposition = nullptr;
-    ITfComposition* pComposition = nullptr;
+    wil::com_ptr<ITfInsertAtSelection> pInsertAtSelection;
+    RETURN_IF_FAILED(pContext->QueryInterface(IID_PPV_ARGS(&pInsertAtSelection)));
 
-    if (FAILED(pContext->QueryInterface(IID_ITfInsertAtSelection, (void **)&pInsertAtSelection)))
-    {
-        goto Exit;
-    }
+    wil::com_ptr<ITfRange> pRangeInsert;
+    RETURN_IF_FAILED(pInsertAtSelection->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, NULL, 0, &pRangeInsert));
 
-    if (FAILED(pInsertAtSelection->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, NULL, 0, &pRangeInsert)))
-    {
-        goto Exit;
-    }
+    wil::com_ptr<ITfContextComposition> pContextComposition;
+    RETURN_IF_FAILED(pContext->QueryInterface(IID_PPV_ARGS(&pContextComposition)));
 
-    if (FAILED(pContext->QueryInterface(IID_ITfContextComposition, (void **)&pContextComposition)))
-    {
-        goto Exit;
-    }
+    wil::com_ptr<ITfComposition> pComposition;
+    RETURN_IF_FAILED(pContextComposition->StartComposition(ec, pRangeInsert.get(), m_framework->GetCompositionSink(), &pComposition));
+    RETURN_HR_IF(S_OK /* ? */, !pComposition);
 
-    if (SUCCEEDED(pContextComposition->StartComposition(ec, pRangeInsert, m_framework->GetCompositionSink(), &pComposition)) && (nullptr != pComposition))
-    {
-        _SetComposition(pComposition);
+    _SetComposition(pComposition.get());
 
-        // set selection to the adjusted range
-        TF_SELECTION tfSelection = {};
-        tfSelection.range = pRangeInsert;
-        tfSelection.style.ase = TF_AE_NONE;
-        tfSelection.style.fInterimChar = FALSE;
+    // set selection to the adjusted range
+    TF_SELECTION tfSelection = {};
+    tfSelection.range = pRangeInsert.get();
+    tfSelection.style.ase = TF_AE_NONE;
+    tfSelection.style.fInterimChar = FALSE;
 
-        pContext->SetSelection(ec, 1, &tfSelection);
-        _SaveCompositionContext(pContext);
-    }
+    RETURN_IF_FAILED(pContext->SetSelection(ec, 1, &tfSelection));
 
-Exit:
-    if (nullptr != pContextComposition)
-    {
-        pContextComposition->Release();
-    }
+    _SaveCompositionContext(pContext);
 
-    if (nullptr != pRangeInsert)
-    {
-        pRangeInsert->Release();
-    }
-
-    if (nullptr != pInsertAtSelection)
-    {
-        pInsertAtSelection->Release();
-    }
+    LOG_IF_FAILED(m_framework->_StartLayoutTracking(pContext, ec, pRangeInsert.get()));
 
     return S_OK;
 }
@@ -115,20 +92,20 @@ Exit:
 //         pStartCompositionEditSession->Release();
 //     }
 // }
-
-//+---------------------------------------------------------------------------
-//
-// _SaveCompositionContext
-//
-// this saves the context _pComposition belongs to; we need this to clear
-// text attribute in case composition has not been terminated on 
-// deactivation
-//----------------------------------------------------------------------------
-
-void CompositionBuffer::_SaveCompositionContext(_In_ ITfContext *pContext)
-{
-    assert(_pContext == nullptr);
-
-//    pContext->AddRef();
-    _pContext = pContext;
-} 
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // _SaveCompositionContext
+// //
+// // this saves the context _pComposition belongs to; we need this to clear
+// // text attribute in case composition has not been terminated on 
+// // deactivation
+// //----------------------------------------------------------------------------
+// 
+// void CompositionBuffer::_SaveCompositionContext(_In_ ITfContext *pContext)
+// {
+//     assert(_pContext == nullptr);
+// 
+// //    pContext->AddRef();
+//     _pContext = pContext;
+// } 

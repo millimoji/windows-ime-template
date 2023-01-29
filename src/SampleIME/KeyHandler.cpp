@@ -209,7 +209,7 @@ HRESULT CKeyStateCategory::_HandleCompositionInputWorker(_In_ CompositionProcess
 
     if (candidateList.size() > 0)
     {
-        hr = _CreateAndStartCandidate(ec, pContext);
+        hr = _CreateAndStartCandidate(pContext);
         if (SUCCEEDED(hr))
         {
             _pCandidateListUIPresenter->_ClearList();
@@ -222,7 +222,7 @@ HRESULT CKeyStateCategory::_HandleCompositionInputWorker(_In_ CompositionProcess
     }
     else if (readingStrings.size() && isWildcardIncluded)
     {
-        hr = _CreateAndStartCandidate(ec, pContext);
+        hr = _CreateAndStartCandidate(pContext);
         if (SUCCEEDED_LOG(hr))
         {
             _pCandidateListUIPresenter->_ClearList();
@@ -236,7 +236,7 @@ HRESULT CKeyStateCategory::_HandleCompositionInputWorker(_In_ CompositionProcess
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_CreateAndStartCandidate(TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CKeyStateCategory::_CreateAndStartCandidate(_In_ ITfContext *pContext)
 {
     HRESULT hr = S_OK;
 
@@ -285,8 +285,7 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate(TfEditCookie ec, _In_ ITfCon
             ITfRange* pRange = nullptr;
             if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRange)))
             {
-                hr = _pCandidateListUIPresenter->_StartCandidateList(pContext, ec, pRange,
-                        WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
+                hr = _pCandidateListUIPresenter->_StartCandidateList(WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
                 pRange->Release();
             }
             pDocumentMgr->Release();
@@ -360,91 +359,61 @@ HRESULT CKeyStateCategory::_HandleCompositionFinalize(const KeyHandlerEditSessio
 
 HRESULT CKeyStateCategory::_HandleCompositionConvert(const KeyHandlerEditSessionDTO& dto, BOOL isWildcardSearch)
 {
-    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, isWildcardSearch](TfEditCookie ec) -> HRESULT
+    HRESULT hr = S_OK;
+
+    std::vector<shared_wstring> candidateList;
+
+    //
+    // Get candidate string from composition processor engine
+    //
+    auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+    pCompositionProcessorEngine->GetCandidateList(candidateList, FALSE, isWildcardSearch);
+
+    // If there is no candlidate listin the current reading string, we don't do anything. Just wait for
+    // next char to be ready for the conversion with it.
+    int nCount = static_cast<int>(candidateList.size());
+    if (nCount)
     {
-        HRESULT hr = S_OK;
-
-        std::vector<shared_wstring> candidateList;
-
-        //
-        // Get candidate string from composition processor engine
-        //
-        auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
-        pCompositionProcessorEngine->GetCandidateList(candidateList, FALSE, isWildcardSearch);
-
-        // If there is no candlidate listin the current reading string, we don't do anything. Just wait for
-        // next char to be ready for the conversion with it.
-        int nCount = static_cast<int>(candidateList.size());
-        if (nCount)
+        if (_pCandidateListUIPresenter->IsCreated())
         {
-    //        if (_pCandidateListUIPresenter)
-    //        {
-    //            _pCandidateListUIPresenter->_EndCandidateList();
-    //            // delete _pCandidateListUIPresenter;
-    //            // _pCandidateListUIPresenter = nullptr;
-    //            _pCandidateListUIPresenter.reset();
-    //
-    //            _candidateMode = CANDIDATE_NONE;
-    //            _isCandidateWithWildcard = FALSE;
-    //        }
-            if (_pCandidateListUIPresenter->IsCreated())
-            {
-                _pCandidateListUIPresenter->_EndCandidateList();
-                _pCandidateListUIPresenter->DestroyView();
-                _pCompositionProcessorEngine->ResetCandidateState();
-            }
-
-            // 
-            // create an instance of the candidate list class.
-            // 
-    //        if (_pCandidateListUIPresenter == nullptr)
-    //        {
-    //            _pCandidateListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(
-    //                reinterpret_cast<CWindowsIME*>(_textService->GetTextService()),
-    //                Global::AtomCandidateWindow,
-    //                CATEGORY_CANDIDATE,
-    //                pCompositionProcessorEngine->GetCandidateListIndexRange(),
-    //                FALSE);
-    //            if (!_pCandidateListUIPresenter)
-    //            {
-    //                return E_OUTOFMEMORY;
-    //            }
-    //
-    //            _candidateMode = CANDIDATE_ORIGINAL;
-    //        }
-            if (!_pCandidateListUIPresenter->IsCreated())
-            {
-                _pCandidateListUIPresenter->CreateView(
-                                                pCompositionProcessorEngine->GetCandidateListIndexRange(),
-                                                FALSE);
-                _pCompositionProcessorEngine->SetCandidateKeyStrokeCategory(CATEGORY_CANDIDATE);
-                _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_ORIGINAL);
-            }
-
-            _pCompositionProcessorEngine->SetIsCandidateWithWildcard(isWildcardSearch);
-
-            // we don't cache the document manager object. So get it from pContext.
-            ITfDocumentMgr* pDocumentMgr = nullptr;
-            if (SUCCEEDED(dto.pContext->GetDocumentMgr(&pDocumentMgr)))
-            {
-                // get the composition range.
-                ITfRange* pRange = nullptr;
-                if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRange)))
-                {
-                    hr = _pCandidateListUIPresenter->_StartCandidateList(dto.pContext, ec, pRange,
-                            WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
-                    pRange->Release();
-                }
-                pDocumentMgr->Release();
-            }
-            if (SUCCEEDED(hr))
-            {
-                _pCandidateListUIPresenter->_SetText(candidateList);
-            }
+            _pCandidateListUIPresenter->_EndCandidateList();
+            _pCandidateListUIPresenter->DestroyView();
+            _pCompositionProcessorEngine->ResetCandidateState();
         }
 
-        return hr;
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+        // 
+        // create an instance of the candidate list class.
+        // 
+        if (!_pCandidateListUIPresenter->IsCreated())
+        {
+            _pCandidateListUIPresenter->CreateView(
+                                            pCompositionProcessorEngine->GetCandidateListIndexRange(),
+                                            FALSE);
+            _pCompositionProcessorEngine->SetCandidateKeyStrokeCategory(CATEGORY_CANDIDATE);
+            _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_ORIGINAL);
+        }
+
+        _pCompositionProcessorEngine->SetIsCandidateWithWildcard(isWildcardSearch);
+
+        // we don't cache the document manager object. So get it from pContext.
+        ITfDocumentMgr* pDocumentMgr = nullptr;
+        if (SUCCEEDED(dto.pContext->GetDocumentMgr(&pDocumentMgr)))
+        {
+            // get the composition range.
+            ITfRange* pRange = nullptr;
+            if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRange)))
+            {
+                hr = _pCandidateListUIPresenter->_StartCandidateList(WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
+                pRange->Release();
+            }
+            pDocumentMgr->Release();
+        }
+        if (SUCCEEDED(hr))
+        {
+            _pCandidateListUIPresenter->_SetText(candidateList);
+        }
+    }
+    return hr;
 }
 
 //+---------------------------------------------------------------------------

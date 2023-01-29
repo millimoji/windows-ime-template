@@ -309,7 +309,7 @@ HRESULT CCandidateListUIPresenter::ToShowCandidateWindow()
     }
     else
     {
-        _MoveWindowToTextExt(_pTextService->GetCachedEditCookie());
+        _MoveWindowToTextExt();
 
         _pCandidateWnd->_Show(TRUE);
     }
@@ -591,37 +591,21 @@ STDAPI CCandidateListUIPresenter::FinalizeExactCompositionString()
 //
 //----------------------------------------------------------------------------
 
-HRESULT CCandidateListUIPresenter::_StartCandidateList(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth)
+HRESULT CCandidateListUIPresenter::_StartCandidateList(UINT wndWidth)
 {
-    HRESULT hr = E_FAIL;
+    HWND hwnd;
+    RECT rcTextExt;
+    RETURN_IF_FAILED(_pTextService->_GetLastTextExt(&hwnd, &rcTextExt));
 
-    if (FAILED(_pTextService->_StartLayout(pContextDocument, ec, pRangeComposition)))
-    {
-        goto Exit;
-    }
+    RETURN_IF_FAILED(BeginUIElement());
 
-    BeginUIElement();
-
-    hr = MakeCandidateWindow(pContextDocument, wndWidth);
-    if (FAILED(hr))
-    {
-        goto Exit;
-    }
+    RETURN_IF_FAILED(MakeCandidateWindow(wndWidth, hwnd));
 
     Show(_isShowMode);
 
-    RECT rcTextExt;
-    if (SUCCEEDED(_pTextService->_GetTextExt(ec, &rcTextExt)))
-    {
-        _LayoutChangeNotification(&rcTextExt);
-    }
+    _LayoutChangeNotification(&rcTextExt);
 
-Exit:
-    if (FAILED(hr))
-    {
-        _EndCandidateList();
-    }
-    return hr;
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -636,7 +620,7 @@ void CCandidateListUIPresenter::_EndCandidateList()
 
     DisposeCandidateWindow();
 
-    _pTextService->_EndLayout();
+//    _pTextService->_EndLayoutTracking();
 }
 
 //+---------------------------------------------------------------------------
@@ -812,11 +796,12 @@ BOOL CCandidateListUIPresenter::_MovePage(_In_ int offSet)
 //
 //----------------------------------------------------------------------------
 
-void CCandidateListUIPresenter::_MoveWindowToTextExt(TfEditCookie ec)
+void CCandidateListUIPresenter::_MoveWindowToTextExt()
 {
+    HWND hwnd;
     RECT rc;
 
-    if (FAILED(_pTextService->_GetTextExt(ec, &rc)))
+    if (FAILED(_pTextService->_GetLastTextExt(&hwnd, &rc)))
     {
         return;
     }
@@ -1099,7 +1084,7 @@ Exit:
     return hr;
 }
 
-HRESULT CCandidateListUIPresenter::MakeCandidateWindow(_In_ ITfContext *pContextDocument, _In_ UINT wndWidth)
+HRESULT CCandidateListUIPresenter::MakeCandidateWindow(UINT wndWidth, HWND parentWndHandle)
 {
     HRESULT hr = S_OK;
 
@@ -1116,12 +1101,12 @@ HRESULT CCandidateListUIPresenter::MakeCandidateWindow(_In_ ITfContext *pContext
     }
 
     {
-        HWND parentWndHandle = nullptr;
-        ITfContextView* pView = nullptr;
-        if (SUCCEEDED(pContextDocument->GetActiveView(&pView)))
-        {
-            pView->GetWnd(&parentWndHandle);
-        }
+//        HWND parentWndHandle = nullptr;
+//        ITfContextView* pView = nullptr;
+//        if (SUCCEEDED(pContextDocument->GetActiveView(&pView)))
+//        {
+//            pView->GetWnd(&parentWndHandle);
+//        }
 
         if (!_pCandidateWnd->_Create(_atom, wndWidth, parentWndHandle))
         {

@@ -150,10 +150,9 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert(const KeyHandlerEditSessionDT
                 {
     //              if (isNewWindowRequired)
                     {
-    //                  hrStartCandidateList = candidateListInterface->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, ec, pRange,
+    //                  hrStartCandidateList = candidateListInterface->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, pRange,
     //                          WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
-                        _pCandidateListUIPresenter->_StartCandidateList(dto.pContext, ec, pRange,
-                            WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
+                        _pCandidateListUIPresenter->_StartCandidateList(WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
                     }
 
                     pRange->Release();

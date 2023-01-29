@@ -132,7 +132,7 @@ protected:
     HRESULT _HandleCancelWorker(TfEditCookie ec, _In_ ITfContext *pContext);
     HRESULT _HandleCompleteWorker(TfEditCookie ec, _In_ ITfContext *pContext);
     HRESULT _HandleCompositionInputWorker(_In_ CompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext);
-    HRESULT _CreateAndStartCandidate(TfEditCookie ec, _In_ ITfContext *pContext);
+    HRESULT _CreateAndStartCandidate(_In_ ITfContext *pContext);
 
     BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover);
     void RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, const shared_wstring& candidateString);

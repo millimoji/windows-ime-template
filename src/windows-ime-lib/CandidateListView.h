@@ -8,9 +8,7 @@
 
 struct ICandidateListViewOwner
 {
-    virtual HRESULT _StartLayout(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition) = 0;
-    virtual void _EndLayout() = 0;
-    virtual HRESULT _GetTextExt(TfEditCookie ec, _Out_ RECT *lpRect) = 0;
+    virtual HRESULT _GetLastTextExt(_Out_ HWND* documentWindow, _Out_ RECT *lpRect) = 0;
     virtual BOOL _IsStoreAppMode() = 0;
     virtual wil::com_ptr<ITfThreadMgr> _GetThreadMgr() = 0;
     virtual TfEditCookie GetCachedEditCookie() = 0;
@@ -54,9 +52,9 @@ private:
     bool IsCreated() override {
         return !!m_presenter;
     }
-    HRESULT _StartCandidateList(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth) override
+    HRESULT _StartCandidateList(UINT wndWidth) override
     {
-        return m_presenter->_StartCandidateList(pContextDocument, ec, pRangeComposition, wndWidth);
+        return m_presenter->_StartCandidateList(wndWidth);
     }
     void _EndCandidateList() override {
         if (m_presenter) { m_presenter->_EndCandidateList(); }

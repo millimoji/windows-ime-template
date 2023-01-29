@@ -75,7 +75,7 @@ private:
 
 public: // WindowsImeLib::IWindowsIMECandidateListView
     // transfer from parent class
-    HRESULT _StartCandidateList(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth);
+    HRESULT _StartCandidateList(UINT wndWidth);
     void _EndCandidateList();
 
     void _SetText(const std::vector<shared_wstring>& pCandidateList);
@@ -91,7 +91,7 @@ public: // WindowsImeLib::IWindowsIMECandidateListView
     BOOL _SetSelection(_In_ int selectedIndex);
     BOOL _MovePage(_In_ int offSet);
 
-    void _MoveWindowToTextExt(TfEditCookie ec);
+    void _MoveWindowToTextExt();
 
     // CTfTextLayoutSink
     virtual VOID _LayoutChangeNotification(_In_ RECT *lpRect);
@@ -116,7 +116,7 @@ private:
     HRESULT BeginUIElement();
     HRESULT EndUIElement();
 
-    HRESULT MakeCandidateWindow(_In_ ITfContext *pContextDocument, _In_ UINT wndWidth);
+    HRESULT MakeCandidateWindow(UINT wndWidth, HWND parentWndHandle);
     void DisposeCandidateWindow();
     void AddCandidateToCandidateListUI(const std::vector<shared_wstring>& pCandidateList);
     void SetPageIndexWithScrollInfo(const std::vector<shared_wstring>& pCandidateList);
