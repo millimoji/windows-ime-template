@@ -125,49 +125,145 @@ HRESULT CKeyStateCategory::_HandleCompositionInput(const KeyHandlerEditSessionDT
         _HandleCompositionFinalize(dto, FALSE);
     }
 
-    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, wch](TfEditCookie ec) -> HRESULT
+    // Start the new (std::nothrow) compositon if there is no composition.
+    if (!_pTextService->_IsComposing())
     {
-        ITfRange* pRangeComposition = nullptr;
-        TF_SELECTION tfSelection;
-        ULONG fetched = 0;
-        BOOL isCovered = TRUE;
-
-        auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
-
-        // Start the new (std::nothrow) compositon if there is no composition.
-        if (!_pTextService->_IsComposing())
+        RETURN_IF_FAILED(_pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
         {
-            _pTextService->_StartComposition(ec, dto.pContext);
-        }
+            return _pTextService->_StartComposition(ec, dto.pContext);
+        },
+        TF_ES_ASYNCDONTCARE | TF_ES_READWRITE));
+    }
 
-        // first, test where a keystroke would go in the document if we did an insert
-        if (dto.pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched) != S_OK || fetched != 1)
+// TODO confirm range is correct
+//        // first, test where a keystroke would go in the document if we did an insert
+//        if (dto.pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched) != S_OK || fetched != 1)
+//        {
+//            return S_FALSE;
+//        }
+//
+//        // is the insertion point covered by a composition?
+//        if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
+//        {
+//            isCovered = _IsRangeCovered(ec, tfSelection.range, pRangeComposition);
+//
+//            pRangeComposition->Release();
+//
+//            if (!isCovered)
+//            {
+//                goto Exit;
+//            }
+//        }
+
+    // Add virtual key to composition processor engine
+    _pCompositionProcessorEngine->AddVirtualKey(wch);
+
+    return _HandleCompositionInputWorkerNoCookie(dto);
+
+
+//    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, wch](TfEditCookie ec) -> HRESULT
+//    {
+//        ITfRange* pRangeComposition = nullptr;
+//        TF_SELECTION tfSelection;
+//        ULONG fetched = 0;
+//        BOOL isCovered = TRUE;
+//
+//        auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+//
+//        // Start the new (std::nothrow) compositon if there is no composition.
+//        if (!_pTextService->_IsComposing())
+//        {
+//            _pTextService->_StartComposition(ec, dto.pContext);
+//        }
+//
+// TODO
+//        // first, test where a keystroke would go in the document if we did an insert
+//        if (dto.pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched) != S_OK || fetched != 1)
+//        {
+//            return S_FALSE;
+//        }
+//
+//        // is the insertion point covered by a composition?
+//        if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
+//        {
+//            isCovered = _IsRangeCovered(ec, tfSelection.range, pRangeComposition);
+//
+//            pRangeComposition->Release();
+//
+//            if (!isCovered)
+//            {
+//                goto Exit;
+//            }
+//        }
+//
+//        // Add virtual key to composition processor engine
+//        pCompositionProcessorEngine->AddVirtualKey(wch);
+//
+//        _HandleCompositionInputWorker(pCompositionProcessorEngine, ec, dto.pContext);
+//
+//Exit:
+//        tfSelection.range->Release();
+//        return S_OK;
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+}
+
+//+---------------------------------------------------------------------------
+//
+// _HandleCompositionInputWorkerNoCookie
+//
+// If the keystroke happens within a composition, eat the key and return S_OK.
+//
+//----------------------------------------------------------------------------
+
+HRESULT CKeyStateCategory::_HandleCompositionInputWorkerNoCookie(const KeyHandlerEditSessionDTO& dto)
+{
+    //
+    // Get reading string from composition processor engine
+    //
+    BOOL isWildcardIncluded;
+    std::vector<CStringRange> readingStrings;
+    _pCompositionProcessorEngine->GetReadingStrings(&readingStrings, &isWildcardIncluded);
+
+    std::wstring insertionText;
+    for (auto&& readingString: readingStrings)
+    {
+        auto readingStringView = std::wstring_view(readingString.Get(), readingString.GetLength());
+        insertionText += readingStringView;
+    }
+    auto insertionTextShared = std::make_shared<const std::wstring>(std::move(insertionText));
+
+    RETURN_IF_FAILED(_pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, insertionTextShared](TfEditCookie ec) -> HRESULT
+    {
+        return _pTextService->_AddComposingAndChar(ec, dto.pContext, insertionTextShared);
+    },
+    TF_ES_ASYNCDONTCARE | TF_ES_READWRITE));
+
+    //
+    // Get candidate string from composition processor engine
+    //
+    std::vector<shared_wstring> candidateList;
+    _pCompositionProcessorEngine->GetCandidateList(candidateList, TRUE, FALSE);
+
+    if (candidateList.size() > 0)
+    {
+        if (SUCCEEDED_LOG(_CreateAndStartCandidate(dto.pContext)))
         {
-            return S_FALSE;
+            _pCandidateListUIPresenter->_ClearList();
+            _pCandidateListUIPresenter->_SetText(candidateList);
         }
-
-        // is the insertion point covered by a composition?
-        if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
+    }
+    else if (_pCandidateListUIPresenter->IsCreated())
+    {
+        _pCandidateListUIPresenter->_ClearList();
+    }
+    else if (readingStrings.size() && isWildcardIncluded)
+    {
+        if (SUCCEEDED_LOG(_CreateAndStartCandidate(dto.pContext)))
         {
-            isCovered = _IsRangeCovered(ec, tfSelection.range, pRangeComposition);
-
-            pRangeComposition->Release();
-
-            if (!isCovered)
-            {
-                goto Exit;
-            }
+            _pCandidateListUIPresenter->_ClearList();
         }
-
-        // Add virtual key to composition processor engine
-        pCompositionProcessorEngine->AddVirtualKey(wch);
-
-        _HandleCompositionInputWorker(pCompositionProcessorEngine, ec, dto.pContext);
-
-Exit:
-        tfSelection.range->Release();
-        return S_OK;
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    }
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -230,6 +326,7 @@ HRESULT CKeyStateCategory::_HandleCompositionInputWorker(_In_ CompositionProcess
     }
     return hr;
 }
+
 //+---------------------------------------------------------------------------
 //
 // _CreateAndStartCandidate
