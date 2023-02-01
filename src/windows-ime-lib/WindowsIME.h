@@ -105,7 +105,6 @@ private:
 
     // functions for the composition object.
 //    void _SetComposition(_In_ ITfComposition *pComposition);
-//    void _TerminateComposition(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCalledFromDeactivate = FALSE);
 //    void _SaveCompositionContext(_In_ ITfContext *pContext);
 
     // key event handlers for composition/candidate/phrase common objects.
@@ -146,7 +145,6 @@ private:
 //    HRESULT _CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext);
 //    HRESULT _HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext);
 
-//    void _StartComposition(_In_ ITfContext *pContext) override;
 //    void _EndComposition(_In_opt_ ITfContext *pContext) override;
     bool _IsKeyboardDisabled();
 //    CANDIDATE_MODE _CandidateMode() override { return _candidateMode; }

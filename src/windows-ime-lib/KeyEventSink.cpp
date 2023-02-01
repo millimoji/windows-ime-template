@@ -159,6 +159,9 @@ STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
 {
     auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnTestKeyDown();
 
+    m_compositionBuffer->SaveWorkingContext(pContext);
+    auto resetWorkingContext = wil::scope_exit([&]() { m_compositionBuffer->SaveWorkingContext(nullptr); });
+
     Global::UpdateModifiers(wParam, lParam);
 
     if (_pCompositionProcessorEngine)
@@ -199,6 +202,9 @@ STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
 STDAPI CWindowsIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
     auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnKeyDown();
+
+    m_compositionBuffer->SaveWorkingContext(pContext);
+    auto resetWorkingContext = wil::scope_exit([&]() { m_compositionBuffer->SaveWorkingContext(nullptr); });
 
     Global::UpdateModifiers(wParam, lParam);
 
@@ -260,6 +266,9 @@ STDAPI CWindowsIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lPar
 {
     auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnTestKeyUp();
 
+    m_compositionBuffer->SaveWorkingContext(pContext);
+    auto resetWorkingContext = wil::scope_exit([&]() { m_compositionBuffer->SaveWorkingContext(nullptr); });
+
     Global::UpdateModifiers(wParam, lParam);
 
     if (_pCompositionProcessorEngine)
@@ -297,6 +306,9 @@ STDAPI CWindowsIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lPar
 STDAPI CWindowsIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
     auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnKeyUp();
+
+    m_compositionBuffer->SaveWorkingContext(pContext);
+    auto resetWorkingContext = wil::scope_exit([&]() { m_compositionBuffer->SaveWorkingContext(nullptr); });
 
     Global::UpdateModifiers(wParam, lParam);
 

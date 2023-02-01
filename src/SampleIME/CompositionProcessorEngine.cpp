@@ -1379,11 +1379,7 @@ void CompositionProcessorEngine::EndComposition(_In_opt_ ITfContext *pContext)
         return;
     }
 
-    m_compositionBuffer->_SubmitEditSessionTask(pContext, [this, pContext](TfEditCookie ec) -> HRESULT
-    {
-        m_compositionBuffer->_TerminateComposition(ec, pContext, TRUE);
-        return S_OK;
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    m_compositionBuffer->_TerminateComposition();
 }
 
 void CompositionProcessorEngine::FinalizeCandidateList(_In_ ITfContext *pContext)

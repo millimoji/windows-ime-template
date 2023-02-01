@@ -75,18 +75,14 @@ struct IWindowsIMECompositionBuffer
     virtual ~IWindowsIMECompositionBuffer() {}
 
     // functions for the composition object.
-    virtual HRESULT _StartComposition(TfEditCookie ec, _In_ ITfContext *_pContext) = 0;
-    virtual void _TerminateComposition(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCalledFromDeactivate = FALSE) = 0;
-    virtual HRESULT _AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, const shared_wstring& pstrAddString) = 0;
-    virtual HRESULT _AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, const shared_wstring& pstrAddString) = 0;
-    virtual HRESULT _RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition) = 0;
+    virtual HRESULT _StartComposition() = 0;
+    virtual void _TerminateComposition() = 0;
+    virtual HRESULT _AddComposingAndChar(const shared_wstring& pstrAddString) = 0;
+    virtual HRESULT _AddCharAndFinalize(const shared_wstring& pstrAddString) = 0;
+    virtual HRESULT _RemoveDummyCompositionForComposing() = 0;
 
     // function for the display attribute
     virtual bool _IsComposing() = 0;
-
-    //
-    virtual wil::com_ptr<ITfComposition> GetComposition() = 0;
-    virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags) = 0;
 };
 
 struct ICompositionProcessorEngine

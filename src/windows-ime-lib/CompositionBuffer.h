@@ -26,7 +26,8 @@ struct ICompositionBufferInternal
     virtual wil::com_ptr<ITfComposition> GetComposition() = 0;
     virtual wil::com_ptr<ITfContext> GetContext() = 0;
     virtual bool _IsComposing() = 0;
-    virtual HRESULT _RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition) = 0;
+    virtual HRESULT _RemoveDummyCompositionForComposing() = 0;
+    virtual void SaveWorkingContext(_In_ ITfContext *pContext) = 0;
 };
 
 class CompositionBuffer :
@@ -50,7 +51,7 @@ public:
 
 private:
     // functions for the composition object.
-    void _TerminateComposition(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCalledFromDeactivate = FALSE) override;
+    void _TerminateComposition() override;
 
     // key event handlers for composition/candidate/phrase common objects.
 //     HRESULT _HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext);
@@ -79,10 +80,10 @@ private:
 //     HRESULT _CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext) override;
 //     HRESULT _HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext) override;
 
-    HRESULT _StartComposition(TfEditCookie ec, _In_ ITfContext *_pContext) override;
+    HRESULT _StartComposition() override;
 
-    HRESULT _AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, const shared_wstring& pstrAddString) override;
-    HRESULT _AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, const shared_wstring& pstrAddString) override;
+    HRESULT _AddComposingAndChar(const shared_wstring& pstrAddString) override;
+    HRESULT _AddCharAndFinalize(const shared_wstring& pstrAddString) override;
     HRESULT _InsertAtSelection(TfEditCookie ec, _In_ ITfContext *pContext, const shared_wstring& pstrAddString, _Outptr_ ITfRange **ppCompRange);
 
     BOOL _FindComposingRange(TfEditCookie ec, _In_ ITfContext *pContext, _In_ ITfRange *pSelection, _Outptr_result_maybenull_ ITfRange **ppRange);
@@ -104,13 +105,9 @@ private: // ICompositionBufferInternal
     wil::com_ptr<ITfComposition> GetComposition() override { return _pComposition; }
     wil::com_ptr<ITfContext> GetContext() override { return _pContext; }
     bool _IsComposing() override { return !!_pComposition; }
-    HRESULT _RemoveDummyCompositionForComposing(TfEditCookie ec, _In_ ITfComposition *pComposition) override;
+    HRESULT _RemoveDummyCompositionForComposing() override;
+    void SaveWorkingContext(_In_ ITfContext *pContext) override { m_workingContext = pContext; }
 
-private:
-    HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags) override
-    {
-        return m_framework->_SubmitEditSessionTask(context, editSesisonTask, tfEsFlags);
-    }
 private:
     void _SetComposition(_In_ ITfComposition *pComposition) { _pComposition = pComposition; }
     void _SaveCompositionContext(_In_ ITfContext *pContext) { _pContext = pContext; }
@@ -124,4 +121,5 @@ private:
 
     wil::com_ptr<ITfContext> _pContext;
     wil::com_ptr<ITfComposition> _pComposition;
+    wil::com_ptr<ITfContext> m_workingContext;
 };

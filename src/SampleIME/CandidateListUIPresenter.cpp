@@ -39,11 +39,7 @@ HRESULT CKeyStateCategory::_HandleCandidateFinalize(const KeyHandlerEditSessionD
 
         if (candidateString->length() > 0)
         {
-            RETURN_IF_FAILED(_pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, candidateString](TfEditCookie ec) -> HRESULT
-            {
-                return _pTextService->_AddComposingAndChar(ec, dto.pContext, candidateString);
-            },
-            TF_ES_ASYNCDONTCARE | TF_ES_READWRITE));
+            RETURN_IF_FAILED(_pTextService->_AddComposingAndChar(candidateString));
         }
     }
 
@@ -104,143 +100,7 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert(const KeyHandlerEditSessionDT
     _pCandidateListUIPresenter->_SetText(candidateConvertedList);
 
     // Add composing character
-    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, pCandidateString](TfEditCookie ec) -> HRESULT
-    {
-        return _pTextService->_AddComposingAndChar(ec, dto.pContext, pCandidateString);
-    },
-    TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
-
-
-
-//    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
-//    {
-//        HRESULT hrReturn = E_FAIL;
-//        shared_wstring pCandidateString;
-//        BSTR pbstr = nullptr;
-//        BOOL fMakePhraseFromText = FALSE;
-//        std::vector<CCandidateListItem> candidatePhraseList;
-//        ITfDocumentMgr* pDocumentMgr = nullptr;
-//
-//        if (!_pCandidateListUIPresenter->IsCreated())
-//        {
-//            hrReturn = S_OK;
-//            goto Exit;
-//        }
-//
-//        pCandidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
-//        if (pCandidateString->length() == 0)
-//        {
-//            hrReturn = S_FALSE;
-//            goto Exit;
-//        }
-//
-//        fMakePhraseFromText = _pCompositionProcessorEngine->IsMakePhraseFromText();
-//        if (fMakePhraseFromText)
-//        {
-//
-//            _pCompositionProcessorEngine->GetCandidateStringInConverted(pCandidateString, &candidatePhraseList);
-//            LCID locale = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLocale();
-//            RemoveSpecificCandidateFromList(locale, candidatePhraseList, pCandidateString);
-//        }
-//
-//        // We have a candidate list if candidatePhraseList.Cnt is not 0
-//        // If we are showing reverse conversion, use CCandidateListUIPresenter
-//        if (candidatePhraseList.size() > 0)
-//        {
-//            if (_pCandidateListUIPresenter->IsCreated())
-//            {
-//                _pCandidateListUIPresenter->_EndCandidateList();
-//                _pCandidateListUIPresenter->DestroyView();
-//                _pCompositionProcessorEngine->ResetCandidateState();
-//            }
-//    
-//    //        tempCandMode = CANDIDATE_WITH_NEXT_COMPOSITION;
-//    //
-//    //        pTempCandListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(
-//    //            reinterpret_cast<CWindowsIME*>(_textService->GetTextService()),
-//    //            Global::AtomCandidateWindow,
-//    //            CATEGORY_CANDIDATE,
-//    //            _pCompositionProcessorEngine->GetCandidateListIndexRange(),
-//    //            FALSE);
-//    //        if (nullptr == pTempCandListUIPresenter)
-//    //        {
-//    //            hrReturn = E_OUTOFMEMORY;
-//    //            goto Exit;
-//    //        }
-//
-//            _pCandidateListUIPresenter->CreateView(
-//                _pCompositionProcessorEngine->GetCandidateListIndexRange(),
-//                FALSE);
-//
-//            _pCompositionProcessorEngine->SetCandidateKeyStrokeCategory(CATEGORY_CANDIDATE);
-//            _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_WITH_NEXT_COMPOSITION);
-//            _pCompositionProcessorEngine->SetIsCandidateWithWildcard(false);
-//            // _candidateMode = CANDIDATE_WITH_NEXT_COMPOSITION;
-//            // _isCandidateWithWildcard = FALSE;
-//
-//            // call _Start*Line for CCandidateListUIPresenter or CReadingLine
-//            // we don't cache the document manager object so get it from pContext.
-//            if (dto.pContext->GetDocumentMgr(&pDocumentMgr) == S_OK)
-//            {
-//                ITfRange* pRange = nullptr;
-//                if (_pTextService->GetComposition()->GetRange(&pRange) == S_OK)
-//                {
-//    //              if (isNewWindowRequired)
-//                    {
-//    //                  hrStartCandidateList = candidateListInterface->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, pRange,
-//    //                          WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
-//                        _pCandidateListUIPresenter->_StartCandidateList(WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
-//                    }
-//
-//                    pRange->Release();
-//                }
-//                pDocumentMgr->Release();
-//            }
-//
-//            // set up candidate list if it is being shown
-//            _pCandidateListUIPresenter->_SetTextColor(RGB(0, 0x80, 0), GetSysColor(COLOR_WINDOW));    // Text color is green
-//            _pCandidateListUIPresenter->_SetFillColor((HBRUSH)(COLOR_WINDOW+1));    // Background color is window
-//
-//            std::vector<shared_wstring> candidateConvertedList;
-//            for (const auto& candidateSrc : candidatePhraseList) {
-//                candidateConvertedList.emplace_back(std::make_shared<std::wstring>(
-//                    candidateSrc._ItemString.Get(), candidateSrc._ItemString.GetLength()));
-//            }
-//            _pCandidateListUIPresenter->_SetText(candidateConvertedList);
-//
-//            // Add composing character
-//            hrReturn = _pTextService->_AddComposingAndChar(ec, dto.pContext, pCandidateString);
-//
-//    //        // close candidate list
-//    //        if (_pCandidateListUIPresenter)
-//    //        {
-//    //            _pCandidateListUIPresenter->_EndCandidateList();
-//    //            _pCandidateListUIPresenter.reset();
-//    //            ResetCandidateState();
-//    //        }
-//    //
-//    //        if (hrReturn == S_OK)
-//    //        {
-//    //            // copy temp candidate
-//    //            _pCandidateListUIPresenter.attach(pTempCandListUIPresenter);
-//    //
-//    //            _candidateMode = tempCandMode;
-//    //            _isCandidateWithWildcard = FALSE;
-//    //        }
-//        }
-//        else
-//        {
-//            hrReturn = _HandleCandidateFinalizeWorker(ec, dto.pContext);
-//        }
-//    
-//        if (pbstr)
-//        {
-//            SysFreeString(pbstr);
-//        }
-//    
-//Exit:
-//        return hrReturn;
-//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _pTextService->_AddComposingAndChar(pCandidateString);
 }
 
 //+---------------------------------------------------------------------------
@@ -311,11 +171,7 @@ HRESULT CKeyStateCategory::_HandlePhraseFinalize(const KeyHandlerEditSessionDTO&
 
     if (phraseString->length() > 0)
     {
-        RETURN_IF_FAILED(_pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, phraseString](TfEditCookie ec) -> HRESULT
-        {
-            return _pTextService->_AddCharAndFinalize(ec, dto.pContext, phraseString);
-        },
-        TF_ES_ASYNCDONTCARE | TF_ES_READWRITE));
+        RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(phraseString));
     }
 
     return _HandleComplete(dto);

@@ -870,53 +870,6 @@ HRESULT CCandidateListUIPresenter::_CandidateChangeNotification(_In_ enum CANDWN
         compositionBuffer->FinalizeCandidateList(pContext.get());
     }
 
-//    pThreadMgr = _pTextService->_GetThreadMgr();
-//    if (nullptr == pThreadMgr)
-//    {
-//        goto Exit;
-//    }
-//
-//    hr = pThreadMgr->GetFocus(&pDocumentMgr);
-//    if (FAILED(hr))
-//    {
-//        goto Exit;
-//    }
-//
-//    hr = pDocumentMgr->GetTop(&pContext);
-//    if (FAILED(hr))
-//    {
-//        pDocumentMgr->Release();
-//        goto Exit;
-//    }
-//
-////    {
-////        CKeyHandlerEditSession* pEditSession = new (std::nothrow) CKeyHandlerEditSession(_pTextService, pContext, 0, 0, KeyState);
-////        if (nullptr != pEditSession)
-////        {
-////            HRESULT hrSession = S_OK;
-////            hr = pContext->RequestEditSession(tfClientId, pEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hrSession);
-////            if (hrSession == TF_E_SYNCHRONOUS || hrSession == TS_E_READONLY)
-////            {
-////                hr = pContext->RequestEditSession(tfClientId, pEditSession, TF_ES_ASYNC | TF_ES_READWRITE, &hrSession);
-////            }
-////            pEditSession->Release();
-////        }
-////    }
-//
-//    {
-//        auto compositionBuffer = _pTextService->GetCompositionBuffer();
-//        auto pTextService = static_cast<WindowsImeLib::ICompositionProcessorEngineOwner*>(_pTextService);
-//        auto compositionEngiene = _pTextService->GetCompositionProcessorEngine();
-//        RETURN_IF_FAILED(pTextService->_SubmitEditSessionTask(pContext, [pTextService, compositionBuffer, compositionEngiene, KeyState, pContext]
-//            (TfEditCookie ec, WindowsImeLib::IWindowsIMECompositionBuffer* /*pv*/) ->  HRESULT
-//            {
-//                return compositionEngiene->KeyHandlerEditSession_DoEditSession(ec, KeyState, pContext, 0, 0, compositionBuffer.get());
-//            }, TF_ES_ASYNC | TF_ES_READWRITE));
-//    }
-//
-//    pContext->Release();
-//    pDocumentMgr->Release();
-
 Exit:
     return hr;
 }

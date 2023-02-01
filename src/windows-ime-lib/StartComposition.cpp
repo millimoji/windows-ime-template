@@ -33,37 +33,39 @@
 //
 //----------------------------------------------------------------------------
 
-// STDAPI CStartCompositionEditSession::DoEditSession(TfEditCookie ec)
-HRESULT CompositionBuffer::_StartComposition(TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CompositionBuffer::_StartComposition()
 {
-    wil::com_ptr<ITfInsertAtSelection> pInsertAtSelection;
-    RETURN_IF_FAILED(pContext->QueryInterface(IID_PPV_ARGS(&pInsertAtSelection)));
+    return m_framework->_SubmitEditSessionTask(m_workingContext.get(), [this, pContext = m_workingContext](TfEditCookie ec) -> HRESULT
+    {
+        wil::com_ptr<ITfInsertAtSelection> pInsertAtSelection;
+        RETURN_IF_FAILED(pContext->QueryInterface(IID_PPV_ARGS(&pInsertAtSelection)));
 
-    wil::com_ptr<ITfRange> pRangeInsert;
-    RETURN_IF_FAILED(pInsertAtSelection->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, NULL, 0, &pRangeInsert));
+        wil::com_ptr<ITfRange> pRangeInsert;
+        RETURN_IF_FAILED(pInsertAtSelection->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, NULL, 0, &pRangeInsert));
 
-    wil::com_ptr<ITfContextComposition> pContextComposition;
-    RETURN_IF_FAILED(pContext->QueryInterface(IID_PPV_ARGS(&pContextComposition)));
+        wil::com_ptr<ITfContextComposition> pContextComposition;
+        RETURN_IF_FAILED(pContext->QueryInterface(IID_PPV_ARGS(&pContextComposition)));
 
-    wil::com_ptr<ITfComposition> pComposition;
-    RETURN_IF_FAILED(pContextComposition->StartComposition(ec, pRangeInsert.get(), m_framework->GetCompositionSink(), &pComposition));
-    RETURN_HR_IF(S_OK /* ? */, !pComposition);
+        wil::com_ptr<ITfComposition> pComposition;
+        RETURN_IF_FAILED(pContextComposition->StartComposition(ec, pRangeInsert.get(), m_framework->GetCompositionSink(), &pComposition));
+        RETURN_HR_IF(S_OK /* ? */, !pComposition);
 
-    _SetComposition(pComposition.get());
+        _SetComposition(pComposition.get());
 
-    // set selection to the adjusted range
-    TF_SELECTION tfSelection = {};
-    tfSelection.range = pRangeInsert.get();
-    tfSelection.style.ase = TF_AE_NONE;
-    tfSelection.style.fInterimChar = FALSE;
+        // set selection to the adjusted range
+        TF_SELECTION tfSelection = {};
+        tfSelection.range = pRangeInsert.get();
+        tfSelection.style.ase = TF_AE_NONE;
+        tfSelection.style.fInterimChar = FALSE;
 
-    RETURN_IF_FAILED(pContext->SetSelection(ec, 1, &tfSelection));
+        RETURN_IF_FAILED(pContext->SetSelection(ec, 1, &tfSelection));
 
-    _SaveCompositionContext(pContext);
+        _SaveCompositionContext(pContext.get());
 
-    LOG_IF_FAILED(m_framework->_StartLayoutTracking(pContext, ec, pRangeInsert.get()));
-
-    return S_OK;
+        LOG_IF_FAILED(m_framework->_StartLayoutTracking(pContext.get(), ec, pRangeInsert.get()));
+        return S_OK;
+    },
+    TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -71,41 +73,3 @@ HRESULT CompositionBuffer::_StartComposition(TfEditCookie ec, _In_ ITfContext *p
 // CWindowsIME class
 //
 //////////////////////////////////////////////////////////////////////
-
-//+---------------------------------------------------------------------------
-//
-// _StartComposition
-//
-// this starts the new (std::nothrow) composition at the selection of the current 
-// focus context.
-//----------------------------------------------------------------------------
-
-// void CWindowsIME::_StartComposition(_In_ ITfContext *pContext)
-// {
-//     CStartCompositionEditSession* pStartCompositionEditSession = new (std::nothrow) CStartCompositionEditSession(this, pContext);
-// 
-//     if (nullptr != pStartCompositionEditSession)
-//     {
-//         HRESULT hr = S_OK;
-//         pContext->RequestEditSession(_tfClientId, pStartCompositionEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hr);
-// 
-//         pStartCompositionEditSession->Release();
-//     }
-// }
-// 
-// //+---------------------------------------------------------------------------
-// //
-// // _SaveCompositionContext
-// //
-// // this saves the context _pComposition belongs to; we need this to clear
-// // text attribute in case composition has not been terminated on 
-// // deactivation
-// //----------------------------------------------------------------------------
-// 
-// void CompositionBuffer::_SaveCompositionContext(_In_ ITfContext *pContext)
-// {
-//     assert(_pContext == nullptr);
-// 
-// //    pContext->AddRef();
-//     _pContext = pContext;
-// } 

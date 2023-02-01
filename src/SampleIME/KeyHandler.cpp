@@ -80,14 +80,8 @@ VOID CompositionProcessorEngine::_DeleteCandidateList(BOOL isForce, _In_opt_ ITf
 HRESULT CKeyStateCategory::_HandleComplete(const KeyHandlerEditSessionDTO& dto)
 {
     _pCompositionProcessorEngine->_DeleteCandidateList(FALSE, dto.pContext);
-
-    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
-    {
-        // just terminate the composition
-        _pTextService->_TerminateComposition(ec, dto.pContext);
-        return S_OK;
-    },
-    TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    _pTextService->_TerminateComposition();
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -99,14 +93,9 @@ HRESULT CKeyStateCategory::_HandleComplete(const KeyHandlerEditSessionDTO& dto)
 HRESULT CKeyStateCategory::_HandleCancel(const KeyHandlerEditSessionDTO& dto)
 {
     _pCompositionProcessorEngine->_DeleteCandidateList(FALSE, dto.pContext);
-
-    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
-    {
-        _pTextService->_RemoveDummyCompositionForComposing(ec, _pTextService->GetComposition().get());
-        _pTextService->_TerminateComposition(ec, dto.pContext);
-        return S_OK;
-    },
-    TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    _pTextService->_RemoveDummyCompositionForComposing();
+    _pTextService->_TerminateComposition();
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -127,11 +116,7 @@ HRESULT CKeyStateCategory::_HandleCompositionInput(const KeyHandlerEditSessionDT
     // Start the new (std::nothrow) compositon if there is no composition.
     if (!_pTextService->_IsComposing())
     {
-        RETURN_IF_FAILED(_pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
-        {
-            return _pTextService->_StartComposition(ec, dto.pContext);
-        },
-        TF_ES_ASYNCDONTCARE | TF_ES_READWRITE));
+        RETURN_IF_FAILED(_pTextService->_StartComposition());
     }
 
 // TODO confirm range is correct
@@ -158,52 +143,6 @@ HRESULT CKeyStateCategory::_HandleCompositionInput(const KeyHandlerEditSessionDT
     _pCompositionProcessorEngine->AddVirtualKey(wch);
 
     return _HandleCompositionInputWorker(dto);
-
-
-//    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, wch](TfEditCookie ec) -> HRESULT
-//    {
-//        ITfRange* pRangeComposition = nullptr;
-//        TF_SELECTION tfSelection;
-//        ULONG fetched = 0;
-//        BOOL isCovered = TRUE;
-//
-//        auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
-//
-//        // Start the new (std::nothrow) compositon if there is no composition.
-//        if (!_pTextService->_IsComposing())
-//        {
-//            _pTextService->_StartComposition(ec, dto.pContext);
-//        }
-//
-// TODO
-//        // first, test where a keystroke would go in the document if we did an insert
-//        if (dto.pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched) != S_OK || fetched != 1)
-//        {
-//            return S_FALSE;
-//        }
-//
-//        // is the insertion point covered by a composition?
-//        if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
-//        {
-//            isCovered = _IsRangeCovered(ec, tfSelection.range, pRangeComposition);
-//
-//            pRangeComposition->Release();
-//
-//            if (!isCovered)
-//            {
-//                goto Exit;
-//            }
-//        }
-//
-//        // Add virtual key to composition processor engine
-//        pCompositionProcessorEngine->AddVirtualKey(wch);
-//
-//        _HandleCompositionInputWorker(pCompositionProcessorEngine, ec, dto.pContext);
-//
-//Exit:
-//        tfSelection.range->Release();
-//        return S_OK;
-//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 //+---------------------------------------------------------------------------
@@ -231,11 +170,7 @@ HRESULT CKeyStateCategory::_HandleCompositionInputWorker(const KeyHandlerEditSes
     }
     auto insertionTextShared = std::make_shared<const std::wstring>(std::move(insertionText));
 
-    RETURN_IF_FAILED(_pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, insertionTextShared](TfEditCookie ec) -> HRESULT
-    {
-        return _pTextService->_AddComposingAndChar(ec, dto.pContext, insertionTextShared);
-    },
-    TF_ES_ASYNCDONTCARE | TF_ES_READWRITE));
+    RETURN_IF_FAILED(_pTextService->_AddComposingAndChar(insertionTextShared));
 
     //
     // Get candidate string from composition processor engine
@@ -264,67 +199,6 @@ HRESULT CKeyStateCategory::_HandleCompositionInputWorker(const KeyHandlerEditSes
     }
     return S_OK;
 }
-
-// //+---------------------------------------------------------------------------
-// //
-// // _HandleCompositionInputWorker
-// //
-// // If the keystroke happens within a composition, eat the key and return S_OK.
-// //
-// //----------------------------------------------------------------------------
-// 
-// HRESULT CKeyStateCategory::_HandleCompositionInputWorker(_In_ CompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
-// {
-//     HRESULT hr = S_OK;
-//     std::vector<CStringRange> readingStrings;
-//     BOOL isWildcardIncluded = TRUE;
-// 
-//     //
-//     // Get reading string from composition processor engine
-//     //
-//     pCompositionProcessorEngine->GetReadingStrings(&readingStrings, &isWildcardIncluded);
-// 
-//     for (UINT index = 0; index < readingStrings.size(); index++)
-//     {
-//         auto readingSubString = readingStrings.at(index).ToSharedWstring();
-// 
-//         hr = _pTextService->_AddComposingAndChar(ec, pContext, readingSubString);
-//         if (FAILED(hr))
-//         {
-//             return hr;
-//         }
-//     }
-// 
-//     //
-//     // Get candidate string from composition processor engine
-//     //
-//     std::vector<shared_wstring> candidateList;
-// 
-//     pCompositionProcessorEngine->GetCandidateList(candidateList, TRUE, FALSE);
-// 
-//     if (candidateList.size() > 0)
-//     {
-//         hr = _CreateAndStartCandidate(pContext);
-//         if (SUCCEEDED(hr))
-//         {
-//             _pCandidateListUIPresenter->_ClearList();
-//             _pCandidateListUIPresenter->_SetText(candidateList);
-//         }
-//     }
-//     else if (_pCandidateListUIPresenter->IsCreated())
-//     {
-//         _pCandidateListUIPresenter->_ClearList();
-//     }
-//     else if (readingStrings.size() && isWildcardIncluded)
-//     {
-//         hr = _CreateAndStartCandidate(pContext);
-//         if (SUCCEEDED_LOG(hr))
-//         {
-//             _pCandidateListUIPresenter->_ClearList();
-//         }
-//     }
-//     return hr;
-// }
 
 //+---------------------------------------------------------------------------
 //
@@ -407,10 +281,7 @@ HRESULT CKeyStateCategory::_HandleCompositionFinalize(const KeyHandlerEditSessio
         auto candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
 
         // Finalize character
-        RETURN_IF_FAILED(_pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, candidateString](TfEditCookie ec) -> HRESULT
-        {
-            return _pTextService->_AddCharAndFinalize(ec, dto.pContext, candidateString);
-        }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE));
+        RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(candidateString));
     }
     else
     {
@@ -424,62 +295,11 @@ HRESULT CKeyStateCategory::_HandleCompositionFinalize(const KeyHandlerEditSessio
 //                    if (_IsRangeCovered(ec, tfSelection.range, pRangeComposition))
 //                        _pTextService->_TerminateComposition(ec, dto.pContext, FALSE);
 
-            RETURN_IF_FAILED(_pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
-            {
-                _pTextService->_TerminateComposition(ec, dto.pContext, FALSE);
-                return S_OK;
-            }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE));
+            _pTextService->_TerminateComposition();
         }
     }
 
     return _HandleCancel(dto);
-
-//    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, isCandidateList](TfEditCookie ec) -> HRESULT
-//    {
-//        if (isCandidateList && _pCandidateListUIPresenter->IsCreated())
-//        {
-//            // Finalize selected candidate string from CCandidateListUIPresenter
-//            auto candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
-//
-//            if (candidateString->length() > 0)
-//            {
-//                // Finalize character
-//                RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(ec, dto.pContext, candidateString));
-//            }
-//        }
-//        else
-//        {
-//            // Finalize current text store strings
-//            if (_pTextService->_IsComposing())
-//            {
-//                ULONG fetched = 0;
-//                TF_SELECTION tfSelection;
-//
-//                if (FAILED(dto.pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched)) || fetched != 1)
-//                {
-//                    return S_FALSE;
-//                }
-//
-//                ITfRange* pRangeComposition = nullptr;
-//                if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
-//                {
-//                    if (_IsRangeCovered(ec, tfSelection.range, pRangeComposition))
-//                    {
-//                        _pTextService->_TerminateComposition(ec, dto.pContext, FALSE);
-//                        // _textService->_EndComposition(pContext);
-//                    }
-//
-//                    pRangeComposition->Release();
-//                }
-//
-//                tfSelection.range->Release();
-//            }
-//        }
-//
-//        _HandleCancelWorker(ec, dto.pContext);
-//
-//        return S_OK;
-//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 //+---------------------------------------------------------------------------
@@ -585,67 +405,7 @@ HRESULT CKeyStateCategory::_HandleCompositionBackspace(const KeyHandlerEditSessi
         }
     }
 
-	return S_OK;
-
-//    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
-//    {
-//        ITfRange* pRangeComposition = nullptr;
-//        TF_SELECTION tfSelection;
-//        ULONG fetched = 0;
-//        BOOL isCovered = TRUE;
-//
-//        // Start the new (std::nothrow) compositon if there is no composition.
-//        if (!_pTextService->_IsComposing())
-//        {
-//            return S_OK;
-//        }
-//
-//        // first, test where a keystroke would go in the document if we did an insert
-//        if (FAILED(dto.pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched)) || fetched != 1)
-//        {
-//            return S_FALSE;
-//        }
-//
-//        // is the insertion point covered by a composition?
-//        if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
-//        {
-//            isCovered = _IsRangeCovered(ec, tfSelection.range, pRangeComposition);
-//
-//            pRangeComposition->Release();
-//
-//            if (!isCovered)
-//            {
-//                goto Exit;
-//            }
-//        }
-//
-//        //
-//        // Add virtual key to composition processor engine
-//        //
-//        {
-//            auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
-//
-//            DWORD_PTR vKeyLen = pCompositionProcessorEngine->GetVirtualKeyLength();
-//
-//            if (vKeyLen)
-//            {
-//                pCompositionProcessorEngine->RemoveVirtualKey(vKeyLen - 1);
-//
-//                if (pCompositionProcessorEngine->GetVirtualKeyLength() > 0)
-//                {
-//                    _HandleCompositionInputWorker(pCompositionProcessorEngine, ec, dto.pContext);
-//                }
-//                else
-//                {
-//                    _HandleCancelWorker(ec, dto.pContext);
-//                }
-//            }
-//        }
-//
-//Exit:
-//        tfSelection.range->Release();
-//        return S_OK;
-//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -668,46 +428,6 @@ HRESULT CKeyStateCategory::_HandleCompositionArrowKey(const KeyHandlerEditSessio
     return S_OK;
 }
 
-//    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
-//    {
-//        ITfRange* pRangeComposition = nullptr;
-//        TF_SELECTION tfSelection;
-//        ULONG fetched = 0;
-//
-//        // get the selection
-//        if (FAILED(dto.pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched))
-//            || fetched != 1)
-//        {
-//            // no selection, eat the keystroke
-//            return S_OK;
-//        }
-//
-//        // get the composition range
-//        if (FAILED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
-//        {
-//            goto Exit;
-//        }
-//
-//        // For incremental candidate list
-//        if (_pCandidateListUIPresenter->IsCreated())
-//        {
-//            const auto candidateListFuntion = KeyStrokeFunctionToCandidateListFunction(dto.arrowKey);
-//            if (candidateListFuntion != CANDIDATELIST_FUNCTION_NONE)
-//            {
-//                _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(candidateListFuntion);
-//            }
-//        }
-//
-//        dto.pContext->SetSelection(ec, 1, &tfSelection);
-//
-//        pRangeComposition->Release();
-//
-//Exit:
-//        tfSelection.range->Release();
-//        return S_OK;
-//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
-//}
-
 //+---------------------------------------------------------------------------
 //
 // _HandleCompositionPunctuation
@@ -721,11 +441,7 @@ HRESULT CKeyStateCategory::_HandleCompositionPunctuation(const KeyHandlerEditSes
         auto candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
         if (candidateString->length() > 0)
         {
-            _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, candidateString](TfEditCookie ec) -> HRESULT
-            {
-                return _pTextService->_AddComposingAndChar(ec, dto.pContext, candidateString);
-            },
-            TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+            RETURN_IF_FAILED(_pTextService->_AddComposingAndChar(candidateString));
         }
     }
 
@@ -736,41 +452,9 @@ HRESULT CKeyStateCategory::_HandleCompositionPunctuation(const KeyHandlerEditSes
     WCHAR punctuation = pCompositionProcessorEngine->GetPunctuation(dto.wch);
     auto punctuationString = std::make_shared<const std::wstring>(&punctuation, 1);
 
-    _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, punctuationString](TfEditCookie ec) -> HRESULT
-    {
-        return _pTextService->_AddCharAndFinalize(ec, dto.pContext, punctuationString);
-    },
-    TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(punctuationString));
 
     return _HandleCancel(dto);
-
-//    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
-//    {
-//        if (_pCompositionProcessorEngine->CandidateMode() != CANDIDATE_NONE && _pCandidateListUIPresenter->IsCreated())
-//        {
-//            auto candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
-//
-//            if (candidateString->length() > 0)
-//            {
-//                _pTextService->_AddComposingAndChar(ec, dto.pContext, candidateString);
-//            }
-//        }
-//        //
-//        // Get punctuation char from composition processor engine
-//        //
-//        auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
-//
-//        WCHAR punctuation = pCompositionProcessorEngine->GetPunctuation(dto.wch);
-//
-//        auto punctuationString = std::make_shared<const std::wstring>(&punctuation, 1);
-//
-//        // Finalize character
-//        RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(ec, dto.pContext, punctuationString));
-//
-//        _HandleCancelWorker(ec, dto.pContext);
-//
-//        return S_OK;
-//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 //+---------------------------------------------------------------------------
@@ -786,12 +470,7 @@ HRESULT CKeyStateCategory::_HandleCompositionDoubleSingleByte(const KeyHandlerEd
     fullWidthString.Set(&fullWidth, 1);
     const auto sharedFullWidthString = fullWidthString.ToSharedWstring();
 
-    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, sharedFullWidthString](TfEditCookie ec) -> HRESULT
-    {
-        // Finalize character
-        return _pTextService->_AddCharAndFinalize(ec, dto.pContext, sharedFullWidthString);
-    },
-    TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(sharedFullWidthString));
 
     return _HandleCancel(dto);
 }
