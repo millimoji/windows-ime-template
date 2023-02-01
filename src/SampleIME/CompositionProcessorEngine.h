@@ -75,7 +75,7 @@ public:
         m_compartmentIsPunctuation = json["isPunctuation"].get<bool>();
     }
 
-    void SetCandidateKeyStrokeCategory(KEYSTROKE_CATEGORY keyStrokeCategory) { _keyStrokeCategory = keyStrokeCategory; }
+//    void SetCandidateKeyStrokeCategory(KEYSTROKE_CATEGORY keyStrokeCategory) { _keyStrokeCategory = keyStrokeCategory; }
     CANDIDATE_MODE CandidateMode() { return _candidateMode; }
     void SetCandidateMode(CANDIDATE_MODE candidateMode) { _candidateMode = candidateMode; }
     bool IsCandidateWithWildcard() { return _isCandidateWithWildcard; }
@@ -221,7 +221,7 @@ private:
     UINT _candidateListPhraseModifier;
 //    UINT _candidateWndWidth;
 
-    KEYSTROKE_CATEGORY _keyStrokeCategory;
+//    KEYSTROKE_CATEGORY _keyStrokeCategory;
     CANDIDATE_MODE _candidateMode;
     BOOL _isCandidateWithWildcard = FALSE;
 

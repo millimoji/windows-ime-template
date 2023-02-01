@@ -228,9 +228,7 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate()
 //    if (_pCandidateListUIPresenter == nullptr)
     if (!_pCandidateListUIPresenter->IsCreated())
     {
-        _pCandidateListUIPresenter->CreateView(
-            _pCompositionProcessorEngine->GetCandidateListIndexRange(),
-            FALSE);
+        _pCandidateListUIPresenter->CreateView(_pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
 
 //        _pCandidateListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(
 //            reinterpret_cast<CWindowsIME*>(_textService->GetTextService()),
@@ -243,25 +241,10 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate()
 //            return E_OUTOFMEMORY;
 //        }
 
-        _pCompositionProcessorEngine->SetCandidateKeyStrokeCategory(CATEGORY_CANDIDATE);
         _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_INCREMENTAL);
         _pCompositionProcessorEngine->SetIsCandidateWithWildcard(false);
 
         hr = _pCandidateListUIPresenter->_StartCandidateList(WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
-
-//        // we don't cache the document manager object. So get it from pContext.
-//        ITfDocumentMgr* pDocumentMgr = nullptr;
-//        if (SUCCEEDED(pContext->GetDocumentMgr(&pDocumentMgr)))
-//        {
-//            // get the composition range.
-//            ITfRange* pRange = nullptr;
-//            if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRange)))
-//            {
-//                hr = _pCandidateListUIPresenter->_StartCandidateList(WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
-//                pRange->Release();
-//            }
-//            pDocumentMgr->Release();
-//        }
     }
 
     return hr;
@@ -336,10 +319,7 @@ HRESULT CKeyStateCategory::_HandleCompositionConvert(BOOL isWildcardSearch)
         // 
         if (!_pCandidateListUIPresenter->IsCreated())
         {
-            _pCandidateListUIPresenter->CreateView(
-                                            pCompositionProcessorEngine->GetCandidateListIndexRange(),
-                                            FALSE);
-            _pCompositionProcessorEngine->SetCandidateKeyStrokeCategory(CATEGORY_CANDIDATE);
+            _pCandidateListUIPresenter->CreateView(pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
             _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_ORIGINAL);
         }
 
@@ -347,19 +327,6 @@ HRESULT CKeyStateCategory::_HandleCompositionConvert(BOOL isWildcardSearch)
 
         hr = _pCandidateListUIPresenter->_StartCandidateList(WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
 
-//        // we don't cache the document manager object. So get it from pContext.
-//        ITfDocumentMgr* pDocumentMgr = nullptr;
-//        if (SUCCEEDED(dto.pContext->GetDocumentMgr(&pDocumentMgr)))
-//        {
-//            // get the composition range.
-//            ITfRange* pRange = nullptr;
-//            if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRange)))
-//            {
-//                hr = _pCandidateListUIPresenter->_StartCandidateList(WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
-//                pRange->Release();
-//            }
-//            pDocumentMgr->Release();
-//        }
         if (SUCCEEDED(hr))
         {
             _pCandidateListUIPresenter->_SetText(candidateList);

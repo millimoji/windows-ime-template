@@ -82,7 +82,6 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert()
     }
 
     _pCandidateListUIPresenter->CreateView(_pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
-    _pCompositionProcessorEngine->SetCandidateKeyStrokeCategory(CATEGORY_CANDIDATE);
     _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_WITH_NEXT_COMPOSITION);
     _pCompositionProcessorEngine->SetIsCandidateWithWildcard(false);
 

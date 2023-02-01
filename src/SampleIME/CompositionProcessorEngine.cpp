@@ -1375,7 +1375,7 @@ BOOL CompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_S
 void CompositionProcessorEngine::FinalizeCandidateList()
 {
     _KEYSTROKE_STATE KeystrokeState = {};
-    KeystrokeState.Category = _keyStrokeCategory;
+    KeystrokeState.Category = CATEGORY_CANDIDATE;
     KeystrokeState.Function = FUNCTION_FINALIZE_CANDIDATELIST;
 
 	KeyHandlerEditSession_DoEditSession(KeystrokeState, 0, 0);
