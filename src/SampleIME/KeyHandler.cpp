@@ -307,7 +307,7 @@ HRESULT CKeyStateCategory::_HandleCompositionFinalize(BOOL isCandidateList)
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_HandleCompositionConvert(const KeyHandlerEditSessionDTO& /*dto*/, BOOL isWildcardSearch)
+HRESULT CKeyStateCategory::_HandleCompositionConvert(BOOL isWildcardSearch)
 {
     HRESULT hr = S_OK;
 

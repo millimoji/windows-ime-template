@@ -81,7 +81,7 @@ protected:
     virtual HRESULT HandleKeyFinalizeCandidatelist();
 
     // HandleKeyConvert
-    virtual HRESULT HandleKeyConvert(KeyHandlerEditSessionDTO dto);
+    virtual HRESULT HandleKeyConvert();
 
     // HandleKeyConvertWild
     virtual HRESULT HandleKeyConvertWildCard(KeyHandlerEditSessionDTO dto);
@@ -111,7 +111,7 @@ protected:
     HRESULT _HandleCompositionFinalize(BOOL fCandidateList);
     HRESULT _HandleComplete();
 
-    HRESULT _HandleCompositionConvert(const KeyHandlerEditSessionDTO& dto, BOOL isWildcardSearch);
+    HRESULT _HandleCompositionConvert(BOOL isWildcardSearch);
     HRESULT _HandleCompositionBackspace();
     HRESULT _HandleCompositionArrowKey(const KeyHandlerEditSessionDTO& dto);
     HRESULT _HandleCompositionPunctuation(const KeyHandlerEditSessionDTO& dto);
@@ -164,7 +164,7 @@ protected:
     HRESULT HandleKeyFinalizeCandidatelist();
 
     // HandleCompositionConvert
-    HRESULT HandleKeyConvert(KeyHandlerEditSessionDTO dto);
+    HRESULT HandleKeyConvert();
 
     // HandleKeyCompositionConvertWildCard
     HRESULT HandleKeyConvertWildCard(KeyHandlerEditSessionDTO dto);
@@ -262,7 +262,7 @@ protected:
     HRESULT HandleKeyFinalizeCandidatelist() { return __super::HandleKeyFinalizeCandidatelist(); };
 
     //_HandleNullConvert
-    HRESULT HandleKeyConvert(KeyHandlerEditSessionDTO dto) { return __super::HandleKeyConvert(dto); };
+    HRESULT HandleKeyConvert() { return __super::HandleKeyConvert(); };
 
     //_HandleNullCancel
     HRESULT HandleKeyCancel() { return __super::HandleKeyCancel(); };

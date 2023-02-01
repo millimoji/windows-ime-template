@@ -104,7 +104,7 @@ HRESULT CKeyStateCategory::KeyStateHandler(KEYSTROKE_FUNCTION function, KeyHandl
         return HandleKeyFinalizeCandidatelist();
 
     case FUNCTION_CONVERT:
-        return HandleKeyConvert(dto);
+        return HandleKeyConvert();
 
     case FUNCTION_CONVERT_WILDCARD:
         return HandleKeyConvertWildCard(dto);
@@ -178,9 +178,8 @@ HRESULT CKeyStateCategory::HandleKeyFinalizeCandidatelist()
 }
 
 // HandleKeyConvert
-HRESULT CKeyStateCategory::HandleKeyConvert(KeyHandlerEditSessionDTO dto)
+HRESULT CKeyStateCategory::HandleKeyConvert()
 {
-    dto;
     return E_NOTIMPL;
 }
 
@@ -267,14 +266,14 @@ HRESULT CKeyStateComposing::HandleKeyFinalizeCandidatelist()
     return _HandleCompositionFinalize(TRUE);
 }
 
-HRESULT CKeyStateComposing::HandleKeyConvert(KeyHandlerEditSessionDTO dto)
+HRESULT CKeyStateComposing::HandleKeyConvert()
 {
-    return _HandleCompositionConvert(dto, FALSE);
+    return _HandleCompositionConvert(FALSE);
 }
 
-HRESULT CKeyStateComposing::HandleKeyConvertWildCard(KeyHandlerEditSessionDTO dto)
+HRESULT CKeyStateComposing::HandleKeyConvertWildCard(KeyHandlerEditSessionDTO /*dto*/)
 {
-    return _HandleCompositionConvert(dto, TRUE);
+    return _HandleCompositionConvert(TRUE);
 }
 
 HRESULT CKeyStateComposing::HandleKeyCancel()
