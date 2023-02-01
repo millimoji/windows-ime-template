@@ -400,52 +400,85 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate(_In_ ITfContext *pContext)
 
 HRESULT CKeyStateCategory::_HandleCompositionFinalize(const KeyHandlerEditSessionDTO& dto, BOOL isCandidateList)
 {
-    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, isCandidateList](TfEditCookie ec) -> HRESULT
+    if (isCandidateList && _pCandidateListUIPresenter->IsCreated())
     {
-        if (isCandidateList && _pCandidateListUIPresenter->IsCreated())
+        // Finalize selected candidate string from CCandidateListUIPresenter
+        auto candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
+
+        // Finalize character
+        RETURN_IF_FAILED(_pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, candidateString](TfEditCookie ec) -> HRESULT
         {
-            // Finalize selected candidate string from CCandidateListUIPresenter
-            auto candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
-
-            if (candidateString->length() > 0)
-            {
-                // Finalize character
-                RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(ec, dto.pContext, candidateString));
-            }
-        }
-        else
+            return _pTextService->_AddCharAndFinalize(ec, dto.pContext, candidateString);
+        }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE));
+    }
+    else
+    {
+        // Finalize current text store strings
+        if (_pTextService->_IsComposing())
         {
-            // Finalize current text store strings
-            if (_pTextService->_IsComposing())
+//TODO?? Confirm range
+//                if (FAILED(dto.pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched)) || fetched != 1)
+//                ITfRange* pRangeComposition = nullptr;
+//                if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
+//                    if (_IsRangeCovered(ec, tfSelection.range, pRangeComposition))
+//                        _pTextService->_TerminateComposition(ec, dto.pContext, FALSE);
+
+            RETURN_IF_FAILED(_pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
             {
-                ULONG fetched = 0;
-                TF_SELECTION tfSelection;
-
-                if (FAILED(dto.pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched)) || fetched != 1)
-                {
-                    return S_FALSE;
-                }
-
-                ITfRange* pRangeComposition = nullptr;
-                if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
-                {
-                    if (_IsRangeCovered(ec, tfSelection.range, pRangeComposition))
-                    {
-                        _pTextService->_TerminateComposition(ec, dto.pContext, FALSE);
-                        // _textService->_EndComposition(pContext);
-                    }
-
-                    pRangeComposition->Release();
-                }
-
-                tfSelection.range->Release();
-            }
+                _pTextService->_TerminateComposition(ec, dto.pContext, FALSE);
+                return S_OK;
+            }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE));
         }
+    }
 
-        _HandleCancelWorker(ec, dto.pContext);
+    return _HandleCancel(dto);
 
-        return S_OK;
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+//    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, isCandidateList](TfEditCookie ec) -> HRESULT
+//    {
+//        if (isCandidateList && _pCandidateListUIPresenter->IsCreated())
+//        {
+//            // Finalize selected candidate string from CCandidateListUIPresenter
+//            auto candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
+//
+//            if (candidateString->length() > 0)
+//            {
+//                // Finalize character
+//                RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(ec, dto.pContext, candidateString));
+//            }
+//        }
+//        else
+//        {
+//            // Finalize current text store strings
+//            if (_pTextService->_IsComposing())
+//            {
+//                ULONG fetched = 0;
+//                TF_SELECTION tfSelection;
+//
+//                if (FAILED(dto.pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched)) || fetched != 1)
+//                {
+//                    return S_FALSE;
+//                }
+//
+//                ITfRange* pRangeComposition = nullptr;
+//                if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
+//                {
+//                    if (_IsRangeCovered(ec, tfSelection.range, pRangeComposition))
+//                    {
+//                        _pTextService->_TerminateComposition(ec, dto.pContext, FALSE);
+//                        // _textService->_EndComposition(pContext);
+//                    }
+//
+//                    pRangeComposition->Release();
+//                }
+//
+//                tfSelection.range->Release();
+//            }
+//        }
+//
+//        _HandleCancelWorker(ec, dto.pContext);
+//
+//        return S_OK;
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 //+---------------------------------------------------------------------------
