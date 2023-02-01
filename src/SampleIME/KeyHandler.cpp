@@ -54,9 +54,9 @@
 //
 //----------------------------------------------------------------------------
 
-VOID CompositionProcessorEngine::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext)
+VOID CompositionProcessorEngine::_DeleteCandidateList()
 {
-    isForce;pContext;
+//    isForce;pContext;
 
     PurgeVirtualKey();
 
@@ -77,9 +77,9 @@ VOID CompositionProcessorEngine::_DeleteCandidateList(BOOL isForce, _In_opt_ ITf
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_HandleComplete(const KeyHandlerEditSessionDTO& dto)
+HRESULT CKeyStateCategory::_HandleComplete()
 {
-    _pCompositionProcessorEngine->_DeleteCandidateList(FALSE, dto.pContext);
+    _pCompositionProcessorEngine->_DeleteCandidateList();
     _pTextService->_TerminateComposition();
     return S_OK;
 }
@@ -90,9 +90,9 @@ HRESULT CKeyStateCategory::_HandleComplete(const KeyHandlerEditSessionDTO& dto)
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_HandleCancel(const KeyHandlerEditSessionDTO& dto)
+HRESULT CKeyStateCategory::_HandleCancel()
 {
-    _pCompositionProcessorEngine->_DeleteCandidateList(FALSE, dto.pContext);
+    _pCompositionProcessorEngine->_DeleteCandidateList();
     _pTextService->_RemoveDummyCompositionForComposing();
     _pTextService->_TerminateComposition();
     return S_OK;
@@ -106,11 +106,11 @@ HRESULT CKeyStateCategory::_HandleCancel(const KeyHandlerEditSessionDTO& dto)
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_HandleCompositionInput(const KeyHandlerEditSessionDTO& dto, WCHAR wch)
+HRESULT CKeyStateCategory::_HandleCompositionInput(WCHAR wch)
 {
     if (_pCandidateListUIPresenter->IsCreated() && (_pCompositionProcessorEngine->CandidateMode() != CANDIDATE_INCREMENTAL))
     {
-        _HandleCompositionFinalize(dto, FALSE);
+        _HandleCompositionFinalize(FALSE);
     }
 
     // Start the new (std::nothrow) compositon if there is no composition.
@@ -142,7 +142,7 @@ HRESULT CKeyStateCategory::_HandleCompositionInput(const KeyHandlerEditSessionDT
     // Add virtual key to composition processor engine
     _pCompositionProcessorEngine->AddVirtualKey(wch);
 
-    return _HandleCompositionInputWorker(dto);
+    return _HandleCompositionInputWorker();
 }
 
 //+---------------------------------------------------------------------------
@@ -153,7 +153,7 @@ HRESULT CKeyStateCategory::_HandleCompositionInput(const KeyHandlerEditSessionDT
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_HandleCompositionInputWorker(const KeyHandlerEditSessionDTO& dto)
+HRESULT CKeyStateCategory::_HandleCompositionInputWorker()
 {
     //
     // Get reading string from composition processor engine
@@ -180,7 +180,7 @@ HRESULT CKeyStateCategory::_HandleCompositionInputWorker(const KeyHandlerEditSes
 
     if (candidateList.size() > 0)
     {
-        if (SUCCEEDED_LOG(_CreateAndStartCandidate(dto.pContext)))
+        if (SUCCEEDED_LOG(_CreateAndStartCandidate()))
         {
             _pCandidateListUIPresenter->_ClearList();
             _pCandidateListUIPresenter->_SetText(candidateList);
@@ -192,7 +192,7 @@ HRESULT CKeyStateCategory::_HandleCompositionInputWorker(const KeyHandlerEditSes
     }
     else if (readingStrings.size() && isWildcardIncluded)
     {
-        if (SUCCEEDED_LOG(_CreateAndStartCandidate(dto.pContext)))
+        if (SUCCEEDED_LOG(_CreateAndStartCandidate()))
         {
             _pCandidateListUIPresenter->_ClearList();
         }
@@ -206,7 +206,7 @@ HRESULT CKeyStateCategory::_HandleCompositionInputWorker(const KeyHandlerEditSes
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_CreateAndStartCandidate(_In_ ITfContext* /*pContext*/)
+HRESULT CKeyStateCategory::_CreateAndStartCandidate()
 {
     HRESULT hr = S_OK;
 
@@ -273,7 +273,7 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate(_In_ ITfContext* /*pContext*
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_HandleCompositionFinalize(const KeyHandlerEditSessionDTO& dto, BOOL isCandidateList)
+HRESULT CKeyStateCategory::_HandleCompositionFinalize(BOOL isCandidateList)
 {
     if (isCandidateList && _pCandidateListUIPresenter->IsCreated())
     {
@@ -293,13 +293,12 @@ HRESULT CKeyStateCategory::_HandleCompositionFinalize(const KeyHandlerEditSessio
 //                ITfRange* pRangeComposition = nullptr;
 //                if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
 //                    if (_IsRangeCovered(ec, tfSelection.range, pRangeComposition))
-//                        _pTextService->_TerminateComposition(ec, dto.pContext, FALSE);
 
             _pTextService->_TerminateComposition();
         }
     }
 
-    return _HandleCancel(dto);
+    return _HandleCancel();
 }
 
 //+---------------------------------------------------------------------------
@@ -375,7 +374,7 @@ HRESULT CKeyStateCategory::_HandleCompositionConvert(const KeyHandlerEditSession
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_HandleCompositionBackspace(const KeyHandlerEditSessionDTO& dto)
+HRESULT CKeyStateCategory::_HandleCompositionBackspace()
 {
 	// Start the new (std::nothrow) compositon if there is no composition.
 	RETURN_HR_IF(S_OK, !_pTextService->_IsComposing());
@@ -397,11 +396,11 @@ HRESULT CKeyStateCategory::_HandleCompositionBackspace(const KeyHandlerEditSessi
 
         if (_pCompositionProcessorEngine->GetVirtualKeyLength() > 0)
         {
-            _HandleCompositionInputWorker(dto);
+            _HandleCompositionInputWorker();
         }
         else
         {
-            _HandleCancel(dto);
+            _HandleCancel();
         }
     }
 
@@ -454,7 +453,7 @@ HRESULT CKeyStateCategory::_HandleCompositionPunctuation(const KeyHandlerEditSes
 
     RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(punctuationString));
 
-    return _HandleCancel(dto);
+    return _HandleCancel();
 }
 
 //+---------------------------------------------------------------------------
@@ -472,46 +471,5 @@ HRESULT CKeyStateCategory::_HandleCompositionDoubleSingleByte(const KeyHandlerEd
 
     RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(sharedFullWidthString));
 
-    return _HandleCancel(dto);
+    return _HandleCancel();
 }
-
-// //+---------------------------------------------------------------------------
-// //
-// // _InvokeKeyHandler
-// //
-// // This text service is interested in handling keystrokes to demonstrate the
-// // use the compositions. Some apps will cancel compositions if they receive
-// // keystrokes while a compositions is ongoing.
-// //
-// // param
-// //    [in] uCode - virtual key code of WM_KEYDOWN wParam
-// //    [in] dwFlags - WM_KEYDOWN lParam
-// //    [in] dwKeyFunction - Function regarding virtual key
-// //----------------------------------------------------------------------------
-// 
-// HRESULT CWindowsIME::_InvokeKeyHandler(_In_ ITfContext *pContext, UINT code, WCHAR wch, DWORD flags, _KEYSTROKE_STATE keyState)
-// {
-//     flags;
-// 
-//     CKeyHandlerEditSession* pEditSession = nullptr;
-//     HRESULT hr = E_FAIL;
-// 
-//     // we'll insert a char ourselves in place of this keystroke
-//     pEditSession = new (std::nothrow) CKeyHandlerEditSession(this, pContext, code, wch, keyState);
-//     if (pEditSession == nullptr)
-//     {
-//         goto Exit;
-//     }
-// 
-//     //
-//     // Call CKeyHandlerEditSession::DoEditSession().
-//     //
-//     // Do not specify TF_ES_SYNC so edit session is not invoked on WinWord
-//     //
-//     hr = pContext->RequestEditSession(_tfClientId, pEditSession, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE, &hr);
-// 
-//     pEditSession->Release();
-// 
-// Exit:
-//     return hr;
-// }

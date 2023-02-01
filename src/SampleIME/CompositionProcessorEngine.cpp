@@ -938,7 +938,7 @@ void CompositionProcessorEngine::SetInitialCandidateListRange()
 //
 //////////////////////////////////////////////////////////////////////
 
-void CompositionProcessorEngine::OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten,
+void CompositionProcessorEngine::OnKeyEvent(WPARAM wParam, LPARAM lParam, BOOL *pIsEaten,
         wchar_t wch, UINT vkPackSource, bool isKbdDisabled, DWORD modifiers, DWORD uniqueModifiers, bool isTest, bool isDown)
 {
     // copy modifier state
@@ -952,22 +952,22 @@ void CompositionProcessorEngine::OnKeyEvent(ITfContext *pContext, WPARAM wParam,
     {
         if (isDown)
         {
-            OnTestKeyDown(pContext, wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled);
+            OnTestKeyDown(wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled);
         }
         else
         {
-            OnTestKeyUp(pContext, wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled);
+            OnTestKeyUp(wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled);
         }
     }
     else
     {
         if (isDown)
         {
-            OnKeyDown(pContext, wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled);
+            OnKeyDown(wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled);
         }
         else
         {
-            OnKeyUp(pContext, wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled);
+            OnKeyUp(wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled);
         }
     }
 }
@@ -1372,23 +1372,13 @@ BOOL CompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_S
     return FALSE;
 }
 
-void CompositionProcessorEngine::EndComposition(_In_opt_ ITfContext *pContext)
-{
-    if (!pContext)
-    {
-        return;
-    }
-
-    m_compositionBuffer->_TerminateComposition();
-}
-
-void CompositionProcessorEngine::FinalizeCandidateList(_In_ ITfContext *pContext)
+void CompositionProcessorEngine::FinalizeCandidateList()
 {
     _KEYSTROKE_STATE KeystrokeState = {};
     KeystrokeState.Category = _keyStrokeCategory;
     KeystrokeState.Function = FUNCTION_FINALIZE_CANDIDATELIST;
 
-	KeyHandlerEditSession_DoEditSession(KeystrokeState, pContext, 0, 0);
+	KeyHandlerEditSession_DoEditSession(KeystrokeState, 0, 0);
 }
 
 SampleIMEProcessor::SampleIMEProcessor(WindowsImeLib::ITextInputFramework* framework) :

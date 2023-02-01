@@ -188,67 +188,6 @@ BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT /*codeIn*/, wchar_t wch, 
 //     return 0;
 // }
 // 
-// //+---------------------------------------------------------------------------
-// //
-// // _IsKeyboardDisabled
-// //
-// //----------------------------------------------------------------------------
-// 
-// BOOL CWindowsIME::_IsKeyboardDisabled()
-// {
-//     ITfDocumentMgr* pDocMgrFocus = nullptr;
-//     ITfContext* pContext = nullptr;
-//     BOOL isDisabled = FALSE;
-// 
-//     if ((_pThreadMgr->GetFocus(&pDocMgrFocus) != S_OK) ||
-//         (pDocMgrFocus == nullptr))
-//     {
-//         // if there is no focus document manager object, the keyboard 
-//         // is disabled.
-//         isDisabled = TRUE;
-//     }
-//     else if ((pDocMgrFocus->GetTop(&pContext) != S_OK) ||
-//         (pContext == nullptr))
-//     {
-//         // if there is no context object, the keyboard is disabled.
-//         isDisabled = TRUE;
-//     }
-//     else
-//     {
-//         CCompartment CompartmentKeyboardDisabled(_pThreadMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_DISABLED);
-//         CompartmentKeyboardDisabled._GetCompartmentBOOL(isDisabled);
-// 
-//         CCompartment CompartmentEmptyContext(_pThreadMgr, _tfClientId, GUID_COMPARTMENT_EMPTYCONTEXT);
-//         CompartmentEmptyContext._GetCompartmentBOOL(isDisabled);
-//     }
-// 
-//     if (pContext)
-//     {
-//         pContext->Release();
-//     }
-// 
-//     if (pDocMgrFocus)
-//     {
-//         pDocMgrFocus->Release();
-//     }
-// 
-//     return isDisabled;
-// }
-// 
-// //+---------------------------------------------------------------------------
-// //
-// // ITfKeyEventSink::OnSetFocus
-// //
-// // Called by the system whenever this service gets the keystroke device focus.
-// //----------------------------------------------------------------------------
-// 
-// STDAPI CWindowsIME::OnSetFocus(BOOL /*fForeground*/) try
-// {
-//     // auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnSetFocus();
-//     // activity.Stop();
-//     return S_OK;
-// }
-// CATCH_RETURN()
 
 //+---------------------------------------------------------------------------
 //
@@ -257,7 +196,7 @@ BOOL CompositionProcessorEngine::_IsKeyEaten(_In_ UINT /*codeIn*/, wchar_t wch, 
 // Called by the system to query this service wants a potential keystroke.
 //----------------------------------------------------------------------------
 
-HRESULT CompositionProcessorEngine::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled)
+HRESULT CompositionProcessorEngine::OnTestKeyDown(WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled)
 {
     _KEYSTROKE_STATE KeystrokeState;
     //WCHAR wch = '\0';
@@ -270,7 +209,7 @@ HRESULT CompositionProcessorEngine::OnTestKeyDown(ITfContext *pContext, WPARAM w
         // Invoke key handler edit session
         //
         KeystrokeState.Category = CATEGORY_COMPOSING;
-        return KeyHandlerEditSession_DoEditSession(KeystrokeState, pContext, code, wch);
+        return KeyHandlerEditSession_DoEditSession(KeystrokeState, code, wch);
     }
 
     return S_OK;
@@ -284,7 +223,7 @@ HRESULT CompositionProcessorEngine::OnTestKeyDown(ITfContext *pContext, WPARAM w
 // on exit, the application will not handle the keystroke.
 //----------------------------------------------------------------------------
 
-HRESULT CompositionProcessorEngine::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled)
+HRESULT CompositionProcessorEngine::OnKeyDown(WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled)
 {
     _KEYSTROKE_STATE KeystrokeState;
 
@@ -309,14 +248,14 @@ HRESULT CompositionProcessorEngine::OnKeyDown(ITfContext *pContext, WPARAM wPara
 
         if (needInvokeKeyHandler)
         {
-            KeyHandlerEditSession_DoEditSession(KeystrokeState, pContext, vkPackSource, wch);
+            KeyHandlerEditSession_DoEditSession(KeystrokeState, vkPackSource, wch);
         }
     }
     else if (KeystrokeState.Category == CATEGORY_INVOKE_COMPOSITION_EDIT_SESSION)
     {
         // Invoke key handler edit session
         KeystrokeState.Category = CATEGORY_COMPOSING;
-        KeyHandlerEditSession_DoEditSession(KeystrokeState, pContext, vkPackSource, wch);
+        KeyHandlerEditSession_DoEditSession(KeystrokeState, vkPackSource, wch);
     }
 
     return S_OK;
@@ -329,7 +268,7 @@ HRESULT CompositionProcessorEngine::OnKeyDown(ITfContext *pContext, WPARAM wPara
 // Called by the system to query this service wants a potential keystroke.
 //----------------------------------------------------------------------------
 
-HRESULT CompositionProcessorEngine::OnTestKeyUp(ITfContext* /*pContext*/, WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled)
+HRESULT CompositionProcessorEngine::OnTestKeyUp(WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled)
 {
     *pIsEaten = _IsKeyEaten((UINT)wParam, wch, vkPackSource, isKbdDisabled, NULL);
     return S_OK;
@@ -343,73 +282,9 @@ HRESULT CompositionProcessorEngine::OnTestKeyUp(ITfContext* /*pContext*/, WPARAM
 // on exit, the application will not handle the keystroke.
 //----------------------------------------------------------------------------
 
-HRESULT CompositionProcessorEngine::OnKeyUp(ITfContext* /*pContext*/, WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled)
+HRESULT CompositionProcessorEngine::OnKeyUp(WPARAM wParam, LPARAM /*lParam*/, BOOL* pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled)
 {
     *pIsEaten = _IsKeyEaten((UINT)wParam, wch, vkPackSource, isKbdDisabled, NULL);
     return S_OK;
 }
 
-// //+---------------------------------------------------------------------------
-// //
-// // ITfKeyEventSink::OnPreservedKey
-// //
-// // Called when a hotkey (registered by us, or by the system) is typed.
-// //----------------------------------------------------------------------------
-// 
-// STDAPI CWindowsIME::OnPreservedKey(ITfContext* /*pContext*/, REFGUID rguid, BOOL* pIsEaten)
-// {
-//     auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnPreservedKey();
-// 
-//     if (m_inprocClient)
-//     {
-//         m_inprocClient->OnPreservedKey(rguid, pIsEaten, _pThreadMgr, _tfClientId);
-//     }
-// 
-//     activity.Stop();
-//     return S_OK;
-// }
-// 
-// //+---------------------------------------------------------------------------
-// //
-// // _InitKeyEventSink
-// //
-// // Advise a keystroke sink.
-// //----------------------------------------------------------------------------
-// 
-// BOOL CWindowsIME::_InitKeyEventSink()
-// {
-//     ITfKeystrokeMgr* pKeystrokeMgr = nullptr;
-//     HRESULT hr = S_OK;
-// 
-//     if (FAILED(_pThreadMgr->QueryInterface(IID_ITfKeystrokeMgr, (void **)&pKeystrokeMgr)))
-//     {
-//         return FALSE;
-//     }
-// 
-//     hr = pKeystrokeMgr->AdviseKeyEventSink(_tfClientId, (ITfKeyEventSink *)this, TRUE);
-// 
-//     pKeystrokeMgr->Release();
-// 
-//     return (hr == S_OK);
-// }
-// 
-// //+---------------------------------------------------------------------------
-// //
-// // _UninitKeyEventSink
-// //
-// // Unadvise a keystroke sink.  Assumes we have advised one already.
-// //----------------------------------------------------------------------------
-// 
-// void CWindowsIME::_UninitKeyEventSink()
-// {
-//     ITfKeystrokeMgr* pKeystrokeMgr = nullptr;
-// 
-//     if (FAILED(_pThreadMgr->QueryInterface(IID_ITfKeystrokeMgr, (void **)&pKeystrokeMgr)))
-//     {
-//         return;
-//     }
-// 
-//     pKeystrokeMgr->UnadviseKeyEventSink(_tfClientId);
-// 
-//     pKeystrokeMgr->Release();
-// }

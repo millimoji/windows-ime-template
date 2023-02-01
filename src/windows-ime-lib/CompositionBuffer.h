@@ -28,6 +28,7 @@ struct ICompositionBufferInternal
     virtual bool _IsComposing() = 0;
     virtual HRESULT _RemoveDummyCompositionForComposing() = 0;
     virtual void SaveWorkingContext(_In_ ITfContext *pContext) = 0;
+    virtual void _TerminateComposition() = 0;
 };
 
 class CompositionBuffer :
@@ -96,7 +97,6 @@ private:
     BOOL _SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute);
 
 //    BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover) override;
-//    VOID _DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext) override;
 
 //    TfClientId GetClientId() override { return _tfClientId; }
 

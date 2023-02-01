@@ -867,7 +867,7 @@ HRESULT CCandidateListUIPresenter::_CandidateChangeNotification(_In_ enum CANDWN
         RETURN_IF_FAILED(pDocumentMgr->GetTop(&pContext));
 
         auto compositionBuffer = _pTextService->GetCompositionProcessorEngine();
-        compositionBuffer->FinalizeCandidateList(pContext.get());
+        compositionBuffer->FinalizeCandidateList();
     }
 
 Exit:

@@ -29,11 +29,11 @@ public:
     BOOL Initialize() override;
     // BOOL SetupLanguageProfile() override; // LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode) override;
 
-	void OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled, DWORD modifiers, DWORD uniqueModifiers, bool isTest, bool isUp) override;
+	void OnKeyEvent(WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled, DWORD modifiers, DWORD uniqueModifiers, bool isTest, bool isUp) override;
 
 private:
 	// in KeyHandlerEditSession.cpp
-	HRESULT KeyHandlerEditSession_DoEditSession(_KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch);
+	HRESULT KeyHandlerEditSession_DoEditSession(_KEYSTROKE_STATE _KeyState, UINT _uCode, WCHAR _wch);
 
 public:
     BOOL AddVirtualKey(WCHAR wch);
@@ -56,9 +56,8 @@ public:
     BOOL IsDoubleSingleByte(WCHAR wch);
     BOOL IsMakePhraseFromText() { return _hasMakePhraseFromText; }
 
-    void EndComposition(_In_opt_ ITfContext* pContext) override;
-    void FinalizeCandidateList(_In_ ITfContext *pContext) override;
-    VOID _DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext) override;
+    void FinalizeCandidateList() override;
+    VOID _DeleteCandidateList() override;
 
     // Language bar control
 //    void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) override;
@@ -135,10 +134,10 @@ private:
 
     // in KeyEventSink.cpp
     BOOL _IsKeyEaten(_In_ UINT codeIn, wchar_t wch, UINT vkPackSource, bool isKbdDisabled, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
-    HRESULT OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled);
-    HRESULT OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled);
-    HRESULT OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled);
-    HRESULT OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled);
+    HRESULT OnTestKeyDown(WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled);
+    HRESULT OnKeyDown(WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled);
+    HRESULT OnTestKeyUp(WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled);
+    HRESULT OnKeyUp(WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled);
 
 private:
     const std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> m_compositionBuffer;

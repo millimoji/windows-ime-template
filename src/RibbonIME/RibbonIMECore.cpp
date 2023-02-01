@@ -19,10 +19,6 @@ BOOL RibbonIMECore::Initialize()
     return TRUE;
 }
 
-void RibbonIMECore::PurgeVirtualKey()
-{
-}
-
 void RibbonIMECore::GetCandidateList(std::vector<shared_wstring>& pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch)
 {
     (void)pCandidateList;

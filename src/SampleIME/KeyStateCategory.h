@@ -37,15 +37,13 @@ private:
 
 typedef struct KeyHandlerEditSessionDTO
 {
-    KeyHandlerEditSessionDTO(_In_ ITfContext *pTfContext, UINT virualCode, WCHAR inputChar, KEYSTROKE_FUNCTION arrowKeyFunction)
+    KeyHandlerEditSessionDTO(UINT virualCode, WCHAR inputChar, KEYSTROKE_FUNCTION arrowKeyFunction)
     {
-        pContext = pTfContext;
         code = virualCode;
         wch = inputChar;
         arrowKey = arrowKeyFunction;
     }
 
-    ITfContext* pContext;
     UINT code;
     WCHAR wch;
     KEYSTROKE_FUNCTION arrowKey;
@@ -74,13 +72,13 @@ protected:
     virtual HRESULT HandleKeyFinalizeTextStoreAndInput(KeyHandlerEditSessionDTO dto);
 
     // HandleKeyFinalizeTextStore
-    virtual HRESULT HandleKeyFinalizeTextStore(KeyHandlerEditSessionDTO dto);
+    virtual HRESULT HandleKeyFinalizeTextStore();
 
     // HandleKeyFinalizeCandidatelistAndInput
     virtual HRESULT HandleKeyFinalizeCandidatelistAndInput(KeyHandlerEditSessionDTO dto);
 
     // HandleKeyFinalizeCandidatelist
-    virtual HRESULT HandleKeyFinalizeCandidatelist(KeyHandlerEditSessionDTO dto);
+    virtual HRESULT HandleKeyFinalizeCandidatelist();
 
     // HandleKeyConvert
     virtual HRESULT HandleKeyConvert(KeyHandlerEditSessionDTO dto);
@@ -89,10 +87,10 @@ protected:
     virtual HRESULT HandleKeyConvertWildCard(KeyHandlerEditSessionDTO dto);
 
     // HandleKeyCancel
-    virtual HRESULT HandleKeyCancel(KeyHandlerEditSessionDTO dto);
+    virtual HRESULT HandleKeyCancel();
 
     // HandleKeyBackspace
-    virtual HRESULT HandleKeyBackspace(KeyHandlerEditSessionDTO dto);
+    virtual HRESULT HandleKeyBackspace();
 
     // HandleKeyArrow
     virtual HRESULT HandleKeyArrow(KeyHandlerEditSessionDTO dto);
@@ -104,33 +102,33 @@ protected:
     virtual HRESULT HandleKeyPunctuation(KeyHandlerEditSessionDTO dto);
 
     // HandleKeySelectByNumber
-    virtual HRESULT HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto);
+    virtual HRESULT HandleKeySelectByNumber(UINT keyCode);
 
 protected:
-    HRESULT _HandleCancel(const KeyHandlerEditSessionDTO& dto);
+    HRESULT _HandleCancel();
     // key event handlers for composition object.
-    HRESULT _HandleCompositionInput(const KeyHandlerEditSessionDTO& dto, WCHAR wch);
-    HRESULT _HandleCompositionFinalize(const KeyHandlerEditSessionDTO& dto, BOOL fCandidateList);
-    HRESULT _HandleComplete(const KeyHandlerEditSessionDTO& dto);
+    HRESULT _HandleCompositionInput(WCHAR wch);
+    HRESULT _HandleCompositionFinalize(BOOL fCandidateList);
+    HRESULT _HandleComplete();
 
     HRESULT _HandleCompositionConvert(const KeyHandlerEditSessionDTO& dto, BOOL isWildcardSearch);
-    HRESULT _HandleCompositionBackspace(const KeyHandlerEditSessionDTO& dto);
+    HRESULT _HandleCompositionBackspace();
     HRESULT _HandleCompositionArrowKey(const KeyHandlerEditSessionDTO& dto);
     HRESULT _HandleCompositionPunctuation(const KeyHandlerEditSessionDTO& dto);
     HRESULT _HandleCompositionDoubleSingleByte(const KeyHandlerEditSessionDTO& dto);
     // key event handlers for candidate object.
-    HRESULT _HandleCandidateFinalize(const KeyHandlerEditSessionDTO& dto);
-    HRESULT _HandleCandidateConvert(const KeyHandlerEditSessionDTO& dto);
+    HRESULT _HandleCandidateFinalize();
+    HRESULT _HandleCandidateConvert();
     HRESULT _HandleCandidateArrowKey(const KeyHandlerEditSessionDTO& dto);
-    HRESULT _HandleCandidateSelectByNumber(const KeyHandlerEditSessionDTO& dto);
+    HRESULT _HandleCandidateSelectByNumber(UINT keyCode);
     // key event handlers for phrase object.
-    HRESULT _HandlePhraseFinalize(const KeyHandlerEditSessionDTO& dto);
+    HRESULT _HandlePhraseFinalize();
     HRESULT _HandlePhraseArrowKey(const KeyHandlerEditSessionDTO& dto);
-    HRESULT _HandlePhraseSelectByNumber(const KeyHandlerEditSessionDTO& dto, UINT uCode);
+    HRESULT _HandlePhraseSelectByNumber(UINT keyCode);
 
     // worker functions for the composition object.
-    HRESULT _HandleCompositionInputWorker(const KeyHandlerEditSessionDTO& dto);
-    HRESULT _CreateAndStartCandidate(_In_ ITfContext *pContext);
+    HRESULT _HandleCompositionInputWorker();
+    HRESULT _CreateAndStartCandidate();
 
 //    BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover);
     void RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, const shared_wstring& candidateString);
@@ -157,13 +155,13 @@ protected:
     HRESULT HandleKeyFinalizeTextStoreAndInput(KeyHandlerEditSessionDTO dto);
 
     // HandleKeyFinalizeTextStore
-    HRESULT HandleKeyFinalizeTextStore(KeyHandlerEditSessionDTO dto);
+    HRESULT HandleKeyFinalizeTextStore();
 
     // HandleKeyCompositionFinalizeCandidatelistAndInput
     HRESULT HandleKeyFinalizeCandidatelistAndInput(KeyHandlerEditSessionDTO dto);
 
     // HandleKeyCompositionFinalizeCandidatelist
-    HRESULT HandleKeyFinalizeCandidatelist(KeyHandlerEditSessionDTO dto);
+    HRESULT HandleKeyFinalizeCandidatelist();
 
     // HandleCompositionConvert
     HRESULT HandleKeyConvert(KeyHandlerEditSessionDTO dto);
@@ -172,10 +170,10 @@ protected:
     HRESULT HandleKeyConvertWildCard(KeyHandlerEditSessionDTO dto);
 
     // HandleCancel
-    HRESULT HandleKeyCancel(KeyHandlerEditSessionDTO dto);
+    HRESULT HandleKeyCancel();
 
     // HandleCompositionBackspace
-    HRESULT HandleKeyBackspace(KeyHandlerEditSessionDTO dto);
+    HRESULT HandleKeyBackspace();
 
     // HandleArrowKey
     HRESULT HandleKeyArrow(KeyHandlerEditSessionDTO dto);
@@ -197,22 +195,22 @@ public:
 
 protected:
     // HandleKeyFinalizeCandidatelist
-    HRESULT HandleKeyFinalizeCandidatelist(KeyHandlerEditSessionDTO dto);
+    HRESULT HandleKeyFinalizeCandidatelist();
 
     // HandleKeyFinalizeCandidatelistAndInput
     HRESULT HandleKeyFinalizeCandidatelistAndInput(KeyHandlerEditSessionDTO dto);
 
     //_HandleCandidateConvert
-    HRESULT HandleKeyConvert(KeyHandlerEditSessionDTO dto);
+    HRESULT HandleKeyConvert();
 
     //_HandleCancel
-    HRESULT HandleKeyCancel(KeyHandlerEditSessionDTO dto);
+    HRESULT HandleKeyCancel();
 
     //_HandleCandidateArrowKey
     HRESULT HandleKeyArrow(KeyHandlerEditSessionDTO dto);
 
     //_HandleCandidateSelectByNumber
-    HRESULT HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto);
+    HRESULT HandleKeySelectByNumber(UINT keyCode);
 };
 
 class CKeyStatePhrase : public CKeyStateCategory
@@ -225,16 +223,16 @@ public:
 
 protected:
     //_HandleCancel
-    HRESULT HandleKeyFinalizeCandidatelist(KeyHandlerEditSessionDTO dto);
+    HRESULT HandleKeyFinalizeCandidatelist();
 
     //_HandleCancel
-    HRESULT HandleKeyCancel(KeyHandlerEditSessionDTO dto);
+    HRESULT HandleKeyCancel();
 
     //_HandlePhraseArrowKey
     HRESULT HandleKeyArrow(KeyHandlerEditSessionDTO dto);
 
     //_HandlePhraseSelectByNumber
-    HRESULT HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto);
+    HRESULT HandleKeySelectByNumber(UINT keyCode);
 };
 
 //degeneration class
@@ -255,25 +253,25 @@ protected:
     HRESULT HandleKeyFinalizeTextStoreAndInput(KeyHandlerEditSessionDTO dto) { return __super::HandleKeyFinalizeTextStoreAndInput(dto); };
 
     // HandleKeyFinalizeTextStore
-    HRESULT HandleKeyFinalizeTextStore(KeyHandlerEditSessionDTO dto) { return __super::HandleKeyFinalizeTextStore(dto); };
+    HRESULT HandleKeyFinalizeTextStore() { return __super::HandleKeyFinalizeTextStore(); };
 
     // HandleKeyNullFinalizeCandidatelistAndInput
     HRESULT HandleKeyFinalizeCandidatelistAndInput(KeyHandlerEditSessionDTO dto) { return __super::HandleKeyFinalizeCandidatelistAndInput(dto); };
 
     // HandleKeyNullFinalizeCandidatelist
-    HRESULT HandleKeyFinalizeCandidatelist(KeyHandlerEditSessionDTO dto) { return __super::HandleKeyFinalizeCandidatelist(dto); };
+    HRESULT HandleKeyFinalizeCandidatelist() { return __super::HandleKeyFinalizeCandidatelist(); };
 
     //_HandleNullConvert
     HRESULT HandleKeyConvert(KeyHandlerEditSessionDTO dto) { return __super::HandleKeyConvert(dto); };
 
     //_HandleNullCancel
-    HRESULT HandleKeyCancel(KeyHandlerEditSessionDTO dto) { return __super::HandleKeyCancel(dto); };
+    HRESULT HandleKeyCancel() { return __super::HandleKeyCancel(); };
 
     // HandleKeyNullConvertWild
     HRESULT HandleKeyConvertWildCard(KeyHandlerEditSessionDTO dto) { return __super::HandleKeyConvertWildCard(dto); };
 
     //_HandleNullBackspace
-    HRESULT HandleKeyBackspace(KeyHandlerEditSessionDTO dto) { return __super::HandleKeyBackspace(dto); };
+    HRESULT HandleKeyBackspace() { return __super::HandleKeyBackspace(); };
 
     //_HandleNullArrowKey
     HRESULT HandleKeyArrow(KeyHandlerEditSessionDTO dto) { return __super::HandleKeyArrow(dto); };
@@ -285,5 +283,5 @@ protected:
     HRESULT HandleKeyPunctuation(KeyHandlerEditSessionDTO dto) { return __super::HandleKeyPunctuation(dto); };
 
     //_HandleNullCandidateSelectByNumber
-    HRESULT HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto) { return __super::HandleKeySelectByNumber(dto); };
+    HRESULT HandleKeySelectByNumber(UINT keyCode) { return __super::HandleKeySelectByNumber(keyCode); };
 };

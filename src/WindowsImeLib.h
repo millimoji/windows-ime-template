@@ -94,15 +94,13 @@ struct ICompositionProcessorEngine
 
     // wch: converted character from VK and keyboard state
     // vkPackSource: estimated VK from wch for VK_PACKET
-    virtual void OnKeyEvent(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled,
+    virtual void OnKeyEvent(WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled,
         DWORD modifiers, DWORD uniqueModifiers, bool isTest, bool isDown) = 0;
 
     virtual void GetCandidateList(std::vector<shared_wstring>& pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) = 0;
 
-    virtual void PurgeVirtualKey() = 0;
-    virtual void EndComposition(_In_opt_ ITfContext* pContext) = 0;
-    virtual void FinalizeCandidateList(_In_ ITfContext* pContext) = 0;
-    virtual VOID _DeleteCandidateList(BOOL fForce, _In_opt_ ITfContext *pContext) = 0;
+    virtual void FinalizeCandidateList() = 0;
+    virtual VOID _DeleteCandidateList() = 0;
 };
 
 struct ITextInputFramework

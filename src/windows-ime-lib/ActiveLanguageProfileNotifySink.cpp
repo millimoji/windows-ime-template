@@ -59,7 +59,7 @@ STDAPI CWindowsIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID, _In_ BOOL isA
     }
     else
     {
-        _pCompositionProcessorEngine->_DeleteCandidateList(FALSE, nullptr);
+        _pCompositionProcessorEngine->_DeleteCandidateList();
 
         if (m_inprocClient)
         {

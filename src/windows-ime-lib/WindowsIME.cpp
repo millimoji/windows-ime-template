@@ -197,7 +197,7 @@ STDAPI CWindowsIME::Deactivate()
     if (pContext)
     {
         // pContext->AddRef();
-        _pCompositionProcessorEngine->EndComposition(pContext.get());
+        m_compositionBuffer->_TerminateComposition();
     }
 
     if (_pCompositionProcessorEngine)

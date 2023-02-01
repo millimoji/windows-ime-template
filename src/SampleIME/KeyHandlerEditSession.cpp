@@ -27,7 +27,7 @@
 //
 //----------------------------------------------------------------------------
 
-HRESULT CompositionProcessorEngine::KeyHandlerEditSession_DoEditSession(_KEYSTROKE_STATE _KeyState, _In_ ITfContext* pContext, UINT _uCode, WCHAR _wch)
+HRESULT CompositionProcessorEngine::KeyHandlerEditSession_DoEditSession(_KEYSTROKE_STATE _KeyState, UINT _uCode, WCHAR _wch)
 {
     HRESULT hResult = S_OK;
 
@@ -39,7 +39,7 @@ HRESULT CompositionProcessorEngine::KeyHandlerEditSession_DoEditSession(_KEYSTRO
 
     if (pKeyStateCategory)
     {
-        KeyHandlerEditSessionDTO keyHandlerEditSessioDTO(pContext, _uCode, _wch, _KeyState.Function);
+        KeyHandlerEditSessionDTO keyHandlerEditSessioDTO(_uCode, _wch, _KeyState.Function);
         pKeyStateCategory->KeyStateHandler(_KeyState.Function, keyHandlerEditSessioDTO);
 
         pKeyStateCategory->Release();

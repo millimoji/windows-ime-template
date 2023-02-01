@@ -16,13 +16,7 @@ public:
 
     BOOL Initialize() override;
 
-    void OnKeyEvent(ITfContext*, WPARAM, LPARAM, BOOL*, wchar_t, UINT, bool, DWORD, DWORD, bool, bool) override {
-    }
-//    HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie, _KEYSTROKE_STATE, _In_ ITfContext*, UINT, WCHAR, _In_ WindowsImeLib::IWindowsIMECompositionBuffer*) override {
-//        return S_OK;
-//    }
-
-    void PurgeVirtualKey() override;
+    void OnKeyEvent(WPARAM, LPARAM, BOOL*, wchar_t, UINT, bool, DWORD, DWORD, bool, bool) override { }
 
     void GetCandidateList(std::vector<shared_wstring>& pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) override;
 
@@ -35,9 +29,8 @@ public:
 //    // Compartment
 //    HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept override;
 //    void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
-    void EndComposition(_In_opt_ ITfContext* pContext) override {}
-    void FinalizeCandidateList(_In_ ITfContext *pContext) override {}
-    VOID _DeleteCandidateList(BOOL fForce, _In_opt_ ITfContext* pContext) override {}
+    void FinalizeCandidateList() override {}
+    VOID _DeleteCandidateList() override {}
 
     void UpdateCustomState(const std::string& /* customStateJson */) override {}
 

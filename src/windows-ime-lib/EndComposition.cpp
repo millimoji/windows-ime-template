@@ -44,7 +44,7 @@ void CompositionBuffer::_TerminateComposition()
             if (FAILED_LOG(_pComposition->EndComposition(ec)))
             {
                 // if we fail to EndComposition, then we need to close the reverse reading window.
-                m_framework->GetCompositionProcessorEngine()->_DeleteCandidateList(TRUE, pContext);
+                m_framework->GetCompositionProcessorEngine()->_DeleteCandidateList();
             }
 
             _pComposition.reset();

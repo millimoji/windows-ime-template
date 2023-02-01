@@ -31,7 +31,7 @@ const int MOVETO_BOTTOM = -1;
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_HandleCandidateFinalize(const KeyHandlerEditSessionDTO& dto)
+HRESULT CKeyStateCategory::_HandleCandidateFinalize()
 {
     if (_pCandidateListUIPresenter->IsCreated())
     {
@@ -43,7 +43,7 @@ HRESULT CKeyStateCategory::_HandleCandidateFinalize(const KeyHandlerEditSessionD
         }
     }
 
-    return _HandleComplete(dto);
+    return _HandleComplete();
 }
 
 //+---------------------------------------------------------------------------
@@ -52,7 +52,7 @@ HRESULT CKeyStateCategory::_HandleCandidateFinalize(const KeyHandlerEditSessionD
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_HandleCandidateConvert(const KeyHandlerEditSessionDTO& dto)
+HRESULT CKeyStateCategory::_HandleCandidateConvert()
 {
     RETURN_HR_IF(S_OK, !_pCandidateListUIPresenter->IsCreated());
 
@@ -71,7 +71,7 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert(const KeyHandlerEditSessionDT
 
     if (candidatePhraseList.size() == 0)
     {
-        return _HandleCandidateFinalize(dto);
+        return _HandleCandidateFinalize();
     }
 
     if (_pCandidateListUIPresenter->IsCreated())
@@ -139,9 +139,9 @@ inline int FindVkInVector(const std::vector<DWORD>& srcVkList, UINT vk)
     return -1;
 }
 
-HRESULT CKeyStateCategory::_HandleCandidateSelectByNumber(const KeyHandlerEditSessionDTO& dto)
+HRESULT CKeyStateCategory::_HandleCandidateSelectByNumber(UINT keyCode)
 {
-    int iSelectAsNumber = FindVkInVector(*_pCompositionProcessorEngine->GetCandidateListIndexRange(), dto.code);
+    int iSelectAsNumber = FindVkInVector(*_pCompositionProcessorEngine->GetCandidateListIndexRange(), keyCode);
 
     if (iSelectAsNumber == -1)
     {
@@ -152,7 +152,7 @@ HRESULT CKeyStateCategory::_HandleCandidateSelectByNumber(const KeyHandlerEditSe
     {
         if (_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
         {
-            return _HandleCandidateConvert(dto);
+            return _HandleCandidateConvert();
         }
     }
 
@@ -165,7 +165,7 @@ HRESULT CKeyStateCategory::_HandleCandidateSelectByNumber(const KeyHandlerEditSe
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_HandlePhraseFinalize(const KeyHandlerEditSessionDTO& dto)
+HRESULT CKeyStateCategory::_HandlePhraseFinalize()
 {
     auto phraseString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
 
@@ -174,7 +174,7 @@ HRESULT CKeyStateCategory::_HandlePhraseFinalize(const KeyHandlerEditSessionDTO&
         RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(phraseString));
     }
 
-    return _HandleComplete(dto);
+    return _HandleComplete();
 }
 
 //+---------------------------------------------------------------------------
@@ -199,7 +199,7 @@ HRESULT CKeyStateCategory::_HandlePhraseArrowKey(const KeyHandlerEditSessionDTO&
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_HandlePhraseSelectByNumber(const KeyHandlerEditSessionDTO& dto, UINT uCode)
+HRESULT CKeyStateCategory::_HandlePhraseSelectByNumber(UINT uCode)
 {
     int iSelectAsNumber = FindVkInVector(*_pCompositionProcessorEngine->GetCandidateListIndexRange(), uCode);
     if (iSelectAsNumber == -1)
@@ -211,7 +211,7 @@ HRESULT CKeyStateCategory::_HandlePhraseSelectByNumber(const KeyHandlerEditSessi
     {
         if (_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
         {
-            return _HandlePhraseFinalize(dto);
+            return _HandlePhraseFinalize();
         }
     }
 
