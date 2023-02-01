@@ -553,33 +553,61 @@ HRESULT CKeyStateCategory::_HandleCompositionArrowKey(const KeyHandlerEditSessio
 
 HRESULT CKeyStateCategory::_HandleCompositionPunctuation(const KeyHandlerEditSessionDTO& dto)
 {
-    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
+    if (_pCompositionProcessorEngine->CandidateMode() != CANDIDATE_NONE && _pCandidateListUIPresenter->IsCreated())
     {
-        if (_pCompositionProcessorEngine->CandidateMode() != CANDIDATE_NONE && _pCandidateListUIPresenter->IsCreated())
+        auto candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
+        if (candidateString->length() > 0)
         {
-            auto candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
-
-            if (candidateString->length() > 0)
+            _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, candidateString](TfEditCookie ec) -> HRESULT
             {
-                _pTextService->_AddComposingAndChar(ec, dto.pContext, candidateString);
-            }
+                return _pTextService->_AddComposingAndChar(ec, dto.pContext, candidateString);
+            },
+            TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
         }
-        //
-        // Get punctuation char from composition processor engine
-        //
-        auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+    }
 
-        WCHAR punctuation = pCompositionProcessorEngine->GetPunctuation(dto.wch);
+    //
+    // Get punctuation char from composition processor engine
+    //
+    auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+    WCHAR punctuation = pCompositionProcessorEngine->GetPunctuation(dto.wch);
+    auto punctuationString = std::make_shared<const std::wstring>(&punctuation, 1);
 
-        auto punctuationString = std::make_shared<const std::wstring>(&punctuation, 1);
+    _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, punctuationString](TfEditCookie ec) -> HRESULT
+    {
+        return _pTextService->_AddCharAndFinalize(ec, dto.pContext, punctuationString);
+    },
+    TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 
-        // Finalize character
-        RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(ec, dto.pContext, punctuationString));
+    return _HandleCancel(dto);
 
-        _HandleCancelWorker(ec, dto.pContext);
-
-        return S_OK;
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+//    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
+//    {
+//        if (_pCompositionProcessorEngine->CandidateMode() != CANDIDATE_NONE && _pCandidateListUIPresenter->IsCreated())
+//        {
+//            auto candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
+//
+//            if (candidateString->length() > 0)
+//            {
+//                _pTextService->_AddComposingAndChar(ec, dto.pContext, candidateString);
+//            }
+//        }
+//        //
+//        // Get punctuation char from composition processor engine
+//        //
+//        auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+//
+//        WCHAR punctuation = pCompositionProcessorEngine->GetPunctuation(dto.wch);
+//
+//        auto punctuationString = std::make_shared<const std::wstring>(&punctuation, 1);
+//
+//        // Finalize character
+//        RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(ec, dto.pContext, punctuationString));
+//
+//        _HandleCancelWorker(ec, dto.pContext);
+//
+//        return S_OK;
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 //+---------------------------------------------------------------------------
@@ -590,20 +618,19 @@ HRESULT CKeyStateCategory::_HandleCompositionPunctuation(const KeyHandlerEditSes
 
 HRESULT CKeyStateCategory::_HandleCompositionDoubleSingleByte(const KeyHandlerEditSessionDTO& dto)
 {
-    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
+    WCHAR fullWidth = Global::FullWidthCharTable[dto.wch - 0x20];
+    CStringRange fullWidthString;
+    fullWidthString.Set(&fullWidth, 1);
+    const auto sharedFullWidthString = fullWidthString.ToSharedWstring();
+
+    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, sharedFullWidthString](TfEditCookie ec) -> HRESULT
     {
-        WCHAR fullWidth = Global::FullWidthCharTable[dto.wch - 0x20];
-
-        CStringRange fullWidthString;
-        fullWidthString.Set(&fullWidth, 1);
-
         // Finalize character
-        RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(ec, dto.pContext, fullWidthString.ToSharedWstring()));
+        return _pTextService->_AddCharAndFinalize(ec, dto.pContext, sharedFullWidthString);
+    },
+    TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 
-        _HandleCancelWorker(ec, dto.pContext);
-
-        return S_OK;
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return _HandleCancel(dto);
 }
 
 // //+---------------------------------------------------------------------------
