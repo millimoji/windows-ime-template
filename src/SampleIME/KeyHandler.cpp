@@ -90,16 +90,6 @@ HRESULT CKeyStateCategory::_HandleComplete(const KeyHandlerEditSessionDTO& dto)
     TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
-HRESULT CKeyStateCategory::_HandleCompleteWorker(TfEditCookie ec, _In_ ITfContext *pContext)
-{
-    _pCompositionProcessorEngine->_DeleteCandidateList(FALSE, pContext);
-
-    // just terminate the composition
-    _pTextService->_TerminateComposition(ec, pContext);
-
-    return S_OK;
-}
-
 //+---------------------------------------------------------------------------
 //
 // _HandleCancel
@@ -108,20 +98,15 @@ HRESULT CKeyStateCategory::_HandleCompleteWorker(TfEditCookie ec, _In_ ITfContex
 
 HRESULT CKeyStateCategory::_HandleCancel(const KeyHandlerEditSessionDTO& dto)
 {
+    _pCompositionProcessorEngine->_DeleteCandidateList(FALSE, dto.pContext);
+
     return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
     {
-        return _HandleCancelWorker(ec, dto.pContext);
+        _pTextService->_RemoveDummyCompositionForComposing(ec, _pTextService->GetComposition().get());
+        _pTextService->_TerminateComposition(ec, dto.pContext);
+        return S_OK;
     },
     TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
-}
-
-HRESULT CKeyStateCategory::_HandleCancelWorker(TfEditCookie ec, _In_ ITfContext *pContext)
-{
-    _pTextService->_RemoveDummyCompositionForComposing(ec, _pTextService->GetComposition().get());
-    _pCompositionProcessorEngine->_DeleteCandidateList(FALSE, pContext);
-    _pTextService->_TerminateComposition(ec, pContext);
-
-    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -172,7 +157,7 @@ HRESULT CKeyStateCategory::_HandleCompositionInput(const KeyHandlerEditSessionDT
     // Add virtual key to composition processor engine
     _pCompositionProcessorEngine->AddVirtualKey(wch);
 
-    return _HandleCompositionInputWorkerNoCookie(dto);
+    return _HandleCompositionInputWorker(dto);
 
 
 //    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, wch](TfEditCookie ec) -> HRESULT
@@ -223,13 +208,13 @@ HRESULT CKeyStateCategory::_HandleCompositionInput(const KeyHandlerEditSessionDT
 
 //+---------------------------------------------------------------------------
 //
-// _HandleCompositionInputWorkerNoCookie
+// _HandleCompositionInputWorker
 //
 // If the keystroke happens within a composition, eat the key and return S_OK.
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_HandleCompositionInputWorkerNoCookie(const KeyHandlerEditSessionDTO& dto)
+HRESULT CKeyStateCategory::_HandleCompositionInputWorker(const KeyHandlerEditSessionDTO& dto)
 {
     //
     // Get reading string from composition processor engine
@@ -280,66 +265,66 @@ HRESULT CKeyStateCategory::_HandleCompositionInputWorkerNoCookie(const KeyHandle
     return S_OK;
 }
 
-//+---------------------------------------------------------------------------
-//
-// _HandleCompositionInputWorker
-//
-// If the keystroke happens within a composition, eat the key and return S_OK.
-//
-//----------------------------------------------------------------------------
-
-HRESULT CKeyStateCategory::_HandleCompositionInputWorker(_In_ CompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
-{
-    HRESULT hr = S_OK;
-    std::vector<CStringRange> readingStrings;
-    BOOL isWildcardIncluded = TRUE;
-
-    //
-    // Get reading string from composition processor engine
-    //
-    pCompositionProcessorEngine->GetReadingStrings(&readingStrings, &isWildcardIncluded);
-
-    for (UINT index = 0; index < readingStrings.size(); index++)
-    {
-        auto readingSubString = readingStrings.at(index).ToSharedWstring();
-
-        hr = _pTextService->_AddComposingAndChar(ec, pContext, readingSubString);
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-    }
-
-    //
-    // Get candidate string from composition processor engine
-    //
-    std::vector<shared_wstring> candidateList;
-
-    pCompositionProcessorEngine->GetCandidateList(candidateList, TRUE, FALSE);
-
-    if (candidateList.size() > 0)
-    {
-        hr = _CreateAndStartCandidate(pContext);
-        if (SUCCEEDED(hr))
-        {
-            _pCandidateListUIPresenter->_ClearList();
-            _pCandidateListUIPresenter->_SetText(candidateList);
-        }
-    }
-    else if (_pCandidateListUIPresenter->IsCreated())
-    {
-        _pCandidateListUIPresenter->_ClearList();
-    }
-    else if (readingStrings.size() && isWildcardIncluded)
-    {
-        hr = _CreateAndStartCandidate(pContext);
-        if (SUCCEEDED_LOG(hr))
-        {
-            _pCandidateListUIPresenter->_ClearList();
-        }
-    }
-    return hr;
-}
+// //+---------------------------------------------------------------------------
+// //
+// // _HandleCompositionInputWorker
+// //
+// // If the keystroke happens within a composition, eat the key and return S_OK.
+// //
+// //----------------------------------------------------------------------------
+// 
+// HRESULT CKeyStateCategory::_HandleCompositionInputWorker(_In_ CompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext)
+// {
+//     HRESULT hr = S_OK;
+//     std::vector<CStringRange> readingStrings;
+//     BOOL isWildcardIncluded = TRUE;
+// 
+//     //
+//     // Get reading string from composition processor engine
+//     //
+//     pCompositionProcessorEngine->GetReadingStrings(&readingStrings, &isWildcardIncluded);
+// 
+//     for (UINT index = 0; index < readingStrings.size(); index++)
+//     {
+//         auto readingSubString = readingStrings.at(index).ToSharedWstring();
+// 
+//         hr = _pTextService->_AddComposingAndChar(ec, pContext, readingSubString);
+//         if (FAILED(hr))
+//         {
+//             return hr;
+//         }
+//     }
+// 
+//     //
+//     // Get candidate string from composition processor engine
+//     //
+//     std::vector<shared_wstring> candidateList;
+// 
+//     pCompositionProcessorEngine->GetCandidateList(candidateList, TRUE, FALSE);
+// 
+//     if (candidateList.size() > 0)
+//     {
+//         hr = _CreateAndStartCandidate(pContext);
+//         if (SUCCEEDED(hr))
+//         {
+//             _pCandidateListUIPresenter->_ClearList();
+//             _pCandidateListUIPresenter->_SetText(candidateList);
+//         }
+//     }
+//     else if (_pCandidateListUIPresenter->IsCreated())
+//     {
+//         _pCandidateListUIPresenter->_ClearList();
+//     }
+//     else if (readingStrings.size() && isWildcardIncluded)
+//     {
+//         hr = _CreateAndStartCandidate(pContext);
+//         if (SUCCEEDED_LOG(hr))
+//         {
+//             _pCandidateListUIPresenter->_ClearList();
+//         }
+//     }
+//     return hr;
+// }
 
 //+---------------------------------------------------------------------------
 //
@@ -347,7 +332,7 @@ HRESULT CKeyStateCategory::_HandleCompositionInputWorker(_In_ CompositionProcess
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_CreateAndStartCandidate(_In_ ITfContext *pContext)
+HRESULT CKeyStateCategory::_CreateAndStartCandidate(_In_ ITfContext* /*pContext*/)
 {
     HRESULT hr = S_OK;
 
@@ -388,19 +373,21 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate(_In_ ITfContext *pContext)
         _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_INCREMENTAL);
         _pCompositionProcessorEngine->SetIsCandidateWithWildcard(false);
 
-        // we don't cache the document manager object. So get it from pContext.
-        ITfDocumentMgr* pDocumentMgr = nullptr;
-        if (SUCCEEDED(pContext->GetDocumentMgr(&pDocumentMgr)))
-        {
-            // get the composition range.
-            ITfRange* pRange = nullptr;
-            if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRange)))
-            {
-                hr = _pCandidateListUIPresenter->_StartCandidateList(WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
-                pRange->Release();
-            }
-            pDocumentMgr->Release();
-        }
+        hr = _pCandidateListUIPresenter->_StartCandidateList(WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
+
+//        // we don't cache the document manager object. So get it from pContext.
+//        ITfDocumentMgr* pDocumentMgr = nullptr;
+//        if (SUCCEEDED(pContext->GetDocumentMgr(&pDocumentMgr)))
+//        {
+//            // get the composition range.
+//            ITfRange* pRange = nullptr;
+//            if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRange)))
+//            {
+//                hr = _pCandidateListUIPresenter->_StartCandidateList(WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
+//                pRange->Release();
+//            }
+//            pDocumentMgr->Release();
+//        }
     }
 
     return hr;
@@ -501,7 +488,7 @@ HRESULT CKeyStateCategory::_HandleCompositionFinalize(const KeyHandlerEditSessio
 //
 //----------------------------------------------------------------------------
 
-HRESULT CKeyStateCategory::_HandleCompositionConvert(const KeyHandlerEditSessionDTO& dto, BOOL isWildcardSearch)
+HRESULT CKeyStateCategory::_HandleCompositionConvert(const KeyHandlerEditSessionDTO& /*dto*/, BOOL isWildcardSearch)
 {
     HRESULT hr = S_OK;
 
@@ -539,19 +526,21 @@ HRESULT CKeyStateCategory::_HandleCompositionConvert(const KeyHandlerEditSession
 
         _pCompositionProcessorEngine->SetIsCandidateWithWildcard(isWildcardSearch);
 
-        // we don't cache the document manager object. So get it from pContext.
-        ITfDocumentMgr* pDocumentMgr = nullptr;
-        if (SUCCEEDED(dto.pContext->GetDocumentMgr(&pDocumentMgr)))
-        {
-            // get the composition range.
-            ITfRange* pRange = nullptr;
-            if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRange)))
-            {
-                hr = _pCandidateListUIPresenter->_StartCandidateList(WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
-                pRange->Release();
-            }
-            pDocumentMgr->Release();
-        }
+        hr = _pCandidateListUIPresenter->_StartCandidateList(WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
+
+//        // we don't cache the document manager object. So get it from pContext.
+//        ITfDocumentMgr* pDocumentMgr = nullptr;
+//        if (SUCCEEDED(dto.pContext->GetDocumentMgr(&pDocumentMgr)))
+//        {
+//            // get the composition range.
+//            ITfRange* pRange = nullptr;
+//            if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRange)))
+//            {
+//                hr = _pCandidateListUIPresenter->_StartCandidateList(WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
+//                pRange->Release();
+//            }
+//            pDocumentMgr->Release();
+//        }
         if (SUCCEEDED(hr))
         {
             _pCandidateListUIPresenter->_SetText(candidateList);
@@ -588,7 +577,7 @@ HRESULT CKeyStateCategory::_HandleCompositionBackspace(const KeyHandlerEditSessi
 
         if (_pCompositionProcessorEngine->GetVirtualKeyLength() > 0)
         {
-            _HandleCompositionInputWorkerNoCookie(dto);
+            _HandleCompositionInputWorker(dto);
         }
         else
         {
