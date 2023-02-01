@@ -33,38 +33,21 @@ const int MOVETO_BOTTOM = -1;
 
 HRESULT CKeyStateCategory::_HandleCandidateFinalize(const KeyHandlerEditSessionDTO& dto)
 {
-    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
+    if (_pCandidateListUIPresenter->IsCreated())
     {
-        return _HandleCandidateFinalizeWorker(ec, dto.pContext);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
-}
-
-HRESULT CKeyStateCategory::_HandleCandidateFinalizeWorker(TfEditCookie ec, _In_ ITfContext *pContext)
-{
-        HRESULT hr = S_OK;
-        shared_wstring candidateString;
-
-        if (!_pCandidateListUIPresenter->IsCreated())
-        {
-            goto NoPresenter;
-        }
-
-        candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
+        const auto candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
 
         if (candidateString->length() > 0)
         {
-            hr = _pTextService->_AddComposingAndChar(ec, pContext, candidateString);
-
-            if (FAILED(hr))
+            RETURN_IF_FAILED(_pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, candidateString](TfEditCookie ec) -> HRESULT
             {
-                return hr;
-            }
+                return _pTextService->_AddComposingAndChar(ec, dto.pContext, candidateString);
+            },
+            TF_ES_ASYNCDONTCARE | TF_ES_READWRITE));
         }
+    }
 
-NoPresenter:
-        _HandleCompleteWorker(ec, pContext);
-
-        return hr;
+    return _HandleComplete(dto);
 }
 
 //+---------------------------------------------------------------------------
@@ -92,11 +75,7 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert(const KeyHandlerEditSessionDT
 
     if (candidatePhraseList.size() == 0)
     {
-        return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
-        {
-            return _HandleCandidateFinalizeWorker(ec, dto.pContext);
-        },
-        TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+        return _HandleCandidateFinalize(dto);
     }
 
     if (_pCandidateListUIPresenter->IsCreated())
@@ -330,14 +309,16 @@ HRESULT CKeyStateCategory::_HandlePhraseFinalize(const KeyHandlerEditSessionDTO&
 {
     auto phraseString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
 
-    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, phraseString](TfEditCookie ec) -> HRESULT
+    if (phraseString->length() > 0)
     {
-        if (phraseString->length() > 0)
+        RETURN_IF_FAILED(_pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto, phraseString](TfEditCookie ec) -> HRESULT
         {
-            RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(ec, dto.pContext, phraseString));
-        }
-        return _HandleCompleteWorker(ec, dto.pContext);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+            return _pTextService->_AddCharAndFinalize(ec, dto.pContext, phraseString);
+        },
+        TF_ES_ASYNCDONTCARE | TF_ES_READWRITE));
+    }
+
+    return _HandleComplete(dto);
 }
 
 //+---------------------------------------------------------------------------

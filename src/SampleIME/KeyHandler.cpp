@@ -21,32 +21,32 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-//+---------------------------------------------------------------------------
-//
-// _IsRangeCovered
-//
-// Returns TRUE if pRangeTest is entirely contained within pRangeCover.
-//
-//----------------------------------------------------------------------------
-
-BOOL CKeyStateCategory::_IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover)
-{
-    LONG lResult = 0;;
-
-    if (FAILED(pRangeCover->CompareStart(ec, pRangeTest, TF_ANCHOR_START, &lResult)) 
-        || (lResult > 0))
-    {
-        return FALSE;
-    }
-
-    if (FAILED(pRangeCover->CompareEnd(ec, pRangeTest, TF_ANCHOR_END, &lResult)) 
-        || (lResult < 0))
-    {
-        return FALSE;
-    }
-
-    return TRUE;
-}
+// //+---------------------------------------------------------------------------
+// //
+// // _IsRangeCovered
+// //
+// // Returns TRUE if pRangeTest is entirely contained within pRangeCover.
+// //
+// //----------------------------------------------------------------------------
+// 
+// BOOL CKeyStateCategory::_IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover)
+// {
+//     LONG lResult = 0;;
+// 
+//     if (FAILED(pRangeCover->CompareStart(ec, pRangeTest, TF_ANCHOR_START, &lResult)) 
+//         || (lResult > 0))
+//     {
+//         return FALSE;
+//     }
+// 
+//     if (FAILED(pRangeCover->CompareEnd(ec, pRangeTest, TF_ANCHOR_END, &lResult)) 
+//         || (lResult < 0))
+//     {
+//         return FALSE;
+//     }
+// 
+//     return TRUE;
+// }
 
 //+---------------------------------------------------------------------------
 //
@@ -77,6 +77,19 @@ VOID CompositionProcessorEngine::_DeleteCandidateList(BOOL isForce, _In_opt_ ITf
 //
 //----------------------------------------------------------------------------
 
+HRESULT CKeyStateCategory::_HandleComplete(const KeyHandlerEditSessionDTO& dto)
+{
+    _pCompositionProcessorEngine->_DeleteCandidateList(FALSE, dto.pContext);
+
+    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
+    {
+        // just terminate the composition
+        _pTextService->_TerminateComposition(ec, dto.pContext);
+        return S_OK;
+    },
+    TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+}
+
 HRESULT CKeyStateCategory::_HandleCompleteWorker(TfEditCookie ec, _In_ ITfContext *pContext)
 {
     _pCompositionProcessorEngine->_DeleteCandidateList(FALSE, pContext);
@@ -98,7 +111,8 @@ HRESULT CKeyStateCategory::_HandleCancel(const KeyHandlerEditSessionDTO& dto)
     return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
     {
         return _HandleCancelWorker(ec, dto.pContext);
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    },
+    TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 HRESULT CKeyStateCategory::_HandleCancelWorker(TfEditCookie ec, _In_ ITfContext *pContext)
@@ -554,65 +568,95 @@ HRESULT CKeyStateCategory::_HandleCompositionConvert(const KeyHandlerEditSession
 
 HRESULT CKeyStateCategory::_HandleCompositionBackspace(const KeyHandlerEditSessionDTO& dto)
 {
-    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
+	// Start the new (std::nothrow) compositon if there is no composition.
+	RETURN_HR_IF(S_OK, !_pTextService->_IsComposing());
+
+// TODO: required? range check
+//        if (FAILED(dto.pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched)) || fetched != 1)
+//        // is the insertion point covered by a composition?
+//        if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
+//            isCovered = _IsRangeCovered(ec, tfSelection.range, pRangeComposition);
+
+    //
+    // Add virtual key to composition processor engine
+    //
+    DWORD_PTR vKeyLen = _pCompositionProcessorEngine->GetVirtualKeyLength();
+
+    if (vKeyLen)
     {
-        ITfRange* pRangeComposition = nullptr;
-        TF_SELECTION tfSelection;
-        ULONG fetched = 0;
-        BOOL isCovered = TRUE;
+        _pCompositionProcessorEngine->RemoveVirtualKey(vKeyLen - 1);
 
-        // Start the new (std::nothrow) compositon if there is no composition.
-        if (!_pTextService->_IsComposing())
+        if (_pCompositionProcessorEngine->GetVirtualKeyLength() > 0)
         {
-            return S_OK;
+            _HandleCompositionInputWorkerNoCookie(dto);
         }
-
-        // first, test where a keystroke would go in the document if we did an insert
-        if (FAILED(dto.pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched)) || fetched != 1)
+        else
         {
-            return S_FALSE;
+            _HandleCancel(dto);
         }
+    }
 
-        // is the insertion point covered by a composition?
-        if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
-        {
-            isCovered = _IsRangeCovered(ec, tfSelection.range, pRangeComposition);
+	return S_OK;
 
-            pRangeComposition->Release();
-
-            if (!isCovered)
-            {
-                goto Exit;
-            }
-        }
-
-        //
-        // Add virtual key to composition processor engine
-        //
-        {
-            auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
-
-            DWORD_PTR vKeyLen = pCompositionProcessorEngine->GetVirtualKeyLength();
-
-            if (vKeyLen)
-            {
-                pCompositionProcessorEngine->RemoveVirtualKey(vKeyLen - 1);
-
-                if (pCompositionProcessorEngine->GetVirtualKeyLength() > 0)
-                {
-                    _HandleCompositionInputWorker(pCompositionProcessorEngine, ec, dto.pContext);
-                }
-                else
-                {
-                    _HandleCancelWorker(ec, dto.pContext);
-                }
-            }
-        }
-
-Exit:
-        tfSelection.range->Release();
-        return S_OK;
-    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+//    return _pTextService->_SubmitEditSessionTask(dto.pContext, [this, dto](TfEditCookie ec) -> HRESULT
+//    {
+//        ITfRange* pRangeComposition = nullptr;
+//        TF_SELECTION tfSelection;
+//        ULONG fetched = 0;
+//        BOOL isCovered = TRUE;
+//
+//        // Start the new (std::nothrow) compositon if there is no composition.
+//        if (!_pTextService->_IsComposing())
+//        {
+//            return S_OK;
+//        }
+//
+//        // first, test where a keystroke would go in the document if we did an insert
+//        if (FAILED(dto.pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched)) || fetched != 1)
+//        {
+//            return S_FALSE;
+//        }
+//
+//        // is the insertion point covered by a composition?
+//        if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
+//        {
+//            isCovered = _IsRangeCovered(ec, tfSelection.range, pRangeComposition);
+//
+//            pRangeComposition->Release();
+//
+//            if (!isCovered)
+//            {
+//                goto Exit;
+//            }
+//        }
+//
+//        //
+//        // Add virtual key to composition processor engine
+//        //
+//        {
+//            auto pCompositionProcessorEngine = _pCompositionProcessorEngine.get();
+//
+//            DWORD_PTR vKeyLen = pCompositionProcessorEngine->GetVirtualKeyLength();
+//
+//            if (vKeyLen)
+//            {
+//                pCompositionProcessorEngine->RemoveVirtualKey(vKeyLen - 1);
+//
+//                if (pCompositionProcessorEngine->GetVirtualKeyLength() > 0)
+//                {
+//                    _HandleCompositionInputWorker(pCompositionProcessorEngine, ec, dto.pContext);
+//                }
+//                else
+//                {
+//                    _HandleCancelWorker(ec, dto.pContext);
+//                }
+//            }
+//        }
+//
+//Exit:
+//        tfSelection.range->Release();
+//        return S_OK;
+//    }, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
 }
 
 //+---------------------------------------------------------------------------

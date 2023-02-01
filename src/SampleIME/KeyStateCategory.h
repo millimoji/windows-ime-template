@@ -111,6 +111,7 @@ protected:
     // key event handlers for composition object.
     HRESULT _HandleCompositionInput(const KeyHandlerEditSessionDTO& dto, WCHAR wch);
     HRESULT _HandleCompositionFinalize(const KeyHandlerEditSessionDTO& dto, BOOL fCandidateList);
+    HRESULT _HandleComplete(const KeyHandlerEditSessionDTO& dto);
 
     HRESULT _HandleCompositionConvert(const KeyHandlerEditSessionDTO& dto, BOOL isWildcardSearch);
     HRESULT _HandleCompositionBackspace(const KeyHandlerEditSessionDTO& dto);
@@ -128,14 +129,13 @@ protected:
     HRESULT _HandlePhraseSelectByNumber(const KeyHandlerEditSessionDTO& dto, UINT uCode);
 
     // worker functions for the composition object.
-    HRESULT _HandleCandidateFinalizeWorker(TfEditCookie ec, _In_ ITfContext* pContext);
     HRESULT _HandleCancelWorker(TfEditCookie ec, _In_ ITfContext *pContext);
     HRESULT _HandleCompleteWorker(TfEditCookie ec, _In_ ITfContext *pContext);
     HRESULT _HandleCompositionInputWorker(_In_ CompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext);
     HRESULT _HandleCompositionInputWorkerNoCookie(const KeyHandlerEditSessionDTO& dto);
     HRESULT _CreateAndStartCandidate(_In_ ITfContext *pContext);
 
-    BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover);
+//    BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover);
     void RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, const shared_wstring& candidateString);
 
 protected:
