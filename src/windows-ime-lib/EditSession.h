@@ -13,30 +13,6 @@ namespace WindowsImeLib
     struct IWindowsIMECompositionBuffer;
 }
 
-// class CWindowsIME;
-// 
-// class CEditSessionBase : public ITfEditSession
-// {
-// public:
-//     CEditSessionBase(_In_ CWindowsIME *pTextService, _In_ ITfContext *pContext);
-//     virtual ~CEditSessionBase();
-// 
-//     // IUnknown
-//     STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);
-//     STDMETHODIMP_(ULONG) AddRef(void);
-//     STDMETHODIMP_(ULONG) Release(void);
-// 
-//     // ITfEditSession
-//     virtual STDMETHODIMP DoEditSession(TfEditCookie ec) = 0;
-// 
-// protected:
-//     ITfContext *_pContext;
-//     CWindowsIME *_pTextService;
-// 
-// private:
-//     LONG _refCount;     // COM ref count
-// };
-
 class CEditSessionTask :
     public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
                                         ITfEditSession,

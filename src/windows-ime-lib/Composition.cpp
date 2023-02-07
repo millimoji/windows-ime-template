@@ -30,8 +30,7 @@ STDAPI CWindowsIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfCompos
     }
 
     // Clear display attribute and end composition, _EndComposition will release composition for us
-    // ITfContext* pContext = _pContext;
-    auto pContext = m_compositionBuffer->GetContext();
+    auto pContext = m_compositionBuffer->GetCompositionContext();
 //    if (pContext)
 //    {
 //        pContext->AddRef();

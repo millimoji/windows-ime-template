@@ -9,34 +9,3 @@
 
 #include "EditSession.h"
 
-// class CWindowsIME;
-// class CTfTextLayoutSink;
-// 
-// //////////////////////////////////////////////////////////////////////
-// //
-// //    ITfEditSession
-// //        CEditSessionBase
-// // CGetTextExtentEditSession class
-// //
-// //////////////////////////////////////////////////////////////////////
-// 
-// //+---------------------------------------------------------------------------
-// //
-// // CGetTextExtentEditSession
-// //
-// //----------------------------------------------------------------------------
-// 
-// class CGetTextExtentEditSession : public CEditSessionBase
-// {
-// public:
-//     CGetTextExtentEditSession(_In_ CWindowsIME *pTextService, _In_ ITfContext *pContext, _In_ ITfContextView *pContextView, _In_ ITfRange *pRangeComposition, _In_ CTfTextLayoutSink *pTextLayoutSink);
-// 
-//     // ITfEditSession
-//     STDMETHODIMP DoEditSession(TfEditCookie ec);
-// 
-// private:
-//     ITfContextView* _pContextView;
-//     ITfRange* _pRangeComposition;
-//     CTfTextLayoutSink* _pTfTextLayoutSink;
-// };
-//

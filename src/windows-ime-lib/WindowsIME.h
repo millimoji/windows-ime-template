@@ -153,7 +153,6 @@ private:
     // Invoke key handler edit session
 //    HRESULT _InvokeKeyHandler(_In_ ITfContext *pContext, UINT code, WCHAR wch, DWORD flags, _KEYSTROKE_STATE keyState) override;
     HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags) override;
-//    HRESULT KeyHandlerEditSession_DoEditSession(TfEditCookie ec, _KEYSTROKE_STATE _KeyState, _In_ ITfContext* _pContext, UINT _uCode, WCHAR _wch, void* /*pv*/)  override;
 
     // function for the language property
 //    BOOL _SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pContext);
@@ -280,7 +279,6 @@ private:
 //    BOOL _isCandidateWithWildcard;
 //    wil::com_ptr<WindowsImeLib::IWindowsIMECandidateListVeiw> _pCandidateListUIPresenter;
 
-//    ITfContext* _pContext;
 //    ITfCompartment* _pSIPIMEOnOffCompartment;
 //    DWORD _dwSIPIMEOnOffCompartmentSinkCookie;
 //    HWND _msgWndHandle;

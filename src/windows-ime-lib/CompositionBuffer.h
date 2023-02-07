@@ -24,7 +24,7 @@ struct ICompositionBufferInternal
 
     virtual std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> GetClientInterface() = 0;
     virtual wil::com_ptr<ITfComposition> GetComposition() = 0;
-    virtual wil::com_ptr<ITfContext> GetContext() = 0;
+    virtual wil::com_ptr<ITfContext> GetCompositionContext() = 0;
     virtual bool _IsComposing() = 0;
     virtual HRESULT _RemoveDummyCompositionForComposing() = 0;
     virtual void SaveWorkingContext(_In_ ITfContext *pContext) = 0;
@@ -102,14 +102,14 @@ private:
 private: // ICompositionBufferInternal
     std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> GetClientInterface() override { return std::static_pointer_cast<WindowsImeLib::IWindowsIMECompositionBuffer>(shared_from_this()); }
     wil::com_ptr<ITfComposition> GetComposition() override { return _pComposition; }
-    wil::com_ptr<ITfContext> GetContext() override { return _pContext; }
-    bool _IsComposing() override { return !!_pComposition; }
+    wil::com_ptr<ITfContext> GetCompositionContext() override { return _pCompositionContext; }
+    bool _IsComposing() override { return m_isComposing; }
     HRESULT _RemoveDummyCompositionForComposing() override;
     void SaveWorkingContext(_In_ ITfContext *pContext) override { m_workingContext = pContext; }
 
 private:
     void _SetComposition(_In_ ITfComposition *pComposition) { _pComposition = pComposition; }
-    void _SaveCompositionContext(_In_ ITfContext *pContext) { _pContext = pContext; }
+    void _SaveCompositionContext(_In_ ITfContext *pContext) { _pCompositionContext = pContext; }
 
 private:
     ICompositionBufferOwner* m_framework = nullptr;
@@ -117,8 +117,9 @@ private:
 
     TfClientId _tfClientId = TF_CLIENTID_NULL;
     TfGuidAtom _gaDisplayAttributeInput = {};
+    bool m_isComposing = false;
 
-    wil::com_ptr<ITfContext> _pContext;
+    wil::com_ptr<ITfContext> _pCompositionContext;
     wil::com_ptr<ITfComposition> _pComposition;
     wil::com_ptr<ITfContext> m_workingContext;
 };

@@ -35,6 +35,8 @@
 
 HRESULT CompositionBuffer::_StartComposition()
 {
+    m_isComposing = true;
+
     return m_framework->_SubmitEditSessionTask(m_workingContext.get(), [this, pContext = m_workingContext](TfEditCookie ec) -> HRESULT
     {
         wil::com_ptr<ITfInsertAtSelection> pInsertAtSelection;
@@ -50,8 +52,6 @@ HRESULT CompositionBuffer::_StartComposition()
         RETURN_IF_FAILED(pContextComposition->StartComposition(ec, pRangeInsert.get(), m_framework->GetCompositionSink(), &pComposition));
         RETURN_HR_IF(S_OK /* ? */, !pComposition);
 
-        _SetComposition(pComposition.get());
-
         // set selection to the adjusted range
         TF_SELECTION tfSelection = {};
         tfSelection.range = pRangeInsert.get();
@@ -60,6 +60,7 @@ HRESULT CompositionBuffer::_StartComposition()
 
         RETURN_IF_FAILED(pContext->SetSelection(ec, 1, &tfSelection));
 
+        _SetComposition(pComposition.get());
         _SaveCompositionContext(pContext.get());
 
         LOG_IF_FAILED(m_framework->_StartLayoutTracking(pContext.get(), ec, pRangeInsert.get()));

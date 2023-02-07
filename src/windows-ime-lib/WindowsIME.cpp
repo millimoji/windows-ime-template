@@ -54,24 +54,6 @@ CATCH_RETURN()
 CWindowsIME::CWindowsIME()
 {
     DllAddRef();
-
-//    _pThreadMgr = nullptr;
-//    _threadMgrEventSinkCookie = TF_INVALID_COOKIE;
-//    _pTextEditSinkContext = nullptr;
-//    _textEditSinkCookie = TF_INVALID_COOKIE;
-//    _activeLanguageProfileNotifySinkCookie = TF_INVALID_COOKIE;
-//    _dwThreadFocusSinkCookie = TF_INVALID_COOKIE;
-//    _pComposition = nullptr;
-//    _pCompositionProcessorEngine = nullptr;
-//    _candidateMode = CANDIDATE_NONE;
-//    _pCandidateListUIPresenter = nullptr;
-//    _isCandidateWithWildcard = FALSE;
-//    _pDocMgrLastFocused = nullptr;
-//    _pSIPIMEOnOffCompartment = nullptr;
-//    _dwSIPIMEOnOffCompartmentSinkCookie = 0;
-//    _msgWndHandle = nullptr;
-//    _pContext = nullptr;
-//    _refCount = 1;
 }
 
 //+---------------------------------------------------------------------------
@@ -192,8 +174,7 @@ STDAPI CWindowsIME::Deactivate()
 {
     auto activity = WindowsImeLibTelemetry::ITfTextInputProcessorEx_Deactivate();
 
-    // ITfContext* pContext = _pContext;
-    auto pContext = m_compositionBuffer->GetContext();
+    auto pContext = m_compositionBuffer->GetCompositionContext();
     if (pContext)
     {
         // pContext->AddRef();

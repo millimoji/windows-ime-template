@@ -32,6 +32,8 @@
 
 void CompositionBuffer::_TerminateComposition()
 {
+    m_isComposing = false;
+
     LOG_IF_FAILED(m_framework->_SubmitEditSessionTask(m_workingContext.get(), [this, xpContext = m_workingContext](TfEditCookie ec) -> HRESULT
     {
         if (_pComposition)
@@ -47,8 +49,8 @@ void CompositionBuffer::_TerminateComposition()
                 m_framework->GetCompositionProcessorEngine()->_DeleteCandidateList();
             }
 
-            _pComposition.reset();
-            _pContext.reset();
+            _SetComposition(nullptr);
+            _SaveCompositionContext(nullptr);
         }
         m_framework->_EndLayoutTracking();
         return S_OK;
