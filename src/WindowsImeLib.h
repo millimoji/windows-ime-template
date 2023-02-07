@@ -76,7 +76,7 @@ struct IWindowsIMECompositionBuffer
 
     // functions for the composition object.
     virtual HRESULT _StartComposition() = 0;
-    virtual void _TerminateComposition() = 0;
+    virtual HRESULT _TerminateComposition() = 0;
     virtual HRESULT _AddComposingAndChar(const shared_wstring& pstrAddString) = 0;
     virtual HRESULT _AddCharAndFinalize(const shared_wstring& pstrAddString) = 0;
     virtual HRESULT _RemoveDummyCompositionForComposing() = 0;

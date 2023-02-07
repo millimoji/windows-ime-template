@@ -30,11 +30,11 @@
 //
 //----------------------------------------------------------------------------
 
-void CompositionBuffer::_TerminateComposition()
+HRESULT CompositionBuffer::_TerminateComposition()
 {
     m_isComposing = false;
 
-    LOG_IF_FAILED(m_framework->_SubmitEditSessionTask(m_workingContext.get(), [this, xpContext = m_workingContext](TfEditCookie ec) -> HRESULT
+    RETURN_IF_FAILED(m_framework->_SubmitEditSessionTask(m_workingContext.get(), [this, xpContext = m_workingContext](TfEditCookie ec) -> HRESULT
     {
         if (_pComposition)
         {
@@ -56,4 +56,5 @@ void CompositionBuffer::_TerminateComposition()
         return S_OK;
     },
     TF_ES_ASYNCDONTCARE | TF_ES_READWRITE));
+    return S_OK;
 }

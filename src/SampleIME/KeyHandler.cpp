@@ -80,7 +80,7 @@ VOID CompositionProcessorEngine::_DeleteCandidateList()
 HRESULT CKeyStateCategory::_HandleComplete()
 {
     _pCompositionProcessorEngine->_DeleteCandidateList();
-    _pTextService->_TerminateComposition();
+    LOG_IF_FAILED(_pTextService->_TerminateComposition());
     return S_OK;
 }
 
@@ -94,7 +94,7 @@ HRESULT CKeyStateCategory::_HandleCancel()
 {
     _pCompositionProcessorEngine->_DeleteCandidateList();
     _pTextService->_RemoveDummyCompositionForComposing();
-    _pTextService->_TerminateComposition();
+    LOG_IF_FAILED(_pTextService->_TerminateComposition());
     return S_OK;
 }
 
@@ -277,7 +277,7 @@ HRESULT CKeyStateCategory::_HandleCompositionFinalize(BOOL isCandidateList)
 //                if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
 //                    if (_IsRangeCovered(ec, tfSelection.range, pRangeComposition))
 
-            _pTextService->_TerminateComposition();
+            LOG_IF_FAILED(_pTextService->_TerminateComposition());
         }
     }
 

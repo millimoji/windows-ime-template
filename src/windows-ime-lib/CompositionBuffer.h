@@ -28,7 +28,7 @@ struct ICompositionBufferInternal
     virtual bool _IsComposing() = 0;
     virtual HRESULT _RemoveDummyCompositionForComposing() = 0;
     virtual void SaveWorkingContext(_In_ ITfContext *pContext) = 0;
-    virtual void _TerminateComposition() = 0;
+    virtual HRESULT _TerminateComposition() = 0;
 };
 
 class CompositionBuffer :
@@ -52,7 +52,7 @@ public:
 
 private:
     // functions for the composition object.
-    void _TerminateComposition() override;
+    HRESULT _TerminateComposition() override;
 
     // key event handlers for composition/candidate/phrase common objects.
 //     HRESULT _HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext);
