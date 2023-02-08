@@ -54,11 +54,11 @@ struct IWindowsIMECandidateListView
 {
     virtual ~IWindowsIMECandidateListView() {}
 
-    virtual void CreateView(_In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) = 0;
-    virtual void DestroyView() = 0;
+    // virtual void CreateView(_In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) = 0;
+    // virtual void DestroyView() = 0;
     virtual bool IsCreated() = 0;
 
-    virtual HRESULT _StartCandidateList(UINT wndWidth) = 0;
+    virtual HRESULT _StartCandidateList(_In_ std::vector<DWORD> *pIndexRange, UINT wndWidth) = 0;
     virtual void _EndCandidateList() = 0;
     virtual void _ClearList() = 0;
     virtual void _SetText(const std::vector<shared_wstring>& pCandidateList) = 0;

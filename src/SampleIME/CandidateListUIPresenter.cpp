@@ -77,20 +77,21 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert()
     if (_pCandidateListUIPresenter->IsCreated())
     {
         _pCandidateListUIPresenter->_EndCandidateList();
-        _pCandidateListUIPresenter->DestroyView();
         _pCompositionProcessorEngine->ResetCandidateState();
     }
 
-    _pCandidateListUIPresenter->CreateView(_pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
-    _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_WITH_NEXT_COMPOSITION);
-    _pCompositionProcessorEngine->SetIsCandidateWithWildcard(false);
-
     // call _Start*Line for CCandidateListUIPresenter or CReadingLine
-    _pCandidateListUIPresenter->_StartCandidateList(WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
+    LOG_IF_FAILED(_pCandidateListUIPresenter->_StartCandidateList(
+            _pCompositionProcessorEngine->GetCandidateListIndexRange(),
+            WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth()));
 
     // set up candidate list if it is being shown
     _pCandidateListUIPresenter->_SetTextColor(RGB(0, 0x80, 0), GetSysColor(COLOR_WINDOW));    // Text color is green
     _pCandidateListUIPresenter->_SetFillColor((HBRUSH)(COLOR_WINDOW+1));    // Background color is window
+
+
+    _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_WITH_NEXT_COMPOSITION);
+    _pCompositionProcessorEngine->SetIsCandidateWithWildcard(false);
 
     std::vector<shared_wstring> candidateConvertedList;
     for (const auto& candidateSrc : candidatePhraseList) {

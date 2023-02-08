@@ -215,11 +215,6 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate()
     {
         // Recreate candidate list
         _pCandidateListUIPresenter->_EndCandidateList();
-        // delete _pCandidateListUIPresenter;
-        // _pCandidateListUIPresenter = nullptr;
-        // _pCandidateListUIPresenter.reset();
-        _pCandidateListUIPresenter->DestroyView();
-
         _pCompositionProcessorEngine->ResetCandidateState();
         // _candidateMode = CANDIDATE_NONE;
         // _isCandidateWithWildcard = FALSE;
@@ -228,8 +223,8 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate()
 //    if (_pCandidateListUIPresenter == nullptr)
     if (!_pCandidateListUIPresenter->IsCreated())
     {
-        _pCandidateListUIPresenter->CreateView(_pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
-
+//        _pCandidateListUIPresenter->CreateView(_pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
+//
 //        _pCandidateListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(
 //            reinterpret_cast<CWindowsIME*>(_textService->GetTextService()),
 //            Global::AtomCandidateWindow,
@@ -241,10 +236,13 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate()
 //            return E_OUTOFMEMORY;
 //        }
 
+        LOG_IF_FAILED(_pCandidateListUIPresenter->_StartCandidateList(
+                _pCompositionProcessorEngine->GetCandidateListIndexRange(),
+                WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth()));
+
         _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_INCREMENTAL);
         _pCompositionProcessorEngine->SetIsCandidateWithWildcard(false);
 
-        hr = _pCandidateListUIPresenter->_StartCandidateList(WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
     }
 
     return hr;
@@ -310,22 +308,25 @@ HRESULT CKeyStateCategory::_HandleCompositionConvert(BOOL isWildcardSearch)
         if (_pCandidateListUIPresenter->IsCreated())
         {
             _pCandidateListUIPresenter->_EndCandidateList();
-            _pCandidateListUIPresenter->DestroyView();
             _pCompositionProcessorEngine->ResetCandidateState();
         }
 
         // 
         // create an instance of the candidate list class.
         // 
-        if (!_pCandidateListUIPresenter->IsCreated())
-        {
-            _pCandidateListUIPresenter->CreateView(pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
-            _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_ORIGINAL);
-        }
+//        if (!_pCandidateListUIPresenter->IsCreated())
+//        {
+//            _pCandidateListUIPresenter->CreateView(pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
+//            _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_ORIGINAL);
+//        }
+
+
+        LOG_IF_FAILED(_pCandidateListUIPresenter->_StartCandidateList(
+                pCompositionProcessorEngine->GetCandidateListIndexRange(),
+                WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth()));
 
         _pCompositionProcessorEngine->SetIsCandidateWithWildcard(isWildcardSearch);
-
-        hr = _pCandidateListUIPresenter->_StartCandidateList(WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth());
+        _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_ORIGINAL);
 
         if (SUCCEEDED(hr))
         {

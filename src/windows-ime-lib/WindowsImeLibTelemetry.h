@@ -42,8 +42,6 @@ public:
     DEFINE_CALLCONTEXT_ACTIVITY(ITfFunction_GetDisplayName);
     DEFINE_CALLCONTEXT_ACTIVITY(ITfFnGetPreferredTouchKeyboardLayout_GetLayout);
 
-    DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_CreateView);
-    DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_DestroyView);
     DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_StartCandidateList);
     DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_EndCandidateList);
     DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_ClearList);

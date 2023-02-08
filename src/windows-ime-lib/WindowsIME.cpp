@@ -204,7 +204,6 @@ STDAPI CWindowsIME::Deactivate()
 
 //        m_compositionBuffer->DestroyCandidateView();
         m_candidateListView->_EndCandidateList();
-        m_candidateListView->DestroyView();
     }
 
     if (m_inprocClient)

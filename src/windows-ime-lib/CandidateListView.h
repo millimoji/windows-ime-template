@@ -26,7 +26,6 @@ struct ICandidateListViewInternal
     virtual void _EndCandidateList() = 0;
 
     // both?
-    virtual void DestroyView() = 0;
     virtual bool IsCreated() = 0;
 };
 
@@ -39,33 +38,36 @@ public:
     CandidateListView(ICandidateListViewOwner* framework) : m_framework(framework) {}
 private:
     // WindowsImeLib::IWindowsIMECandidateListView
-    void CreateView(_In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) override
-    {
-        auto activity = WindowsImeLibTelemetry::CandidateListView_CreateView::Start();
-        m_presenter.reset();
-        THROW_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CCandidateListUIPresenter>(
-            &m_presenter, m_framework, Global::AtomCandidateWindow, pIndexRange, hideWindow));
-        activity.Stop();
-    }
-    void DestroyView() override {
-        auto activity = WindowsImeLibTelemetry::CandidateListView_DestroyView::Start();
-        m_presenter.reset();
-        activity.Stop();
-    }
+//    void CreateView(_In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) override
+//    {
+//        m_presenter.reset();
+//        THROW_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CCandidateListUIPresenter>(
+//            &m_presenter, m_framework, Global::AtomCandidateWindow, pIndexRange, hideWindow));
+//    }
+//    void DestroyView() override {
+//        m_presenter.reset();
+//    }
     bool IsCreated() override {
         return !!m_presenter;
     }
-    HRESULT _StartCandidateList(UINT wndWidth) override
+    HRESULT _StartCandidateList(_In_ std::vector<DWORD> *pIndexRange, UINT wndWidth) override
     {
         auto activity = WindowsImeLibTelemetry::CandidateListView_StartCandidateList::Start();
-        const auto hr = m_presenter->_StartCandidateList(wndWidth);
+
+        m_presenter.reset();
+        RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CCandidateListUIPresenter>(
+            &m_presenter, m_framework, Global::AtomCandidateWindow, pIndexRange, FALSE /*hideWindow*/));
+
+        RETURN_IF_FAILED(m_presenter->_StartCandidateList(wndWidth));
+
         activity.Stop();
-        return hr;
+        return S_OK;
     }
     void _EndCandidateList() override {
         if (m_presenter) {
             auto activity = WindowsImeLibTelemetry::CandidateListView_EndCandidateList::Start();
             m_presenter->_EndCandidateList();
+            m_presenter.reset();
             activity.Stop();
         }
     }
