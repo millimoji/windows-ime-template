@@ -63,9 +63,11 @@ private:
         return hr;
     }
     void _EndCandidateList() override {
-        auto activity = WindowsImeLibTelemetry::CandidateListView_EndCandidateList::Start();
-        if (m_presenter) { m_presenter->_EndCandidateList(); }
-        activity.Stop();
+        if (m_presenter) {
+            auto activity = WindowsImeLibTelemetry::CandidateListView_EndCandidateList::Start();
+            m_presenter->_EndCandidateList();
+            activity.Stop();
+        }
     }
     void _ClearList() override {
         auto activity = WindowsImeLibTelemetry::CandidateListView_ClearList::Start();
@@ -97,26 +99,36 @@ private:
         return std::static_pointer_cast<WindowsImeLib::IWindowsIMECandidateListView>(shared_from_this());
     }
     VOID _LayoutChangeNotification(_In_ RECT *lpRect) override {
-        auto activity = WindowsImeLibTelemetry::CandidateListView_LayoutChangeNotification::Start();
-        if (m_presenter) { m_presenter->_LayoutChangeNotification(lpRect); }
-        activity.Stop();
+        if (m_presenter) {
+            auto activity = WindowsImeLibTelemetry::CandidateListView_LayoutChangeNotification::Start();
+            m_presenter->_LayoutChangeNotification(lpRect);
+            activity.Stop();
+        }
     }
     VOID _LayoutDestroyNotification() override {
-        auto activity = WindowsImeLibTelemetry::CandidateListView_LayoutDestroyNotification::Start();
-        if (m_presenter) { m_presenter->_LayoutDestroyNotification(); }
-        activity.Stop();
+        if (m_presenter) {
+            auto activity = WindowsImeLibTelemetry::CandidateListView_LayoutDestroyNotification::Start();
+            m_presenter->_LayoutDestroyNotification();
+            activity.Stop();
+        }
     }
     HRESULT OnSetThreadFocus() override {
-        auto activity = WindowsImeLibTelemetry::CandidateListView_OnSetThreadFocus::Start();
-        const auto hr = (m_presenter ? m_presenter->OnSetThreadFocus() : S_OK);
-        activity.Stop();
-        return hr;
+        if (m_presenter) {
+            auto activity = WindowsImeLibTelemetry::CandidateListView_OnSetThreadFocus::Start();
+            const auto hr = (m_presenter ? m_presenter->OnSetThreadFocus() : S_OK);
+            activity.Stop();
+            return hr;
+        }
+        return S_OK;
     }
     HRESULT OnKillThreadFocus() override {
-        auto activity = WindowsImeLibTelemetry::CandidateListView_OnKillThreadFocus::Start();
-        const auto hr = (m_presenter ? m_presenter->OnKillThreadFocus() : S_OK);
-        activity.Stop();
-        return hr;
+        if (m_presenter) {
+            auto activity = WindowsImeLibTelemetry::CandidateListView_OnKillThreadFocus::Start();
+            const auto hr = m_presenter->OnKillThreadFocus();
+            activity.Stop();
+            return hr;
+        }
+        return S_OK;
     }
 
 private:
