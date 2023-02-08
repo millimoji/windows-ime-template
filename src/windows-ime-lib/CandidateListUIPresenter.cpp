@@ -860,14 +860,13 @@ HRESULT CCandidateListUIPresenter::_CandidateChangeNotification(_In_ enum CANDWN
     }
 
     {
-        wil::com_ptr<ITfDocumentMgr> pDocumentMgr;
-        RETURN_IF_FAILED(_pTextService->_GetThreadMgr()->GetFocus(&pDocumentMgr));
+//        wil::com_ptr<ITfDocumentMgr> pDocumentMgr;
+//        RETURN_IF_FAILED(_pTextService->_GetThreadMgr()->GetFocus(&pDocumentMgr));
+//
+//        wil::com_ptr<ITfContext> pContext;
+//        RETURN_IF_FAILED(pDocumentMgr->GetTop(&pContext));
 
-        wil::com_ptr<ITfContext> pContext;
-        RETURN_IF_FAILED(pDocumentMgr->GetTop(&pContext));
-
-        auto compositionBuffer = _pTextService->GetCompositionProcessorEngine();
-        compositionBuffer->FinalizeCandidateList();
+        _pTextService->NotifyFinalizeCandidateList();
     }
 
 Exit:
@@ -992,7 +991,7 @@ HRESULT CCandidateListUIPresenter::BeginUIElement()
     auto pThreadMgr = _pTextService->_GetThreadMgr();
     if (!pThreadMgr)
     {
-        hr = E_FAIL;
+        hr = S_OK; // E_FAIL;
         goto Exit;
     }
 
@@ -1019,7 +1018,7 @@ HRESULT CCandidateListUIPresenter::EndUIElement()
     auto pThreadMgr = _pTextService->_GetThreadMgr();
     if (!pThreadMgr || (-1 == _uiElementId))
     {
-        hr = E_FAIL;
+        hr = S_OK; // E_FAIL;
         goto Exit;
     }
 

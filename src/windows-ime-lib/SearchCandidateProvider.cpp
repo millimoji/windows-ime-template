@@ -91,14 +91,15 @@ STDMETHODIMP CSearchCandidateProvider::GetSearchCandidates(BSTR bstrQuery, BSTR 
         return hr;
     }
 
-    auto pCompositionProcessorEngine = m_owner->GetCompositionProcessorEngine();
-    if (!pCompositionProcessorEngine)
-    {
-        return hr;
-    }
-
+//    auto pCompositionProcessorEngine = m_owner->GetCompositionProcessorEngine();
+//    if (!pCompositionProcessorEngine)
+//    {
+//        return hr;
+//    }
+//
     std::vector<shared_wstring> candidateList;
-    pCompositionProcessorEngine->GetCandidateList(candidateList, TRUE, FALSE);
+//    pCompositionProcessorEngine->GetCandidateList(candidateList, TRUE, FALSE);
+//    m_framework->GetTextInputProcessor()->_DeleteCandidateList();
 
     int cCand = std::min(static_cast<int>(candidateList.size()), FAKECANDIDATENUMBER);
     if (0 < cCand)

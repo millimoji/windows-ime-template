@@ -56,7 +56,7 @@ private:
         if (IsEqualGUID(rguid, Global::SampleIMEGuidImeModePreserveKey))
         {
             const auto preservedKeyData = FindPreservedKey(rguid);
-            if (CheckShiftKeyOnly(preservedKeyData->tfPreservedKey.uModifiers))
+            if (true /*CheckShiftKeyOnly(preservedKeyData->tfPreservedKey.uModifiers)*/)
             {
                 const auto isOpen = m_compartmentKeyboardOpenClose->GetCompartmentBOOL();
                 THROW_IF_FAILED(m_compartmentKeyboardOpenClose->_SetCompartmentBOOL(isOpen ? FALSE : TRUE));
@@ -242,7 +242,7 @@ private:
         GUID preservedKeyGuid;
         const wchar_t* description;
     } s_preservedKeys[3] = {
-        { TF_PRESERVEDKEY { VK_SHIFT,       _TF_MOD_ON_KEYUP_SHIFT_ONLY },  Global::SampleIMEGuidImeModePreserveKey,            Global::ImeModeDescription },
+        { TF_PRESERVEDKEY { VK_SHIFT,       _TF_MOD_ON_KEYUP_SHIFT_ONLY },  Global::SampleIMEGuidImeModePreserveKey,            Global::ImeModeDescription},
         { TF_PRESERVEDKEY { VK_SPACE,       TF_MOD_SHIFT },                 Global::SampleIMEGuidDoubleSingleBytePreserveKey,   Global::DoubleSingleByteDescription },
         { TF_PRESERVEDKEY { VK_OEM_PERIOD,  TF_MOD_CONTROL},                Global::SampleIMEGuidPunctuationPreserveKey,        Global::PunctuationDescription }
     };

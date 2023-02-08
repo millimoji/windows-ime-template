@@ -1380,27 +1380,3 @@ void CompositionProcessorEngine::FinalizeCandidateList()
 
 	KeyHandlerEditSession_DoEditSession(KeystrokeState, 0, 0);
 }
-
-SampleIMEProcessor::SampleIMEProcessor(WindowsImeLib::ITextInputFramework* framework) :
-    m_framework(framework)
-{
-}
-
-SampleIMEProcessor::~SampleIMEProcessor()
-{
-}
-
-std::wstring SampleIMEProcessor::TestMethod(const std::wstring& src)
-{
-    return src + L"-sample-suffix";
-}
-
-void SampleIMEProcessor::SetFocus(bool isGotten)
-{
-    WindowsImeLib::TraceLog("SampleIMEProcessor::SetFocus:%d", isGotten ? 1 : 0);
-}
-
-void SampleIMEProcessor::UpdateCustomState(const std::string& stateJson)
-{
-    WindowsImeLib::TraceLog("SampleIMEProcessor::UpdateSingletonEngine: %s", stateJson.c_str());
-}

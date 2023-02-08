@@ -70,10 +70,12 @@ STDAPI CWindowsIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocume
             if (pCandidateListDocumentMgr != pDocMgrFocus)
             {
                 m_candidateListView->OnKillThreadFocus();
+                m_singletonProcessor->CandidateListViewInternal_OnKillThreadFocus();
             }
-            else 
+            else
             {
                 m_candidateListView->OnSetThreadFocus();
+                m_singletonProcessor->CandidateListViewInternal_OnSetThreadFocus();
             }
 
             pCandidateListDocumentMgr->Release();

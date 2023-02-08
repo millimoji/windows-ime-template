@@ -181,10 +181,10 @@ STDAPI CWindowsIME::Deactivate()
         LOG_IF_FAILED(m_compositionBuffer->_TerminateCompositionInternal());
     }
 
-    if (_pCompositionProcessorEngine)
+    if (m_singletonProcessor)
     {
 //        _pCompositionProcessorEngine->ClearCompartment(_pThreadMgr, _tfClientId);
-        _pCompositionProcessorEngine.reset();
+        m_singletonProcessor.reset();
     }
 
 //    if (_pCandidateListUIPresenter)
@@ -204,6 +204,7 @@ STDAPI CWindowsIME::Deactivate()
 
 //        m_compositionBuffer->DestroyCandidateView();
         m_candidateListView->_EndCandidateList();
+        m_singletonProcessor->CandidateListViewInternal_EndCandidateList();
     }
 
     if (m_inprocClient)
@@ -391,7 +392,7 @@ BOOL CWindowsIME::_AddTextProcessorEngine()
     }
 
     // Is this already added?
-    if (_pCompositionProcessorEngine)
+    if (m_singletonProcessor)
     {
         LANGID langidProfile = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLangID();
         GUID guidLanguageProfile = WindowsImeLib::g_processorFactory->GetConstantProvider()->IMEProfileGuid();
@@ -403,19 +404,19 @@ BOOL CWindowsIME::_AddTextProcessorEngine()
     }
 
     // Create composition processor engine
-    if (!_pCompositionProcessorEngine)
+    if (!m_singletonProcessor)
     {
         m_singletonProcessor = CreateSingletonProcessorBridge();
 
-        _pCompositionProcessorEngine = WindowsImeLib::g_processorFactory->CreateCompositionProcessorEngine(
-            m_compositionBuffer->GetClientInterface(),
-            m_candidateListView->GetClientInterface());
-
-        _pCompositionProcessorEngine->Initialize();
+//        _pCompositionProcessorEngine = WindowsImeLib::g_processorFactory->CreateCompositionProcessorEngine(
+//            m_compositionBuffer->GetClientInterface(),
+//            m_candidateListView->GetClientInterface());
+//
+//        _pCompositionProcessorEngine->Initialize();
         UpdateCustomState();
         SetDefaultCandidateTextFont();
     }
-    if (!_pCompositionProcessorEngine)
+    if (!m_singletonProcessor)
     {
         return FALSE;
     }

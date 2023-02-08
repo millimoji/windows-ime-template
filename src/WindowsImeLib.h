@@ -111,15 +111,6 @@ struct ITextInputFramework
     virtual void Test() = 0;
 };
 
-struct ITextInputProcessor
-{
-    virtual ~ITextInputProcessor() {}
-
-    virtual std::wstring TestMethod(const std::wstring& src) = 0;
-    virtual void UpdateCustomState(const std::string& stateJson) = 0;
-    virtual void SetFocus(bool isGotten) = 0;
-};
-
 struct IConstantProvider
 {
     virtual const CLSID& IMECLSID() noexcept = 0;
@@ -145,7 +136,6 @@ struct IProcessorFactory
         const std::shared_ptr<IWindowsIMECompositionBuffer>& compositionBuffer,
         const std::shared_ptr<IWindowsIMECandidateListView>& candidateListView) = 0;
     virtual std::shared_ptr<IConstantProvider> GetConstantProvider() = 0;
-    virtual std::shared_ptr<ITextInputProcessor> CreateTextInputProcessor(ITextInputFramework* framework) = 0;
     virtual std::shared_ptr<IWindowsIMEInprocClient> CreateIMEInprocClient(IWindowsIMEInprocFramework* framework) = 0;
 };
 

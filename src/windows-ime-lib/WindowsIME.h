@@ -188,10 +188,6 @@ private:
         if (m_inprocClient)
         {
             const auto customStateJson = m_inprocClient->EncodeCustomState();
-            if (_pCompositionProcessorEngine)
-            {
-                _pCompositionProcessorEngine->UpdateCustomState(customStateJson);
-            }
             if (m_singletonProcessor)
             {
                 m_singletonProcessor->UpdateCustomState(customStateJson.c_str());
@@ -204,11 +200,14 @@ private:
     // ICandidateListViewOwner
     HRESULT _GetLastTextExt(_Out_ HWND* documentWindow, _Out_ RECT *lpRect) override;
     BOOL _IsStoreAppMode(void) override { return (_dwActivateFlags & TF_TMF_IMMERSIVEMODE) ? TRUE : FALSE; };
-    wil::com_ptr<ITfThreadMgr> _GetThreadMgr() override { return _pThreadMgr; }
-    TfEditCookie GetCachedEditCookie() override { return m_textLayoutSink._tfEditCookie; } // Is this Ok???
+    void NotifyFinalizeCandidateList() override { m_singletonProcessor->FinalizeCandidateList(); }
 
-    // ICompositionBufferOwner && ICandidateListViewOwner
-    std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() override { return (_pCompositionProcessorEngine); };
+// FUTURE: cross proc candidate window
+    wil::com_ptr<ITfThreadMgr> _GetThreadMgr() override { return wil::com_ptr<ITfThreadMgr>(); }
+
+    // ICompositionBufferOwner
+//    std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() override { return (_pCompositionProcessorEngine); };
+    wil::com_ptr<ITextInputProcessor> GetTextInputProcessor() override { return m_singletonProcessor; }
 
     HRESULT _StartLayoutTracking(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition) override;
     HRESULT _EndLayoutTracking() override;
@@ -231,7 +230,8 @@ private:
     DWORD _dwThreadFocusSinkCookie = TF_INVALID_COOKIE;
 
     // Composition Processor Engine object.
-    std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> _pCompositionProcessorEngine;
+//    std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> _pCompositionProcessorEngine;
+    wil::com_ptr<ITextInputProcessor> m_singletonProcessor;
 
     // guidatom for the display attibute.
     TfGuidAtom _gaDisplayAttributeInput = {};
@@ -246,7 +246,6 @@ private:
     std::shared_ptr<ICandidateListViewInternal> m_candidateListView;
 
     std::shared_ptr<WindowsImeLib::IWindowsIMEInprocClient> m_inprocClient;
-    wil::com_ptr<ITextInputProcessor> m_singletonProcessor;
 
     struct TextLayoutSinkState
     {

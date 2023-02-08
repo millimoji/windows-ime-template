@@ -168,12 +168,14 @@ STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
 
     Global::UpdateModifiers(wParam, lParam);
 
-    if (_pCompositionProcessorEngine)
+    if (m_singletonProcessor)
     {
         WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
         UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
         bool isKbdDisabled = _IsKeyboardDisabled();
-        _pCompositionProcessorEngine->OnKeyEvent(wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, true /*test*/, true /*down*/);
+        wil::unique_bstr bstrResult;
+        m_singletonProcessor->OnKeyEvent(static_cast<DWORD>(wParam), static_cast<DWORD>(lParam), wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, true /*test*/, true /*down*/, &bstrResult, pIsEaten);
+        m_compositionBuffer->HandleCrossProcJson(reinterpret_cast<const char*>(bstrResult.get()));
     }
 
 //    _KEYSTROKE_STATE KeystrokeState;
@@ -216,12 +218,14 @@ STDAPI CWindowsIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam
 
     Global::UpdateModifiers(wParam, lParam);
 
-    if (_pCompositionProcessorEngine)
+    if (m_singletonProcessor)
     {
         WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
         UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
         bool isKbdDisabled = _IsKeyboardDisabled();
-        _pCompositionProcessorEngine->OnKeyEvent(wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, false /*test*/, true /*down*/);
+        wil::unique_bstr bstrResult;
+        m_singletonProcessor->OnKeyEvent(static_cast<DWORD>(wParam), static_cast<DWORD>(lParam), wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, false /*test*/, true /*down*/, &bstrResult, pIsEaten);
+        m_compositionBuffer->HandleCrossProcJson(reinterpret_cast<const char*>(bstrResult.get()));
     }
 
 //    _KEYSTROKE_STATE KeystrokeState;
@@ -283,12 +287,14 @@ STDAPI CWindowsIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lPar
 
     Global::UpdateModifiers(wParam, lParam);
 
-    if (_pCompositionProcessorEngine)
+    if (m_singletonProcessor)
     {
         WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
         UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
         bool isKbdDisabled = _IsKeyboardDisabled();
-        _pCompositionProcessorEngine->OnKeyEvent(wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, true /*test*/, false /*down*/);
+        wil::unique_bstr bstrResult;
+        m_singletonProcessor->OnKeyEvent(static_cast<DWORD>(wParam), static_cast<DWORD>(lParam), wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, true /*test*/, false /*down*/, &bstrResult, pIsEaten);
+        m_compositionBuffer->HandleCrossProcJson(reinterpret_cast<const char*>(bstrResult.get()));
     }
 
 //    if (pIsEaten == nullptr)
@@ -328,12 +334,14 @@ STDAPI CWindowsIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, 
 
     Global::UpdateModifiers(wParam, lParam);
 
-    if (_pCompositionProcessorEngine)
+    if (m_singletonProcessor)
     {
         WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
         UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
         bool isKbdDisabled = _IsKeyboardDisabled();
-        _pCompositionProcessorEngine->OnKeyEvent(wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, false /*test*/, false /*down*/);
+        wil::unique_bstr bstrResult;
+        m_singletonProcessor->OnKeyEvent(static_cast<DWORD>(wParam), static_cast<DWORD>(lParam), wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, false /*test*/, false /*down*/, &bstrResult, pIsEaten);
+        m_compositionBuffer->HandleCrossProcJson(reinterpret_cast<const char*>(bstrResult.get()));
     }
 
 //    WCHAR wch = '\0';

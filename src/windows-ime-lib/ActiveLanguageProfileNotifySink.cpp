@@ -41,7 +41,7 @@ STDAPI CWindowsIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID, _In_ BOOL isA
         _AddTextProcessorEngine();
     }
 
-    if (!_pCompositionProcessorEngine)
+    if (!m_singletonProcessor)
     {
         activity.Stop();
         return S_OK;
@@ -59,7 +59,7 @@ STDAPI CWindowsIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID, _In_ BOOL isA
     }
     else
     {
-        _pCompositionProcessorEngine->_DeleteCandidateList();
+        m_singletonProcessor->_DeleteCandidateList();
 
         if (m_inprocClient)
         {

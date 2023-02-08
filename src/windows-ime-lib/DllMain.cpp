@@ -81,9 +81,4 @@ void WindowsImeLib::TraceLog(const wchar_t* format, ...)
 
 __declspec(dllexport) void TestFunction()
 {
-    const auto bridge = CreateSingletonProcessorBridge();
-    const auto srcBstr = wil::make_bstr(L"abc");
-    wil::unique_bstr resultBstr;
-    LOG_IF_FAILED(bridge->TestMethod(srcBstr.get(), &resultBstr));
-    WindowsImeLibTelemetry::TraceLog("TEST_METHOD result", L"%s", resultBstr.get());
 }

@@ -193,7 +193,7 @@ void CBaseWindow::_Show(BOOL isShowWnd)
     {
         if (isShowWnd)
         {
-            ShowWindow(_wndHandle, SW_SHOWNA);
+            ShowWindow(_wndHandle, SW_SHOWNOACTIVATE /*SW_SHOWNA*/);
         }
         else
         {

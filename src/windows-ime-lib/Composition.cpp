@@ -37,7 +37,7 @@ STDAPI CWindowsIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfCompos
 
     LOG_IF_FAILED(m_compositionBuffer->_TerminateCompositionInternal());
 
-    _pCompositionProcessorEngine->_DeleteCandidateList();
+    m_singletonProcessor->_DeleteCandidateList();
 
 //    if (pContext)
 //    {
@@ -343,3 +343,29 @@ void CompositionBuffer::FlushTasks()
     }
     m_listTasks.clear();
 }
+
+void CompositionBuffer::HandleCrossProcJson(const char* jsonText) try
+{
+    const auto json = nlohmann::json::parse(jsonText);
+    const auto jsonComposition = json["composition"];
+    const auto jsonCommands = jsonComposition["cmds"];
+
+    for (auto it = jsonCommands.begin(); it != jsonCommands.end(); ++it)
+    {
+        auto commandText = it.value()["cmd"];
+        if (commandText == "StartComposition") {
+            LOG_IF_FAILED(_StartComposition());
+        } else if (commandText == "TerminateComposition") {
+            LOG_IF_FAILED(_TerminateComposition());
+        } else if (commandText == "AddComposingAndChar") {
+            auto str = it.value()["str"].get<std::wstring>();
+            LOG_IF_FAILED(_AddComposingAndChar(std::make_shared<const std::wstring>(std::move(str))));
+        } else if (commandText == "AddCharAndFinalize") {
+            auto str = it.value()["str"].get<std::wstring>();
+            LOG_IF_FAILED(_AddComposingAndChar(std::make_shared<const std::wstring>(std::move(str))));
+        } else if (commandText == "RemoveDummyCompositionForComposing") {
+            LOG_IF_FAILED(_RemoveDummyCompositionForComposing());
+        }
+    }
+}
+CATCH_LOG()

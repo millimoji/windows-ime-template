@@ -229,19 +229,3 @@ private:
 
     static const int OUT_OF_FILE_INDEX = -1;
 };
-
-class SampleIMEProcessor :
-    public WindowsImeLib::ITextInputProcessor,
-    public std::enable_shared_from_this<SampleIMEProcessor>
-{
-public:
-    SampleIMEProcessor(WindowsImeLib::ITextInputFramework* framework);
-    virtual ~SampleIMEProcessor();
-
-    std::wstring TestMethod(const std::wstring& src) override;
-    void SetFocus(bool isGotten) override;
-    void UpdateCustomState(const std::string& stateJson) override;
-
-private:
-    WindowsImeLib::ITextInputFramework* m_framework;
-};

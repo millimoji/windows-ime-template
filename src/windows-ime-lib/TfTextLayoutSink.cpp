@@ -95,7 +95,8 @@ IFACEMETHODIMP CWindowsIME::OnLayoutChange(_In_ ITfContext *pContext, TfLayoutCo
                         m_textLayoutSink.documentWindow = parentWndHandle;
                     }
 
-                    m_candidateListView->_LayoutChangeNotification(&rc);
+                    m_candidateListView->_LayoutChangeNotification(parentWndHandle, &rc);
+                    m_singletonProcessor->CandidateListViewInternal_LayoutChangeNotification(parentWndHandle, &rc);
                 }
                 return S_OK;
             }, TF_ES_SYNC | TF_ES_READ);
@@ -103,6 +104,7 @@ IFACEMETHODIMP CWindowsIME::OnLayoutChange(_In_ ITfContext *pContext, TfLayoutCo
 
     case TF_LC_DESTROY:
         m_candidateListView->_LayoutDestroyNotification();
+        m_singletonProcessor->CandidateListViewInternal_LayoutDestroyNotification();
         break;
 
     }

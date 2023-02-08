@@ -25,22 +25,3 @@ void RibbonIMECore::GetCandidateList(std::vector<shared_wstring>& pCandidateList
     (void)isIncrementalWordSearch;
     (void)isWildcardSearch;
 }
-
-RibbonTextInputProcessor::RibbonTextInputProcessor(WindowsImeLib::ITextInputFramework* framework) :
-	m_framework(framework)
-{
-}
-
-RibbonTextInputProcessor::~RibbonTextInputProcessor()
-{
-}
-
-std::wstring RibbonTextInputProcessor::TestMethod(const std::wstring& src)
-{
-    return src + L"-ribbon-suffix";
-}
-
-void RibbonTextInputProcessor::SetFocus(bool isGotten)
-{
-    WindowsImeLib::TraceLog("RibbonTextInputProcessor::::SetFocus:%d", isGotten ? 1 : 0);
-}

@@ -39,25 +39,6 @@ private:
     const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> m_candidateListView;
 };
 
-class RibbonTextInputProcessor :
-    public WindowsImeLib::ITextInputProcessor,
-    public std::enable_shared_from_this<RibbonTextInputProcessor>
-{
-public:
-    RibbonTextInputProcessor(WindowsImeLib::ITextInputFramework* framework);
-    virtual ~RibbonTextInputProcessor();
-
-    std::wstring TestMethod(const std::wstring& src) override;
-    void SetFocus(bool isGotten) override;
-    void UpdateCustomState(const std::string& customStateJson) override
-    {
-        WindowsImeLib::TraceLog("RibbonTextInputProcessor::UpdateSingletonEngine: %s", customStateJson.c_str());
-    }
-
-private:
-    WindowsImeLib::ITextInputFramework* m_framework;
-};
-
 class RibbonIMEConstants : public WindowsImeLib::IConstantProvider
 {
     // GUIDs

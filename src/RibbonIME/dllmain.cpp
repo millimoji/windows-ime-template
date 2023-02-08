@@ -67,12 +67,6 @@ namespace WindowsImeLib
             return constantProvider;
         }
 
-        std::shared_ptr<ITextInputProcessor> CreateTextInputProcessor(ITextInputFramework* framework) override
-        {
-            auto textInputProcessor = std::make_shared<RibbonTextInputProcessor>(framework);
-            return std::static_pointer_cast<ITextInputProcessor>(textInputProcessor);
-        }
-
         std::shared_ptr<IWindowsIMEInprocClient> CreateIMEInprocClient(IWindowsIMEInprocFramework* framework) override
         {
             auto inprocClient = std::make_shared<RibbonIMEInprocClient>(framework);

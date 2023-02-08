@@ -34,6 +34,7 @@ STDAPI CWindowsIME::OnSetThreadFocus() try
             if (pCandidateListDocumentMgr == _pDocMgrLastFocused.get())
             {
                 m_candidateListView->OnSetThreadFocus();
+                m_singletonProcessor->CandidateListViewInternal_OnSetThreadFocus();
             }
 
             pCandidateListDocumentMgr->Release();
@@ -79,6 +80,7 @@ STDAPI CWindowsIME::OnKillThreadFocus() try
 //            }
         }
         m_candidateListView->OnKillThreadFocus();
+        m_singletonProcessor->CandidateListViewInternal_OnKillThreadFocus();
     }
 
     activity.Stop();

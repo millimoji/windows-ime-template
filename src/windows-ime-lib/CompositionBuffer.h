@@ -11,7 +11,8 @@ struct ICompositionBufferOwner
     virtual ~ICompositionBufferOwner() {}
 
     virtual ITfCompositionSink* GetCompositionSink() = 0;
-    virtual std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() = 0;
+//    virtual std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() = 0;
+    virtual wil::com_ptr<ITextInputProcessor> GetTextInputProcessor() = 0;
     virtual HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags) = 0;
 
     virtual HRESULT _StartLayoutTracking(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition) = 0;
@@ -22,7 +23,9 @@ struct ICompositionBufferInternal
 {
     virtual ~ICompositionBufferInternal() {}
 
+    virtual void HandleCrossProcJson(const char* json) = 0;
     virtual void FlushTasks() = 0;
+
     virtual std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> GetClientInterface() = 0;
     virtual wil::com_ptr<ITfComposition> GetComposition() = 0;
     virtual wil::com_ptr<ITfContext> GetCompositionContext() = 0;
@@ -59,6 +62,7 @@ private:
     HRESULT _RemoveDummyCompositionForComposing() override;
 
 private: // ICompositionBufferInternal
+    void HandleCrossProcJson(const char* json) override;
     void FlushTasks() override;
     std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> GetClientInterface() override { return std::static_pointer_cast<WindowsImeLib::IWindowsIMECompositionBuffer>(shared_from_this()); }
     wil::com_ptr<ITfComposition> GetComposition() override { return m_currentComposition; }
@@ -97,4 +101,65 @@ private:
     wil::com_ptr<ITfContext> m_currentCompositionContext;
     wil::com_ptr<ITfComposition> m_currentComposition;
     wil::com_ptr<ITfContext> m_workingContext;
+};
+
+class CompositionBufferProxy :
+    public WindowsImeLib::IWindowsIMECompositionBuffer,
+    public std::enable_shared_from_this<CompositionBufferProxy>
+{
+public:
+    CompositionBufferProxy() {}
+    ~CompositionBufferProxy() {}
+
+    HRESULT _StartComposition() override
+    {
+        nlohmann::json json;
+        json["cmd"] = "StartComposition";
+        m_jsonCmdArray.emplace_back(json);
+        m_isComposing = true;
+        return S_OK;
+    }
+
+    HRESULT _TerminateComposition() override
+    {
+        nlohmann::json json;
+        json["cmd"] = "TerminateComposition";
+        m_jsonCmdArray.emplace_back(json);
+        m_isComposing = false;
+        return S_OK;
+    }
+
+    HRESULT _AddComposingAndChar(const shared_wstring& pstrAddString) override
+    {
+        nlohmann::json json;
+        json["cmd"] = "AddComposingAndChar";
+        json["str"] = *pstrAddString;
+        m_jsonCmdArray.emplace_back(json);
+        return S_OK;
+    }
+
+    HRESULT _AddCharAndFinalize(const shared_wstring& pstrAddString) override
+    {
+        nlohmann::json json;
+        json["cmd"] = "AddCharAndFinalize";
+        json["str"] = *pstrAddString;
+        m_jsonCmdArray.emplace_back(json);
+        return S_OK;
+    }
+
+    HRESULT _RemoveDummyCompositionForComposing() override
+    {
+        nlohmann::json json;
+        json["cmd"] = "RemoveDummyCompositionForComposing";
+        m_jsonCmdArray.emplace_back(json);
+        return S_OK;
+    }
+
+    bool _IsComposing() override
+    {
+        return m_isComposing;
+    }
+
+    nlohmann::json m_jsonCmdArray;
+    bool m_isComposing = false;
 };

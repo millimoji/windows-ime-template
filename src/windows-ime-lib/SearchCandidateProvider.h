@@ -12,7 +12,7 @@ struct ISearchCandidateProviderOwner
 {
     virtual ~ISearchCandidateProviderOwner() {}
 
-    virtual std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() = 0;
+//    virtual std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() = 0;
 };
 
 //

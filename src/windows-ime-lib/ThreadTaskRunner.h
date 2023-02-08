@@ -155,3 +155,54 @@ private:
 };
 
 
+class UIThreadTaskRunner
+{
+public:
+    UIThreadTaskRunner() {}
+    ~UIThreadTaskRunner()
+    {
+        if (m_thread)
+        {
+            PostThreadMessage(m_threadId, WM_QUIT, 0, 0);
+            WaitForSingleObject(m_thread.get(), INFINITE);
+        }
+    }
+    void RunOnThread(const std::function<void(void)>& task)
+    {
+        EnsureInitialized();
+        m_taskRunner->RequestTask(task);
+    }
+
+private:
+    void EnsureInitialized()
+    {
+        if (!m_thread)
+        {
+            m_threadPrepared.reset(CreateEvent(nullptr, FALSE, FALSE, nullptr));
+            m_thread.reset(CreateThread(nullptr, 0, ThreadFunction, this, 0, &m_threadId));
+            WaitForSingleObject(m_threadPrepared.get(), INFINITE);
+        }
+    }
+
+    static DWORD WINAPI ThreadFunction(void* lpParameter)
+    {
+        auto _this = reinterpret_cast<UIThreadTaskRunner*>(lpParameter);
+        const auto coInit = wil::CoInitializeEx(COINIT_APARTMENTTHREADED);
+        TaskRunner taskRunner;
+        _this->m_taskRunner = &taskRunner;
+        SetEvent(_this->m_threadPrepared.get());
+
+        MSG msg;
+        while (GetMessage(&msg, NULL, 0, 0))
+        {
+            DispatchMessage(&msg);
+        }
+        return 0;
+    }
+
+private:
+    wil::unique_handle m_threadPrepared;
+    TaskRunner* m_taskRunner = nullptr;
+    wil::unique_handle m_thread;
+    DWORD m_threadId = 0;
+};
