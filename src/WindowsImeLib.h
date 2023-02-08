@@ -31,6 +31,12 @@ enum class CANDIDATELIST_FUNCTION
     MOVE_PAGE_BOTTOM,
 };
 
+enum class CANDIDATE_COLOR_STYLE
+{
+    DEFAULT,
+    GREEN,
+};
+
 // Hard to make data driven setup for compartment, langbar button and preserved key. so allow customize by code
 struct IWindowsIMEInprocClient
 {
@@ -54,17 +60,12 @@ struct IWindowsIMECandidateListView
 {
     virtual ~IWindowsIMECandidateListView() {}
 
-    // virtual void CreateView(_In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) = 0;
-    // virtual void DestroyView() = 0;
-    virtual bool IsCreated() = 0;
-
     virtual HRESULT _StartCandidateList(_In_ std::vector<DWORD> *pIndexRange, UINT wndWidth) = 0;
     virtual void _EndCandidateList() = 0;
-    virtual void _ClearList() = 0;
     virtual void _SetText(const std::vector<shared_wstring>& pCandidateList) = 0;
-    virtual VOID _SetTextColor(COLORREF crColor, COLORREF crBkColor) = 0;
-    virtual VOID _SetFillColor(HBRUSH hBrush) = 0;
+    virtual VOID _SetTextColorAndFillColor(CANDIDATE_COLOR_STYLE colorStyle) = 0;
 
+    virtual bool IsCreated() = 0;
     virtual shared_wstring _GetSelectedCandidateString() = 0;
     virtual BOOL _SetSelectionInPage(int nPos) = 0;
     virtual void AdviseUIChangedByArrowKey(_In_ WindowsImeLib::CANDIDATELIST_FUNCTION arrowKey) = 0;

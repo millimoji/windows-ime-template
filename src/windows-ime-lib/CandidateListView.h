@@ -71,19 +71,28 @@ private:
             activity.Stop();
         }
     }
-    void _ClearList() override {
-        auto activity = WindowsImeLibTelemetry::CandidateListView_ClearList::Start();
-        m_presenter->_ClearList();
-        activity.Stop();
-    }
+//    void _ClearList() override {
+//        auto activity = WindowsImeLibTelemetry::CandidateListView_ClearList::Start();
+//        m_presenter->_ClearList();
+//        activity.Stop();
+//    }
     void _SetText(const std::vector<shared_wstring>& pCandidateList) override {
-        return m_presenter->_SetText(pCandidateList);
+        m_presenter->_ClearList();
+        if (!pCandidateList.empty()) {
+            m_presenter->_SetText(pCandidateList);
+        }
     }
-    VOID _SetTextColor(COLORREF crColor, COLORREF crBkColor) override {
-        return m_presenter->_SetTextColor(crColor, crBkColor);
-    }
-    VOID _SetFillColor(HBRUSH hBrush) override {
-        return m_presenter->_SetFillColor(hBrush);
+    void _SetTextColorAndFillColor(WindowsImeLib::CANDIDATE_COLOR_STYLE colorStyle) override {
+        switch (colorStyle) {
+        case WindowsImeLib::CANDIDATE_COLOR_STYLE::DEFAULT:
+            m_presenter->_SetTextColor(CANDWND_ITEM_COLOR, GetSysColor(COLOR_WINDOW));
+            m_presenter->_SetFillColor((HBRUSH)(COLOR_WINDOW+1));
+            break;
+        case WindowsImeLib::CANDIDATE_COLOR_STYLE::GREEN:
+            m_presenter->_SetTextColor(RGB(0, 0x80, 0), GetSysColor(COLOR_WINDOW));
+            m_presenter->_SetFillColor((HBRUSH)(COLOR_WINDOW+1));
+            break;
+        }
     }
     shared_wstring _GetSelectedCandidateString() override {
         return m_presenter->_GetSelectedCandidateString();

@@ -182,19 +182,21 @@ HRESULT CKeyStateCategory::_HandleCompositionInputWorker()
     {
         if (SUCCEEDED_LOG(_CreateAndStartCandidate()))
         {
-            _pCandidateListUIPresenter->_ClearList();
+            // _pCandidateListUIPresenter->_ClearList();
             _pCandidateListUIPresenter->_SetText(candidateList);
         }
     }
     else if (_pCandidateListUIPresenter->IsCreated())
     {
-        _pCandidateListUIPresenter->_ClearList();
+        // _pCandidateListUIPresenter->_ClearList();
+        _pCandidateListUIPresenter->_SetText(std::vector<shared_wstring>());
     }
     else if (readingStrings.size() && isWildcardIncluded)
     {
         if (SUCCEEDED_LOG(_CreateAndStartCandidate()))
         {
-            _pCandidateListUIPresenter->_ClearList();
+            // _pCandidateListUIPresenter->_ClearList();
+            _pCandidateListUIPresenter->_SetText(std::vector<shared_wstring>());
         }
     }
     return S_OK;

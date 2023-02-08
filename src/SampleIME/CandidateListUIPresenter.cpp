@@ -85,10 +85,8 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert()
             _pCompositionProcessorEngine->GetCandidateListIndexRange(),
             WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth()));
 
-    // set up candidate list if it is being shown
-    _pCandidateListUIPresenter->_SetTextColor(RGB(0, 0x80, 0), GetSysColor(COLOR_WINDOW));    // Text color is green
-    _pCandidateListUIPresenter->_SetFillColor((HBRUSH)(COLOR_WINDOW+1));    // Background color is window
-
+    // set up candidate list if it is being shown. Text color is green, Background color is window.
+    _pCandidateListUIPresenter->_SetTextColorAndFillColor(WindowsImeLib::CANDIDATE_COLOR_STYLE::GREEN);
 
     _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_WITH_NEXT_COMPOSITION);
     _pCompositionProcessorEngine->SetIsCandidateWithWildcard(false);
