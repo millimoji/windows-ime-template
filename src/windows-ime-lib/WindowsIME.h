@@ -103,10 +103,6 @@ private:
 	IFACEMETHODIMP OnLayoutChange(_In_ ITfContext *pic, TfLayoutCode lcode, _In_ ITfContextView *pView) override;
 
 
-    // functions for the composition object.
-//    void _SetComposition(_In_ ITfComposition *pComposition);
-//    void _SaveCompositionContext(_In_ ITfContext *pContext);
-
     // key event handlers for composition/candidate/phrase common objects.
 //    HRESULT _HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext);
 //    HRESULT _HandleCancel(TfEditCookie ec, _In_ ITfContext *pContext) override;
@@ -154,12 +150,7 @@ private:
 //    HRESULT _InvokeKeyHandler(_In_ ITfContext *pContext, UINT code, WCHAR wch, DWORD flags, _KEYSTROKE_STATE keyState) override;
     HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags) override;
 
-    // function for the language property
-//    BOOL _SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext *pContext);
-
     // function for the display attribute
-//    void _ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext);
-//    BOOL _SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute);
     BOOL _InitDisplayAttributeGuidAtom();
 
     BOOL _InitThreadMgrEventSink();
@@ -270,9 +261,6 @@ private:
 
     // Language bar item object.
     // CLangBarItemButton* _pLangBarItem = {};
-
-    // the current composition object.
-//    ITfComposition* _pComposition;
 
 //    CANDIDATE_MODE _candidateMode;
 //    CCandidateListUIPresenter *_pCandidateListUIPresenter;

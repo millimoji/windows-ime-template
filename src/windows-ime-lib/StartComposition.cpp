@@ -10,23 +10,6 @@
 #include "EditSession.h"
 #include "WindowsIME.h"
 
-// //+---------------------------------------------------------------------------
-// //
-// // CStartCompositinoEditSession
-// //
-// //----------------------------------------------------------------------------
-// 
-// class CStartCompositionEditSession : public CEditSessionBase
-// {
-// public:
-//     CStartCompositionEditSession(_In_ CWindowsIME *pTextService, _In_ ITfContext *pContext) : CEditSessionBase(pTextService, pContext)
-//     {
-//     }
-// 
-//     // ITfEditSession
-//     STDMETHODIMP DoEditSession(TfEditCookie ec);
-// };
-
 //+---------------------------------------------------------------------------
 //
 // ITfEditSession::DoEditSession
@@ -35,38 +18,39 @@
 
 HRESULT CompositionBuffer::_StartComposition()
 {
+    wil::com_ptr<CEditSessionTask> task;
+    RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CEditSessionTask>(&task,
+        [this](TfEditCookie ec) -> HRESULT
+        {
+            wil::com_ptr<ITfInsertAtSelection> pInsertAtSelection;
+            RETURN_IF_FAILED(m_workingContext->QueryInterface(IID_PPV_ARGS(&pInsertAtSelection)));
+
+            wil::com_ptr<ITfRange> pRangeInsert;
+            RETURN_IF_FAILED(pInsertAtSelection->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, NULL, 0, &pRangeInsert));
+
+            wil::com_ptr<ITfContextComposition> pContextComposition;
+            RETURN_IF_FAILED(m_workingContext->QueryInterface(IID_PPV_ARGS(&pContextComposition)));
+
+            wil::com_ptr<ITfComposition> pComposition;
+            RETURN_IF_FAILED(pContextComposition->StartComposition(ec, pRangeInsert.get(), m_framework->GetCompositionSink(), &pComposition));
+            RETURN_HR_IF(S_OK /* ? */, !pComposition);
+
+            // set selection to the adjusted range
+            TF_SELECTION tfSelection = {};
+            tfSelection.range = pRangeInsert.get();
+            tfSelection.style.ase = TF_AE_NONE;
+            tfSelection.style.fInterimChar = FALSE;
+
+            RETURN_IF_FAILED(m_workingContext->SetSelection(ec, 1, &tfSelection));
+
+            _SaveCompositionAndContext(pComposition.get(), m_workingContext.get());
+
+            LOG_IF_FAILED(m_framework->_StartLayoutTracking(m_workingContext.get(), ec, pRangeInsert.get()));
+            return S_OK;
+        }));
+    m_listTasks.emplace_back(task);
     m_isComposing = true;
-
-    return m_framework->_SubmitEditSessionTask(m_workingContext.get(), [this, pContext = m_workingContext](TfEditCookie ec) -> HRESULT
-    {
-        wil::com_ptr<ITfInsertAtSelection> pInsertAtSelection;
-        RETURN_IF_FAILED(pContext->QueryInterface(IID_PPV_ARGS(&pInsertAtSelection)));
-
-        wil::com_ptr<ITfRange> pRangeInsert;
-        RETURN_IF_FAILED(pInsertAtSelection->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, NULL, 0, &pRangeInsert));
-
-        wil::com_ptr<ITfContextComposition> pContextComposition;
-        RETURN_IF_FAILED(pContext->QueryInterface(IID_PPV_ARGS(&pContextComposition)));
-
-        wil::com_ptr<ITfComposition> pComposition;
-        RETURN_IF_FAILED(pContextComposition->StartComposition(ec, pRangeInsert.get(), m_framework->GetCompositionSink(), &pComposition));
-        RETURN_HR_IF(S_OK /* ? */, !pComposition);
-
-        // set selection to the adjusted range
-        TF_SELECTION tfSelection = {};
-        tfSelection.range = pRangeInsert.get();
-        tfSelection.style.ase = TF_AE_NONE;
-        tfSelection.style.fInterimChar = FALSE;
-
-        RETURN_IF_FAILED(pContext->SetSelection(ec, 1, &tfSelection));
-
-        _SetComposition(pComposition.get());
-        _SaveCompositionContext(pContext.get());
-
-        LOG_IF_FAILED(m_framework->_StartLayoutTracking(pContext.get(), ec, pRangeInsert.get()));
-        return S_OK;
-    },
-    TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+    return S_OK;
 }
 
 //////////////////////////////////////////////////////////////////////

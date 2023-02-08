@@ -23,7 +23,6 @@ STDAPI CWindowsIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfCompos
     auto activity = WindowsImeLibTelemetry::ITfCompositionSink_OnCompositionTerminated();
 
     // Clear dummy composition
-    // m_compositionBuffer->_RemoveDummyCompositionForComposing(ecWrite, pComposition);
     {   wil::com_ptr<ITfRange> range;
         RETURN_IF_FAILED(pComposition->GetRange(&range));
         RETURN_IF_FAILED(range->SetText(ecWrite, 0, nullptr, 0));
@@ -36,7 +35,7 @@ STDAPI CWindowsIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfCompos
 //        pContext->AddRef();
 //    }
 
-    LOG_IF_FAILED(m_compositionBuffer->_TerminateComposition());
+    LOG_IF_FAILED(m_compositionBuffer->_TerminateCompositionInternal());
 
     _pCompositionProcessorEngine->_DeleteCandidateList();
 
@@ -56,34 +55,37 @@ STDAPI CWindowsIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfCompos
 //
 //----------------------------------------------------------------------------
 
-HRESULT CompositionBuffer::_AddComposingAndChar(const shared_wstring& pstrAddString)
+HRESULT CompositionBuffer::_AddComposingAndChar(const shared_wstring& _pstrAddString)
 {
-    return m_framework->_SubmitEditSessionTask(m_workingContext.get(), [this, pContext = m_workingContext, pstrAddString](TfEditCookie ec) -> HRESULT
-    {
-        ULONG fetched = 0;
-        TF_SELECTION tfSelection = {};
-        RETURN_IF_FAILED(pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched));
+    wil::com_ptr<CEditSessionTask> task;
+    RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CEditSessionTask>(&task,
+        [this, pstrAddString = _pstrAddString](TfEditCookie ec) -> HRESULT
+        {
+            ULONG fetched = 0;
+            TF_SELECTION tfSelection = {};
+            RETURN_IF_FAILED(m_workingContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched));
 
-        wil::com_ptr<ITfRange> selectionRange;
-        selectionRange.attach(tfSelection.range);
+            wil::com_ptr<ITfRange> selectionRange;
+            selectionRange.attach(tfSelection.range);
 
-        RETURN_HR_IF(S_FALSE, fetched != 1);
+            RETURN_HR_IF(S_FALSE, fetched != 1);
 
-        //
-        // make range start to selection
-        //
-        wil::com_ptr<ITfRange> pAheadSelection;
-        RETURN_IF_FAILED(pContext->GetStart(ec, &pAheadSelection));
-        RETURN_IF_FAILED(pAheadSelection->ShiftEndToRange(ec, tfSelection.range, TF_ANCHOR_START));
+            //
+            // make range start to selection
+            //
+            wil::com_ptr<ITfRange> pAheadSelection;
+            RETURN_IF_FAILED(m_workingContext->GetStart(ec, &pAheadSelection));
+            RETURN_IF_FAILED(pAheadSelection->ShiftEndToRange(ec, tfSelection.range, TF_ANCHOR_START));
 
-        wil::com_ptr<ITfRange> pRange;
-        BOOL exist_composing = _FindComposingRange(ec, pContext.get(), pAheadSelection.get(), &pRange);
+            wil::com_ptr<ITfRange> pRange;
+            BOOL exist_composing = _FindComposingRange(ec, m_workingContext.get(), pAheadSelection.get(), &pRange);
 
-        _SetInputString(ec, pContext.get(), pRange.get(), pstrAddString, exist_composing);
+            _SetInputString(ec, m_workingContext.get(), pRange.get(), pstrAddString, exist_composing);
 
-        return S_OK;
-    },
-    TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+            return S_OK;
+        }));
+    m_listTasks.emplace_back(task);
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -92,31 +94,34 @@ HRESULT CompositionBuffer::_AddComposingAndChar(const shared_wstring& pstrAddStr
 //
 //----------------------------------------------------------------------------
 
-HRESULT CompositionBuffer::_AddCharAndFinalize(const shared_wstring& pstrAddString)
+HRESULT CompositionBuffer::_AddCharAndFinalize(const shared_wstring& _pstrAddString)
 {
-    return m_framework->_SubmitEditSessionTask(m_workingContext.get(), [this, pContext = m_workingContext, pstrAddString](TfEditCookie ec) -> HRESULT
-    {
-        ULONG fetched = 0;
-        TF_SELECTION tfSelection;
-        RETURN_IF_FAILED(pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched));
+    wil::com_ptr<CEditSessionTask> task;
+    RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CEditSessionTask>(&task,
+        [this, pstrAddString = _pstrAddString](TfEditCookie ec) -> HRESULT
+        {
+            ULONG fetched = 0;
+            TF_SELECTION tfSelection;
+            RETURN_IF_FAILED(m_workingContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched));
 
-        wil::com_ptr<ITfRange> selectionRange;
-        selectionRange.attach(tfSelection.range);
+            wil::com_ptr<ITfRange> selectionRange;
+            selectionRange.attach(tfSelection.range);
 
-        RETURN_HR_IF(E_FAIL, fetched != 1);
+            RETURN_HR_IF(E_FAIL, fetched != 1);
 
-        // we use SetText here instead of InsertTextAtSelection because we've already started a composition
-        // we don't want to the app to adjust the insertion point inside our composition
-        RETURN_IF_FAILED(selectionRange->SetText(ec, 0, pstrAddString->c_str(), (LONG)pstrAddString->length()));
+            // we use SetText here instead of InsertTextAtSelection because we've already started a composition
+            // we don't want to the app to adjust the insertion point inside our composition
+            RETURN_IF_FAILED(selectionRange->SetText(ec, 0, pstrAddString->c_str(), (LONG)pstrAddString->length()));
 
-        // update the selection, we'll make it an insertion point just past
-        // the inserted text.
-        RETURN_IF_FAILED(selectionRange->Collapse(ec, TF_ANCHOR_END));
-        RETURN_IF_FAILED(pContext->SetSelection(ec, 1, &tfSelection));
+            // update the selection, we'll make it an insertion point just past
+            // the inserted text.
+            RETURN_IF_FAILED(selectionRange->Collapse(ec, TF_ANCHOR_END));
+            RETURN_IF_FAILED(m_workingContext->SetSelection(ec, 1, &tfSelection));
 
-        return S_OK;
-    },
-    TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+            return S_OK;
+        }));
+    m_listTasks.emplace_back(task);
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -254,18 +259,19 @@ HRESULT CompositionBuffer::_InsertAtSelection(TfEditCookie ec, _In_ ITfContext *
 
 HRESULT CompositionBuffer::_RemoveDummyCompositionForComposing()
 {
-    if (_pComposition)
+    if (m_currentComposition)
     {
-        return m_framework->_SubmitEditSessionTask(m_workingContext.get(), [this, pContext = m_workingContext](TfEditCookie ec) -> HRESULT
-        {
-            wil::com_ptr<ITfRange> range;
-            RETURN_IF_FAILED(_pComposition->GetRange(&range));
-            RETURN_IF_FAILED(range->SetText(ec, 0, nullptr, 0));
-            return S_OK;
-        },
-        TF_ES_ASYNCDONTCARE | TF_ES_READWRITE);
+        wil::com_ptr<CEditSessionTask> task;
+        RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CEditSessionTask>(&task,
+            [this](TfEditCookie ec) -> HRESULT
+            {
+                wil::com_ptr<ITfRange> range;
+                RETURN_IF_FAILED(m_currentComposition->GetRange(&range));
+                RETURN_IF_FAILED(range->SetText(ec, 0, nullptr, 0));
+                return S_OK;
+            }));
+        m_listTasks.emplace_back(task);
     }
-
     return S_OK;
 }
 
@@ -286,7 +292,7 @@ BOOL CompositionBuffer::_SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext
     ITfProperty* pLanguageProperty = nullptr;
 
     // we need a range and the context it lives in
-    hr = _pComposition->GetRange(&pRangeComposition);
+    hr = m_currentComposition->GetRange(&pRangeComposition);
     if (FAILED(hr))
     {
         ret = FALSE;
@@ -319,4 +325,21 @@ BOOL CompositionBuffer::_SetCompositionLanguage(TfEditCookie ec, _In_ ITfContext
 
 Exit:
     return ret;
+}
+
+void CompositionBuffer::FlushTasks()
+{
+    if (!m_listTasks.empty())
+    {
+        LOG_IF_FAILED(m_framework->_SubmitEditSessionTask(m_workingContext.get(), [this](TfEditCookie ec) -> HRESULT
+        {
+            for (auto&& task: m_listTasks)
+            {
+                LOG_IF_FAILED(task->DoEditSession(ec));
+            }
+            return S_OK;
+        },
+        TF_ES_ASYNCDONTCARE | TF_ES_READWRITE));
+    }
+    m_listTasks.clear();
 }

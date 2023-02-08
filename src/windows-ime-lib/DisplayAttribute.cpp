@@ -16,27 +16,22 @@
 //
 //----------------------------------------------------------------------------
 
-void CompositionBuffer::_ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CompositionBuffer::_ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext)
 {
-    ITfRange* pRangeComposition = nullptr;
-    ITfProperty* pDisplayAttributeProperty = nullptr;
+    wil::com_ptr<ITfRange> pRangeComposition;
+    wil::com_ptr<ITfProperty> pDisplayAttributeProperty;
 
     // get the compositon range.
-    if (FAILED(_pComposition->GetRange(&pRangeComposition)))
+    if (SUCCEEDED_LOG(m_currentComposition->GetRange(&pRangeComposition)))
     {
-        return;
+        // get our the display attribute property
+        if (SUCCEEDED_LOG(pContext->GetProperty(GUID_PROP_ATTRIBUTE, &pDisplayAttributeProperty)))
+        {
+            // clear the value over the range
+            LOG_IF_FAILED(pDisplayAttributeProperty->Clear(ec, pRangeComposition.get()));
+        }
     }
-
-    // get our the display attribute property
-    if (SUCCEEDED(pContext->GetProperty(GUID_PROP_ATTRIBUTE, &pDisplayAttributeProperty)))
-    {
-        // clear the value over the range
-        pDisplayAttributeProperty->Clear(ec, pRangeComposition);
-
-        pDisplayAttributeProperty->Release();
-    }
-
-    pRangeComposition->Release();
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -52,7 +47,7 @@ BOOL CompositionBuffer::_SetCompositionDisplayAttributes(TfEditCookie ec, _In_ I
     HRESULT hr = S_OK;
 
     // we need a range and the context it lives in
-    hr = _pComposition->GetRange(&pRangeComposition);
+    hr = m_currentComposition->GetRange(&pRangeComposition);
     if (FAILED(hr))
     {
         return FALSE;

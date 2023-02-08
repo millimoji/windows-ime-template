@@ -160,7 +160,11 @@ STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
     auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnTestKeyDown();
 
     m_compositionBuffer->SaveWorkingContext(pContext);
-    auto resetWorkingContext = wil::scope_exit([&]() { m_compositionBuffer->SaveWorkingContext(nullptr); });
+    auto resetWorkingContext = wil::scope_exit([&]()
+    {
+        m_compositionBuffer->FlushTasks();
+        m_compositionBuffer->SaveWorkingContext(nullptr);
+    });
 
     Global::UpdateModifiers(wParam, lParam);
 
@@ -204,7 +208,11 @@ STDAPI CWindowsIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam
     auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnKeyDown();
 
     m_compositionBuffer->SaveWorkingContext(pContext);
-    auto resetWorkingContext = wil::scope_exit([&]() { m_compositionBuffer->SaveWorkingContext(nullptr); });
+    auto resetWorkingContext = wil::scope_exit([&]()
+    {
+        m_compositionBuffer->FlushTasks();
+        m_compositionBuffer->SaveWorkingContext(nullptr);
+    });
 
     Global::UpdateModifiers(wParam, lParam);
 
@@ -267,7 +275,11 @@ STDAPI CWindowsIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lPar
     auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnTestKeyUp();
 
     m_compositionBuffer->SaveWorkingContext(pContext);
-    auto resetWorkingContext = wil::scope_exit([&]() { m_compositionBuffer->SaveWorkingContext(nullptr); });
+    auto resetWorkingContext = wil::scope_exit([&]()
+    {
+        m_compositionBuffer->FlushTasks();
+        m_compositionBuffer->SaveWorkingContext(nullptr);
+    });
 
     Global::UpdateModifiers(wParam, lParam);
 
@@ -308,7 +320,11 @@ STDAPI CWindowsIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, 
     auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnKeyUp();
 
     m_compositionBuffer->SaveWorkingContext(pContext);
-    auto resetWorkingContext = wil::scope_exit([&]() { m_compositionBuffer->SaveWorkingContext(nullptr); });
+    auto resetWorkingContext = wil::scope_exit([&]()
+    {
+        m_compositionBuffer->FlushTasks();
+        m_compositionBuffer->SaveWorkingContext(nullptr);
+    });
 
     Global::UpdateModifiers(wParam, lParam);
 

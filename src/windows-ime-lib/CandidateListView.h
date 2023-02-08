@@ -38,29 +38,39 @@ class CandidateListView :
 public:
     CandidateListView(ICandidateListViewOwner* framework) : m_framework(framework) {}
 private:
+    // WindowsImeLib::IWindowsIMECandidateListView
     void CreateView(_In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) override
     {
+        auto activity = WindowsImeLibTelemetry::CandidateListView_CreateView::Start();
         m_presenter.reset();
         THROW_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CCandidateListUIPresenter>(
             &m_presenter, m_framework, Global::AtomCandidateWindow, pIndexRange, hideWindow));
+        activity.Stop();
     }
-private:
-    // WindowsImeLib::IWindowsIMECandidateListView
     void DestroyView() override {
+        auto activity = WindowsImeLibTelemetry::CandidateListView_DestroyView::Start();
         m_presenter.reset();
+        activity.Stop();
     }
     bool IsCreated() override {
         return !!m_presenter;
     }
     HRESULT _StartCandidateList(UINT wndWidth) override
     {
-        return m_presenter->_StartCandidateList(wndWidth);
+        auto activity = WindowsImeLibTelemetry::CandidateListView_StartCandidateList::Start();
+        const auto hr = m_presenter->_StartCandidateList(wndWidth);
+        activity.Stop();
+        return hr;
     }
     void _EndCandidateList() override {
+        auto activity = WindowsImeLibTelemetry::CandidateListView_EndCandidateList::Start();
         if (m_presenter) { m_presenter->_EndCandidateList(); }
+        activity.Stop();
     }
     void _ClearList() override {
-        return m_presenter->_ClearList();
+        auto activity = WindowsImeLibTelemetry::CandidateListView_ClearList::Start();
+        m_presenter->_ClearList();
+        activity.Stop();
     }
     void _SetText(const std::vector<shared_wstring>& pCandidateList) override {
         return m_presenter->_SetText(pCandidateList);
@@ -71,12 +81,14 @@ private:
     VOID _SetFillColor(HBRUSH hBrush) override {
         return m_presenter->_SetFillColor(hBrush);
     }
-
     shared_wstring _GetSelectedCandidateString() override {
         return m_presenter->_GetSelectedCandidateString();
     }
     BOOL _SetSelectionInPage(int nPos) override {
         return m_presenter->_SetSelectionInPage(nPos);
+    }
+    void AdviseUIChangedByArrowKey(_In_ WindowsImeLib::CANDIDATELIST_FUNCTION arrowKey) override {
+        return m_presenter->AdviseUIChangedByArrowKey(arrowKey);
     }
 
 private:
@@ -85,21 +97,26 @@ private:
         return std::static_pointer_cast<WindowsImeLib::IWindowsIMECandidateListView>(shared_from_this());
     }
     VOID _LayoutChangeNotification(_In_ RECT *lpRect) override {
-        if (m_presenter) { return m_presenter->_LayoutChangeNotification(lpRect); }
+        auto activity = WindowsImeLibTelemetry::CandidateListView_LayoutChangeNotification::Start();
+        if (m_presenter) { m_presenter->_LayoutChangeNotification(lpRect); }
+        activity.Stop();
     }
     VOID _LayoutDestroyNotification() override {
-        if (m_presenter) { return m_presenter->_LayoutDestroyNotification(); }
+        auto activity = WindowsImeLibTelemetry::CandidateListView_LayoutDestroyNotification::Start();
+        if (m_presenter) { m_presenter->_LayoutDestroyNotification(); }
+        activity.Stop();
     }
     HRESULT OnSetThreadFocus() override {
-        if (m_presenter) { return m_presenter->OnSetThreadFocus(); } else { return S_OK; }
+        auto activity = WindowsImeLibTelemetry::CandidateListView_OnSetThreadFocus::Start();
+        const auto hr = (m_presenter ? m_presenter->OnSetThreadFocus() : S_OK);
+        activity.Stop();
+        return hr;
     }
     HRESULT OnKillThreadFocus() override {
-        if (m_presenter) { return m_presenter->OnKillThreadFocus(); } else { return S_OK; }
-    }
-
-private:
-    void AdviseUIChangedByArrowKey(_In_ WindowsImeLib::CANDIDATELIST_FUNCTION arrowKey) override {
-        return m_presenter->AdviseUIChangedByArrowKey(arrowKey);
+        auto activity = WindowsImeLibTelemetry::CandidateListView_OnKillThreadFocus::Start();
+        const auto hr = (m_presenter ? m_presenter->OnKillThreadFocus() : S_OK);
+        activity.Stop();
+        return hr;
     }
 
 private:

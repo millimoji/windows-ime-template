@@ -42,6 +42,16 @@ public:
     DEFINE_CALLCONTEXT_ACTIVITY(ITfFunction_GetDisplayName);
     DEFINE_CALLCONTEXT_ACTIVITY(ITfFnGetPreferredTouchKeyboardLayout_GetLayout);
 
+    DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_CreateView);
+    DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_DestroyView);
+    DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_StartCandidateList);
+    DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_EndCandidateList);
+    DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_ClearList);
+    DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_LayoutChangeNotification);
+    DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_LayoutDestroyNotification);
+    DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_OnSetThreadFocus);
+    DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_OnKillThreadFocus);
+
     static void TraceLogStr(char const* const args) noexcept
     {
         TraceLoggingWrite(TraceLoggingType::Provider(), "TraceLog", // TODO: investigate forwrd keyText

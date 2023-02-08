@@ -30,31 +30,56 @@
 //
 //----------------------------------------------------------------------------
 
+HRESULT CompositionBuffer::_TerminateCompositionInternal()
+{
+    if (m_currentCompositionContext)
+    {
+        RETURN_IF_FAILED(m_framework->_SubmitEditSessionTask(m_currentCompositionContext.get(), [this](TfEditCookie ec) -> HRESULT
+        {
+            if (m_currentComposition)
+            {
+                // remove the display attribute from the composition range.
+                LOG_IF_FAILED(_ClearCompositionDisplayAttributes(ec, m_currentCompositionContext.get()));
+
+                if (FAILED_LOG(m_currentComposition->EndComposition(ec)))
+                {
+                    // if we fail to EndComposition, then we need to close the reverse reading window.
+                    m_framework->GetCompositionProcessorEngine()->_DeleteCandidateList();
+                }
+            }
+            LOG_IF_FAILED(m_framework->_EndLayoutTracking());
+
+            _SaveCompositionAndContext(nullptr, nullptr);
+            return S_OK;
+        },
+        TF_ES_ASYNCDONTCARE | TF_ES_READWRITE));
+    }
+    m_isComposing = false;
+    return S_OK;
+}
+
 HRESULT CompositionBuffer::_TerminateComposition()
 {
-    m_isComposing = false;
-
-    RETURN_IF_FAILED(m_framework->_SubmitEditSessionTask(m_workingContext.get(), [this, xpContext = m_workingContext](TfEditCookie ec) -> HRESULT
-    {
-        if (_pComposition)
+    wil::com_ptr<CEditSessionTask> task;
+    RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CEditSessionTask>(&task,
+        [this](TfEditCookie ec) -> HRESULT
         {
-            ITfContext* pContext = (xpContext ? xpContext.get() : _pContext.get());
-
-            // remove the display attribute from the composition range.
-            _ClearCompositionDisplayAttributes(ec, pContext);
-
-            if (FAILED_LOG(_pComposition->EndComposition(ec)))
+            if (m_currentComposition)
             {
-                // if we fail to EndComposition, then we need to close the reverse reading window.
-                m_framework->GetCompositionProcessorEngine()->_DeleteCandidateList();
-            }
+                // remove the display attribute from the composition range.
+                LOG_IF_FAILED(_ClearCompositionDisplayAttributes(ec, m_workingContext.get()));
 
-            _SetComposition(nullptr);
-            _SaveCompositionContext(nullptr);
-        }
-        m_framework->_EndLayoutTracking();
-        return S_OK;
-    },
-    TF_ES_ASYNCDONTCARE | TF_ES_READWRITE));
+                if (FAILED_LOG(m_currentComposition->EndComposition(ec)))
+                {
+                    // if we fail to EndComposition, then we need to close the reverse reading window.
+                    m_framework->GetCompositionProcessorEngine()->_DeleteCandidateList();
+                }
+            }
+            _SaveCompositionAndContext(nullptr, nullptr);
+            m_framework->_EndLayoutTracking();
+            return S_OK;
+        }));
+    m_listTasks.emplace_back(task);
+    m_isComposing = false;
     return S_OK;
 }

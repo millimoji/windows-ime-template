@@ -93,7 +93,7 @@ HRESULT CKeyStateCategory::_HandleComplete()
 HRESULT CKeyStateCategory::_HandleCancel()
 {
     _pCompositionProcessorEngine->_DeleteCandidateList();
-    _pTextService->_RemoveDummyCompositionForComposing();
+    LOG_IF_FAILED(_pTextService->_RemoveDummyCompositionForComposing());
     LOG_IF_FAILED(_pTextService->_TerminateComposition());
     return S_OK;
 }
