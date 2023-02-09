@@ -16,11 +16,7 @@
 #include "SearchCandidateProvider.h"
 
 class CLangBarItemButton;
-//class CCandidateListUIPresenter;
 struct SingletonProcessorBridge;
-
-// const DWORD WM_CheckGlobalCompartment = WM_USER;
-// LRESULT CALLBACK CWindowsIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 class CWindowsIME :
     public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
@@ -37,7 +33,7 @@ class CWindowsIME :
                                         ITfTextLayoutSink,
                                         ITfFnGetPreferredTouchKeyboardLayout,
                                         Microsoft::WRL::FtmBase>,
-    public WindowsImeLib::IWindowsIMEInprocFramework,
+    public WindowsImeLib::IWindowsIMEInProcFramework,
     public ICandidateListViewOwner,
     public ICompositionBufferOwner,
     public ISearchCandidateProviderOwner
@@ -99,32 +95,8 @@ private:
     // ITfFnGetPreferredTouchKeyboardLayout, it is the Optimized layout feature.
     STDMETHODIMP GetLayout(_Out_ TKBLayoutType *ptkblayoutType, _Out_ WORD *pwPreferredLayoutId) override;
 
-	// ITfTextLayoutSink
-	IFACEMETHODIMP OnLayoutChange(_In_ ITfContext *pic, TfLayoutCode lcode, _In_ ITfContextView *pView) override;
-
-
-    // key event handlers for composition/candidate/phrase common objects.
-//    HRESULT _HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext);
-//    HRESULT _HandleCancel(TfEditCookie ec, _In_ ITfContext *pContext) override;
-
-    // key event handlers for composition object.
-//    HRESULT _HandleCompositionInput(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch) override;
-//    HRESULT _HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext *pContext, BOOL fCandidateList) override;
-//    HRESULT _HandleCompositionBackspace(TfEditCookie ec, _In_ ITfContext *pContext) override;
-//    HRESULT _HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, KEYSTROKE_FUNCTION keyFunction) override;
-//    HRESULT _HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch) override;
-//    HRESULT _HandleCompositionDoubleSingleByte(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch) override;
-
-    // key event handlers for candidate object.
-//    HRESULT _HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext *pContext) override;
-//    HRESULT _HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext *pContext) override;
-//    HRESULT _HandleCandidateArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction) override;
-//    HRESULT _HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode) override;
-
-    // key event handlers for phrase object.
-//    HRESULT _HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext *pContext) override;
-//    HRESULT _HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction) override;
-//    HRESULT _HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode) override;
+    // ITfTextLayoutSink
+    IFACEMETHODIMP OnLayoutChange(_In_ ITfContext *pic, TfLayoutCode lcode, _In_ ITfContextView *pView) override;
 
     BOOL _IsSecureMode(void) { return (_dwActivateFlags & TF_TMAE_SECUREMODE) ? TRUE : FALSE; }
     BOOL _IsComLess(void) { return (_dwActivateFlags & TF_TMAE_COMLESS) ? TRUE : FALSE; }
@@ -135,19 +107,9 @@ private:
     static HRESULT GetComModuleName(REFGUID rclsid, _Out_writes_(cchPath)WCHAR* wchPath, DWORD cchPath);
 
 private:
-    // functions for the composition object.
-//    HRESULT _HandleCompositionInputWorker(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext);
-//    HRESULT _CreateAndStartCandidate(_In_ WindowsImeLib::ICompositionProcessorEngine *pCompositionProcessorEngine, TfEditCookie ec, _In_ ITfContext *pContext);
-//    HRESULT _HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext);
-
     bool _IsKeyboardDisabled();
-//    CANDIDATE_MODE _CandidateMode() override { return _candidateMode; }
-//    bool IsCandidateWithWildcard() override { return _isCandidateWithWildcard; }
-
-//    BOOL _FindComposingRange(TfEditCookie ec, _In_ ITfContext *pContext, _In_ ITfRange *pSelection, _Outptr_result_maybenull_ ITfRange **ppRange);
 
     // Invoke key handler edit session
-//    HRESULT _InvokeKeyHandler(_In_ ITfContext *pContext, UINT code, WCHAR wch, DWORD flags, _KEYSTROKE_STATE keyState) override;
     HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags) override;
 
     // function for the display attribute
@@ -165,9 +127,6 @@ private:
 
     BOOL _InitActiveLanguageProfileNotifySink();
     void _UninitActiveLanguageProfileNotifySink();
-
-//    BOOL _IsKeyEaten(_In_ ITfContext *pContext, UINT codeIn, _Out_ UINT *pCodeOut, _Out_writes_(1) WCHAR *pwch, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
-//    BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover);
 
     wchar_t ConvertVKey(UINT code);
     UINT VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch);
@@ -195,7 +154,6 @@ private:
         }
     }
     ITfCompositionSink* GetCompositionSink() override { return this;  }
-//    void* GetTextService() override { return (void*)this; }
 
     // ICandidateListViewOwner
     HRESULT _GetLastTextExt(_Out_ HWND* documentWindow, _Out_ RECT *lpRect) override;
@@ -206,7 +164,6 @@ private:
     wil::com_ptr<ITfThreadMgr> _GetThreadMgr() override { return wil::com_ptr<ITfThreadMgr>(); }
 
     // ICompositionBufferOwner
-//    std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() override { return (_pCompositionProcessorEngine); };
     wil::com_ptr<ITextInputProcessor> GetTextInputProcessor() override { return m_singletonProcessor; }
 
     HRESULT _StartLayoutTracking(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition) override;
@@ -230,7 +187,6 @@ private:
     DWORD _dwThreadFocusSinkCookie = TF_INVALID_COOKIE;
 
     // Composition Processor Engine object.
-//    std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> _pCompositionProcessorEngine;
     wil::com_ptr<ITextInputProcessor> m_singletonProcessor;
 
     // guidatom for the display attibute.
@@ -245,7 +201,7 @@ private:
     std::shared_ptr<ICompositionBufferInternal> m_compositionBuffer;
     std::shared_ptr<ICandidateListViewInternal> m_candidateListView;
 
-    std::shared_ptr<WindowsImeLib::IWindowsIMEInprocClient> m_inprocClient;
+    std::shared_ptr<WindowsImeLib::IWindowsIMEInProcClient> m_inprocClient;
 
     struct TextLayoutSinkState
     {
@@ -257,17 +213,4 @@ private:
         BOOL isClipped = {};
         HWND documentWindow = {};
     } m_textLayoutSink;
-
-    // Language bar item object.
-    // CLangBarItemButton* _pLangBarItem = {};
-
-//    CANDIDATE_MODE _candidateMode;
-//    CCandidateListUIPresenter *_pCandidateListUIPresenter;
-//    BOOL _isCandidateWithWildcard;
-//    wil::com_ptr<WindowsImeLib::IWindowsIMECandidateListVeiw> _pCandidateListUIPresenter;
-
-//    ITfCompartment* _pSIPIMEOnOffCompartment;
-//    DWORD _dwSIPIMEOnOffCompartmentSinkCookie;
-//    HWND _msgWndHandle;
-//    LONG _refCount;
 };

@@ -38,9 +38,9 @@ enum class CANDIDATE_COLOR_STYLE
 };
 
 // Hard to make data driven setup for compartment, langbar button and preserved key. so allow customize by code
-struct IWindowsIMEInprocClient
+struct IWindowsIMEInProcClient
 {
-    virtual ~IWindowsIMEInprocClient() {}
+    virtual ~IWindowsIMEInProcClient() {}
 
     virtual void Initialize(_In_ ITfThreadMgr* threadMgr, TfClientId tfClientId, BOOL isSecureMode) = 0;
     virtual void Deinitialize() = 0;
@@ -50,9 +50,9 @@ struct IWindowsIMEInprocClient
     virtual std::string EncodeCustomState() = 0;
 };
 
-struct IWindowsIMEInprocFramework
+struct IWindowsIMEInProcFramework
 {
-    virtual ~IWindowsIMEInprocFramework() {}
+    virtual ~IWindowsIMEInProcFramework() {}
     virtual void UpdateCustomState() = 0;
 };
 
@@ -128,7 +128,7 @@ struct IProcessorFactory
         const std::shared_ptr<IWindowsIMECompositionBuffer>& compositionBuffer,
         const std::shared_ptr<IWindowsIMECandidateListView>& candidateListView) = 0;
     virtual std::shared_ptr<IConstantProvider> GetConstantProvider() = 0;
-    virtual std::shared_ptr<IWindowsIMEInprocClient> CreateIMEInprocClient(IWindowsIMEInprocFramework* framework) = 0;
+    virtual std::shared_ptr<IWindowsIMEInProcClient> CreateIMEInprocClient(IWindowsIMEInProcFramework* framework) = 0;
 };
 
 // TODO: re-design how to inject factory

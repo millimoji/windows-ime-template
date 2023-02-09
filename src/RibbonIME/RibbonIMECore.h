@@ -110,11 +110,11 @@ class RibbonIMEConstants : public WindowsImeLib::IConstantProvider
 };
 
 class RibbonIMEInprocClient :
-    public WindowsImeLib::IWindowsIMEInprocClient,
+    public WindowsImeLib::IWindowsIMEInProcClient,
     public std::enable_shared_from_this<RibbonIMEInprocClient>
 {
 public:
-    RibbonIMEInprocClient(WindowsImeLib::IWindowsIMEInprocFramework* framework) : m_framework(framework) {}
+    RibbonIMEInprocClient(WindowsImeLib::IWindowsIMEInProcFramework* framework) : m_framework(framework) {}
     ~RibbonIMEInprocClient() {}
 
 private:
@@ -143,5 +143,5 @@ private:
     }
 
 private:
-    WindowsImeLib::IWindowsIMEInprocFramework* m_framework;
+    WindowsImeLib::IWindowsIMEInProcFramework* m_framework;
 };

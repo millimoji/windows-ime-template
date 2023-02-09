@@ -12,11 +12,11 @@
 #include "SampleIMEGlobals.h"
 
 class SampleIMEInprocClient :
-    public WindowsImeLib::IWindowsIMEInprocClient,
+    public WindowsImeLib::IWindowsIMEInProcClient,
     public std::enable_shared_from_this<SampleIMEInprocClient>
 {
 public:
-    SampleIMEInprocClient(WindowsImeLib::IWindowsIMEInprocFramework* framework) : m_framework(framework) {}
+    SampleIMEInprocClient(WindowsImeLib::IWindowsIMEInProcFramework* framework) : m_framework(framework) {}
     ~SampleIMEInprocClient() {}
 
 private:
@@ -391,7 +391,7 @@ private:
     }
 
 private:
-    WindowsImeLib::IWindowsIMEInprocFramework* m_framework;
+    WindowsImeLib::IWindowsIMEInProcFramework* m_framework;
     wil::com_ptr<ITfThreadMgr> m_threadMgr;
     TfClientId m_tfClientId = TF_CLIENTID_NULL;
 
@@ -413,10 +413,10 @@ private:
 namespace WindowsImeLib
 {
 
-std::shared_ptr<IWindowsIMEInprocClient> ProcessorFactory_CreateIMEInprocClient(IWindowsIMEInprocFramework* framework)
+std::shared_ptr<IWindowsIMEInProcClient> ProcessorFactory_CreateIMEInprocClient(IWindowsIMEInProcFramework* framework)
 {
     auto inprocClient = std::make_shared<SampleIMEInprocClient>(framework);
-    return std::static_pointer_cast<IWindowsIMEInprocClient>(inprocClient);
+    return std::static_pointer_cast<IWindowsIMEInProcClient>(inprocClient);
 }
 
 }
