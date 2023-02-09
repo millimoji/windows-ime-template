@@ -35,7 +35,11 @@ class CandidateListView :
     public std::enable_shared_from_this<CandidateListView>
 {
 public:
-    CandidateListView(ICandidateListViewOwner* framework) : m_framework(framework) {}
+    CandidateListView(ICandidateListViewOwner* framework) :
+        m_framework(framework)
+    {
+        SetDefaultCandidateTextFont();
+    }
 private:
     // WindowsImeLib::IWindowsIMECandidateListView
 //    void CreateView(_In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) override
@@ -167,6 +171,7 @@ private:
         });
         return S_OK;
     }
+    void SetDefaultCandidateTextFont();
 
 private:
     ICandidateListViewOwner* m_framework;

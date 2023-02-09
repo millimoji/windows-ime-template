@@ -82,7 +82,6 @@ struct IWindowsIMECompositionBuffer
     virtual HRESULT _AddCharAndFinalize(const shared_wstring& pstrAddString) = 0;
     virtual HRESULT _RemoveDummyCompositionForComposing() = 0;
 
-    // function for the display attribute
     virtual bool _IsComposing() = 0;
 };
 
@@ -90,7 +89,8 @@ struct ICompositionProcessorEngine
 {
     virtual ~ICompositionProcessorEngine() {}
 
-    virtual void UpdateCustomState(const std::string& customStateJson) = 0;
+    virtual void UpdateCustomState(const std::string_view customStateJson) = 0;
+    virtual void OnSetFocus(bool isGotten, const std::wstring_view applicationName, GUID clientId) = 0;
 
     // wch: converted character from VK and keyboard state
     // vkPackSource: estimated VK from wch for VK_PACKET
@@ -99,8 +99,8 @@ struct ICompositionProcessorEngine
 
     virtual void GetCandidateList(std::vector<shared_wstring>& pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) = 0;
 
-    virtual void FinalizeCandidateList() = 0;
-    virtual VOID _DeleteCandidateList() = 0;
+    virtual void FinalizeCandidateList() = 0; // determine selected candidate by mouse click or ITfCandidateListUIElementBehavior::Finalize
+    virtual VOID CancelCompositioon() = 0; // cancel composition by external triggers
 };
 
 struct IConstantProvider

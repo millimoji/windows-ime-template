@@ -61,39 +61,25 @@ STDAPI CWindowsIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocume
     // We have to hide/unhide candidate list depending on whether they are 
     // associated with pDocMgrFocus.
     //
-    if (m_candidateListView->IsCreated())
+    // if (m_candidateListView->IsCreated())
     {
-        ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
-        ITfContext* pTfContext = m_textLayoutSink._pContextDocument.get();
-        if ((nullptr != pTfContext) && SUCCEEDED(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr)))
+        wil::com_ptr<ITfDocumentMgr> pCandidateListDocumentMgr;
+        auto pTfContext = m_textLayoutSink._pContextDocument.get();
+
+        if (pTfContext && SUCCEEDED_LOG(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr)))
         {
-            if (pCandidateListDocumentMgr != pDocMgrFocus)
+            if (pCandidateListDocumentMgr.get() != pDocMgrFocus)
             {
-                m_candidateListView->OnKillThreadFocus();
+                // m_candidateListView->OnKillThreadFocus();
                 m_singletonProcessor->CandidateListViewInternal_OnKillThreadFocus();
             }
             else
             {
-                m_candidateListView->OnSetThreadFocus();
+                // m_candidateListView->OnSetThreadFocus();
                 m_singletonProcessor->CandidateListViewInternal_OnSetThreadFocus();
             }
-
-            pCandidateListDocumentMgr->Release();
         }
     }
-
-//    if (_pDocMgrLastFocused)
-//    {
-//        _pDocMgrLastFocused->Release();
-//        _pDocMgrLastFocused = nullptr;
-//    }
-//
-//    _pDocMgrLastFocused = pDocMgrFocus;
-//
-//    if (_pDocMgrLastFocused)
-//    {
-//        _pDocMgrLastFocused->AddRef();
-//    }
 
     _pDocMgrLastFocused = pDocMgrFocus;
 

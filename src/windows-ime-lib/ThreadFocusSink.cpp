@@ -21,23 +21,21 @@ STDAPI CWindowsIME::OnSetThreadFocus() try
 
     if (m_singletonProcessor)
     {
-        m_singletonProcessor->SetFocus(true);
+        m_singletonProcessor->OnSetFocus(true, m_processNameBstr.get(), m_clientGuid);
     }
 
-    if (m_candidateListView->IsCreated())
+    // if (m_candidateListView->IsCreated())
     {
-        ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
-        ITfContext* pTfContext = m_textLayoutSink._pContextDocument.get();
+        wil::com_ptr<ITfDocumentMgr> pCandidateListDocumentMgr;
+        wil::com_ptr<ITfContext> pTfContext = m_textLayoutSink._pContextDocument;
 
-        if ((nullptr != pTfContext) && SUCCEEDED(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr)))
+        if (pTfContext && SUCCEEDED(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr)))
         {
-            if (pCandidateListDocumentMgr == _pDocMgrLastFocused.get())
+            if (pCandidateListDocumentMgr == _pDocMgrLastFocused)
             {
-                m_candidateListView->OnSetThreadFocus();
+                // m_candidateListView->OnSetThreadFocus();
                 m_singletonProcessor->CandidateListViewInternal_OnSetThreadFocus();
             }
-
-            pCandidateListDocumentMgr->Release();
         }
     }
 
@@ -58,10 +56,10 @@ STDAPI CWindowsIME::OnKillThreadFocus() try
 
     if (m_singletonProcessor)
     {
-        m_singletonProcessor->SetFocus(false);
+        m_singletonProcessor->OnSetFocus(false, m_processNameBstr.get(), m_clientGuid);
     }
 
-    if (m_candidateListView->IsCreated())
+//    if (m_candidateListView->IsCreated())
     {
         ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
         ITfContext* pTfContext = m_textLayoutSink._pContextDocument.get();
@@ -79,7 +77,7 @@ STDAPI CWindowsIME::OnKillThreadFocus() try
 //                _pDocMgrLastFocused->AddRef();
 //            }
         }
-        m_candidateListView->OnKillThreadFocus();
+//        m_candidateListView->OnKillThreadFocus();
         m_singletonProcessor->CandidateListViewInternal_OnKillThreadFocus();
     }
 

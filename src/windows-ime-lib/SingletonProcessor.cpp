@@ -71,11 +71,11 @@ struct SingletonProcessorBridge :
         return hr;
     }
 
-    IFACEMETHODIMP SetFocus(BOOL isGotten) override
+    IFACEMETHODIMP OnSetFocus(BOOL isGotten, BSTR applicationName, GUID clientId) override
     {
         EnsureInitialized();
         HRESULT hr = S_OK;
-        m_threadTaskRunner->RunOnThread([&]() { hr = m_engine->SetFocus(isGotten); });
+        m_threadTaskRunner->RunOnThread([&]() { hr = m_engine->OnSetFocus(isGotten, applicationName, clientId); });
         return hr;
     }
 
@@ -125,12 +125,12 @@ struct SingletonProcessorBridge :
         return hr;
     }
 
-    IFACEMETHODIMP _DeleteCandidateList() override
+    IFACEMETHODIMP CancelCompositioon() override
     {
         HRESULT hr = S_OK;
         if (m_threadTaskRunner)
         {
-            m_threadTaskRunner->RunOnThread([&]() { hr = m_engine->_DeleteCandidateList(); });
+            m_threadTaskRunner->RunOnThread([&]() { hr = m_engine->CancelCompositioon(); });
         }
         return hr;
     }
@@ -272,9 +272,9 @@ private:
         return S_OK;
     }
 
-    IFACEMETHODIMP SetFocus(BOOL /*isGotten*/) override
+    IFACEMETHODIMP OnSetFocus(BOOL isGotten, BSTR applicationName, GUID clientId) override
     {
-        // m_processor->SetFocus(!!isGotten);
+        m_processor->OnSetFocus(!!isGotten, std::wstring_view(applicationName, SysStringLen(applicationName)), clientId);
         return S_OK;
     }
 
@@ -317,9 +317,9 @@ private:
         return S_OK;
     }
 
-    IFACEMETHODIMP _DeleteCandidateList() override
+    IFACEMETHODIMP CancelCompositioon() override
     {
-        m_processor->_DeleteCandidateList();
+        m_processor->CancelCompositioon();
         return S_OK;
     }
 
@@ -381,6 +381,8 @@ private:
 
 HRESULT CreateSingletonProcessorHost(_In_ IUnknown *pUnkOuter, REFIID riid, _Outptr_ void **ppvObj) try
 {
+    SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+
     RETURN_HR_IF(CLASS_E_NOAGGREGATION, pUnkOuter != nullptr);
     wil::com_ptr<SingletonProcessorHost> engineHost;
     RETURN_IF_FAILED(wrl::MakeAndInitialize<SingletonProcessorHost>(&engineHost));

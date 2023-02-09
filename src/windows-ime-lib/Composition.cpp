@@ -37,7 +37,7 @@ STDAPI CWindowsIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfCompos
 
     LOG_IF_FAILED(m_compositionBuffer->_TerminateCompositionInternal());
 
-    m_singletonProcessor->_DeleteCandidateList();
+    m_singletonProcessor->CancelCompositioon();
 
 //    if (pContext)
 //    {

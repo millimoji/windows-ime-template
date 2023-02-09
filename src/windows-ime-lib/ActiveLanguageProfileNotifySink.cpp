@@ -59,7 +59,7 @@ STDAPI CWindowsIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID, _In_ BOOL isA
     }
     else
     {
-        m_singletonProcessor->_DeleteCandidateList();
+        m_singletonProcessor->CancelCompositioon();
 
         if (m_inprocClient)
         {

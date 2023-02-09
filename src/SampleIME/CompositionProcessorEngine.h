@@ -57,7 +57,7 @@ public:
     BOOL IsMakePhraseFromText() { return _hasMakePhraseFromText; }
 
     void FinalizeCandidateList() override;
-    VOID _DeleteCandidateList() override;
+    VOID CancelCompositioon() override;
 
     // Language bar control
 //    void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) override;
@@ -67,12 +67,20 @@ public:
 //    HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept override;
 //    void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
 
-    void UpdateCustomState(const std::string& stateJson) override
+    void UpdateCustomState(std::string_view stateJson) override
     {
         const auto json = nlohmann::json::parse(stateJson);
         m_compartmentIsOpen = json["isOpen"].get<bool>();
         m_compartmentIsDoubleSingleByte = json["isDouble"].get<bool>();
         m_compartmentIsPunctuation = json["isPunctuation"].get<bool>();
+    }
+    void OnSetFocus(bool isGotten, const std::wstring_view applicationName, GUID clientId) override
+    {
+        if (isGotten)
+        {
+            m_applicationName = applicationName;
+            m_clientId = clientId;
+        }
     }
 
 //    void SetCandidateKeyStrokeCategory(KEYSTROKE_CATEGORY keyStrokeCategory) { _keyStrokeCategory = keyStrokeCategory; }
@@ -127,6 +135,8 @@ private:
     HRESULT OnKeyUp(WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled);
 
 private:
+    std::wstring m_applicationName;
+    GUID m_clientId;
     const std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> m_compositionBuffer;
     const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> m_candidateListView;
 

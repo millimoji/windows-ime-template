@@ -28,9 +28,10 @@ public:
 //    HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept override;
 //    void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
     void FinalizeCandidateList() override {}
-    VOID _DeleteCandidateList() override {}
+    VOID CancelCompositioon() override {}
 
-    void UpdateCustomState(const std::string& /* customStateJson */) override {}
+    void UpdateCustomState(const std::string_view /* customStateJson */) override {}
+    void OnSetFocus(bool /*isGotten*/, const std::wstring_view /*applicationName*/, GUID /*clientId*/) override {}
 
 private:
     const std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> m_compositionBuffer;

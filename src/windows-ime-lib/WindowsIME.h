@@ -141,7 +141,6 @@ private:
 
     BOOL VerifyIMECLSID(_In_ REFCLSID clsid);
 
-    void SetDefaultCandidateTextFont();
     void UpdateCustomState() override
     {
         if (m_inprocClient)
@@ -174,6 +173,10 @@ private:
     TfClientId _tfClientId = {};
     DWORD _dwActivateFlags = {};
 
+    std::wstring m_processName;
+    wil::unique_bstr m_processNameBstr;
+    GUID m_clientGuid;
+
     // The cookie of ThreadMgrEventSink
     DWORD _threadMgrEventSinkCookie = TF_INVALID_COOKIE;
 
@@ -199,7 +202,7 @@ private:
     wil::com_ptr<ITfFnSearchCandidateProvider> _pITfFnSearchCandidateProvider;
 
     std::shared_ptr<ICompositionBufferInternal> m_compositionBuffer;
-    std::shared_ptr<ICandidateListViewInternal> m_candidateListView;
+//    std::shared_ptr<ICandidateListViewInternal> m_candidateListView;
 
     std::shared_ptr<WindowsImeLib::IWindowsIMEInProcClient> m_inprocClient;
 

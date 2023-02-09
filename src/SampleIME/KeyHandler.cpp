@@ -50,11 +50,11 @@
 
 //+---------------------------------------------------------------------------
 //
-// _DeleteCandidateList
+// CancelCompositioon
 //
 //----------------------------------------------------------------------------
 
-VOID CompositionProcessorEngine::_DeleteCandidateList()
+VOID CompositionProcessorEngine::CancelCompositioon()
 {
 //    isForce;pContext;
 
@@ -79,8 +79,8 @@ VOID CompositionProcessorEngine::_DeleteCandidateList()
 
 HRESULT CKeyStateCategory::_HandleComplete()
 {
-    _pCompositionProcessorEngine->_DeleteCandidateList();
-    LOG_IF_FAILED(_pTextService->_TerminateComposition());
+    _pCompositionProcessorEngine->CancelCompositioon();
+    LOG_IF_FAILED(_pTextService->_TerminateComposition()); // ????
     return S_OK;
 }
 
@@ -92,7 +92,7 @@ HRESULT CKeyStateCategory::_HandleComplete()
 
 HRESULT CKeyStateCategory::_HandleCancel()
 {
-    _pCompositionProcessorEngine->_DeleteCandidateList();
+    _pCompositionProcessorEngine->CancelCompositioon();
     LOG_IF_FAILED(_pTextService->_RemoveDummyCompositionForComposing());
     LOG_IF_FAILED(_pTextService->_TerminateComposition());
     return S_OK;

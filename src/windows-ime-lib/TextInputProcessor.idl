@@ -20,7 +20,7 @@ interface ITextInputProcessor : IUnknown
 {
     HRESULT Acivate([in] ITextInputEnvironment* environment);
     HRESULT Deacivate();
-    HRESULT SetFocus([in] BOOL isGotten);
+    HRESULT OnSetFocus([in] BOOL isGotten, [in] BSTR applicationName, [in] GUID clientId);
     HRESULT UpdateCustomState([in] LPCSTR customState);
 
     HRESULT OnKeyEvent([in] DWORD wParam, [in] DWORD lParam, [in] WCHAR wch, [in] UINT vkPackSource,
@@ -29,7 +29,7 @@ interface ITextInputProcessor : IUnknown
 
     HRESULT GetCandidateList([in] BOOL isIncrementalWordSearch, [in] BOOL isWildcardSearch, [in] BSTR* candidateList);
     HRESULT FinalizeCandidateList();
-    HRESULT _DeleteCandidateList();
+    HRESULT CancelCompositioon();
 
     // ICandidateListViewInternal
     // HRESULT CandidateListViewInternal_NotifyTextExt([in] HWND documentWindow, [in] RECT* lpRect);

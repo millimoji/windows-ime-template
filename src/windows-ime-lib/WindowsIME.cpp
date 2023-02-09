@@ -54,6 +54,14 @@ CATCH_RETURN()
 CWindowsIME::CWindowsIME()
 {
     DllAddRef();
+
+    {
+        wchar_t fileNameBuf[MAX_PATH];
+        GetModuleFileName(nullptr, fileNameBuf, ARRAYSIZE(fileNameBuf));
+        m_processName = fileNameBuf;
+        m_processNameBstr.reset(SysAllocString(m_processName.c_str()));
+    }
+    CoCreateGuid(&m_clientGuid);
 }
 
 //+---------------------------------------------------------------------------
@@ -140,14 +148,14 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
         goto ExitError;
     }
 
-    {
-        auto candidateListView = std::make_shared<CandidateListView>(this);
-        m_candidateListView = std::static_pointer_cast<ICandidateListViewInternal>(candidateListView);
-    }
+//    {
+//        auto candidateListView = std::make_shared<CandidateListView>(this);
+//        m_candidateListView = std::static_pointer_cast<ICandidateListViewInternal>(candidateListView);
+//    }
 
     m_compositionBuffer = std::make_shared<CompositionBuffer>(
         this,
-        m_candidateListView->GetClientInterface(),
+        nullptr, // nullptm_candidateListView->GetClientInterface(),
         _tfClientId,
         _gaDisplayAttributeInput);
 
@@ -184,6 +192,7 @@ STDAPI CWindowsIME::Deactivate()
     if (m_singletonProcessor)
     {
 //        _pCompositionProcessorEngine->ClearCompartment(_pThreadMgr, _tfClientId);
+        m_singletonProcessor->CandidateListViewInternal_EndCandidateList();
         m_singletonProcessor.reset();
     }
 
@@ -203,8 +212,7 @@ STDAPI CWindowsIME::Deactivate()
 //        m_compositionBuffer->ResetCandidateState();
 
 //        m_compositionBuffer->DestroyCandidateView();
-        m_candidateListView->_EndCandidateList();
-        m_singletonProcessor->CandidateListViewInternal_EndCandidateList();
+//        m_candidateListView->_EndCandidateList();
     }
 
     if (m_inprocClient)
@@ -549,7 +557,7 @@ HRESULT CWindowsIME::GetComModuleName(REFGUID rclsid, _Out_writes_(cchPath)WCHAR
     return hr;
 }
 
-void CWindowsIME::SetDefaultCandidateTextFont()
+void CandidateListView::SetDefaultCandidateTextFont()
 {
     // Candidate Text Font
     if (Global::defaultlFontHandle == nullptr)

@@ -44,8 +44,8 @@ HRESULT CompositionBuffer::_TerminateCompositionInternal()
                 if (FAILED_LOG(m_currentComposition->EndComposition(ec)))
                 {
                     // if we fail to EndComposition, then we need to close the reverse reading window.
-                    // m_framework->GetCompositionProcessorEngine()->_DeleteCandidateList();
-                    m_framework->GetTextInputProcessor()->_DeleteCandidateList();
+                    // m_framework->GetCompositionProcessorEngine()->CancelCompositioon();
+                    m_framework->GetTextInputProcessor()->CancelCompositioon();
                 }
             }
             LOG_IF_FAILED(m_framework->_EndLayoutTracking());
@@ -73,8 +73,8 @@ HRESULT CompositionBuffer::_TerminateComposition()
                 if (FAILED_LOG(m_currentComposition->EndComposition(ec)))
                 {
                     // if we fail to EndComposition, then we need to close the reverse reading window.
-                    // m_framework->GetCompositionProcessorEngine()->_DeleteCandidateList();
-                    m_framework->GetTextInputProcessor()->_DeleteCandidateList();
+                    // m_framework->GetCompositionProcessorEngine()->CancelCompositioon();
+                    m_framework->GetTextInputProcessor()->CancelCompositioon();
                 }
             }
             _SaveCompositionAndContext(nullptr, nullptr);

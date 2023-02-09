@@ -67,10 +67,10 @@ namespace WindowsImeLib
             return constantProvider;
         }
 
-        std::shared_ptr<IWindowsIMEInProcFramework> CreateIMEInprocClient(IWindowsIMEInprocFramework* framework) override
+        std::shared_ptr<IWindowsIMEInProcClient> CreateIMEInprocClient(IWindowsIMEInProcFramework* framework) override
         {
             auto inprocClient = std::make_shared<RibbonIMEInprocClient>(framework);
-            return std::static_pointer_cast<IWindowsIMEInProcFramework>(inprocClient);
+            return std::static_pointer_cast<IWindowsIMEInProcClient>(inprocClient);
         }
     };
 

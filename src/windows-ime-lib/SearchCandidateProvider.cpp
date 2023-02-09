@@ -91,6 +91,7 @@ STDMETHODIMP CSearchCandidateProvider::GetSearchCandidates(BSTR bstrQuery, BSTR 
         return hr;
     }
 
+// TODO: Support ITfFnSearchCandidateProvider
 //    auto pCompositionProcessorEngine = m_owner->GetCompositionProcessorEngine();
 //    if (!pCompositionProcessorEngine)
 //    {
@@ -98,8 +99,10 @@ STDMETHODIMP CSearchCandidateProvider::GetSearchCandidates(BSTR bstrQuery, BSTR 
 //    }
 //
     std::vector<shared_wstring> candidateList;
+
+// TODO: Support ITfFnSearchCandidateProvider
 //    pCompositionProcessorEngine->GetCandidateList(candidateList, TRUE, FALSE);
-//    m_framework->GetTextInputProcessor()->_DeleteCandidateList();
+//    m_framework->GetTextInputProcessor()->CancelCompositioon();
 
     int cCand = std::min(static_cast<int>(candidateList.size()), FAKECANDIDATENUMBER);
     if (0 < cCand)

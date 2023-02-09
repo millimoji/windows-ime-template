@@ -843,34 +843,11 @@ VOID CCandidateListUIPresenter::_LayoutDestroyNotification()
 
 HRESULT CCandidateListUIPresenter::_CandidateChangeNotification(_In_ enum CANDWND_ACTION action)
 {
-    HRESULT hr = S_OK;
+    RETURN_HR_IF(S_OK, CAND_ITEM_SELECT != action);
 
-//    TfClientId tfClientId = _pTextService->_GetClientId();
-//    wil::com_ptr<ITfThreadMgr> pThreadMgr;
-//    ITfDocumentMgr* pDocumentMgr = nullptr;
-//    ITfContext* pContext = nullptr;
+    _pTextService->NotifyFinalizeCandidateList();
 
-//    _KEYSTROKE_STATE KeyState = {};
-//    KeyState.Category = _Category;
-//    KeyState.Function = FUNCTION_FINALIZE_CANDIDATELIST;
-
-    if (CAND_ITEM_SELECT != action)
-    {
-        goto Exit;
-    }
-
-    {
-//        wil::com_ptr<ITfDocumentMgr> pDocumentMgr;
-//        RETURN_IF_FAILED(_pTextService->_GetThreadMgr()->GetFocus(&pDocumentMgr));
-//
-//        wil::com_ptr<ITfContext> pContext;
-//        RETURN_IF_FAILED(pDocumentMgr->GetTop(&pContext));
-
-        _pTextService->NotifyFinalizeCandidateList();
-    }
-
-Exit:
-    return hr;
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
