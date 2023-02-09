@@ -59,6 +59,8 @@ CompositionProcessorEngine::CompositionProcessorEngine(
 //    _candidateWndWidth = CAND_WIDTH;
 
     InitKeyStrokeTable();
+
+    Initialize();
 }
 
 //+---------------------------------------------------------------------------

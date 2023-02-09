@@ -14,8 +14,6 @@ public:
 
     virtual ~RibbonIMECore();
 
-    BOOL Initialize() override;
-
     void OnKeyEvent(WPARAM, LPARAM, BOOL*, wchar_t, UINT, bool, DWORD, DWORD, bool, bool) override { }
 
     void GetCandidateList(std::vector<shared_wstring>& pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) override;

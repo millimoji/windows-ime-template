@@ -13,12 +13,6 @@ RibbonIMECore::~RibbonIMECore()
 {
 }
 
-// Get locale
-BOOL RibbonIMECore::Initialize()
-{
-    return TRUE;
-}
-
 void RibbonIMECore::GetCandidateList(std::vector<shared_wstring>& pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch)
 {
     (void)pCandidateList;

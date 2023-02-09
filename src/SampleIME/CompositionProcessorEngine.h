@@ -26,8 +26,8 @@ public:
         const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& candidateListView);
     ~CompositionProcessorEngine(void);
 
-    BOOL Initialize() override;
-    // BOOL SetupLanguageProfile() override; // LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode, BOOL isComLessMode) override;
+private:
+    BOOL Initialize();
 
 	void OnKeyEvent(WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled, DWORD modifiers, DWORD uniqueModifiers, bool isTest, bool isUp) override;
 
@@ -111,24 +111,11 @@ private:
     BOOL IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_STATE *pKeyState);
 
     void SetupKeystroke();
-//    void SetupPreserved(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
     void SetupConfiguration();
-//    void SetupLanguageBar(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isSecureMode);
     void SetKeystrokeTable(_Inout_ std::vector<_KEYSTROKE> *pKeystroke);
     void SetupPunctuationPair();
-//    void CreateLanguageBarButton(DWORD dwEnable, GUID guidLangBar, _In_z_ LPCWSTR pwszDescriptionValue, _In_z_ LPCWSTR pwszTooltipValue, DWORD dwOnIconIndex, DWORD dwOffIconIndex, _Outptr_result_maybenull_ CLangBarItemButton **ppLangBarItemButton, BOOL isSecureMode);
     void SetInitialCandidateListRange();
-//    void SetDefaultCandidateTextFont();
-//    void InitializeSampleIMECompartment(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
 
-//    class XPreservedKey;
-//    void SetPreservedKey(const CLSID clsid, TF_PRESERVEDKEY & tfPreservedKey, _In_z_ LPCWSTR pwszDescription, _Out_ XPreservedKey *pXPreservedKey);
-//    BOOL InitPreservedKey(_In_ XPreservedKey *pXPreservedKey, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
-//    BOOL CheckShiftKeyOnly(_In_ std::vector<TF_PRESERVEDKEY> *pTSFPreservedKeyTable);
-
-//     void PrivateCompartmentsUpdated(_In_ ITfThreadMgr *pThreadMgr);
-//     void KeyboardOpenCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr);
-    
     BOOL SetupDictionaryFile();
     CFile* GetDictionaryFile();
 
@@ -173,39 +160,9 @@ private:
     std::vector<_KEYSTROKE> _KeystrokeCandidateSymbol;
     std::vector<_KEYSTROKE> _KeystrokeSymbol;
 
-    // Preserved key data
-//    class XPreservedKey
-//    {
-//    public:
-//        XPreservedKey();
-//        ~XPreservedKey();
-//        BOOL UninitPreservedKey(_In_ ITfThreadMgr *pThreadMgr);
-//
-//    public:
-//        std::vector<TF_PRESERVEDKEY> TSFPreservedKeyTable;
-//        GUID Guid;
-//        LPCWSTR Description;
-//    };
-//
-//    XPreservedKey _PreservedKey_IMEMode;
-//    XPreservedKey _PreservedKey_DoubleSingleByte;
-//    XPreservedKey _PreservedKey_Punctuation;
-
     // Punctuation data
     std::vector<CPunctuationPair> _PunctuationPair;
     std::vector<CPunctuationNestPair> _PunctuationNestPair;
-
-    // Language bar data
-//    CLangBarItemButton* _pLanguageBar_IMEMode;
-//    CLangBarItemButton* _pLanguageBar_DoubleSingleByte;
-//    CLangBarItemButton* _pLanguageBar_Punctuation;
-
-    // Compartment
-//    CCompartment* _pCompartmentConversion;
-//    CCompartmentEventSink* _pCompartmentConversionEventSink;
-//    CCompartmentEventSink* _pCompartmentKeyboardOpenEventSink;
-//    CCompartmentEventSink* _pCompartmentDoubleSingleByteEventSink;
-//    CCompartmentEventSink* _pCompartmentPunctuationEventSink;
 
     bool m_compartmentIsOpen = false;
     bool m_compartmentIsDoubleSingleByte = false;
@@ -219,9 +176,7 @@ private:
 //    BOOL _isComLessMode : 1;
     std::vector<DWORD> _candidateListIndexRange;
     UINT _candidateListPhraseModifier;
-//    UINT _candidateWndWidth;
 
-//    KEYSTROKE_CATEGORY _keyStrokeCategory;
     CANDIDATE_MODE _candidateMode;
     BOOL _isCandidateWithWildcard = FALSE;
 

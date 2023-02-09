@@ -90,7 +90,6 @@ struct ICompositionProcessorEngine
 {
     virtual ~ICompositionProcessorEngine() {}
 
-    virtual BOOL Initialize() = 0;
     virtual void UpdateCustomState(const std::string& customStateJson) = 0;
 
     // wch: converted character from VK and keyboard state
@@ -102,13 +101,6 @@ struct ICompositionProcessorEngine
 
     virtual void FinalizeCandidateList() = 0;
     virtual VOID _DeleteCandidateList() = 0;
-};
-
-struct ITextInputFramework
-{
-    virtual ~ITextInputFramework() {}
-
-    virtual void Test() = 0;
 };
 
 struct IConstantProvider

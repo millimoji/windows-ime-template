@@ -629,7 +629,7 @@ void CCandidateListUIPresenter::_EndCandidateList()
 //
 //----------------------------------------------------------------------------
 
-void CCandidateListUIPresenter::_SetText(_In_ const std::vector<shared_wstring>& pCandidateList)
+void CCandidateListUIPresenter::_SetText(const std::vector<shared_wstring>& pCandidateList)
 {
     AddCandidateToCandidateListUI(pCandidateList);
 
@@ -650,7 +650,7 @@ void CCandidateListUIPresenter::_SetText(_In_ const std::vector<shared_wstring>&
     }
 }
 
-void CCandidateListUIPresenter::AddCandidateToCandidateListUI(_In_ const std::vector<shared_wstring>& pCandidateList)
+void CCandidateListUIPresenter::AddCandidateToCandidateListUI(const std::vector<shared_wstring>& pCandidateList)
 {
     for (UINT index = 0; index < pCandidateList.size(); index++)
     {
@@ -658,7 +658,7 @@ void CCandidateListUIPresenter::AddCandidateToCandidateListUI(_In_ const std::ve
     }
 }
 
-void CCandidateListUIPresenter::SetPageIndexWithScrollInfo(_In_ const std::vector<shared_wstring>& pCandidateList)
+void CCandidateListUIPresenter::SetPageIndexWithScrollInfo(const std::vector<shared_wstring>& pCandidateList)
 {
     UINT candCntInPage = static_cast<UINT>(_pIndexRange->size());
     UINT bufferSize = static_cast<UINT>(pCandidateList.size() / candCntInPage + 1);

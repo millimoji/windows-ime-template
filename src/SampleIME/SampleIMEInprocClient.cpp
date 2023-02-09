@@ -55,7 +55,7 @@ private:
         *pIsEaten = FALSE;
         if (IsEqualGUID(rguid, Global::SampleIMEGuidImeModePreserveKey))
         {
-            const auto preservedKeyData = FindPreservedKey(rguid);
+            /* const auto preservedKeyData = FindPreservedKey(rguid); */
             if (true /*CheckShiftKeyOnly(preservedKeyData->tfPreservedKey.uModifiers)*/)
             {
                 const auto isOpen = m_compartmentKeyboardOpenClose->GetCompartmentBOOL();

@@ -231,7 +231,6 @@ class SingletonProcessorHost :
     public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
                                         ITextInputProcessor,
                                         Microsoft::WRL::FtmBase>,
-    public WindowsImeLib::ITextInputFramework,
     public ICandidateListViewOwner
 {
 public:
@@ -257,7 +256,6 @@ public:
         {
             m_processor = WindowsImeLib::g_processorFactory->CreateCompositionProcessorEngine(m_compositionBufferProxy, m_candidateListView);
             s_processor = m_processor;
-            m_processor->Initialize();
         }
     }
 
@@ -354,11 +352,6 @@ private:
     {
         m_candidateListViewInternal->_EndCandidateList();
         return S_OK;
-    }
-
-    // WindowsImeLib::ITextInputFramework
-    void Test() override
-    {
     }
 
     // ICandidateListViewOwner

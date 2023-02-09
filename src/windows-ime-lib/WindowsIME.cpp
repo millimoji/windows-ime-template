@@ -392,6 +392,7 @@ BOOL CWindowsIME::_AddTextProcessorEngine()
     }
 
     // Is this already added?
+#if 0
     if (m_singletonProcessor)
     {
         LANGID langidProfile = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLangID();
@@ -402,23 +403,12 @@ BOOL CWindowsIME::_AddTextProcessorEngine()
             return TRUE;
         }
     }
+#endif
 
     // Create composition processor engine
     if (!m_singletonProcessor)
     {
         m_singletonProcessor = CreateSingletonProcessorBridge();
-
-//        _pCompositionProcessorEngine = WindowsImeLib::g_processorFactory->CreateCompositionProcessorEngine(
-//            m_compositionBuffer->GetClientInterface(),
-//            m_candidateListView->GetClientInterface());
-//
-//        _pCompositionProcessorEngine->Initialize();
-        UpdateCustomState();
-        SetDefaultCandidateTextFont();
-    }
-    if (!m_singletonProcessor)
-    {
-        return FALSE;
     }
 
     return TRUE;
