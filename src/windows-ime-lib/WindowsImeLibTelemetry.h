@@ -45,7 +45,6 @@ public:
     DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_StartCandidateList);
     DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_EndCandidateList);
     DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_LayoutChangeNotification);
-    DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_LayoutDestroyNotification);
     DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_OnSetThreadFocus);
     DEFINE_CALLCONTEXT_ACTIVITY(CandidateListView_OnKillThreadFocus);
 

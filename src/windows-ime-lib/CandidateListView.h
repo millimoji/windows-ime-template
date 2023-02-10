@@ -13,17 +13,16 @@ struct ICandidateListViewOwner
     virtual BOOL _IsStoreAppMode() = 0;
     virtual void NotifyFinalizeCandidateList() = 0;
 
-    virtual wil::com_ptr<ITfThreadMgr> _GetThreadMgr() = 0;
+    virtual wil::com_ptr<ITfThreadMgr> _GetThreadMgr() = 0; // for ITfCandidateListUIElement
 };
 
 struct ICandidateListViewInternal
 {
     virtual std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> GetClientInterface() = 0;
     virtual VOID _LayoutChangeNotification(HWND hwnd, _In_ RECT *lpRect) = 0;
-    virtual VOID _LayoutDestroyNotification() = 0;
+    virtual void _EndCandidateList() = 0;
     virtual HRESULT OnSetThreadFocus() = 0;
     virtual HRESULT OnKillThreadFocus() = 0;
-    virtual void _EndCandidateList() = 0;
 
     // both?
     virtual bool IsCreated() = 0;
@@ -42,15 +41,6 @@ public:
     }
 private:
     // WindowsImeLib::IWindowsIMECandidateListView
-//    void CreateView(_In_ std::vector<DWORD> *pIndexRange, BOOL hideWindow) override
-//    {
-//        m_presenter.reset();
-//        THROW_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CCandidateListUIPresenter>(
-//            &m_presenter, m_framework, Global::AtomCandidateWindow, pIndexRange, hideWindow));
-//    }
-//    void DestroyView() override {
-//        m_presenter.reset();
-//    }
     bool IsCreated() override {
         return !!m_presenter;
     }
@@ -79,11 +69,6 @@ private:
             }
         });
     }
-//    void _ClearList() override {
-//        auto activity = WindowsImeLibTelemetry::CandidateListView_ClearList::Start();
-//        m_presenter->_ClearList();
-//        activity.Stop();
-//    }
     void _SetText(const std::vector<shared_wstring>& pCandidateList) override {
         m_taskRunner.RunOnThread([&]()
         {
@@ -129,16 +114,6 @@ private:
             if (m_presenter) {
                 auto activity = WindowsImeLibTelemetry::CandidateListView_LayoutChangeNotification::Start();
                 m_presenter->_LayoutChangeNotification(lpRect);
-                activity.Stop();
-            }
-        });
-    }
-    VOID _LayoutDestroyNotification() override {
-        m_taskRunner.RunOnThread([&]()
-        {
-            if (m_presenter) {
-                auto activity = WindowsImeLibTelemetry::CandidateListView_LayoutDestroyNotification::Start();
-                m_presenter->_LayoutDestroyNotification();
                 activity.Stop();
             }
         });

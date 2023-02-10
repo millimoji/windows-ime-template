@@ -74,8 +74,8 @@ CKeyStateCategory::CKeyStateCategory(
         _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
         const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
         const std::shared_ptr<CompositionProcessorEngine>& pCompositionProcessorEngine) :
-        _pTextService(pTextService),
-        _pCandidateListUIPresenter(pCandidateListUIPresenter),
+        m_compositionBuffer(pTextService),
+        m_candidateListView(pCandidateListUIPresenter),
         _pCompositionProcessorEngine(pCompositionProcessorEngine)
 {
 }

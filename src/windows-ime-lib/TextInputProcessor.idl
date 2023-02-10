@@ -34,8 +34,7 @@ interface ITextInputProcessor : IUnknown
     // ICandidateListViewInternal
     // HRESULT CandidateListViewInternal_NotifyTextExt([in] HWND documentWindow, [in] RECT* lpRect);
     HRESULT CandidateListViewInternal_LayoutChangeNotification([in] HWND documentWindow, [in] RECT *lpRect);
-    HRESULT CandidateListViewInternal_LayoutDestroyNotification();
+    HRESULT CandidateListViewInternal_EndCandidateList();
     HRESULT CandidateListViewInternal_OnSetThreadFocus();
     HRESULT CandidateListViewInternal_OnKillThreadFocus();
-    HRESULT CandidateListViewInternal_EndCandidateList();
 };

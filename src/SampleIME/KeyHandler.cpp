@@ -80,7 +80,7 @@ VOID CompositionProcessorEngine::CancelCompositioon()
 HRESULT CKeyStateCategory::_HandleComplete()
 {
     _pCompositionProcessorEngine->CancelCompositioon();
-    LOG_IF_FAILED(_pTextService->_TerminateComposition()); // ????
+    LOG_IF_FAILED(m_compositionBuffer->_TerminateComposition()); // ????
     return S_OK;
 }
 
@@ -93,8 +93,8 @@ HRESULT CKeyStateCategory::_HandleComplete()
 HRESULT CKeyStateCategory::_HandleCancel()
 {
     _pCompositionProcessorEngine->CancelCompositioon();
-    LOG_IF_FAILED(_pTextService->_RemoveDummyCompositionForComposing());
-    LOG_IF_FAILED(_pTextService->_TerminateComposition());
+    LOG_IF_FAILED(m_compositionBuffer->_RemoveDummyCompositionForComposing());
+    LOG_IF_FAILED(m_compositionBuffer->_TerminateComposition());
     return S_OK;
 }
 
@@ -108,15 +108,15 @@ HRESULT CKeyStateCategory::_HandleCancel()
 
 HRESULT CKeyStateCategory::_HandleCompositionInput(WCHAR wch)
 {
-    if (_pCandidateListUIPresenter->IsCreated() && (_pCompositionProcessorEngine->CandidateMode() != CANDIDATE_INCREMENTAL))
+    if (m_candidateListView->IsCreated() && (_pCompositionProcessorEngine->CandidateMode() != CANDIDATE_INCREMENTAL))
     {
         _HandleCompositionFinalize(FALSE);
     }
 
     // Start the new (std::nothrow) compositon if there is no composition.
-    if (!_pTextService->_IsComposing())
+    if (!m_compositionBuffer->_IsComposing())
     {
-        RETURN_IF_FAILED(_pTextService->_StartComposition());
+        RETURN_IF_FAILED(m_compositionBuffer->_StartComposition());
     }
 
 // TODO confirm range is correct
@@ -127,7 +127,7 @@ HRESULT CKeyStateCategory::_HandleCompositionInput(WCHAR wch)
 //        }
 //
 //        // is the insertion point covered by a composition?
-//        if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
+//        if (SUCCEEDED(m_compositionBuffer->GetComposition()->GetRange(&pRangeComposition)))
 //        {
 //            isCovered = _IsRangeCovered(ec, tfSelection.range, pRangeComposition);
 //
@@ -170,7 +170,7 @@ HRESULT CKeyStateCategory::_HandleCompositionInputWorker()
     }
     auto insertionTextShared = std::make_shared<const std::wstring>(std::move(insertionText));
 
-    RETURN_IF_FAILED(_pTextService->_AddComposingAndChar(insertionTextShared));
+    RETURN_IF_FAILED(m_compositionBuffer->_AddComposingAndChar(insertionTextShared));
 
     //
     // Get candidate string from composition processor engine
@@ -182,21 +182,18 @@ HRESULT CKeyStateCategory::_HandleCompositionInputWorker()
     {
         if (SUCCEEDED_LOG(_CreateAndStartCandidate()))
         {
-            // _pCandidateListUIPresenter->_ClearList();
-            _pCandidateListUIPresenter->_SetText(candidateList);
+            m_candidateListView->_SetText(candidateList);
         }
     }
-    else if (_pCandidateListUIPresenter->IsCreated())
+    else if (m_candidateListView->IsCreated())
     {
-        // _pCandidateListUIPresenter->_ClearList();
-        _pCandidateListUIPresenter->_SetText(std::vector<shared_wstring>());
+        m_candidateListView->_SetText(std::vector<shared_wstring>());
     }
     else if (readingStrings.size() && isWildcardIncluded)
     {
         if (SUCCEEDED_LOG(_CreateAndStartCandidate()))
         {
-            // _pCandidateListUIPresenter->_ClearList();
-            _pCandidateListUIPresenter->_SetText(std::vector<shared_wstring>());
+            m_candidateListView->_SetText(std::vector<shared_wstring>());
         }
     }
     return S_OK;
@@ -212,33 +209,33 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate()
 {
     HRESULT hr = S_OK;
 
-    if (((_pCompositionProcessorEngine->CandidateMode() == CANDIDATE_PHRASE) && _pCandidateListUIPresenter->IsCreated())
-        || ((_pCompositionProcessorEngine->CandidateMode() == CANDIDATE_NONE) && _pCandidateListUIPresenter->IsCreated()))
+    if (((_pCompositionProcessorEngine->CandidateMode() == CANDIDATE_PHRASE) && m_candidateListView->IsCreated())
+        || ((_pCompositionProcessorEngine->CandidateMode() == CANDIDATE_NONE) && m_candidateListView->IsCreated()))
     {
         // Recreate candidate list
-        _pCandidateListUIPresenter->_EndCandidateList();
+        m_candidateListView->_EndCandidateList();
         _pCompositionProcessorEngine->ResetCandidateState();
         // _candidateMode = CANDIDATE_NONE;
         // _isCandidateWithWildcard = FALSE;
     }
 
-//    if (_pCandidateListUIPresenter == nullptr)
-    if (!_pCandidateListUIPresenter->IsCreated())
+//    if (m_candidateListView == nullptr)
+    if (!m_candidateListView->IsCreated())
     {
-//        _pCandidateListUIPresenter->CreateView(_pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
+//        m_candidateListView->CreateView(_pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
 //
-//        _pCandidateListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(
+//        m_candidateListView = new (std::nothrow) CCandidateListUIPresenter(
 //            reinterpret_cast<CWindowsIME*>(_textService->GetTextService()),
 //            Global::AtomCandidateWindow,
 //            CATEGORY_CANDIDATE,
 //            pCompositionProcessorEngine->GetCandidateListIndexRange(),
 //            FALSE);
-//        if (!_pCandidateListUIPresenter)
+//        if (!m_candidateListView)
 //        {
 //            return E_OUTOFMEMORY;
 //        }
 
-        LOG_IF_FAILED(_pCandidateListUIPresenter->_StartCandidateList(
+        LOG_IF_FAILED(m_candidateListView->_StartCandidateList(
                 _pCompositionProcessorEngine->GetCandidateListIndexRange(),
                 WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth()));
 
@@ -258,26 +255,26 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate()
 
 HRESULT CKeyStateCategory::_HandleCompositionFinalize(BOOL isCandidateList)
 {
-    if (isCandidateList && _pCandidateListUIPresenter->IsCreated())
+    if (isCandidateList && m_candidateListView->IsCreated())
     {
         // Finalize selected candidate string from CCandidateListUIPresenter
-        auto candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
+        auto candidateString = m_candidateListView->_GetSelectedCandidateString();
 
         // Finalize character
-        RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(candidateString));
+        RETURN_IF_FAILED(m_compositionBuffer->_AddCharAndFinalize(candidateString));
     }
     else
     {
         // Finalize current text store strings
-        if (_pTextService->_IsComposing())
+        if (m_compositionBuffer->_IsComposing())
         {
 //TODO?? Confirm range
 //                if (FAILED(dto.pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched)) || fetched != 1)
 //                ITfRange* pRangeComposition = nullptr;
-//                if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
+//                if (SUCCEEDED(m_compositionBuffer->GetComposition()->GetRange(&pRangeComposition)))
 //                    if (_IsRangeCovered(ec, tfSelection.range, pRangeComposition))
 
-            LOG_IF_FAILED(_pTextService->_TerminateComposition());
+            LOG_IF_FAILED(m_compositionBuffer->_TerminateComposition());
         }
     }
 
@@ -307,23 +304,23 @@ HRESULT CKeyStateCategory::_HandleCompositionConvert(BOOL isWildcardSearch)
     int nCount = static_cast<int>(candidateList.size());
     if (nCount)
     {
-        if (_pCandidateListUIPresenter->IsCreated())
+        if (m_candidateListView->IsCreated())
         {
-            _pCandidateListUIPresenter->_EndCandidateList();
+            m_candidateListView->_EndCandidateList();
             _pCompositionProcessorEngine->ResetCandidateState();
         }
 
         // 
         // create an instance of the candidate list class.
         // 
-//        if (!_pCandidateListUIPresenter->IsCreated())
+//        if (!m_candidateListView->IsCreated())
 //        {
-//            _pCandidateListUIPresenter->CreateView(pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
+//            m_candidateListView->CreateView(pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
 //            _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_ORIGINAL);
 //        }
 
 
-        LOG_IF_FAILED(_pCandidateListUIPresenter->_StartCandidateList(
+        LOG_IF_FAILED(m_candidateListView->_StartCandidateList(
                 pCompositionProcessorEngine->GetCandidateListIndexRange(),
                 WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth()));
 
@@ -332,7 +329,7 @@ HRESULT CKeyStateCategory::_HandleCompositionConvert(BOOL isWildcardSearch)
 
         if (SUCCEEDED(hr))
         {
-            _pCandidateListUIPresenter->_SetText(candidateList);
+            m_candidateListView->_SetText(candidateList);
         }
     }
     return hr;
@@ -347,12 +344,12 @@ HRESULT CKeyStateCategory::_HandleCompositionConvert(BOOL isWildcardSearch)
 HRESULT CKeyStateCategory::_HandleCompositionBackspace()
 {
 	// Start the new (std::nothrow) compositon if there is no composition.
-	RETURN_HR_IF(S_OK, !_pTextService->_IsComposing());
+	RETURN_HR_IF(S_OK, !m_compositionBuffer->_IsComposing());
 
 // TODO: required? range check
 //        if (FAILED(dto.pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched)) || fetched != 1)
 //        // is the insertion point covered by a composition?
-//        if (SUCCEEDED(_pTextService->GetComposition()->GetRange(&pRangeComposition)))
+//        if (SUCCEEDED(m_compositionBuffer->GetComposition()->GetRange(&pRangeComposition)))
 //            isCovered = _IsRangeCovered(ec, tfSelection.range, pRangeComposition);
 
     //
@@ -388,12 +385,12 @@ HRESULT CKeyStateCategory::_HandleCompositionBackspace()
 HRESULT CKeyStateCategory::_HandleCompositionArrowKey(const KeyHandlerEditSessionDTO& dto)
 {
     // For incremental candidate list
-    RETURN_HR_IF(S_OK, !_pCandidateListUIPresenter->IsCreated());
+    RETURN_HR_IF(S_OK, !m_candidateListView->IsCreated());
 
     const auto candidateListFuntion = KeyStrokeFunctionToCandidateListFunction(dto.arrowKey);
     RETURN_HR_IF(S_OK, candidateListFuntion != WindowsImeLib::CANDIDATELIST_FUNCTION::NONE);
 
-    _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(candidateListFuntion);
+    m_candidateListView->AdviseUIChangedByArrowKey(candidateListFuntion);
     return S_OK;
 }
 
@@ -405,12 +402,12 @@ HRESULT CKeyStateCategory::_HandleCompositionArrowKey(const KeyHandlerEditSessio
 
 HRESULT CKeyStateCategory::_HandleCompositionPunctuation(const KeyHandlerEditSessionDTO& dto)
 {
-    if (_pCompositionProcessorEngine->CandidateMode() != CANDIDATE_NONE && _pCandidateListUIPresenter->IsCreated())
+    if (_pCompositionProcessorEngine->CandidateMode() != CANDIDATE_NONE && m_candidateListView->IsCreated())
     {
-        auto candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
+        auto candidateString = m_candidateListView->_GetSelectedCandidateString();
         if (candidateString->length() > 0)
         {
-            RETURN_IF_FAILED(_pTextService->_AddComposingAndChar(candidateString));
+            RETURN_IF_FAILED(m_compositionBuffer->_AddComposingAndChar(candidateString));
         }
     }
 
@@ -421,7 +418,7 @@ HRESULT CKeyStateCategory::_HandleCompositionPunctuation(const KeyHandlerEditSes
     WCHAR punctuation = pCompositionProcessorEngine->GetPunctuation(dto.wch);
     auto punctuationString = std::make_shared<const std::wstring>(&punctuation, 1);
 
-    RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(punctuationString));
+    RETURN_IF_FAILED(m_compositionBuffer->_AddCharAndFinalize(punctuationString));
 
     return _HandleCancel();
 }
@@ -439,7 +436,7 @@ HRESULT CKeyStateCategory::_HandleCompositionDoubleSingleByte(const KeyHandlerEd
     fullWidthString.Set(&fullWidth, 1);
     const auto sharedFullWidthString = fullWidthString.ToSharedWstring();
 
-    RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(sharedFullWidthString));
+    RETURN_IF_FAILED(m_compositionBuffer->_AddCharAndFinalize(sharedFullWidthString));
 
     return _HandleCancel();
 }

@@ -33,13 +33,13 @@ const int MOVETO_BOTTOM = -1;
 
 HRESULT CKeyStateCategory::_HandleCandidateFinalize()
 {
-    if (_pCandidateListUIPresenter->IsCreated())
+    if (m_candidateListView->IsCreated())
     {
-        const auto candidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
+        const auto candidateString = m_candidateListView->_GetSelectedCandidateString();
 
         if (candidateString->length() > 0)
         {
-            RETURN_IF_FAILED(_pTextService->_AddComposingAndChar(candidateString));
+            RETURN_IF_FAILED(m_compositionBuffer->_AddComposingAndChar(candidateString));
         }
     }
 
@@ -54,9 +54,9 @@ HRESULT CKeyStateCategory::_HandleCandidateFinalize()
 
 HRESULT CKeyStateCategory::_HandleCandidateConvert()
 {
-    RETURN_HR_IF(S_OK, !_pCandidateListUIPresenter->IsCreated());
+    RETURN_HR_IF(S_OK, !m_candidateListView->IsCreated());
 
-    const auto pCandidateString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
+    const auto pCandidateString = m_candidateListView->_GetSelectedCandidateString();
     RETURN_HR_IF(S_FALSE, pCandidateString->length() == 0);
 
     const auto fMakePhraseFromText = _pCompositionProcessorEngine->IsMakePhraseFromText();
@@ -74,19 +74,19 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert()
         return _HandleCandidateFinalize();
     }
 
-    if (_pCandidateListUIPresenter->IsCreated())
+    if (m_candidateListView->IsCreated())
     {
-        _pCandidateListUIPresenter->_EndCandidateList();
+        m_candidateListView->_EndCandidateList();
         _pCompositionProcessorEngine->ResetCandidateState();
     }
 
     // call _Start*Line for CCandidateListUIPresenter or CReadingLine
-    LOG_IF_FAILED(_pCandidateListUIPresenter->_StartCandidateList(
+    LOG_IF_FAILED(m_candidateListView->_StartCandidateList(
             _pCompositionProcessorEngine->GetCandidateListIndexRange(),
             WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth()));
 
     // set up candidate list if it is being shown. Text color is green, Background color is window.
-    _pCandidateListUIPresenter->_SetTextColorAndFillColor(WindowsImeLib::CANDIDATE_COLOR_STYLE::GREEN);
+    m_candidateListView->_SetTextColorAndFillColor(WindowsImeLib::CANDIDATE_COLOR_STYLE::GREEN);
 
     _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_WITH_NEXT_COMPOSITION);
     _pCompositionProcessorEngine->SetIsCandidateWithWildcard(false);
@@ -95,10 +95,10 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert()
     for (const auto& candidateSrc : candidatePhraseList) {
         candidateConvertedList.emplace_back(std::make_shared<std::wstring>(candidateSrc._ItemString.Get(), candidateSrc._ItemString.GetLength()));
     }
-    _pCandidateListUIPresenter->_SetText(candidateConvertedList);
+    m_candidateListView->_SetText(candidateConvertedList);
 
     // Add composing character
-    return _pTextService->_AddComposingAndChar(pCandidateString);
+    return m_compositionBuffer->_AddComposingAndChar(pCandidateString);
 }
 
 //+---------------------------------------------------------------------------
@@ -112,7 +112,7 @@ HRESULT CKeyStateCategory::_HandleCandidateArrowKey(const KeyHandlerEditSessionD
     const auto candidateListFuntion = KeyStrokeFunctionToCandidateListFunction(dto.arrowKey);
     if (candidateListFuntion != WindowsImeLib::CANDIDATELIST_FUNCTION::NONE)
     {
-        _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(candidateListFuntion);
+        m_candidateListView->AdviseUIChangedByArrowKey(candidateListFuntion);
     }
     return S_OK;
 }
@@ -146,9 +146,9 @@ HRESULT CKeyStateCategory::_HandleCandidateSelectByNumber(UINT keyCode)
         return S_FALSE;
     }
 
-    if (_pCandidateListUIPresenter->IsCreated())
+    if (m_candidateListView->IsCreated())
     {
-        if (_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
+        if (m_candidateListView->_SetSelectionInPage(iSelectAsNumber))
         {
             return _HandleCandidateConvert();
         }
@@ -165,11 +165,11 @@ HRESULT CKeyStateCategory::_HandleCandidateSelectByNumber(UINT keyCode)
 
 HRESULT CKeyStateCategory::_HandlePhraseFinalize()
 {
-    auto phraseString = _pCandidateListUIPresenter->_GetSelectedCandidateString();
+    auto phraseString = m_candidateListView->_GetSelectedCandidateString();
 
     if (phraseString->length() > 0)
     {
-        RETURN_IF_FAILED(_pTextService->_AddCharAndFinalize(phraseString));
+        RETURN_IF_FAILED(m_compositionBuffer->_AddCharAndFinalize(phraseString));
     }
 
     return _HandleComplete();
@@ -186,7 +186,7 @@ HRESULT CKeyStateCategory::_HandlePhraseArrowKey(const KeyHandlerEditSessionDTO&
     const auto candidateListFuntion = KeyStrokeFunctionToCandidateListFunction(dto.arrowKey);
     if (candidateListFuntion != WindowsImeLib::CANDIDATELIST_FUNCTION::NONE)
     {
-        _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(candidateListFuntion);
+        m_candidateListView->AdviseUIChangedByArrowKey(candidateListFuntion);
     }
     return S_OK;
 }
@@ -205,9 +205,9 @@ HRESULT CKeyStateCategory::_HandlePhraseSelectByNumber(UINT uCode)
         return S_FALSE;
     }
 
-    if (_pCandidateListUIPresenter->IsCreated())
+    if (m_candidateListView->IsCreated())
     {
-        if (_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
+        if (m_candidateListView->_SetSelectionInPage(iSelectAsNumber))
         {
             return _HandlePhraseFinalize();
         }

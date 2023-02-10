@@ -95,7 +95,6 @@ public: // WindowsImeLib::IWindowsIMECandidateListView
 
     // CTfTextLayoutSink
     virtual VOID _LayoutChangeNotification(_In_ RECT *lpRect);
-    virtual VOID _LayoutDestroyNotification();
 
     // Event for ITfThreadFocusSink
     virtual HRESULT OnSetThreadFocus();

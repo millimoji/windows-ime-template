@@ -103,8 +103,7 @@ IFACEMETHODIMP CWindowsIME::OnLayoutChange(_In_ ITfContext *pContext, TfLayoutCo
         break;
 
     case TF_LC_DESTROY:
-        // m_candidateListView->_LayoutDestroyNotification();
-        m_singletonProcessor->CandidateListViewInternal_LayoutDestroyNotification();
+        m_singletonProcessor->CandidateListViewInternal_EndCandidateList();
         break;
 
     }

@@ -147,16 +147,6 @@ struct SingletonProcessorBridge :
         return hr;
     }
 
-    IFACEMETHODIMP CandidateListViewInternal_LayoutDestroyNotification()
-    {
-        HRESULT hr = S_OK;
-        if (m_threadTaskRunner)
-        {
-            m_threadTaskRunner->RunOnThread([&]() { hr = m_engine->CandidateListViewInternal_LayoutDestroyNotification(); });
-        }
-        return hr;
-    }
-
     IFACEMETHODIMP CandidateListViewInternal_OnSetThreadFocus()
     {
         HRESULT hr = S_OK;
@@ -337,20 +327,22 @@ private:
         return S_OK;
     }
 
-    IFACEMETHODIMP CandidateListViewInternal_LayoutDestroyNotification() override
-    {
-        m_candidateListViewInternal->_LayoutDestroyNotification();
-        return S_OK;
-    }
-
     IFACEMETHODIMP CandidateListViewInternal_OnSetThreadFocus() override
     {
-        return m_candidateListViewInternal->OnSetThreadFocus();
+        if (m_candidateListViewInternal->IsCreated())
+        {
+            return m_candidateListViewInternal->OnSetThreadFocus();
+        }
+        return S_OK;
     }
 
     IFACEMETHODIMP CandidateListViewInternal_OnKillThreadFocus() override
     {
-        return m_candidateListViewInternal->OnKillThreadFocus();
+        if (m_candidateListViewInternal->IsCreated())
+        {
+            return m_candidateListViewInternal->OnKillThreadFocus();
+        }
+        return S_OK;
     }
 
     IFACEMETHODIMP CandidateListViewInternal_EndCandidateList() override

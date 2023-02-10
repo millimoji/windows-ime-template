@@ -134,8 +134,8 @@ protected:
     void RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ std::vector<CCandidateListItem> &candidateList, const shared_wstring& candidateString);
 
 protected:
-    WindowsImeLib::IWindowsIMECompositionBuffer* _pTextService = nullptr;
-    std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> _pCandidateListUIPresenter;
+    WindowsImeLib::IWindowsIMECompositionBuffer* m_compositionBuffer = nullptr;
+    std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> m_candidateListView;
     std::shared_ptr<CompositionProcessorEngine> _pCompositionProcessorEngine;
 };
 

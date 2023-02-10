@@ -67,27 +67,7 @@ const int MOVETO_BOTTOM = -1;
 //     }
 //     return -1;
 // }
-// 
-// HRESULT CompositionBuffer::_HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode)
-// {
-//     int iSelectAsNumber = FindVkInVector(*_pCompositionProcessorEngine->GetCandidateListIndexRange(), uCode);
-// 
-//     if (iSelectAsNumber == -1)
-//     {
-//         return S_FALSE;
-//     }
-// 
-//     if (_pCandidateListUIPresenter->IsCreated())
-//     {
-//         if (_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
-//         {
-//             return _HandleCandidateConvert(ec, pContext);
-//         }
-//     }
-// 
-//     return S_FALSE;
-// }
-// 
+
 // //+---------------------------------------------------------------------------
 // //
 // // _HandlePhraseArrowKey
@@ -102,31 +82,6 @@ const int MOVETO_BOTTOM = -1;
 //     _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
 // 
 //     return S_OK;
-// }
-// 
-// //+---------------------------------------------------------------------------
-// //
-// // _HandlePhraseSelectByNumber
-// //
-// //----------------------------------------------------------------------------
-// 
-// HRESULT CompositionBuffer::_HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode)
-// {
-//     int iSelectAsNumber = FindVkInVector(*_pCompositionProcessorEngine->GetCandidateListIndexRange(), uCode);
-//     if (iSelectAsNumber == -1)
-//     {
-//         return S_FALSE;
-//     }
-// 
-//     if (_pCandidateListUIPresenter->IsCreated())
-//     {
-//         if (_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
-//         {
-//             return _HandlePhraseFinalize(ec, pContext);
-//         }
-//     }
-// 
-//     return S_FALSE;
 // }
 
 //////////////////////////////////////////////////////////////////////
@@ -824,16 +779,16 @@ VOID CCandidateListUIPresenter::_LayoutChangeNotification(_In_ RECT *lpRect)
     _pCandidateWnd->_Move(ptCandidate.x, ptCandidate.y);
 }
 
-//+---------------------------------------------------------------------------
-//
-// _LayoutDestroyNotification
-//
-//----------------------------------------------------------------------------
-
-VOID CCandidateListUIPresenter::_LayoutDestroyNotification()
-{
-    _EndCandidateList();
-}
+// //+---------------------------------------------------------------------------
+// //
+// // _LayoutDestroyNotification
+// //
+// //----------------------------------------------------------------------------
+// 
+// VOID CCandidateListUIPresenter::_LayoutDestroyNotification()
+// {
+//     _EndCandidateList();
+// }
 
 //+---------------------------------------------------------------------------
 //
