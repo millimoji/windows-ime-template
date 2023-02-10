@@ -417,6 +417,7 @@ BOOL CWindowsIME::_AddTextProcessorEngine()
     if (!m_singletonProcessor)
     {
         m_singletonProcessor = CreateSingletonProcessorBridge();
+        UpdateCustomState();
     }
 
     return TRUE;
