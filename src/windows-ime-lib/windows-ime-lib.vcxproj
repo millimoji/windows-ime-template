@@ -83,6 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Compartment.h" />
+    <ClInclude Include="CandidateListView.h" />
     <ClInclude Include="CompositionBuffer.h" />
     <ClInclude Include="Define.h" />
     <ClInclude Include="..\WindowsImeLib.h" />
@@ -100,6 +101,7 @@
     <ClInclude Include="Private.h" />
     <ClInclude Include="RegKey.h" />
     <ClInclude Include="SingletonProcessor.h" />
+    <ClInclude Include="TextInputProcessor_h.h" />
     <ClInclude Include="ThreadTaskRunner.h" />
     <ClInclude Include="WindowsIME.h" />
     <ClInclude Include="BaseStructure.h" />

@@ -167,7 +167,6 @@ BOOL CompositionProcessorEngine::Initialize()
     // SetupPreserved(pThreadMgr, tfClientId); 
     // InitializeSampleIMECompartment(pThreadMgr, tfClientId);
     SetupPunctuationPair();
-    // SetupLanguageBar(pThreadMgr, tfClientId, isSecureMode);
     SetupKeystroke();
     SetupConfiguration();
     SetupDictionaryFile();

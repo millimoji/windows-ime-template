@@ -22,12 +22,19 @@ public:
     ~SampleIMEInprocClient() {}
 
 private:
-    void Initialize(_In_ ITfThreadMgr *threadMgr, TfClientId tfClientId, BOOL isSecureMode) override
-    {
-        try
-        {
+    void Initialize(_In_ ITfThreadMgr *threadMgr, TfClientId tfClientId) override {
+        try {
             m_threadMgr = threadMgr;
             m_tfClientId = tfClientId;
+
+            BOOL isSecureMode = FALSE;
+            {   wil::com_ptr<ITfThreadMgrEx> threadMgrEx;
+                if (SUCCEEDED_LOG(threadMgr->QueryInterface(IID_PPV_ARGS(&threadMgrEx)))) {
+                    if (SUCCEEDED_LOG(threadMgrEx->GetActiveFlags(&m_tfTmfActiveFlags))) {
+                        isSecureMode = (m_tfTmfActiveFlags & TF_TMF_SECUREMODE) ? TRUE : FALSE;
+                    }
+                }
+            }
 
             InitCompartments();
             InitLanguageBar(isSecureMode);
@@ -36,12 +43,12 @@ private:
         catch (...)
         {
             LOG_CAUGHT_EXCEPTION();
-            Deinitialize();
+            Uninitialize();
             throw;
         }
     }
 
-    void Deinitialize() override try
+    void Uninitialize() override try
     {
         DeinitPreservedKeys();
         DeinitLanguageBar();
@@ -398,6 +405,7 @@ private:
     WindowsImeLib::IWindowsIMEInProcFramework* m_framework;
     wil::com_ptr<ITfThreadMgr> m_threadMgr;
     TfClientId m_tfClientId = TF_CLIENTID_NULL;
+    DWORD m_tfTmfActiveFlags = {};
 
     bool m_lastCompartmentIsOpen = false;
     bool m_lastCompartmentIsDoubleSingleByte = false;

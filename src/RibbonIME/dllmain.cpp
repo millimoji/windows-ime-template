@@ -10,10 +10,8 @@
 
 BOOL APIENTRY DllMain(HMODULE hModule,
     DWORD  ul_reason_for_call,
-    LPVOID lpReserved
-)
+    LPVOID lpReserved)
 {
-
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
@@ -56,18 +54,14 @@ namespace WindowsImeLib
     public:
         std::shared_ptr<ICompositionProcessorEngine> CreateCompositionProcessorEngine(
             const std::shared_ptr<IWindowsIMECompositionBuffer>& compositionBuffer,
-            const std::shared_ptr<IWindowsIMECandidateListView>& candidateListView) override
-        {
+            const std::shared_ptr<IWindowsIMECandidateListView>& candidateListView) override {
             auto engine = std::make_shared<RibbonIMECore>(compositionBuffer, candidateListView);
             return std::static_pointer_cast<ICompositionProcessorEngine>(engine);
         }
-
-        std::shared_ptr<IConstantProvider> GetConstantProvider() override
-        {
+        std::shared_ptr<IConstantProvider> GetConstantProvider() override {
             static std::shared_ptr<IConstantProvider> constantProvider = std::make_shared<RibbonIMEConstants>();
             return constantProvider;
         }
-
         std::shared_ptr<IWindowsIMEInProcClient> CreateIMEInProcClient(IWindowsIMEInProcFramework* framework) override {
             return RibbonIMEInProcClient_CreateInstance(framework);
         }

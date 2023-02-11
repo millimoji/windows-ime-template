@@ -21,12 +21,17 @@ public:
     void FinalizeCandidateList() override {}
     VOID CancelCompositioon() override {}
 
-    void UpdateCustomState(const std::string_view /* customStateJson */) override {}
+    void UpdateCustomState(const std::string_view customStateJson) override;
     void OnSetFocus(bool /*isGotten*/, const std::wstring_view /*applicationName*/, GUID /*clientId*/) override {}
 
 private:
     const std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> m_compositionBuffer;
     const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> m_candidateListView;
+
+    bool m_isImeOpen = {};
+    bool m_isSecure = {};
+    bool m_isStoreApp = {};
+    bool m_isConsole = {};
 };
 
 class RibbonIMEConstants : public WindowsImeLib::IConstantProvider

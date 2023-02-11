@@ -172,6 +172,7 @@ private:
     wil::com_ptr<ITfThreadMgr> _pThreadMgr;
     TfClientId _tfClientId = {};
     DWORD _dwActivateFlags = {};
+    DWORD m_dwActiveFlags = {}; // via ITfThreadMgrEx::GetActiveFlags, TF_TMF_*
 
     std::wstring m_processName;
     wil::unique_bstr m_processNameBstr;

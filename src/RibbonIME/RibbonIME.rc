@@ -93,7 +93,7 @@ STRINGTABLE
 BEGIN
     IDS_RIBBON_IME          "Japanese Another IME"
     IDS_DEFAULT_FONT        "Yu Gothic UI"
-    IDS_IME_MODE            "Japanese/English input (Shift)"
+    IDS_IME_MODE            "Japanese/English input"
 END
 
 #endif    // English (United States) resources

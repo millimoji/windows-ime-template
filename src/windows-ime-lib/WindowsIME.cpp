@@ -99,6 +99,17 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
     _tfClientId = tfClientId;
     _dwActivateFlags = dwFlags;
 
+    {
+        wil::com_ptr<ITfThreadMgrEx> threadMgrEx;
+        if (SUCCEEDED_LOG(pThreadMgr->QueryInterface(IID_PPV_ARGS(&threadMgrEx))))
+        {
+            if (FAILED_LOG(threadMgrEx->GetActiveFlags(&m_dwActiveFlags)))
+            {
+                m_dwActiveFlags = _dwActivateFlags;
+            }
+        }
+    }
+
     if (!_InitThreadMgrEventSink())
     {
         goto ExitError;
@@ -140,7 +151,7 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
     try
     {
         m_inprocClient = WindowsImeLib::g_processorFactory->CreateIMEInProcClient(this);
-        m_inprocClient->Initialize(pThreadMgr, tfClientId, _IsSecureMode());
+        m_inprocClient->Initialize(pThreadMgr, tfClientId);
     }
     catch (...)
     {
@@ -217,7 +228,7 @@ STDAPI CWindowsIME::Deactivate()
 
     if (m_inprocClient)
     {
-        m_inprocClient->Deinitialize();
+        m_inprocClient->Uninitialize();
         m_inprocClient.reset();
     }
 
