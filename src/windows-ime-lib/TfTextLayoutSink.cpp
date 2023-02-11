@@ -6,77 +6,62 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #include "Private.h"
+#include "WindowsIME.h"
+#include "Globals.h"
 #include "TfTextLayoutSink.h"
-#include "SampleIME.h"
 #include "GetTextExtentEditSession.h"
 
-CTfTextLayoutSink::CTfTextLayoutSink(_In_ CSampleIME *pTextService)
+
+HRESULT CWindowsIME::_StartLayoutTracking(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition)
 {
-    _pTextService = pTextService;
-    _pTextService->AddRef();
+    LOG_IF_FAILED(_EndLayoutTracking());
 
-    _pRangeComposition = nullptr;
-    _pContextDocument = nullptr;
-    _tfEditCookie = TF_INVALID_EDIT_COOKIE;
+    m_textLayoutSink._pContextDocument = pContextDocument;
+    m_textLayoutSink._pRangeComposition = pRangeComposition;
+    m_textLayoutSink._tfEditCookie = ec;
 
-    _dwCookieTextLayoutSink = TF_INVALID_COOKIE;
+    wil::com_ptr<ITfSource> source;
+    RETURN_IF_FAILED(pContextDocument->QueryInterface(IID_PPV_ARGS(&source)));
+    RETURN_IF_FAILED(source->AdviseSink(IID_ITfTextLayoutSink, (ITfTextLayoutSink *)this, &m_textLayoutSink._dwCookieTextLayoutSink));
 
-    _refCount = 1;
+    // Get current rect
+    wil::com_ptr<ITfContextView> pContextView;
+    RETURN_IF_FAILED(pContextDocument->GetActiveView(&pContextView));
 
-    DllAddRef();
+    RECT rc = {};
+    BOOL isClipped = {};
+    RETURN_IF_FAILED(pContextView->GetTextExt(ec, pRangeComposition, &rc, &isClipped));
+
+    m_textLayoutSink.compositionRect = rc;
+    m_textLayoutSink.isClipped = isClipped;
+
+    HWND parentWndHandle = {};
+    if (SUCCEEDED_LOG(pContextView->GetWnd(&parentWndHandle)))
+    {
+        m_textLayoutSink.documentWindow = parentWndHandle;
+    }
+
+    return S_OK;
 }
 
-CTfTextLayoutSink::~CTfTextLayoutSink()
+HRESULT CWindowsIME::_EndLayoutTracking()
 {
-    if (_pTextService)
+    if (m_textLayoutSink._pContextDocument && m_textLayoutSink._dwCookieTextLayoutSink != 0)
     {
-        _pTextService->Release();
+        wil::com_ptr<ITfSource> source;
+        RETURN_IF_FAILED(m_textLayoutSink._pContextDocument->QueryInterface(IID_PPV_ARGS(&source)));
+        RETURN_IF_FAILED(source->UnadviseSink(m_textLayoutSink._dwCookieTextLayoutSink));
     }
 
-    DllRelease();
-}
+    m_textLayoutSink._pContextDocument.reset();
+    m_textLayoutSink._pRangeComposition.reset();
+    m_textLayoutSink._tfEditCookie = TF_INVALID_EDIT_COOKIE;;
+    m_textLayoutSink._dwCookieTextLayoutSink = 0;
+    m_textLayoutSink.compositionRect = {};
+    m_textLayoutSink.isClipped = {};
+    m_textLayoutSink.documentWindow = {};
 
-STDAPI CTfTextLayoutSink::QueryInterface(REFIID riid, _Outptr_ void **ppvObj)
-{
-    if (ppvObj == nullptr)
-    {
-        return E_INVALIDARG;
-    }
-
-    *ppvObj = nullptr;
-
-    if (IsEqualIID(riid, IID_IUnknown) ||
-        IsEqualIID(riid, IID_ITfTextLayoutSink))
-    {
-        *ppvObj = (ITfTextLayoutSink *)this;
-    }
-
-    if (*ppvObj)
-    {
-        AddRef();
-        return S_OK;
-    }
-
-    return E_NOINTERFACE;
-}
-
-STDAPI_(ULONG) CTfTextLayoutSink::AddRef()
-{
-    return ++_refCount;
-}
-
-STDAPI_(ULONG) CTfTextLayoutSink::Release()
-{
-    LONG cr = --_refCount;
-
-    assert(_refCount >= 0);
-
-    if (_refCount == 0)
-    {
-        delete this;
-    }
-
-    return cr;
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -85,10 +70,10 @@ STDAPI_(ULONG) CTfTextLayoutSink::Release()
 //
 //----------------------------------------------------------------------------
 
-STDAPI CTfTextLayoutSink::OnLayoutChange(_In_ ITfContext *pContext, TfLayoutCode lcode, _In_ ITfContextView *pContextView)
+IFACEMETHODIMP CWindowsIME::OnLayoutChange(_In_ ITfContext *pContext, TfLayoutCode lcode, _In_ ITfContextView *pContextView)
 {
     // we're interested in only document context.
-    if (pContext != _pContextDocument)
+    if (pContext != m_textLayoutSink._pContextDocument.get())
     {
         return S_OK;
     }
@@ -96,125 +81,50 @@ STDAPI CTfTextLayoutSink::OnLayoutChange(_In_ ITfContext *pContext, TfLayoutCode
     switch (lcode)
     {
     case TF_LC_CHANGE:
-        {
-            CGetTextExtentEditSession* pEditSession = nullptr;
-            pEditSession = new (std::nothrow) CGetTextExtentEditSession(_pTextService, pContext, pContextView, _pRangeComposition, this);
-            if (nullptr != (pEditSession))
-            {
-                HRESULT hr = S_OK;
-                pContext->RequestEditSession(_pTextService->_GetClientId(), pEditSession, TF_ES_SYNC | TF_ES_READ, &hr);
+        _SubmitEditSessionTask(pContext, [&](TfEditCookie ec) -> HRESULT {
+                RECT rc = {};
+                BOOL isClipped = {};
+                if (SUCCEEDED_LOG(pContextView->GetTextExt(ec, m_textLayoutSink._pRangeComposition.get(), &rc, &isClipped)))
+                {
+                    m_textLayoutSink.compositionRect = rc;
+                    m_textLayoutSink.isClipped = isClipped;
 
-                pEditSession->Release();
-            }
-        }
+                    HWND parentWndHandle = {};
+                    if (SUCCEEDED_LOG(pContextView->GetWnd(&parentWndHandle)))
+                    {
+                        m_textLayoutSink.documentWindow = parentWndHandle;
+                    }
+
+                    // m_candidateListView->_LayoutChangeNotification(parentWndHandle, &rc);
+                    m_singletonProcessor->CandidateListViewInternal_LayoutChangeNotification(parentWndHandle, &rc);
+                }
+                return S_OK;
+            }, TF_ES_SYNC | TF_ES_READ);
         break;
 
     case TF_LC_DESTROY:
-        _LayoutDestroyNotification();
+        m_singletonProcessor->CandidateListViewInternal_EndCandidateList();
         break;
 
     }
     return S_OK;
 }
 
-HRESULT CTfTextLayoutSink::_StartLayout(_In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition)
+HRESULT CWindowsIME::_GetLastTextExt(_Out_ HWND* documentWindow, _Out_ RECT *lpRect)
 {
-    _pContextDocument = pContextDocument;
-    _pContextDocument->AddRef();
-
-    _pRangeComposition = pRangeComposition;
-    _pRangeComposition->AddRef();
-
-    _tfEditCookie = ec;
-
-    return _AdviseTextLayoutSink();
-}
-
-VOID CTfTextLayoutSink::_EndLayout()
-{
-    if (_pRangeComposition)
-    {
-        _pRangeComposition->Release();
-        _pRangeComposition = nullptr;
-    }
-
-    if (_pContextDocument)
-    {
-        _UnadviseTextLayoutSink();
-        _pContextDocument->Release();
-        _pContextDocument = nullptr;
-    }
-}
-
-HRESULT CTfTextLayoutSink::_AdviseTextLayoutSink()
-{
-    HRESULT hr = S_OK;
-    ITfSource* pSource = nullptr;
-
-    hr = _pContextDocument->QueryInterface(IID_ITfSource, (void **)&pSource);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    hr = pSource->AdviseSink(IID_ITfTextLayoutSink, (ITfTextLayoutSink *)this, &_dwCookieTextLayoutSink);
-    if (FAILED(hr))
-    {
-        pSource->Release();
-        return hr;
-    }
-
-    pSource->Release();
-
-    return hr;
-}
-
-HRESULT CTfTextLayoutSink::_UnadviseTextLayoutSink()
-{
-    HRESULT hr = S_OK;
-    ITfSource* pSource = nullptr;
-
-    if (nullptr == _pContextDocument)
-    {
-        return E_FAIL;
-    }
-
-    hr = _pContextDocument->QueryInterface(IID_ITfSource, (void **)&pSource);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    hr = pSource->UnadviseSink(_dwCookieTextLayoutSink);
-    if (FAILED(hr))
-    {
-        pSource->Release();
-        return hr;
-    }
-
-    pSource->Release();
-
-    return hr;
-}
-
-HRESULT CTfTextLayoutSink::_GetTextExt(_Out_ RECT *lpRect)
-{
-    HRESULT hr = S_OK;
-    BOOL isClipped = TRUE;
-    ITfContextView* pContextView = nullptr;
-
-    hr = _pContextDocument->GetActiveView(&pContextView);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    if (FAILED(hr = pContextView->GetTextExt(_tfEditCookie, _pRangeComposition, lpRect, &isClipped)))
-    {
-        return hr;
-    }
-
-    pContextView->Release();
-
+    *documentWindow = m_textLayoutSink.documentWindow;
+    *lpRect = m_textLayoutSink.compositionRect;
     return S_OK;
+
+//    if (!m_textLayoutSink._pContextDocument || !m_textLayoutSink._pRangeComposition)
+//    {
+//        return E_FAIL;
+//    }
+//
+//    BOOL isClipped = TRUE;
+//    wil::com_ptr<ITfContextView> pContextView;
+//    RETURN_IF_FAILED(m_textLayoutSink._pContextDocument->GetActiveView(&pContextView));
+//    RETURN_IF_FAILED(pContextView->GetTextExt(ec, m_textLayoutSink._pRangeComposition.get(), lpRect, &isClipped));
+//    return S_OK;
 }
+

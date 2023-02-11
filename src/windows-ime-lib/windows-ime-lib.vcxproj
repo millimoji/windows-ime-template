@@ -20,44 +20,59 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ActiveLanguageProfileNotifySink.cpp" />
-    <ClCompile Include="BaseDictionaryEngine.cpp" />
     <ClCompile Include="BaseWindow.cpp" />
     <ClCompile Include="ButtonWindow.cpp" />
     <ClCompile Include="CandidateListUIPresenter.cpp" />
     <ClCompile Include="CandidateWindow.cpp" />
     <ClCompile Include="Compartment.cpp" />
     <ClCompile Include="Composition.cpp" />
-    <ClCompile Include="CompositionProcessorEngine.cpp" />
-    <ClCompile Include="DictionaryParser.cpp" />
-    <ClCompile Include="DictionarySearch.cpp" />
     <ClCompile Include="DisplayAttribute.cpp" />
     <ClCompile Include="DisplayAttributeInfo.cpp" />
     <ClCompile Include="DisplayAttributeProvider.cpp" />
-    <ClCompile Include="DllMain.cpp" />
+    <ClCompile Include="dlldata.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="DllMain.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="EditSession.cpp" />
     <ClCompile Include="EndComposition.cpp" />
     <ClCompile Include="EnumDisplayAttributeInfo.cpp" />
     <ClCompile Include="EnumTfCandidates.cpp" />
-    <ClCompile Include="File.cpp" />
-    <ClCompile Include="FileMapping.cpp" />
     <ClCompile Include="FunctionProviderSink.cpp" />
     <ClCompile Include="GetTextExtentEditSession.cpp" />
     <ClCompile Include="Globals.cpp" />
     <ClCompile Include="KeyEventSink.cpp" />
     <ClCompile Include="KeyHandler.cpp" />
-    <ClCompile Include="KeyHandlerEditSession.cpp" />
-    <ClCompile Include="KeyStateCategory.cpp" />
     <ClCompile Include="LanguageBar.cpp" />
     <ClCompile Include="Register.cpp" />
     <ClCompile Include="RegKey.cpp" />
-    <ClCompile Include="SampleIME.cpp" />
-    <ClCompile Include="SampleIMEBaseStructure.cpp" />
+    <ClCompile Include="SingletonProcessor.cpp" />
+    <ClCompile Include="TextInputProcessor_i.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="TextInputProcessor_p.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="WindowsIME.cpp" />
+    <ClCompile Include="BaseStructure.cpp" />
     <ClCompile Include="ScrollBarWindow.cpp" />
     <ClCompile Include="SearchCandidateProvider.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="ShadowWindow.cpp" />
     <ClCompile Include="StartComposition.cpp" />
-    <ClCompile Include="TableDictionaryEngine.cpp" />
     <ClCompile Include="TextEditSink.cpp" />
     <ClCompile Include="TfInputProcessorProfile.cpp" />
     <ClCompile Include="TfTextLayoutSink.cpp" />
@@ -67,44 +82,44 @@
     <ClCompile Include="TipCandidateString.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BaseDictionaryEngine.h" />
+    <ClInclude Include="..\Compartment.h" />
+    <ClInclude Include="CompositionBuffer.h" />
+    <ClInclude Include="Define.h" />
+    <ClInclude Include="..\WindowsImeLib.h" />
     <ClInclude Include="BaseWindow.h" />
     <ClInclude Include="ButtonWindow.h" />
     <ClInclude Include="CandidateListUIPresenter.h" />
     <ClInclude Include="CandidateWindow.h" />
-    <ClInclude Include="Compartment.h" />
-    <ClInclude Include="CompositionProcessorEngine.h" />
-    <ClInclude Include="Define.h" />
-    <ClInclude Include="DictionaryParser.h" />
-    <ClInclude Include="DictionarySearch.h" />
     <ClInclude Include="DisplayAttributeInfo.h" />
-    <ClInclude Include="DisplayString.h" />
     <ClInclude Include="EditSession.h" />
     <ClInclude Include="EnumDisplayAttributeInfo.h" />
     <ClInclude Include="EnumTfCandidates.h" />
-    <ClInclude Include="File.h" />
-    <ClInclude Include="FileMapping.h" />
     <ClInclude Include="GetTextExtentEditSession.h" />
     <ClInclude Include="Globals.h" />
-    <ClInclude Include="KeyHandlerEditSession.h" />
-    <ClInclude Include="KeyStateCategory.h" />
-    <ClInclude Include="LanguageBar.h" />
+    <ClInclude Include="..\LanguageBar.h" />
     <ClInclude Include="Private.h" />
     <ClInclude Include="RegKey.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="SampleIME.h" />
-    <ClInclude Include="SampleIMEBaseStructure.h" />
-    <ClInclude Include="SampleIMEStructureArray.h" />
+    <ClInclude Include="SingletonProcessor.h" />
+    <ClInclude Include="ThreadTaskRunner.h" />
+    <ClInclude Include="WindowsIME.h" />
+    <ClInclude Include="BaseStructure.h" />
     <ClInclude Include="ScrollBarWindow.h" />
     <ClInclude Include="SearchCandidateProvider.h" />
     <ClInclude Include="ShadowWindow.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="TableDictionaryEngine.h" />
     <ClInclude Include="TfInputProcessorProfile.h" />
     <ClInclude Include="TfTextLayoutSink.h" />
     <ClInclude Include="TipCandidateList.h" />
     <ClInclude Include="TipCandidateString.h" />
-    <ClInclude Include="WindowsImeLib.h" />
+    <ClInclude Include="WindowsImeLibTelemetry.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="TextInputProcessor.idl">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PreprocessorDefinitions>
+    </Midl>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -116,7 +131,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
+    <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -129,7 +144,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
+    <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -160,13 +175,15 @@
   <PropertyGroup Label="UserMacros" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <WarningLevel>Level2</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ENTRY_PREFIX=ProxyStub;REGISTER_PROXY_DLL;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>
-      </PrecompiledHeaderFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Private.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -176,15 +193,17 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level2</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ENTRY_PREFIX=ProxyStub;REGISTER_PROXY_DLL;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>
-      </PrecompiledHeaderFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Private.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -196,13 +215,16 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level2</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ENTRY_PREFIX=ProxyStub;REGISTER_PROXY_DLL;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>
-      </PrecompiledHeaderFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Private.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -212,15 +234,17 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level2</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ENTRY_PREFIX=ProxyStub;REGISTER_PROXY_DLL;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>
-      </PrecompiledHeaderFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Private.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -232,5 +256,14 @@
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\..\packages\Microsoft.Windows.ImplementationLibrary.1.0.220914.1\build\native\Microsoft.Windows.ImplementationLibrary.targets" Condition="Exists('..\..\packages\Microsoft.Windows.ImplementationLibrary.1.0.220914.1\build\native\Microsoft.Windows.ImplementationLibrary.targets')" />
+    <Import Project="..\..\packages\Nlohmann-JSON.3.8.0\build\native\Nlohmann-JSON.targets" Condition="Exists('..\..\packages\Nlohmann-JSON.3.8.0\build\native\Nlohmann-JSON.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\Microsoft.Windows.ImplementationLibrary.1.0.220914.1\build\native\Microsoft.Windows.ImplementationLibrary.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Windows.ImplementationLibrary.1.0.220914.1\build\native\Microsoft.Windows.ImplementationLibrary.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Nlohmann-JSON.3.8.0\build\native\Nlohmann-JSON.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Nlohmann-JSON.3.8.0\build\native\Nlohmann-JSON.targets'))" />
+  </Target>
 </Project>

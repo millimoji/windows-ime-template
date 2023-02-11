@@ -8,26 +8,32 @@
 
 #pragma once
 
-class CSampleIME;
+namespace WindowsImeLib
+{
+    struct IWindowsIMECompositionBuffer;
+}
 
-class CEditSessionBase : public ITfEditSession
+class CEditSessionTask :
+    public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
+                                        ITfEditSession,
+                                        Microsoft::WRL::FtmBase>
 {
 public:
-    CEditSessionBase(_In_ CSampleIME *pTextService, _In_ ITfContext *pContext);
-    virtual ~CEditSessionBase();
+    CEditSessionTask() {}
+    virtual ~CEditSessionTask() {}
 
-    // IUnknown
-    STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);
-    STDMETHODIMP_(ULONG) AddRef(void);
-    STDMETHODIMP_(ULONG) Release(void);
+    HRESULT RuntimeClassInitialize(const std::function<HRESULT (TfEditCookie ec)>& editSesisonTask)
+    {
+        m_editSesisonTask = editSesisonTask;
+        return S_OK;
+    }
 
     // ITfEditSession
-    virtual STDMETHODIMP DoEditSession(TfEditCookie ec) = 0;
-
-protected:
-    ITfContext *_pContext;
-    CSampleIME *_pTextService;
+    IFACEMETHODIMP DoEditSession(TfEditCookie ec) override
+    {
+        return m_editSesisonTask(ec);
+    }
 
 private:
-    LONG _refCount;     // COM ref count
+    std::function<HRESULT (TfEditCookie ec)> m_editSesisonTask;
 };

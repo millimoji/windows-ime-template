@@ -7,12 +7,12 @@
 
 #include "Private.h"
 #include "Globals.h"
-#include "SampleIME.h"
-#include "CompositionProcessorEngine.h"
+#include "../WindowsImeLib.h"
+#include "WindowsIME.h"
 
-BOOL CSampleIME::VerifySampleIMECLSID(_In_ REFCLSID clsid)
+BOOL CWindowsIME::VerifyIMECLSID(_In_ REFCLSID clsid)
 {
-    if (IsEqualCLSID(clsid, Global::SampleIMECLSID))
+    if (IsEqualCLSID(clsid, WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID()))
     {
         return TRUE;
     }
@@ -26,12 +26,13 @@ BOOL CSampleIME::VerifySampleIMECLSID(_In_ REFCLSID clsid)
 // Sink called by the framework when changes activate language profile.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID guidProfile, _In_ BOOL isActivated)
+STDAPI CWindowsIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID, _In_ BOOL isActivated)
 {
-	guidProfile;
+    auto activity = WindowsImeLibTelemetry::ITfActiveLanguageProfileNotifySink_OnActivated();
 
-    if (FALSE == VerifySampleIMECLSID(clsid))
+    if (FALSE == VerifyIMECLSID(clsid))
     {
+        activity.Stop();
         return S_OK;
     }
 
@@ -40,24 +41,34 @@ STDAPI CSampleIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID guidProfile, _I
         _AddTextProcessorEngine();
     }
 
-    if (nullptr == _pCompositionProcessorEngine)
+    if (!m_singletonProcessor)
     {
+        activity.Stop();
         return S_OK;
     }
 
     if (isActivated)
     {
-        _pCompositionProcessorEngine->ShowAllLanguageBarIcons();
-
-        _pCompositionProcessorEngine->ConversionModeCompartmentUpdated(_pThreadMgr);
+        if (m_inprocClient)
+        {
+            m_inprocClient->SetLanguageBarStatus(TF_LBI_STATUS_HIDDEN, FALSE); // ShowAll
+            m_inprocClient->ConversionModeCompartmentUpdated();
+            //_pCompositionProcessorEngine->ShowAllLanguageBarIcons();
+            // _pCompositionProcessorEngine->ConversionModeCompartmentUpdated(_pThreadMgr);
+        }
     }
     else
     {
-        _DeleteCandidateList(FALSE, nullptr);
+        m_singletonProcessor->CancelCompositioon();
 
-        _pCompositionProcessorEngine->HideAllLanguageBarIcons();
+        if (m_inprocClient)
+        {
+            m_inprocClient->SetLanguageBarStatus(TF_LBI_STATUS_HIDDEN, TRUE); // HideAll
+            // _pCompositionProcessorEngine->HideAllLanguageBarIcons();
+        }
     }
 
+    activity.Stop();
     return S_OK;
 }
 
@@ -68,7 +79,7 @@ STDAPI CSampleIME::OnActivated(_In_ REFCLSID clsid, _In_ REFGUID guidProfile, _I
 // Advise a active language profile notify sink.
 //----------------------------------------------------------------------------
 
-BOOL CSampleIME::_InitActiveLanguageProfileNotifySink()
+BOOL CWindowsIME::_InitActiveLanguageProfileNotifySink()
 {
     ITfSource* pSource = nullptr;
     BOOL ret = FALSE;
@@ -98,7 +109,7 @@ Exit:
 // Unadvise a active language profile notify sink.  Assumes we have advised one already.
 //----------------------------------------------------------------------------
 
-void CSampleIME::_UninitActiveLanguageProfileNotifySink()
+void CWindowsIME::_UninitActiveLanguageProfileNotifySink()
 {
     ITfSource* pSource = nullptr;
 

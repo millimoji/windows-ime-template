@@ -6,7 +6,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #include "Private.h"
-#include "SampleIME.h"
+#include "WindowsIME.h"
 #include "CandidateListUIPresenter.h"
 
 //+---------------------------------------------------------------------------
@@ -15,26 +15,34 @@
 //
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnSetThreadFocus()
+STDAPI CWindowsIME::OnSetThreadFocus() try
 {
-    if (_pCandidateListUIPresenter)
-    {
-        ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
-        ITfContext* pTfContext = _pCandidateListUIPresenter->_GetContextDocument();
+    auto activity = WindowsImeLibTelemetry::ITfThreadFocusSink_OnSetThreadFocus();
 
-        if ((nullptr != pTfContext) && SUCCEEDED(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr)))
+    if (m_singletonProcessor)
+    {
+        m_singletonProcessor->OnSetFocus(true, m_processNameBstr.get(), m_clientGuid);
+    }
+
+    // if (m_candidateListView->IsCreated())
+    {
+        wil::com_ptr<ITfDocumentMgr> pCandidateListDocumentMgr;
+        wil::com_ptr<ITfContext> pTfContext = m_textLayoutSink._pContextDocument;
+
+        if (pTfContext && SUCCEEDED(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr)))
         {
             if (pCandidateListDocumentMgr == _pDocMgrLastFocused)
             {
-                _pCandidateListUIPresenter->OnSetThreadFocus();
+                // m_candidateListView->OnSetThreadFocus();
+                m_singletonProcessor->CandidateListViewInternal_OnSetThreadFocus();
             }
-
-            pCandidateListDocumentMgr->Release();
         }
     }
 
+    activity.Stop();
     return S_OK;
 }
+CATCH_RETURN()
 
 //+---------------------------------------------------------------------------
 //
@@ -42,32 +50,43 @@ STDAPI CSampleIME::OnSetThreadFocus()
 //
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnKillThreadFocus()
+STDAPI CWindowsIME::OnKillThreadFocus() try
 {
-    if (_pCandidateListUIPresenter)
+    auto activity = WindowsImeLibTelemetry::ITfThreadFocusSink_OnKillThreadFocus();
+
+    if (m_singletonProcessor)
+    {
+        m_singletonProcessor->OnSetFocus(false, m_processNameBstr.get(), m_clientGuid);
+    }
+
+//    if (m_candidateListView->IsCreated())
     {
         ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
-        ITfContext* pTfContext = _pCandidateListUIPresenter->_GetContextDocument();
+        ITfContext* pTfContext = m_textLayoutSink._pContextDocument.get();
 
         if ((nullptr != pTfContext) && SUCCEEDED(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr)))
         {
-            if (_pDocMgrLastFocused)
-            {
-                _pDocMgrLastFocused->Release();
-				_pDocMgrLastFocused = nullptr;
-            }
+//            if (_pDocMgrLastFocused)
+//            {
+//                _pDocMgrLastFocused->Release();
+//                _pDocMgrLastFocused = nullptr;
+//            }
             _pDocMgrLastFocused = pCandidateListDocumentMgr;
-            if (_pDocMgrLastFocused)
-            {
-                _pDocMgrLastFocused->AddRef();
-            }
+//            if (_pDocMgrLastFocused)
+//            {
+//                _pDocMgrLastFocused->AddRef();
+//            }
         }
-        _pCandidateListUIPresenter->OnKillThreadFocus();
+//        m_candidateListView->OnKillThreadFocus();
+        m_singletonProcessor->CandidateListViewInternal_OnKillThreadFocus();
     }
+
+    activity.Stop();
     return S_OK;
 }
+CATCH_RETURN()
 
-BOOL CSampleIME::_InitThreadFocusSink()
+BOOL CWindowsIME::_InitThreadFocusSink()
 {
     ITfSource* pSource = nullptr;
 
@@ -87,7 +106,7 @@ BOOL CSampleIME::_InitThreadFocusSink()
     return TRUE;
 }
 
-void CSampleIME::_UninitThreadFocusSink()
+void CWindowsIME::_UninitThreadFocusSink()
 {
     ITfSource* pSource = nullptr;
 

@@ -16,8 +16,10 @@
 //
 //----------------------------------------------------------------------------
 
-CCandidateWindow::CCandidateWindow(_In_ CANDWNDCALLBACK pfnCallback, _In_ void *pv, _In_ CCandidateRange *pIndexRange, _In_ BOOL isStoreAppMode)
+CCandidateWindow::CCandidateWindow(_In_ CANDWNDCALLBACK pfnCallback, _In_ void *pv, const std::shared_ptr<std::vector<DWORD>>& pIndexRange, _In_ BOOL isStoreAppMode)
 {
+    SetDefaultCandidateTextFont();
+
     _currentSelection = 0;
 
     _SetTextColor(CANDWND_ITEM_COLOR, GetSysColor(COLOR_WINDOW));    // text color is black
@@ -159,9 +161,9 @@ void CCandidateWindow::_ResizeWindow()
 {
     SIZE size = {0, 0};
 
-    _cxTitle = max(_cxTitle, size.cx + 2 * GetSystemMetrics(SM_CXFRAME));
+    _cxTitle = std::max(_cxTitle, static_cast<int>(size.cx + 2 * GetSystemMetrics(SM_CXFRAME)));
 
-    int candidateListPageCnt = _pIndexRange->Count();
+    int candidateListPageCnt = static_cast<int>(_pIndexRange->size());
     CBaseWindow::_Resize(0, 0, _cxTitle, _cyRow * candidateListPageCnt);
 
     RECT rcCandRect = {0, 0, 0, 0};
@@ -236,7 +238,6 @@ LRESULT CALLBACK CCandidateWindow::_WindowProcCallback(_In_ HWND wndHandle, UINT
     case WM_CREATE:
         {
             HDC dcHandle = nullptr;
-
             dcHandle = GetDC(wndHandle);
             if (dcHandle)
             {
@@ -324,10 +325,8 @@ LRESULT CALLBACK CCandidateWindow::_WindowProcCallback(_In_ HWND wndHandle, UINT
 
     case WM_PAINT:
         {
-            HDC dcHandle = nullptr;
             PAINTSTRUCT ps;
-
-            dcHandle = BeginPaint(wndHandle, &ps);
+            HDC dcHandle = BeginPaint(wndHandle, &ps);
             _OnPaint(dcHandle, &ps);
             _DrawBorder(wndHandle, CANDWND_BORDER_WIDTH*2);
             EndPaint(wndHandle, &ps);
@@ -361,7 +360,7 @@ LRESULT CALLBACK CCandidateWindow::_WindowProcCallback(_In_ HWND wndHandle, UINT
             // handle mouse message
             _HandleMouseMsg(uMsg, point);
         }
-		// we processes this message, it should return zero. 
+        // we processes this message, it should return zero. 
         return 0;
 
     case WM_MOUSEACTIVATE:
@@ -452,7 +451,7 @@ void CCandidateWindow::_OnLButtonDown(POINT pt)
 
     int cyLine = _cyRow;
     
-    UINT candidateListPageCnt = _pIndexRange->Count();
+    UINT candidateListPageCnt = static_cast<UINT>(_pIndexRange->size());
     UINT index = 0;
     int currentPage = 0;
 
@@ -462,9 +461,9 @@ void CCandidateWindow::_OnLButtonDown(POINT pt)
     }
 
     // Hit test on list items
-    index = *_PageIndex.GetAt(currentPage);
+    index = _PageIndex.at(currentPage);
 
-    for (UINT pageCount = 0; (index < _candidateList.Count()) && (pageCount < candidateListPageCnt); index++, pageCount++)
+    for (UINT pageCount = 0; (index < _candidateList.size()) && (pageCount < candidateListPageCnt); index++, pageCount++)
     {
         RECT rc = {0, 0, 0, 0};
 
@@ -607,21 +606,21 @@ void CCandidateWindow::_OnVScroll(DWORD dwSB, _In_ DWORD nPos)
 void CCandidateWindow::_DrawList(_In_ HDC dcHandle, _In_ UINT iIndex, _In_ RECT *prc)
 {
     int pageCount = 0;
-    int candidateListPageCnt = _pIndexRange->Count();
+    int candidateListPageCnt = static_cast<int>(_pIndexRange->size());
 
     int cxLine = _TextMetric.tmAveCharWidth;
-    int cyLine = max(_cyRow, _TextMetric.tmHeight);
+    int cyLine = std::max(_cyRow, static_cast<int>(_TextMetric.tmHeight));
     int cyOffset = (cyLine == _cyRow ? (cyLine-_TextMetric.tmHeight)/2 : 0);
 
     RECT rc = {};
 
-	const size_t lenOfPageCount = 16;
+    const size_t lenOfPageCount = 16;
     for (;
-        (iIndex < _candidateList.Count()) && (pageCount < candidateListPageCnt);
+        (iIndex < _candidateList.size()) && (pageCount < candidateListPageCnt);
         iIndex++, pageCount++)
     {
         WCHAR pageCountString[lenOfPageCount] = {'\0'};
-        CCandidateListItem* pItemList = nullptr;
+        // CCandidateListItem* pItemList = nullptr;
 
         rc.top = prc->top + pageCount * cyLine;
         rc.bottom = rc.top + cyLine;
@@ -633,7 +632,7 @@ void CCandidateWindow::_DrawList(_In_ HDC dcHandle, _In_ UINT iIndex, _In_ RECT 
         SetTextColor(dcHandle, CANDWND_NUM_COLOR);
         SetBkColor(dcHandle, GetSysColor(COLOR_3DHIGHLIGHT));
 
-        StringCchPrintf(pageCountString, ARRAYSIZE(pageCountString), L"%d", (LONG)*_pIndexRange->GetAt(pageCount));
+        StringCchPrintf(pageCountString, ARRAYSIZE(pageCountString), L"%d", (LONG)_pIndexRange->at(pageCount));
         ExtTextOut(dcHandle, PageCountPosition * cxLine, pageCount * cyLine + cyOffset, ETO_OPAQUE, &rc, pageCountString, lenOfPageCount, NULL);
 
         rc.left = prc->left + StringPosition * cxLine;
@@ -651,8 +650,9 @@ void CCandidateWindow::_DrawList(_In_ HDC dcHandle, _In_ UINT iIndex, _In_ RECT 
             SetBkColor(dcHandle, CANDWND_SELECTED_BK_COLOR);
         }
 
-        pItemList = _candidateList.GetAt(iIndex);
-        ExtTextOut(dcHandle, StringPosition * cxLine, pageCount * cyLine + cyOffset, ETO_OPAQUE, &rc, pItemList->_ItemString.Get(), (DWORD)pItemList->_ItemString.GetLength(), NULL);
+        const auto pItemList = _candidateList.at(iIndex);
+        ExtTextOut(dcHandle, StringPosition * cxLine, pageCount * cyLine + cyOffset, ETO_OPAQUE, &rc,
+            pItemList->c_str(), static_cast<UINT>(pItemList->length()), NULL);
     }
     for (; (pageCount < candidateListPageCnt); pageCount++)
     {
@@ -702,63 +702,15 @@ void CCandidateWindow::_DrawBorder(_In_ HWND wndHandle, _In_ int cx)
 //
 //----------------------------------------------------------------------------
 
-void CCandidateWindow::_AddString(_Inout_ CCandidateListItem *pCandidateItem, _In_ BOOL isAddFindKeyCode)
+// void CCandidateWindow::_AddString(_Inout_ CCandidateListItem *pCandidateItem, _In_ BOOL /* isAddFindKeyCode */)
+void CCandidateWindow::_AddString(const shared_wstring& pCandidateItem)
 {
-    DWORD_PTR dwItemString = pCandidateItem->_ItemString.GetLength();
-    const WCHAR* pwchString = nullptr;
-    if (dwItemString)
+    if (pCandidateItem->length() == 0)
     {
-        pwchString = new (std::nothrow) WCHAR[ dwItemString ];
-        if (!pwchString)
-        {
-            return;
-        }
-        memcpy((void*)pwchString, pCandidateItem->_ItemString.Get(), dwItemString * sizeof(WCHAR));
-    }
-
-    DWORD_PTR itemWildcard = pCandidateItem->_FindKeyCode.GetLength();
-    const WCHAR* pwchWildcard = nullptr;
-    if (itemWildcard && isAddFindKeyCode)
-    {
-        pwchWildcard = new (std::nothrow) WCHAR[ itemWildcard ];
-        if (!pwchWildcard)
-        {
-            if (pwchString)
-            {
-                delete [] pwchString;
-            }
-            return;
-        }
-        memcpy((void*)pwchWildcard, pCandidateItem->_FindKeyCode.Get(), itemWildcard * sizeof(WCHAR));
-    }
-
-    CCandidateListItem* pLI = nullptr;
-    pLI = _candidateList.Append();
-    if (!pLI)
-    {
-        if (pwchString)
-        {
-            delete [] pwchString;
-            pwchString = nullptr;
-        }
-        if (pwchWildcard)
-        {
-            delete [] pwchWildcard;
-            pwchWildcard = nullptr;
-        }
         return;
     }
 
-    if (pwchString)
-    {
-        pLI->_ItemString.Set(pwchString, dwItemString);
-    }
-    if (pwchWildcard)
-    {
-        pLI->_FindKeyCode.Set(pwchWildcard, itemWildcard);
-    }
-
-    return;
+    _candidateList.emplace_back(pCandidateItem);
 }
 
 //+---------------------------------------------------------------------------
@@ -769,16 +721,9 @@ void CCandidateWindow::_AddString(_Inout_ CCandidateListItem *pCandidateItem, _I
 
 void CCandidateWindow::_ClearList()
 {
-    for (UINT index = 0; index < _candidateList.Count(); index++)
-    {
-        CCandidateListItem* pItemList = nullptr;
-        pItemList = _candidateList.GetAt(index);
-        delete [] pItemList->_ItemString.Get();
-        delete [] pItemList->_FindKeyCode.Get();
-    }
     _currentSelection = 0;
-    _candidateList.Clear();
-    _PageIndex.Clear();
+    _candidateList.clear();
+    _PageIndex.clear();
 }
 
 //+---------------------------------------------------------------------------
@@ -806,30 +751,33 @@ void CCandidateWindow::_SetScrollInfo(_In_ int nMax, _In_ int nPage)
 //
 //----------------------------------------------------------------------------
 
-DWORD CCandidateWindow::_GetCandidateString(_In_ int iIndex, _Outptr_result_maybenull_z_ const WCHAR **ppwchCandidateString)
+shared_wstring CCandidateWindow::_GetCandidateString(_In_ int iIndex)
 {
-    CCandidateListItem* pItemList = nullptr;
+    // CCandidateListItem* pItemList = nullptr;
 
     if (iIndex < 0 )
     {
-        *ppwchCandidateString = nullptr;
-        return 0;
+        return std::make_shared<std::wstring>();
+        // *ppwchCandidateString = nullptr;
+        // return 0;
     }
 
     UINT index = static_cast<UINT>(iIndex);
-	
-	if (index >= _candidateList.Count())
+    
+    if (index >= _candidateList.size())
     {
-        *ppwchCandidateString = nullptr;
-        return 0;
+        return std::make_shared<std::wstring>();
+        // *ppwchCandidateString = nullptr;
+        // return 0;
     }
 
-    pItemList = _candidateList.GetAt(iIndex);
-    if (ppwchCandidateString)
-    {
-        *ppwchCandidateString = pItemList->_ItemString.Get();
-    }
-    return (DWORD)pItemList->_ItemString.GetLength();
+    return _candidateList.at(iIndex);
+
+//    if (ppwchCandidateString)
+//    {
+//        *ppwchCandidateString = pItemList->_ItemString.Get();
+//    }
+//    return (DWORD)pItemList->_ItemString.GetLength();
 }
 
 //+---------------------------------------------------------------------------
@@ -838,22 +786,16 @@ DWORD CCandidateWindow::_GetCandidateString(_In_ int iIndex, _Outptr_result_mayb
 //
 //----------------------------------------------------------------------------
 
-DWORD CCandidateWindow::_GetSelectedCandidateString(_Outptr_result_maybenull_ const WCHAR **ppwchCandidateString)
+shared_wstring CCandidateWindow::_GetSelectedCandidateString()
 {
-    CCandidateListItem* pItemList = nullptr;
+    // CCandidateListItem* pItemList = nullptr;
 
-    if (_currentSelection >= _candidateList.Count())
+    if (_currentSelection >= _candidateList.size())
     {
-        *ppwchCandidateString = nullptr;
-        return 0;
+        return std::make_shared<const std::wstring>();
     }
 
-    pItemList = _candidateList.GetAt(_currentSelection);
-    if (ppwchCandidateString)
-    {
-        *ppwchCandidateString = pItemList->_ItemString.Get();
-    }
-    return (DWORD)pItemList->_ItemString.GetLength();
+    return _candidateList.at(_currentSelection);
 }
 
 //+---------------------------------------------------------------------------
@@ -863,7 +805,7 @@ DWORD CCandidateWindow::_GetSelectedCandidateString(_Outptr_result_maybenull_ co
 //----------------------------------------------------------------------------
 
 BOOL CCandidateWindow::_SetSelectionInPage(int nPos)
-{	
+{   
     if (nPos < 0)
     {
         return FALSE;
@@ -871,7 +813,7 @@ BOOL CCandidateWindow::_SetSelectionInPage(int nPos)
 
     UINT pos = static_cast<UINT>(nPos);
 
-    if (pos >= _candidateList.Count())
+    if (pos >= _candidateList.size())
     {
         return FALSE;
     }
@@ -882,7 +824,7 @@ BOOL CCandidateWindow::_SetSelectionInPage(int nPos)
         return FALSE;
     }
 
-    _currentSelection = *_PageIndex.GetAt(currentPage) + nPos;
+    _currentSelection = _PageIndex.at(currentPage) + nPos;
 
     return TRUE;
 }
@@ -895,7 +837,7 @@ BOOL CCandidateWindow::_SetSelectionInPage(int nPos)
 
 BOOL CCandidateWindow::_MoveSelection(_In_ int offSet, _In_ BOOL isNotify)
 {
-    if (_currentSelection + offSet >= _candidateList.Count())
+    if (static_cast<size_t>(_currentSelection + offSet) >= _candidateList.size())
     {
         return FALSE;
     }
@@ -922,7 +864,7 @@ BOOL CCandidateWindow::_SetSelection(_In_ int selectedIndex, _In_ BOOL isNotify)
 {
     if (selectedIndex == -1)
     {
-        selectedIndex = _candidateList.Count() - 1;
+        selectedIndex = static_cast<UINT>(_candidateList.size() - 1);
     }
 
     if (selectedIndex < 0)
@@ -930,7 +872,7 @@ BOOL CCandidateWindow::_SetSelection(_In_ int selectedIndex, _In_ BOOL isNotify)
         return FALSE;
     }
 
-    int candCnt = static_cast<int>(_candidateList.Count());
+    int candCnt = static_cast<int>(_candidateList.size());
     if (selectedIndex >= candCnt)
     {
         return FALSE;
@@ -981,7 +923,7 @@ BOOL CCandidateWindow::_MovePage(_In_ int offSet, _In_ BOOL isNotify)
     }
 
     newPage = currentPage + offSet;
-    if ((newPage < 0) || (newPage >= static_cast<int>(_PageIndex.Count())))
+    if ((newPage < 0) || (newPage >= static_cast<int>(_PageIndex.size())))
     {
         return FALSE;
     }
@@ -991,15 +933,15 @@ BOOL CCandidateWindow::_MovePage(_In_ int offSet, _In_ BOOL isNotify)
     // want adjustment to eliminate empty entries.
     //
     // We do this for keeping behavior inline with downlevel.
-    if (_currentSelection % _pIndexRange->Count() == 0 && 
-        _currentSelection == *_PageIndex.GetAt(currentPage)) 
+    if (_currentSelection % _pIndexRange->size() == 0 && 
+        _currentSelection == _PageIndex.at(currentPage)) 
     {
         _dontAdjustOnEmptyItemPage = TRUE;
     }
 
-    selectionOffset = _currentSelection - *_PageIndex.GetAt(currentPage);
-    _currentSelection = *_PageIndex.GetAt(newPage) + selectionOffset;
-    _currentSelection = _candidateList.Count() > _currentSelection ? _currentSelection : _candidateList.Count() - 1;
+    selectionOffset = _currentSelection - _PageIndex.at(currentPage);
+    _currentSelection = _PageIndex.at(newPage) + selectionOffset;
+    _currentSelection = _candidateList.size() > _currentSelection ? _currentSelection : static_cast<UINT>(_candidateList.size() - 1);
 
     // adjust scrollbar position
     if (_pVScrollBarWnd && isNotify)
@@ -1018,7 +960,7 @@ BOOL CCandidateWindow::_MovePage(_In_ int offSet, _In_ BOOL isNotify)
 
 BOOL CCandidateWindow::_SetSelectionOffset(_In_ int offSet)
 {
-	if (_currentSelection + offSet >= _candidateList.Count())
+    if (static_cast<size_t>(_currentSelection + offSet) >= _candidateList.size())
     {
         return FALSE;
     }
@@ -1033,9 +975,9 @@ BOOL CCandidateWindow::_SetSelectionOffset(_In_ int offSet)
     // For SB_LINEUP and SB_LINEDOWN, we need to special case if CurrentPageHasEmptyItems.
     // CurrentPageHasEmptyItems if we are on the last page.
     if ((offSet == 1 || offSet == -1) &&
-        fCurrentPageHasEmptyItems && _PageIndex.Count() > 1)
+        fCurrentPageHasEmptyItems && _PageIndex.size() > 1)
     {
-        int iPageIndex = *_PageIndex.GetAt(static_cast<size_t>(_PageIndex.Count() - 1));
+        int iPageIndex = _PageIndex.at(static_cast<size_t>(_PageIndex.size() - 1));
         // Moving on the last page and last page has empty items.
         if (newOffset >= iPageIndex)
         {
@@ -1070,9 +1012,9 @@ HRESULT CCandidateWindow::_GetPageIndex(UINT *pIndex, _In_ UINT uSize, _Inout_ U
 {
     HRESULT hr = S_OK;
 
-    if (uSize > _PageIndex.Count())
+    if (uSize > _PageIndex.size())
     {
-        uSize = _PageIndex.Count();
+        uSize = static_cast<UINT>(_PageIndex.size());
     }
     else
     {
@@ -1083,12 +1025,12 @@ HRESULT CCandidateWindow::_GetPageIndex(UINT *pIndex, _In_ UINT uSize, _Inout_ U
     {
         for (UINT i = 0; i < uSize; i++)
         {
-            *pIndex = *_PageIndex.GetAt(i);
+            *pIndex = _PageIndex.at(i);
             pIndex++;
         }
     }
 
-    *puPageCnt = _PageIndex.Count();
+    *puPageCnt = static_cast<UINT>(_PageIndex.size());
 
     return hr;
 }
@@ -1103,11 +1045,12 @@ HRESULT CCandidateWindow::_SetPageIndex(UINT *pIndex, _In_ UINT uPageCnt)
 {
     uPageCnt;
 
-    _PageIndex.Clear();
+    _PageIndex.clear();
 
     for (UINT i = 0; i < uPageCnt; i++)
     {
-        UINT *pLastNewPageIndex = _PageIndex.Append();
+        _PageIndex.emplace_back(0);
+        UINT *pLastNewPageIndex = &_PageIndex.back();
         if (pLastNewPageIndex != nullptr)
         {
             *pLastNewPageIndex = *pIndex;
@@ -1137,21 +1080,21 @@ HRESULT CCandidateWindow::_GetCurrentPage(_Inout_ UINT *pCurrentPage)
 
     *pCurrentPage = 0;
 
-    if (_PageIndex.Count() == 0)
+    if (_PageIndex.size() == 0)
     {
         hr = E_UNEXPECTED;
         goto Exit;
     }
 
-    if (_PageIndex.Count() == 1)
+    if (_PageIndex.size() == 1)
     {
         *pCurrentPage = 0;
          goto Exit;
     }
 
-    for (i = 1; i < _PageIndex.Count(); i++)
+    for (i = 1; i < _PageIndex.size(); i++)
     {
-        UINT uPageIndex = *_PageIndex.GetAt(i);
+        UINT uPageIndex = _PageIndex.at(i);
 
         if (uPageIndex > _currentSelection)
         {
@@ -1207,11 +1150,11 @@ Exit:
 
 BOOL CCandidateWindow::_AdjustPageIndexForSelection()
 {
-    UINT candidateListPageCnt = _pIndexRange->Count();
+    UINT candidateListPageCnt = static_cast<UINT>(_pIndexRange->size());
     UINT* pNewPageIndex = nullptr;
     UINT newPageCnt = 0;
 
-    if (_candidateList.Count() < candidateListPageCnt)
+    if (_candidateList.size() < candidateListPageCnt)
     {
         // no needed to restruct page index
         return TRUE;
@@ -1228,7 +1171,7 @@ BOOL CCandidateWindow::_AdjustPageIndexForSelection()
     // A + B is (_CandidateListCount - 2) / candidateListPageCnt + 1
 
     BOOL isBefore = _currentSelection;
-    BOOL isAfter = _candidateList.Count() > _currentSelection + candidateListPageCnt;
+    BOOL isAfter = _candidateList.size() > static_cast<size_t>(_currentSelection + candidateListPageCnt);
 
     // only have current page
     if (!isBefore && !isAfter) 
@@ -1238,7 +1181,7 @@ BOOL CCandidateWindow::_AdjustPageIndexForSelection()
     // only have after pages; just count the total number of pages
     else if (!isBefore && isAfter)
     {
-        newPageCnt = (_candidateList.Count() - 1) / candidateListPageCnt + 1;
+        newPageCnt = static_cast<UINT>((_candidateList.size() - 1) / candidateListPageCnt + 1);
     }
     // we are at the last page
     else if (isBefore && !isAfter)
@@ -1247,7 +1190,7 @@ BOOL CCandidateWindow::_AdjustPageIndexForSelection()
     }
     else if (isBefore && isAfter)
     {
-        newPageCnt = (_candidateList.Count() - 2) / candidateListPageCnt + 2;
+        newPageCnt = static_cast<UINT>((_candidateList.size() - 2) / candidateListPageCnt + 2);
     }
 
     pNewPageIndex = new (std::nothrow) UINT[ newPageCnt ];
@@ -1300,7 +1243,7 @@ COLORREF _AdjustTextColor(_In_ COLORREF crColor, _In_ COLORREF crBkColor)
 
 HRESULT CCandidateWindow::_CurrentPageHasEmptyItems(_Inout_ BOOL *hasEmptyItems)
 {
-    int candidateListPageCnt = _pIndexRange->Count();
+    int candidateListPageCnt = static_cast<int>(_pIndexRange->size());
     UINT currentPage = 0;
 
     if (FAILED(_GetCurrentPage(&currentPage)))
@@ -1308,9 +1251,9 @@ HRESULT CCandidateWindow::_CurrentPageHasEmptyItems(_Inout_ BOOL *hasEmptyItems)
         return S_FALSE;
     }
 
-    if ((currentPage == 0 || currentPage == _PageIndex.Count()-1) &&
-        (_PageIndex.Count() > 0) &&
-        (*_PageIndex.GetAt(currentPage) > (UINT)(_candidateList.Count() - candidateListPageCnt)))
+    if ((currentPage == 0 || currentPage == _PageIndex.size()-1) &&
+        (_PageIndex.size() > 0) &&
+        (_PageIndex.at(currentPage) > (UINT)(_candidateList.size() - candidateListPageCnt)))
     {
         *hasEmptyItems = TRUE;
     }
@@ -1362,9 +1305,9 @@ void CCandidateWindow::_FireMessageToLightDismiss(_In_ HWND wndHandle, _In_ WIND
 HRESULT CCandidateWindow::_AdjustPageIndex(_Inout_ UINT & currentPage, _Inout_ UINT & currentPageIndex)
 {
     HRESULT hr = E_FAIL;
-    UINT candidateListPageCnt = _pIndexRange->Count();
+    UINT candidateListPageCnt = static_cast<UINT>(_pIndexRange->size());
 
-    currentPageIndex = *_PageIndex.GetAt(currentPage);
+    currentPageIndex = _PageIndex.at(currentPage);
 
     BOOL hasEmptyItems = FALSE;
     if (FAILED(_CurrentPageHasEmptyItems(&hasEmptyItems)))
@@ -1386,8 +1329,8 @@ HRESULT CCandidateWindow::_AdjustPageIndex(_Inout_ UINT & currentPage, _Inout_ U
         UINT tempSelection = _currentSelection;
 
         // Last page
-        UINT candNum = _candidateList.Count();
-        UINT pageNum = _PageIndex.Count();
+        UINT candNum = static_cast<UINT>(_candidateList.size());
+        UINT pageNum = static_cast<UINT>(_PageIndex.size());
 
         if ((currentPageIndex > candNum - candidateListPageCnt) && (pageNum > 0) && (currentPage == (pageNum - 1)))
         {
@@ -1402,7 +1345,7 @@ HRESULT CCandidateWindow::_AdjustPageIndex(_Inout_ UINT & currentPage, _Inout_ U
                 goto Exit;
             }
 
-            currentPageIndex = *_PageIndex.GetAt(currentPage);
+            currentPageIndex = _PageIndex.at(currentPage);
         }
         // First page
         else if ((currentPageIndex < candidateListPageCnt) && (currentPage == 0))

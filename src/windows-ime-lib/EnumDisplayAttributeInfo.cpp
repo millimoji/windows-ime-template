@@ -6,8 +6,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #include "Private.h"
-#include "globals.h"
-#include "SampleIME.h"
+#include "Globals.h"
+#include "WindowsIME.h"
 #include "DisplayAttributeInfo.h"
 #include "EnumDisplayAttributeInfo.h"
 

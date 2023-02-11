@@ -9,12 +9,12 @@
       <UniqueIdentifier>{988f2f0d-8d46-450d-a127-2a64e16ccd46}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="IDL">
+      <UniqueIdentifier>{5d2dfcc9-12d7-45ff-81f0-22c7da81898f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ActiveLanguageProfileNotifySink.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BaseDictionaryEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BaseWindow.cpp">
@@ -33,15 +33,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Composition.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CompositionProcessorEngine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DictionaryParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DictionarySearch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DisplayAttribute.cpp">
@@ -68,12 +59,6 @@
     <ClCompile Include="EnumTfCandidates.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="File.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FileMapping.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="FunctionProviderSink.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -89,12 +74,6 @@
     <ClCompile Include="KeyHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="KeyHandlerEditSession.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KeyStateCategory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LanguageBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -104,10 +83,10 @@
     <ClCompile Include="RegKey.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SampleIME.cpp">
+    <ClCompile Include="WindowsIME.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SampleIMEBaseStructure.cpp">
+    <ClCompile Include="BaseStructure.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ScrollBarWindow.cpp">
@@ -123,9 +102,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="StartComposition.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TableDictionaryEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TextEditSink.cpp">
@@ -149,11 +125,20 @@
     <ClCompile Include="TipCandidateString.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SingletonProcessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dlldata.c">
+      <Filter>IDL</Filter>
+    </ClCompile>
+    <ClCompile Include="TextInputProcessor_i.c">
+      <Filter>IDL</Filter>
+    </ClCompile>
+    <ClCompile Include="TextInputProcessor_p.c">
+      <Filter>IDL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BaseDictionaryEngine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BaseWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -166,25 +151,7 @@
     <ClInclude Include="CandidateWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Compartment.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CompositionProcessorEngine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Define.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DictionaryParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DictionarySearch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DisplayAttributeInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DisplayString.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EditSession.h">
@@ -196,40 +163,16 @@
     <ClInclude Include="EnumTfCandidates.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="File.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FileMapping.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GetTextExtentEditSession.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Globals.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KeyHandlerEditSession.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KeyStateCategory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LanguageBar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RegKey.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
+    <ClInclude Include="WindowsIME.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SampleIME.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SampleIMEBaseStructure.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SampleIMEStructureArray.h">
+    <ClInclude Include="BaseStructure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ScrollBarWindow.h">
@@ -239,9 +182,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ShadowWindow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TableDictionaryEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TfInputProcessorProfile.h">
@@ -256,12 +196,44 @@
     <ClInclude Include="TipCandidateString.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WindowsImeLib.h" />
     <ClInclude Include="Private.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="stdafx.h">
+    <ClInclude Include="..\WindowsImeLib.h" />
+    <ClInclude Include="Define.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Compartment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Globals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LanguageBar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SingletonProcessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowsImeLibTelemetry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadTaskRunner.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CompositionBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="$(MSBuildThisFileDirectory)..\..\natvis\wil.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="TextInputProcessor.idl">
+      <Filter>IDL</Filter>
+    </Midl>
   </ItemGroup>
 </Project>

@@ -7,33 +7,30 @@
 
 #pragma once
 
-#include "private.h"
-#include <string>
+#include "Private.h"
 
-class CTipCandidateString : public ITfCandidateString
+class CTipCandidateString :
+    public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
+                                        ITfCandidateString,
+                                        Microsoft::WRL::FtmBase>
 {
-protected:
-    CTipCandidateString();
-    virtual ~CTipCandidateString();
+public:
+    CTipCandidateString() {}
+    virtual ~CTipCandidateString() {}
 
 public:
     static HRESULT CreateInstance(_Outptr_ CTipCandidateString **ppobj);
     static HRESULT CreateInstance(REFIID riid, _Outptr_ void **ppvObj);
 
-    // IUnknown methods
-    virtual STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);
-    virtual STDMETHODIMP_(ULONG) AddRef();
-    virtual STDMETHODIMP_(ULONG) Release();
-
     // ITfCandidateString methods
     virtual STDMETHODIMP GetString(BSTR *pbstr);
     virtual STDMETHODIMP GetIndex(_Out_ ULONG *pnIndex);
 
-    virtual STDMETHODIMP SetIndex(ULONG uIndex);
-    virtual STDMETHODIMP SetString(_In_ const WCHAR *pch, DWORD_PTR length);
+    HRESULT SetIndex(ULONG uIndex);
+    HRESULT SetString(const shared_wstring& candidateStr);
+    shared_wstring GetUnderlyingString();
 
 protected:
-    long _refCount;
-    int _index;
-    std::wstring _candidateStr;
+    int _index = 0;
+    shared_wstring _candidateStr;
 };

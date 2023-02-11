@@ -8,13 +8,14 @@
 
 #pragma once
 
-#include "KeyHandlerEditSession.h"
+// #include "KeyHandlerEditSession.h"
 #include "CandidateWindow.h"
 #include "TfTextLayoutSink.h"
-#include "SampleIME.h"
-#include "SampleIMEBaseStructure.h"
+#include "BaseStructure.h"
 
 class CReadingLine;
+struct ICandidateListViewOwner;
+
 
 //+---------------------------------------------------------------------------
 //
@@ -26,22 +27,20 @@ class CReadingLine;
 // 3rd party IME.
 //----------------------------------------------------------------------------
 
-class CCandidateListUIPresenter : public CTfTextLayoutSink,
-    public ITfCandidateListUIElementBehavior,
-    public ITfIntegratableCandidateListUIElement
+class CCandidateListUIPresenter :
+    public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
+                                        ITfUIElement,
+                                        ITfCandidateListUIElement,
+                                        ITfCandidateListUIElementBehavior,
+                                        ITfIntegratableCandidateListUIElement,
+                                        Microsoft::WRL::FtmBase>
 {
 public:
-    CCandidateListUIPresenter(_In_ CSampleIME *pTextService, ATOM atom,
-        KEYSTROKE_CATEGORY Category,
-        _In_ CCandidateRange *pIndexRange,
-        BOOL hideWindow);
+    CCandidateListUIPresenter() {}
     virtual ~CCandidateListUIPresenter();
+    HRESULT RuntimeClassInitialize(_In_ ICandidateListViewOwner* pTextService, const std::shared_ptr<std::vector<DWORD>>& _pIndexRange, ATOM atom, BOOL hideWindow);
 
-    // IUnknown
-    STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);
-    STDMETHODIMP_(ULONG) AddRef(void);
-    STDMETHODIMP_(ULONG) Release(void);
-
+private:
     // ITfUIElement
     STDMETHODIMP GetDescription(BSTR *pbstr);
     STDMETHODIMP GetGUID(GUID *pguid);
@@ -70,15 +69,18 @@ public:
     STDMETHODIMP ShowCandidateNumbers(_Out_ BOOL *pIsShow); 
     STDMETHODIMP FinalizeExactCompositionString();
 
-    virtual HRESULT _StartCandidateList(TfClientId tfClientId, _In_ ITfDocumentMgr *pDocumentMgr, _In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth);
+public: // WindowsImeLib::IWindowsIMECandidateListView
+    // transfer from parent class
+    HRESULT _StartCandidateList(UINT wndWidth);
     void _EndCandidateList();
 
-    void _SetText(_In_ CSampleImeArray<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode);
+    void _SetText(const std::vector<shared_wstring>& pCandidateList);
     void _ClearList();
     VOID _SetTextColor(COLORREF crColor, COLORREF crBkColor);
     VOID _SetFillColor(HBRUSH hBrush);
 
-    DWORD_PTR _GetSelectedCandidateString(_Outptr_result_maybenull_ const WCHAR **ppwchCandidateString);
+    shared_wstring _GetSelectedCandidateString();
+
     BOOL _SetSelectionInPage(int nPos) { return _pCandidateWnd->_SetSelectionInPage(nPos); }
 
     BOOL _MoveSelection(_In_ int offSet);
@@ -89,14 +91,12 @@ public:
 
     // CTfTextLayoutSink
     virtual VOID _LayoutChangeNotification(_In_ RECT *lpRect);
-    virtual VOID _LayoutDestroyNotification();
 
     // Event for ITfThreadFocusSink
     virtual HRESULT OnSetThreadFocus();
     virtual HRESULT OnKillThreadFocus();
 
-    void RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ CSampleImeArray<CCandidateListItem> &candidateList, _In_ CStringRange &srgCandidateString);
-    void AdviseUIChangedByArrowKey(_In_ KEYSTROKE_FUNCTION arrowKey);
+    void AdviseUIChangedByArrowKey(_In_ WindowsImeLib::CANDIDATELIST_FUNCTION arrowKey);
 
 private:
     virtual HRESULT CALLBACK _CandidateChangeNotification(_In_ enum CANDWND_ACTION action);
@@ -106,32 +106,26 @@ private:
     HRESULT _UpdateUIElement();
 
     HRESULT ToShowCandidateWindow();
-
     HRESULT ToHideCandidateWindow();
 
     HRESULT BeginUIElement();
     HRESULT EndUIElement();
 
-    HRESULT MakeCandidateWindow(_In_ ITfContext *pContextDocument, _In_ UINT wndWidth);
+    HRESULT MakeCandidateWindow(UINT wndWidth, HWND parentWndHandle);
     void DisposeCandidateWindow();
-
-    void AddCandidateToCandidateListUI(_In_ CSampleImeArray<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode);
-
-    void SetPageIndexWithScrollInfo(_In_ CSampleImeArray<CCandidateListItem> *pCandidateList);
+    void AddCandidateToCandidateListUI(const std::vector<shared_wstring>& pCandidateList);
+    void SetPageIndexWithScrollInfo(const std::vector<shared_wstring>& pCandidateList);
 
 protected:
-    CCandidateWindow *_pCandidateWnd;
-    BOOL _isShowMode;
-    BOOL _hideWindow;
+    CCandidateWindow* _pCandidateWnd = {};
+    BOOL _isShowMode = {};
+    BOOL _hideWindow = {};
 
 private:
-
-    HWND _parentWndHandle;
-    ATOM _atom;
-    CCandidateRange* _pIndexRange;
-    KEYSTROKE_CATEGORY _Category;
-    DWORD _updatedFlags;
-    DWORD _uiElementId;
-    CSampleIME* _pTextService;
-    LONG _refCount;
+    HWND _parentWndHandle = {};
+    ATOM _atom = {};
+    std::shared_ptr<std::vector<DWORD>> _pIndexRange;
+    DWORD _updatedFlags = {};
+    DWORD _uiElementId = {};
+    ICandidateListViewOwner* _pTextService = {};
 };

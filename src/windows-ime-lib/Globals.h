@@ -7,68 +7,22 @@
 
 #pragma once
 
-#include "private.h"
-#include "define.h"
-#include "SampleIMEBaseStructure.h"
+#include "Define.h"
+#include "BaseStructure.h"
 
 void DllAddRef();
 void DllRelease();
 
-
-namespace Global {
-//---------------------------------------------------------------------
-// inline
-//---------------------------------------------------------------------
-
-inline void SafeRelease(_In_ IUnknown *punk)
+namespace WindowsImeLibLocal
 {
-    if (punk != nullptr)
-    {
-        punk->Release();
-    }
-}
-
-inline void QuickVariantInit(_Inout_ VARIANT *pvar)
+namespace Global
 {
-    pvar->vt = VT_EMPTY;
-}
 
-inline void QuickVariantClear(_Inout_ VARIANT *pvar)
-{
-    switch (pvar->vt) 
-    {
-    // some ovbious VTs that don't need to call VariantClear.
-    case VT_EMPTY:
-    case VT_NULL:
-    case VT_I2:
-    case VT_I4:
-    case VT_R4:
-    case VT_R8:
-    case VT_CY:
-    case VT_DATE:
-    case VT_I1:
-    case VT_UI1:
-    case VT_UI2:
-    case VT_UI4:
-    case VT_I8:
-    case VT_UI8:
-    case VT_INT:
-    case VT_UINT:
-    case VT_BOOL:
-        break;
-
-        // Call release for VT_UNKNOWN.
-    case VT_UNKNOWN:
-        SafeRelease(pvar->punkVal);
-        break;
-
-    default:
-        // we call OleAut32 for other VTs.
-        VariantClear(pvar);
-        break;
-    }
-    pvar->vt = VT_EMPTY;
-}
+inline USHORT ModifiersValue = 0;
+inline USHORT UniqueModifiersValue = 0;
+inline BOOL   IsShiftKeyDownOnly = FALSE;
+inline BOOL   IsControlKeyDownOnly = FALSE;
+inline BOOL   IsAltKeyDownOnly = FALSE;
 
 //+---------------------------------------------------------------------------
 //
@@ -94,10 +48,21 @@ inline BOOL IsTooSimilar(COLORREF cr1, COLORREF cr2)
     return DeltaR + DeltaG + DeltaB < 80;
 }
 
+//+---------------------------------------------------------------------------
+//
+// CheckModifiers
+//
+//----------------------------------------------------------------------------
+
+#define TF_MOD_ALLALT     (TF_MOD_RALT | TF_MOD_LALT | TF_MOD_ALT)
+#define TF_MOD_ALLCONTROL (TF_MOD_RCONTROL | TF_MOD_LCONTROL | TF_MOD_CONTROL)
+#define TF_MOD_ALLSHIFT   (TF_MOD_RSHIFT | TF_MOD_LSHIFT | TF_MOD_SHIFT)
+
 //---------------------------------------------------------------------
 // extern
 //---------------------------------------------------------------------
 extern HINSTANCE dllInstanceHandle;
+extern HFONT defaultlFontHandle;                // Global font object we use everywhere
 
 extern ATOM AtomCandidateWindow;
 extern ATOM AtomShadowWindow;
@@ -108,55 +73,11 @@ BOOL RegisterWindowClass();
 extern LONG dllRefCount;
 
 extern CRITICAL_SECTION CS;
-extern HFONT defaultlFontHandle;  // Global font object we use everywhere
 
-extern const CLSID SampleIMECLSID;
-extern const CLSID SampleIMEGuidProfile;
-extern const CLSID SampleIMEGuidImeModePreserveKey;
-extern const CLSID SampleIMEGuidDoubleSingleBytePreserveKey;
-extern const CLSID SampleIMEGuidPunctuationPreserveKey;
-
-LRESULT CALLBACK ThreadKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
-BOOL CheckModifiers(UINT uModCurrent, UINT uMod);
 BOOL UpdateModifiers(WPARAM wParam, LPARAM lParam);
 
-extern USHORT ModifiersValue;
-extern BOOL IsShiftKeyDownOnly;
-extern BOOL IsControlKeyDownOnly;
-extern BOOL IsAltKeyDownOnly;
+// extern const WCHAR FullWidthCharTable[];
 
-extern const GUID SampleIMEGuidCompartmentDoubleSingleByte;
-extern const GUID SampleIMEGuidCompartmentPunctuation;
-
-extern const WCHAR FullWidthCharTable[];
-extern const struct _PUNCTUATION PunctuationTable[14];
-
-extern const GUID SampleIMEGuidLangBarIMEMode;
-extern const GUID SampleIMEGuidLangBarDoubleSingleByte;
-extern const GUID SampleIMEGuidLangBarPunctuation;
-
-extern const GUID SampleIMEGuidDisplayAttributeInput;
-extern const GUID SampleIMEGuidDisplayAttributeConverted;
-
-extern const GUID SampleIMEGuidCandUIElement;
-
-extern const WCHAR UnicodeByteOrderMark;
-extern const WCHAR KeywordDelimiter;
-extern const WCHAR StringDelimiter;
-
-extern const WCHAR ImeModeDescription[];
-extern const int ImeModeOnIcoIndex;
-extern const int ImeModeOffIcoIndex;
-
-extern const WCHAR DoubleSingleByteDescription[];
-extern const int DoubleSingleByteOnIcoIndex;
-extern const int DoubleSingleByteOffIcoIndex;
-
-extern const WCHAR PunctuationDescription[];
-extern const int PunctuationOnIcoIndex;
-extern const int PunctuationOffIcoIndex;
-
-extern const WCHAR LangbarImeModeDescription[];
-extern const WCHAR LangbarDoubleSingleByteDescription[];
-extern const WCHAR LangbarPunctuationDescription[];
 }
+} // namespace WindowsImeLibLocal
+using namespace WindowsImeLibLocal;

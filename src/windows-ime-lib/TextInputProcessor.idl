@@ -1,0 +1,40 @@
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+    uuid(C9B54A64-5371-442F-AFD0-E9F3DCE9A401),
+    helpstring("ITextInputEnvironment interface"),
+    pointer_default(unique)
+]
+interface ITextInputEnvironment : IUnknown
+{
+    HRESULT TestMethod([in] BSTR src, [retval, out] BSTR* result);
+};
+
+[
+    uuid(44D9D766-0B6C-41D8-960D-40BD0BD1AF78),
+    helpstring("ITextInputProcessor interface"),
+    pointer_default(unique)
+]
+interface ITextInputProcessor : IUnknown
+{
+    HRESULT Acivate([in] ITextInputEnvironment* environment);
+    HRESULT Deacivate();
+    HRESULT OnSetFocus([in] BOOL isGotten, [in] BSTR applicationName, [in] GUID clientId);
+    HRESULT UpdateCustomState([in] LPCSTR customState);
+
+    HRESULT OnKeyEvent([in] DWORD wParam, [in] DWORD lParam, [in] WCHAR wch, [in] UINT vkPackSource,
+                        [in] BOOL isKbdDisabled, [in] DWORD modifiers, [in] DWORD uniqueModifiers, [in] BOOL isTest, [in] BOOL isDown,
+                        [out] BSTR* result, [out] BOOL *pIsEaten);
+
+    HRESULT GetCandidateList([in] BOOL isIncrementalWordSearch, [in] BOOL isWildcardSearch, [in] BSTR* candidateList);
+    HRESULT FinalizeCandidateList();
+    HRESULT CancelCompositioon();
+
+    // ICandidateListViewInternal
+    // HRESULT CandidateListViewInternal_NotifyTextExt([in] HWND documentWindow, [in] RECT* lpRect);
+    HRESULT CandidateListViewInternal_LayoutChangeNotification([in] HWND documentWindow, [in] RECT *lpRect);
+    HRESULT CandidateListViewInternal_EndCandidateList();
+    HRESULT CandidateListViewInternal_OnSetThreadFocus();
+    HRESULT CandidateListViewInternal_OnKillThreadFocus();
+};

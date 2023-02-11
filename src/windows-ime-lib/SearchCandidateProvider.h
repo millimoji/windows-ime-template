@@ -6,6 +6,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #pragma once
+#include "../WindowsImeLib.h"
+
+struct ISearchCandidateProviderOwner
+{
+    virtual ~ISearchCandidateProviderOwner() {}
+
+//    virtual std::shared_ptr<WindowsImeLib::ICompositionProcessorEngine> GetCompositionProcessorEngine() = 0;
+};
 
 //
 // CSearchCandidateProvider
@@ -15,36 +23,35 @@
 // as search integration suggestion.
 //
 #define FAKECANDIDATENUMBER (16)
-class CSearchCandidateProvider : public ITfFnSearchCandidateProvider
+class CSearchCandidateProvider :
+    public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
+                                        ITfFunction,
+                                        ITfFnSearchCandidateProvider,
+                                        Microsoft::WRL::FtmBase>
 {
-protected:
-    // constructor/destructor
-    CSearchCandidateProvider(_In_ ITfTextInputProcessorEx *ptip);
-    virtual ~CSearchCandidateProvider();
-
 public:
+    // constructor/destructor
+    CSearchCandidateProvider() {}
+    virtual ~CSearchCandidateProvider();
+    HRESULT RuntimeClassInitialize(_In_ ITfTextInputProcessorEx *ptip, _In_ ISearchCandidateProviderOwner *owner);
     // create instance
-    static HRESULT CreateInstance(_Outptr_ ITfFnSearchCandidateProvider **ppobj, _In_ ITfTextInputProcessorEx *ptip);
-    static HRESULT CreateInstance(REFIID riid, _Outptr_ void **ppvObj, _In_ ITfTextInputProcessorEx *ptip);
+    static HRESULT CreateInstance(_Outptr_ ITfFnSearchCandidateProvider **ppobj, _In_ ITfTextInputProcessorEx *ptip, _In_ ISearchCandidateProviderOwner *owner);
+    // static HRESULT CreateInstance(REFIID riid, _Outptr_ void **ppvObj, _In_ ITfTextInputProcessorEx *ptip, _In_ ISearchCandidateProviderOwner *owner);
 
-    // IUnknown methods
-    STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);
-    STDMETHODIMP_(ULONG) AddRef(void);
-    STDMETHODIMP_(ULONG) Release(void);
-
+private:
     // ITfFunction methods
     STDMETHODIMP GetDisplayName(_Out_ BSTR *pbstrName);
 
     // ITfFnSearchCandidateProvider methods
-	//
-	// GetSearchCandidates is responsible for supporting the candidates to caller, search integration
-	// SetResult is not used
-	//
+    //
+    // GetSearchCandidates is responsible for supporting the candidates to caller, search integration
+    // SetResult is not used
+    //
     STDMETHODIMP GetSearchCandidates(BSTR bstrQuery, BSTR bstrApplicationID, _Outptr_result_maybenull_ ITfCandidateList **pplist); 
     STDMETHODIMP SetResult(BSTR bstrQuery, BSTR bstrApplicationID, BSTR bstrResult);
 
 private:
-    LONG _refCount;
-    ITfTextInputProcessorEx* _pTip;
+    wil::com_ptr<ITfTextInputProcessorEx> _pTip;
+    ISearchCandidateProviderOwner *m_owner = nullptr;
 };
 

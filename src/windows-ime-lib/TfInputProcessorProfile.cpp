@@ -23,7 +23,7 @@ CTfInputProcessorProfile::~CTfInputProcessorProfile()
 
 HRESULT CTfInputProcessorProfile::CreateInstance()
 {
-    HRESULT	hr = CoCreateInstance(CLSID_TF_InputProcessorProfiles, nullptr, CLSCTX_INPROC_SERVER,
+    HRESULT hr = CoCreateInstance(CLSID_TF_InputProcessorProfiles, nullptr, CLSCTX_INPROC_SERVER,
         IID_ITfInputProcessorProfiles, (void**)&_pInputProcessorProfile);
 
     return hr;

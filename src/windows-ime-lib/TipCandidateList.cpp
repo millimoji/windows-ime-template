@@ -5,7 +5,7 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-#include "private.h"
+#include "Private.h"
 #include "TipCandidateList.h"
 #include "EnumTfCandidates.h"
 #include "TipCandidateString.h"
@@ -115,34 +115,30 @@ STDMETHODIMP CTipCandidateList::GetCandidate(ULONG nIndex, _Outptr_result_mayben
     }
     *ppCandStr = nullptr;
 
-    ULONG sizeCandStr = (ULONG)_tfCandStrList.Count();
+    ULONG sizeCandStr = (ULONG)_tfCandStrList.size();
     if (sizeCandStr <= nIndex)
     {
         return E_FAIL;
     }
 
-    for (UINT i = 0; i < _tfCandStrList.Count(); i++)
+    for (UINT i = 0; i < _tfCandStrList.size(); i++)
     {
-        ITfCandidateString** ppCandStrCur = _tfCandStrList.GetAt(i);
+        ITfCandidateString** ppCandStrCur = &_tfCandStrList.at(i);
         ULONG indexCur = 0;
         if ((nullptr != ppCandStrCur) && (SUCCEEDED((*ppCandStrCur)->GetIndex(&indexCur))))
         {
             if (nIndex == indexCur)
             {
-                BSTR bstr;
                 CTipCandidateString* pTipCandidateStrCur = (CTipCandidateString*)(*ppCandStrCur);
-                pTipCandidateStrCur->GetString(&bstr);
+                const auto candidateString = pTipCandidateStrCur->GetUnderlyingString();
 
-                CTipCandidateString::CreateInstance(IID_ITfCandidateString, (void**)ppCandStr);
+                RETURN_IF_FAILED(CTipCandidateString::CreateInstance(IID_ITfCandidateString, (void**)ppCandStr));
 
                 if (nullptr != (*ppCandStr))
                 {
                     CTipCandidateString* pTipCandidateStr = (CTipCandidateString*)(*ppCandStr);
-                    pTipCandidateStr->SetString((LPCWSTR)bstr, SysStringLen(bstr));
+                    pTipCandidateStr->SetString(candidateString);
                 }
-
-                SysFreeString(bstr);
-
                 break;
             }
         }
@@ -157,7 +153,7 @@ STDMETHODIMP CTipCandidateList::GetCandidateNum(_Out_ ULONG *pnCnt)
         return E_POINTER;
     }
 
-    *pnCnt = (ULONG)(_tfCandStrList.Count());
+    *pnCnt = (ULONG)(_tfCandStrList.size());
     return S_OK;
 }
 
@@ -168,17 +164,19 @@ STDMETHODIMP CTipCandidateList::SetResult(ULONG nIndex, TfCandidateResult imcr)
     return E_NOTIMPL;
 }
 
-STDMETHODIMP CTipCandidateList::SetCandidate(_In_ ITfCandidateString **ppCandStr)
+STDMETHODIMP CTipCandidateList::SetCandidate(_In_ ITfCandidateString* pCandStr)
 {
-    if (ppCandStr == nullptr)
+    if (pCandStr == nullptr)
     {
         return E_POINTER;
     }
 
-    ITfCandidateString** ppCandLast = _tfCandStrList.Append();
+    _tfCandStrList.emplace_back(nullptr);
+    ITfCandidateString** ppCandLast = &_tfCandStrList.back();
     if (ppCandLast)
     {
-        *ppCandLast = *ppCandStr;
+        *ppCandLast = pCandStr;
+        (*ppCandLast)->AddRef();
     }
 
     return S_OK;

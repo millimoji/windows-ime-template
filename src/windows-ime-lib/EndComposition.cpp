@@ -8,7 +8,7 @@
 #include "Private.h"
 #include "Globals.h"
 #include "EditSession.h"
-#include "SampleIME.h"
+#include "WindowsIME.h"
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -18,31 +18,9 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-//+---------------------------------------------------------------------------
-//
-// CEndCompositionEditSession
-//
-//----------------------------------------------------------------------------
-
-class CEndCompositionEditSession : public CEditSessionBase
-{
-public:
-    CEndCompositionEditSession(_In_ CSampleIME *pTextService, _In_ ITfContext *pContext) : CEditSessionBase(pTextService, pContext)
-    {
-    }
-
-    // ITfEditSession
-    STDMETHODIMP DoEditSession(TfEditCookie ec)
-    {
-        _pTextService->_TerminateComposition(ec, _pContext, TRUE);
-        return S_OK;
-    }
-
-};
-
 //////////////////////////////////////////////////////////////////////
 //
-// CSampleIME class
+// CWindowsIME class
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -52,47 +30,58 @@ public:
 //
 //----------------------------------------------------------------------------
 
-void CSampleIME::_TerminateComposition(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCalledFromDeactivate)
+HRESULT CompositionBuffer::_TerminateCompositionInternal()
 {
-	isCalledFromDeactivate;
-
-    if (_pComposition != nullptr)
+    if (m_currentCompositionContext)
     {
-        // remove the display attribute from the composition range.
-        _ClearCompositionDisplayAttributes(ec, pContext);
-
-        if (FAILED(_pComposition->EndComposition(ec)))
+        RETURN_IF_FAILED(m_framework->_SubmitEditSessionTask(m_currentCompositionContext.get(), [this](TfEditCookie ec) -> HRESULT
         {
-            // if we fail to EndComposition, then we need to close the reverse reading window.
-            _DeleteCandidateList(TRUE, pContext);
-        }
+            if (m_currentComposition)
+            {
+                // remove the display attribute from the composition range.
+                LOG_IF_FAILED(_ClearCompositionDisplayAttributes(ec, m_currentCompositionContext.get()));
 
-        _pComposition->Release();
-        _pComposition = nullptr;
+                if (FAILED_LOG(m_currentComposition->EndComposition(ec)))
+                {
+                    // if we fail to EndComposition, then we need to close the reverse reading window.
+                    // m_framework->GetCompositionProcessorEngine()->CancelCompositioon();
+                    m_framework->GetTextInputProcessor()->CancelCompositioon();
+                }
+            }
+            LOG_IF_FAILED(m_framework->_EndLayoutTracking());
 
-        if (_pContext)
-        {
-            _pContext->Release();
-            _pContext = nullptr;
-        }
+            _SaveCompositionAndContext(nullptr, nullptr);
+            return S_OK;
+        },
+        TF_ES_ASYNCDONTCARE | TF_ES_READWRITE));
     }
+    m_isComposing = false;
+    return S_OK;
 }
 
-//+---------------------------------------------------------------------------
-//
-// _EndComposition
-//
-//----------------------------------------------------------------------------
-
-void CSampleIME::_EndComposition(_In_opt_ ITfContext *pContext)
+HRESULT CompositionBuffer::_TerminateComposition()
 {
-    CEndCompositionEditSession *pEditSession = new (std::nothrow) CEndCompositionEditSession(this, pContext);
-    HRESULT hr = S_OK;
+    wil::com_ptr<CEditSessionTask> task;
+    RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CEditSessionTask>(&task,
+        [this](TfEditCookie ec) -> HRESULT
+        {
+            if (m_currentComposition)
+            {
+                // remove the display attribute from the composition range.
+                LOG_IF_FAILED(_ClearCompositionDisplayAttributes(ec, m_workingContext.get()));
 
-    if (nullptr != pEditSession)
-    {
-        pContext->RequestEditSession(_tfClientId, pEditSession, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE, &hr);
-        pEditSession->Release();
-    }
+                if (FAILED_LOG(m_currentComposition->EndComposition(ec)))
+                {
+                    // if we fail to EndComposition, then we need to close the reverse reading window.
+                    // m_framework->GetCompositionProcessorEngine()->CancelCompositioon();
+                    m_framework->GetTextInputProcessor()->CancelCompositioon();
+                }
+            }
+            _SaveCompositionAndContext(nullptr, nullptr);
+            m_framework->_EndLayoutTracking();
+            return S_OK;
+        }));
+    m_listTasks.emplace_back(task);
+    m_isComposing = false;
+    return S_OK;
 }
-

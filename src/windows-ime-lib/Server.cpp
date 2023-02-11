@@ -7,21 +7,38 @@
 
 #include "Private.h"
 #include "Globals.h"
-#include "SampleIME.h"
-#include "WindowsImeLib.h"
+#include "WindowsIME.h"
+#include "../WindowsImeLib.h"
+#include "SingletonProcessor.h"
+
+namespace wrl
+{
+    using namespace Microsoft::WRL;
+}
 
 // from Register.cpp
-BOOL RegisterProfiles();
-void UnregisterProfiles();
+BOOL RegisterProfiles(LANGID langId, int textServiceIconIndex);
+void UnregisterProfiles(LANGID langId);
 BOOL RegisterCategories();
 void UnregisterCategories();
 BOOL RegisterServer();
 void UnregisterServer();
-
+HRESULT RegisterSingletonServer();
+HRESULT UnregisterSingletonServer();
 void FreeGlobalObjects(void);
 
 class CClassFactory;
-static CClassFactory* classFactoryObjects[1] = { nullptr };
+static CClassFactory* classFactoryObjects[2] = { nullptr, nullptr };
+
+extern "C" {
+    // in dlldata.c
+    BOOL WINAPI ProxyStubDllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
+    HRESULT STDAPICALLTYPE ProxyStubDllRegisterServer();
+    HRESULT STDAPICALLTYPE ProxyStubDllUnregisterServer();
+    HRESULT STDAPICALLTYPE ProxyStubDllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ void** ppv);
+    HRESULT STDAPICALLTYPE ProxyStubDllCanUnloadNow();
+    void __cdecl ProxyStubDllRpcDummyCall();
+}
 
 //+---------------------------------------------------------------------------
 //
@@ -87,7 +104,7 @@ public:
     REFCLSID _rclsid;
     HRESULT (*_pfnCreateInstance)(IUnknown *pUnkOuter, REFIID riid, _COM_Outptr_ void **ppvObj);
 private:
-	CClassFactory& operator=(const CClassFactory& rhn) {rhn;};
+    CClassFactory& operator=(const CClassFactory& rhn) {rhn;};
 };
 
 //+---------------------------------------------------------------------------
@@ -174,7 +191,13 @@ STDAPI CClassFactory::LockServer(BOOL fLock)
 
 void BuildGlobalObjects(void)
 {
-    classFactoryObjects[0] = new (std::nothrow) CClassFactory(Global::SampleIMECLSID, CSampleIME::CreateInstance);
+    classFactoryObjects[0] = new (std::nothrow) CClassFactory(
+        WindowsImeLib::g_processorFactory->GetConstantProvider()->IMECLSID(),
+        CWindowsIME::CreateInstance);
+
+    classFactoryObjects[1] = new (std::nothrow) CClassFactory(
+        WindowsImeLib::g_processorFactory->GetConstantProvider()->ServerCLSID(),
+        CreateSingletonProcessorHost);
 }
 
 //+---------------------------------------------------------------------------
@@ -202,8 +225,19 @@ void FreeGlobalObjects(void)
 //  DllGetClassObject
 //
 //----------------------------------------------------------------------------
-HRESULT WindowsImeLib_DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ void** ppv)
+HRESULT WindowsImeLib::DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ void** ppv)
 {
+    const auto hr = ProxyStubDllGetClassObject(rclsid, riid, ppv);
+    if (SUCCEEDED(hr))
+    {
+        return hr;
+    }
+
+    if (wrl::Module<wrl::InProc>::GetModule().GetClassObject(rclsid, riid, ppv) == S_OK)
+    {
+        return S_OK;
+    }
+
     if (classFactoryObjects[0] == nullptr)
     {
         EnterCriticalSection(&Global::CS);
@@ -243,14 +277,20 @@ HRESULT WindowsImeLib_DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, 
 //
 //----------------------------------------------------------------------------
 
-HRESULT WindowsImeLib_DllCanUnloadNow(void)
+HRESULT WindowsImeLib::DllCanUnloadNow(void)
 {
+    const auto hr = ProxyStubDllCanUnloadNow();
+    if (hr != S_OK)
+    {
+        return S_FALSE;
+    }
+
     if (Global::dllRefCount >= 0)
     {
         return S_FALSE;
     }
 
-    return S_OK;
+    return wrl::Module<wrl::InProc>::GetModule().Terminate() ? S_OK : S_FALSE;
 }
 
 //+---------------------------------------------------------------------------
@@ -259,11 +299,15 @@ HRESULT WindowsImeLib_DllCanUnloadNow(void)
 //
 //----------------------------------------------------------------------------
 
-HRESULT WindowsImeLib_DllUnregisterServer(void)
+HRESULT WindowsImeLib::DllUnregisterServer()
 {
-    UnregisterProfiles();
+    const auto langId = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLangID();
+
+    UnregisterProfiles(langId);
     UnregisterCategories();
     UnregisterServer();
+    LOG_IF_FAILED(UnregisterSingletonServer());
+    LOG_IF_FAILED(ProxyStubDllUnregisterServer());
 
     return S_OK;
 }
@@ -274,9 +318,15 @@ HRESULT WindowsImeLib_DllUnregisterServer(void)
 //
 //----------------------------------------------------------------------------
 
-HRESULT WindowsImeLib_DllRegisterServer(void)
+HRESULT WindowsImeLib::DllRegisterServer(int textServiceIconIndex)
 {
-    if ((!RegisterServer()) || (!RegisterProfiles()) || (!RegisterCategories()))
+    const auto langId = WindowsImeLib::g_processorFactory->GetConstantProvider()->GetLangID();
+
+    if ((!RegisterServer()) ||
+        (!RegisterProfiles(langId, textServiceIconIndex)) ||
+        (!RegisterCategories()) ||
+        (FAILED_LOG(RegisterSingletonServer())) ||
+        (FAILED_LOG(ProxyStubDllRegisterServer())))
     {
         DllUnregisterServer();
         return E_FAIL;

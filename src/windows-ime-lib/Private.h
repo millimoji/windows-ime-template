@@ -7,16 +7,44 @@
 
 #pragma once
 
-#include "stdafx.h"
-#include "sal.h"
+#pragma warning(push)
+#pragma warning(disable: 4324)
+#pragma warning(disable: 6001)
+#pragma warning(disable: 6387)
+#pragma warning(disable: 26439)
+#pragma warning(disable: 26451)
+#pragma warning(disable: 26495)
 
+#define NOMINMAX
+#include <windows.h>
+#include <initguid.h>
 #include <combaseapi.h>
-#include <olectl.h>
-#include <assert.h>
-
-#include <strsafe.h>
+#include <ctffunc.h>
 #include <intsafe.h>
+#include <msctf.h>
+#include <olectl.h>
+#include <sal.h>
+#include <strsafe.h>
 
-#include "initguid.h"
-#include "msctf.h"
-#include "ctffunc.h"
+#define _SILENCE_CXX20_CISO646_REMOVED_WARNING
+
+#include <algorithm>
+#include <functional>
+#include <memory>
+#include <new>
+#include <string>
+#include <vector>
+#include <cassert>
+
+#include <wrl/module.h>
+#include <wrl/implements.h>
+
+#include <wil/com.h>
+#include <wil/resource.h>
+
+#pragma warning(disable: 28020)
+#include <nlohmann/json.hpp>
+
+#include "WindowsImeLibTelemetry.h"
+
+#pragma warning(pop)

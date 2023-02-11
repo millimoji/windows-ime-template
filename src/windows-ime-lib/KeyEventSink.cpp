@@ -7,11 +7,10 @@
 
 #include "Private.h"
 #include "Globals.h"
-#include "SampleIME.h"
+#include "WindowsIME.h"
 #include "CandidateListUIPresenter.h"
-#include "CompositionProcessorEngine.h"
-#include "KeyHandlerEditSession.h"
-#include "Compartment.h"
+//#include "KeyHandlerEditSession.h"
+#include "../Compartment.h"
 
 // 0xF003, 0xF004 are the keys that the touch keyboard sends for next/previous
 #define THIRDPARTY_NEXTPAGE  static_cast<WORD>(0xF003)
@@ -19,7 +18,7 @@
 
 // Because the code mostly works with VKeys, here map a WCHAR back to a VKKey for certain
 // vkeys that the IME handles specially
-__inline UINT VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch)
+UINT CWindowsIME::VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch)
 {
     UINT vkRet = vk;
     if (LOWORD(vk) == VK_PACKET)
@@ -54,132 +53,11 @@ __inline UINT VKeyFromVKPacketAndWchar(UINT vk, WCHAR wch)
 
 //+---------------------------------------------------------------------------
 //
-// _IsKeyEaten
-//
-//----------------------------------------------------------------------------
-
-BOOL CSampleIME::_IsKeyEaten(_In_ ITfContext *pContext, UINT codeIn, _Out_ UINT *pCodeOut, _Out_writes_(1) WCHAR *pwch, _Out_opt_ _KEYSTROKE_STATE *pKeyState)
-{
-    pContext;
-
-    *pCodeOut = codeIn;
-
-    BOOL isOpen = FALSE;
-    CCompartment CompartmentKeyboardOpen(_pThreadMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
-    CompartmentKeyboardOpen._GetCompartmentBOOL(isOpen);
-
-    BOOL isDoubleSingleByte = FALSE;
-    CCompartment CompartmentDoubleSingleByte(_pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentDoubleSingleByte);
-    CompartmentDoubleSingleByte._GetCompartmentBOOL(isDoubleSingleByte);
-
-    BOOL isPunctuation = FALSE;
-    CCompartment CompartmentPunctuation(_pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentPunctuation);
-    CompartmentPunctuation._GetCompartmentBOOL(isPunctuation);
-
-    if (pKeyState)
-    {
-        pKeyState->Category = CATEGORY_NONE;
-        pKeyState->Function = FUNCTION_NONE;
-    }
-    if (pwch)
-    {
-        *pwch = L'\0';
-    }
-
-    // if the keyboard is disabled, we don't eat keys.
-    if (_IsKeyboardDisabled())
-    {
-        return FALSE;
-    }
-
-    //
-    // Map virtual key to character code
-    //
-    BOOL isTouchKeyboardSpecialKeys = FALSE;
-    WCHAR wch = ConvertVKey(codeIn);
-    *pCodeOut = VKeyFromVKPacketAndWchar(codeIn, wch);
-    if ((wch == THIRDPARTY_NEXTPAGE) || (wch == THIRDPARTY_PREVPAGE))
-    {
-        // We always eat the above softkeyboard special keys
-        isTouchKeyboardSpecialKeys = TRUE;
-        if (pwch)
-        {
-            *pwch = wch;
-        }
-    }
-
-    // if the keyboard is closed, we don't eat keys, with the exception of the touch keyboard specials keys
-    if (!isOpen && !isDoubleSingleByte && !isPunctuation)
-    {
-        return isTouchKeyboardSpecialKeys;
-    }
-
-    if (pwch)
-    {
-        *pwch = wch;
-    }
-
-    //
-    // Get composition engine
-    //
-    CCompositionProcessorEngine *pCompositionProcessorEngine;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine;
-
-    if (isOpen)
-    {
-        //
-        // The candidate or phrase list handles the keys through ITfKeyEventSink.
-        //
-        // eat only keys that CKeyHandlerEditSession can handles.
-        //
-        if (pCompositionProcessorEngine->IsVirtualKeyNeed(*pCodeOut, pwch, _IsComposing(), _candidateMode, _isCandidateWithWildcard, pKeyState))
-        {
-            return TRUE;
-        }
-    }
-
-    //
-    // Punctuation
-    //
-    if (pCompositionProcessorEngine->IsPunctuation(wch))
-    {
-        if ((_candidateMode == CANDIDATE_NONE) && isPunctuation)
-        {
-            if (pKeyState)
-            {
-                pKeyState->Category = CATEGORY_COMPOSING;
-                pKeyState->Function = FUNCTION_PUNCTUATION;
-            }
-            return TRUE;
-        }
-    }
-
-    //
-    // Double/Single byte
-    //
-    if (isDoubleSingleByte && pCompositionProcessorEngine->IsDoubleSingleByte(wch))
-    {
-        if (_candidateMode == CANDIDATE_NONE)
-        {
-            if (pKeyState)
-            {
-                pKeyState->Category = CATEGORY_COMPOSING;
-                pKeyState->Function = FUNCTION_DOUBLE_SINGLE_BYTE;
-            }
-            return TRUE;
-        }
-    }
-
-    return isTouchKeyboardSpecialKeys;
-}
-
-//+---------------------------------------------------------------------------
-//
 // ConvertVKey
 //
 //----------------------------------------------------------------------------
 
-WCHAR CSampleIME::ConvertVKey(UINT code)
+wchar_t CWindowsIME::ConvertVKey(UINT code)
 {
     //
     // Map virtual key to scan code
@@ -214,7 +92,7 @@ WCHAR CSampleIME::ConvertVKey(UINT code)
 //
 //----------------------------------------------------------------------------
 
-BOOL CSampleIME::_IsKeyboardDisabled()
+bool CWindowsIME::_IsKeyboardDisabled()
 {
     ITfDocumentMgr* pDocMgrFocus = nullptr;
     ITfContext* pContext = nullptr;
@@ -235,10 +113,10 @@ BOOL CSampleIME::_IsKeyboardDisabled()
     }
     else
     {
-        CCompartment CompartmentKeyboardDisabled(_pThreadMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_DISABLED);
+        CCompartment CompartmentKeyboardDisabled(_pThreadMgr.get(), _tfClientId, GUID_COMPARTMENT_KEYBOARD_DISABLED);
         CompartmentKeyboardDisabled._GetCompartmentBOOL(isDisabled);
 
-        CCompartment CompartmentEmptyContext(_pThreadMgr, _tfClientId, GUID_COMPARTMENT_EMPTYCONTEXT);
+        CCompartment CompartmentEmptyContext(_pThreadMgr.get(), _tfClientId, GUID_COMPARTMENT_EMPTYCONTEXT);
         CompartmentEmptyContext._GetCompartmentBOOL(isDisabled);
     }
 
@@ -252,7 +130,7 @@ BOOL CSampleIME::_IsKeyboardDisabled()
         pDocMgrFocus->Release();
     }
 
-    return isDisabled;
+    return !!isDisabled;
 }
 
 //+---------------------------------------------------------------------------
@@ -262,12 +140,13 @@ BOOL CSampleIME::_IsKeyboardDisabled()
 // Called by the system whenever this service gets the keystroke device focus.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnSetFocus(BOOL fForeground)
+STDAPI CWindowsIME::OnSetFocus(BOOL /*fForeground*/) try
 {
-	fForeground;
-
+    // auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnSetFocus();
+    // activity.Stop();
     return S_OK;
 }
+CATCH_RETURN()
 
 //+---------------------------------------------------------------------------
 //
@@ -276,25 +155,45 @@ STDAPI CSampleIME::OnSetFocus(BOOL fForeground)
 // Called by the system to query this service wants a potential keystroke.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
+STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten) 
 {
+    auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnTestKeyDown();
+
+    m_compositionBuffer->SaveWorkingContext(pContext);
+    auto resetWorkingContext = wil::scope_exit([&]()
+    {
+        m_compositionBuffer->FlushTasks();
+        m_compositionBuffer->SaveWorkingContext(nullptr);
+    });
+
     Global::UpdateModifiers(wParam, lParam);
 
-    _KEYSTROKE_STATE KeystrokeState;
-    WCHAR wch = '\0';
-    UINT code = 0;
-    *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, &KeystrokeState);
-
-    if (KeystrokeState.Category == CATEGORY_INVOKE_COMPOSITION_EDIT_SESSION)
+    if (m_singletonProcessor)
     {
-        //
-        // Invoke key handler edit session
-        //
-        KeystrokeState.Category = CATEGORY_COMPOSING;
-
-        _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
+        WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
+        UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
+        bool isKbdDisabled = _IsKeyboardDisabled();
+        wil::unique_bstr bstrResult;
+        m_singletonProcessor->OnKeyEvent(static_cast<DWORD>(wParam), static_cast<DWORD>(lParam), wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, true /*test*/, true /*down*/, &bstrResult, pIsEaten);
+        m_compositionBuffer->HandleCrossProcJson(reinterpret_cast<const char*>(bstrResult.get()));
     }
 
+//    _KEYSTROKE_STATE KeystrokeState;
+//    WCHAR wch = '\0';
+//    UINT code = 0;
+//    *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, &KeystrokeState);
+//
+//    if (KeystrokeState.Category == CATEGORY_INVOKE_COMPOSITION_EDIT_SESSION)
+//    {
+//        //
+//        // Invoke key handler edit session
+//        //
+//        KeystrokeState.Category = CATEGORY_COMPOSING;
+//
+//        _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
+//    }
+//
+    activity.Stop();
     return S_OK;
 }
 
@@ -306,45 +205,65 @@ STDAPI CSampleIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lPa
 // on exit, the application will not handle the keystroke.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
+STDAPI CWindowsIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
+    auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnKeyDown();
+
+    m_compositionBuffer->SaveWorkingContext(pContext);
+    auto resetWorkingContext = wil::scope_exit([&]()
+    {
+        m_compositionBuffer->FlushTasks();
+        m_compositionBuffer->SaveWorkingContext(nullptr);
+    });
+
     Global::UpdateModifiers(wParam, lParam);
 
-    _KEYSTROKE_STATE KeystrokeState;
-    WCHAR wch = '\0';
-    UINT code = 0;
-
-    *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, &KeystrokeState);
-
-    if (*pIsEaten)
+    if (m_singletonProcessor)
     {
-        bool needInvokeKeyHandler = true;
-        //
-        // Invoke key handler edit session
-        //
-        if (code == VK_ESCAPE)
-        {
-            KeystrokeState.Category = CATEGORY_COMPOSING;
-        }
-
-        // Always eat THIRDPARTY_NEXTPAGE and THIRDPARTY_PREVPAGE keys, but don't always process them.
-        if ((wch == THIRDPARTY_NEXTPAGE) || (wch == THIRDPARTY_PREVPAGE))
-        {
-            needInvokeKeyHandler = !((KeystrokeState.Category == CATEGORY_NONE) && (KeystrokeState.Function == FUNCTION_NONE));
-        }
-
-        if (needInvokeKeyHandler)
-        {
-            _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
-        }
-    }
-    else if (KeystrokeState.Category == CATEGORY_INVOKE_COMPOSITION_EDIT_SESSION)
-    {
-        // Invoke key handler edit session
-        KeystrokeState.Category = CATEGORY_COMPOSING;
-        _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
+        WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
+        UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
+        bool isKbdDisabled = _IsKeyboardDisabled();
+        wil::unique_bstr bstrResult;
+        m_singletonProcessor->OnKeyEvent(static_cast<DWORD>(wParam), static_cast<DWORD>(lParam), wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, false /*test*/, true /*down*/, &bstrResult, pIsEaten);
+        m_compositionBuffer->HandleCrossProcJson(reinterpret_cast<const char*>(bstrResult.get()));
     }
 
+//    _KEYSTROKE_STATE KeystrokeState;
+//    WCHAR wch = '\0';
+//    UINT code = 0;
+//
+//    *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, &KeystrokeState);
+//
+//    if (*pIsEaten)
+//    {
+//        bool needInvokeKeyHandler = true;
+//        //
+//        // Invoke key handler edit session
+//        //
+//        if (code == VK_ESCAPE)
+//        {
+//            KeystrokeState.Category = CATEGORY_COMPOSING;
+//        }
+//
+//        // Always eat THIRDPARTY_NEXTPAGE and THIRDPARTY_PREVPAGE keys, but don't always process them.
+//        if ((wch == THIRDPARTY_NEXTPAGE) || (wch == THIRDPARTY_PREVPAGE))
+//        {
+//            needInvokeKeyHandler = !((KeystrokeState.Category == CATEGORY_NONE) && (KeystrokeState.Function == FUNCTION_NONE));
+//        }
+//
+//        if (needInvokeKeyHandler)
+//        {
+//            _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
+//        }
+//    }
+//    else if (KeystrokeState.Category == CATEGORY_INVOKE_COMPOSITION_EDIT_SESSION)
+//    {
+//        // Invoke key handler edit session
+//        KeystrokeState.Category = CATEGORY_COMPOSING;
+//        _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
+//    }
+
+    activity.Stop();
     return S_OK;
 }
 
@@ -355,20 +274,42 @@ STDAPI CSampleIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam,
 // Called by the system to query this service wants a potential keystroke.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
+STDAPI CWindowsIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
-    if (pIsEaten == nullptr)
+    auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnTestKeyUp();
+
+    m_compositionBuffer->SaveWorkingContext(pContext);
+    auto resetWorkingContext = wil::scope_exit([&]()
     {
-        return E_INVALIDARG;
-    }
+        m_compositionBuffer->FlushTasks();
+        m_compositionBuffer->SaveWorkingContext(nullptr);
+    });
 
     Global::UpdateModifiers(wParam, lParam);
 
-    WCHAR wch = '\0';
-    UINT code = 0;
+    if (m_singletonProcessor)
+    {
+        WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
+        UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
+        bool isKbdDisabled = _IsKeyboardDisabled();
+        wil::unique_bstr bstrResult;
+        m_singletonProcessor->OnKeyEvent(static_cast<DWORD>(wParam), static_cast<DWORD>(lParam), wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, true /*test*/, false /*down*/, &bstrResult, pIsEaten);
+        m_compositionBuffer->HandleCrossProcJson(reinterpret_cast<const char*>(bstrResult.get()));
+    }
 
-    *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, NULL);
+//    if (pIsEaten == nullptr)
+//    {
+//        return E_INVALIDARG;
+//    }
+//
+//    Global::UpdateModifiers(wParam, lParam);
+//
+//    WCHAR wch = '\0';
+//    UINT code = 0;
+//
+//    *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, NULL);
 
+    activity.Stop();
     return S_OK;
 }
 
@@ -380,15 +321,35 @@ STDAPI CSampleIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lPara
 // on exit, the application will not handle the keystroke.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
+STDAPI CWindowsIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
+    auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnKeyUp();
+
+    m_compositionBuffer->SaveWorkingContext(pContext);
+    auto resetWorkingContext = wil::scope_exit([&]()
+    {
+        m_compositionBuffer->FlushTasks();
+        m_compositionBuffer->SaveWorkingContext(nullptr);
+    });
+
     Global::UpdateModifiers(wParam, lParam);
 
-    WCHAR wch = '\0';
-    UINT code = 0;
+    if (m_singletonProcessor)
+    {
+        WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
+        UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
+        bool isKbdDisabled = _IsKeyboardDisabled();
+        wil::unique_bstr bstrResult;
+        m_singletonProcessor->OnKeyEvent(static_cast<DWORD>(wParam), static_cast<DWORD>(lParam), wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, false /*test*/, false /*down*/, &bstrResult, pIsEaten);
+        m_compositionBuffer->HandleCrossProcJson(reinterpret_cast<const char*>(bstrResult.get()));
+    }
 
-    *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, NULL);
+//    WCHAR wch = '\0';
+//    UINT code = 0;
+//
+//    *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, NULL);
 
+    activity.Stop();
     return S_OK;
 }
 
@@ -399,15 +360,16 @@ STDAPI CSampleIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, B
 // Called when a hotkey (registered by us, or by the system) is typed.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnPreservedKey(ITfContext *pContext, REFGUID rguid, BOOL *pIsEaten)
+STDAPI CWindowsIME::OnPreservedKey(ITfContext* /*pContext*/, REFGUID rguid, BOOL* pIsEaten)
 {
-	pContext;
+    auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnPreservedKey();
 
-    CCompositionProcessorEngine *pCompositionProcessorEngine;
-    pCompositionProcessorEngine = _pCompositionProcessorEngine;
+    if (m_inprocClient)
+    {
+        m_inprocClient->OnPreservedKey(rguid, pIsEaten, _pThreadMgr.get(), _tfClientId);
+    }
 
-    pCompositionProcessorEngine->OnPreservedKey(rguid, pIsEaten, _GetThreadMgr(), _GetClientId());
-
+    activity.Stop();
     return S_OK;
 }
 
@@ -418,7 +380,7 @@ STDAPI CSampleIME::OnPreservedKey(ITfContext *pContext, REFGUID rguid, BOOL *pIs
 // Advise a keystroke sink.
 //----------------------------------------------------------------------------
 
-BOOL CSampleIME::_InitKeyEventSink()
+BOOL CWindowsIME::_InitKeyEventSink()
 {
     ITfKeystrokeMgr* pKeystrokeMgr = nullptr;
     HRESULT hr = S_OK;
@@ -442,7 +404,7 @@ BOOL CSampleIME::_InitKeyEventSink()
 // Unadvise a keystroke sink.  Assumes we have advised one already.
 //----------------------------------------------------------------------------
 
-void CSampleIME::_UninitKeyEventSink()
+void CWindowsIME::_UninitKeyEventSink()
 {
     ITfKeystrokeMgr* pKeystrokeMgr = nullptr;
 

@@ -450,7 +450,7 @@ BOOL CScrollBarWindow::_GetBtnUpRect(_Out_ RECT *prc)
     prc->left = rc.left;
     prc->top = rc.top;
     prc->right = rc.right;
-    prc->bottom = rc.top + min(_sizeOfScrollBtn.cy, (rc.bottom - rc.top)/2);
+    prc->bottom = rc.top + std::min(_sizeOfScrollBtn.cy, (rc.bottom - rc.top)/2);
 
     return TRUE;
 }
@@ -473,7 +473,7 @@ BOOL CScrollBarWindow::_GetBtnDnRect(_Out_ RECT *prc)
     }
 
     prc->left = rc.left;
-    prc->top = rc.bottom - min(_sizeOfScrollBtn.cy, (rc.bottom - rc.top)/2);
+    prc->top = rc.bottom - std::min(_sizeOfScrollBtn.cy, (rc.bottom - rc.top)/2);
     prc->right = rc.right;
     prc->bottom = rc.bottom;
 
@@ -521,8 +521,8 @@ void CScrollBarWindow::_SetCurPos(int nPos, int dwSB)
 {
     int posMax = (_scrollInfo.nMax <= _scrollInfo.nPage) ? 0 : _scrollInfo.nMax - _scrollInfo.nPage;
 
-    nPos = min(nPos, posMax);
-    nPos = max(nPos, 0);
+    nPos = std::min(nPos, posMax);
+    nPos = std::max(nPos, 0);
 
     _scrollInfo.nPos = nPos;
 

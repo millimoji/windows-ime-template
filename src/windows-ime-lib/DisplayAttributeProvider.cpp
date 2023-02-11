@@ -6,8 +6,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #include "Private.h"
-#include "globals.h"
-#include "SampleIME.h"
+#include "Globals.h"
+#include "WindowsIME.h"
 #include "DisplayAttributeInfo.h"
 #include "EnumDisplayAttributeInfo.h"
 
@@ -17,8 +17,10 @@
 //
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::EnumDisplayAttributeInfo(__RPC__deref_out_opt IEnumTfDisplayAttributeInfo **ppEnum)
+STDAPI CWindowsIME::EnumDisplayAttributeInfo(__RPC__deref_out_opt IEnumTfDisplayAttributeInfo **ppEnum)
 {
+    auto activity = WindowsImeLibTelemetry::ITfDisplayAttributeProvider_EnumDisplayAttributeInfo();
+
     CEnumDisplayAttributeInfo* pAttributeEnum = nullptr;
 
     if (ppEnum == nullptr)
@@ -36,6 +38,7 @@ STDAPI CSampleIME::EnumDisplayAttributeInfo(__RPC__deref_out_opt IEnumTfDisplayA
 
     *ppEnum = pAttributeEnum;
 
+    activity.Stop();
     return S_OK;
 }
 
@@ -45,8 +48,10 @@ STDAPI CSampleIME::EnumDisplayAttributeInfo(__RPC__deref_out_opt IEnumTfDisplayA
 //
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::GetDisplayAttributeInfo(__RPC__in REFGUID guidInfo, __RPC__deref_out_opt ITfDisplayAttributeInfo **ppInfo)
+STDAPI CWindowsIME::GetDisplayAttributeInfo(__RPC__in REFGUID guidInfo, __RPC__deref_out_opt ITfDisplayAttributeInfo **ppInfo)
 {
+    auto activity = WindowsImeLibTelemetry::ITfDisplayAttributeProvider_GetDisplayAttributeInfo();
+
     if (ppInfo == nullptr)
     {
         return E_INVALIDARG;
@@ -55,7 +60,7 @@ STDAPI CSampleIME::GetDisplayAttributeInfo(__RPC__in REFGUID guidInfo, __RPC__de
     *ppInfo = nullptr;
 
     // Which display attribute GUID?
-    if (IsEqualGUID(guidInfo, Global::SampleIMEGuidDisplayAttributeInput))
+    if (IsEqualGUID(guidInfo, WindowsImeLib::g_processorFactory->GetConstantProvider()->DisplayAttributeInput()))
     {
         *ppInfo = new (std::nothrow) CDisplayAttributeInfoInput();
         if ((*ppInfo) == nullptr)
@@ -63,7 +68,7 @@ STDAPI CSampleIME::GetDisplayAttributeInfo(__RPC__in REFGUID guidInfo, __RPC__de
             return E_OUTOFMEMORY;
         }
     }
-    else if (IsEqualGUID(guidInfo, Global::SampleIMEGuidDisplayAttributeConverted))
+    else if (IsEqualGUID(guidInfo, WindowsImeLib::g_processorFactory->GetConstantProvider()->DisplayAttributeConverted()))
     {
         *ppInfo = new (std::nothrow) CDisplayAttributeInfoConverted();
         if ((*ppInfo) == nullptr)
@@ -76,6 +81,6 @@ STDAPI CSampleIME::GetDisplayAttributeInfo(__RPC__in REFGUID guidInfo, __RPC__de
         return E_INVALIDARG;
     }
 
-
+    activity.Stop();
     return S_OK;
 }

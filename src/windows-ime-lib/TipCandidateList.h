@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "SampleIMEBaseStructure.h"
+#include "BaseStructure.h"
 
 //
 // CTipCandidateList
@@ -34,10 +34,10 @@ public:
     virtual STDMETHODIMP GetCandidateNum(_Out_ ULONG *pnCnt);
     virtual STDMETHODIMP SetResult(ULONG nIndex, TfCandidateResult imcr);
 
-    virtual STDMETHODIMP SetCandidate(_In_ ITfCandidateString **ppCandStr);
+    virtual STDMETHODIMP SetCandidate(_In_ ITfCandidateString* pCandStr);
 
 protected:
     long _refCount;
-    CSampleImeArray<ITfCandidateString*> _tfCandStrList;
+    std::vector<ITfCandidateString*> _tfCandStrList;
 };
 

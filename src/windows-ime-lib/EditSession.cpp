@@ -7,93 +7,13 @@
 
 #include "Private.h"
 #include "EditSession.h"
-#include "SampleIME.h"
+#include "WindowsIME.h"
 
-//+---------------------------------------------------------------------------
-//
-// ctor
-//
-//----------------------------------------------------------------------------
-
-CEditSessionBase::CEditSessionBase(_In_ CSampleIME *pTextService, _In_ ITfContext *pContext)
+HRESULT CWindowsIME::_SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags)
 {
-    _refCount = 1;
-    _pContext = pContext;
-    _pContext->AddRef();
-
-    _pTextService = pTextService;
-    _pTextService->AddRef();
-}
-
-//+---------------------------------------------------------------------------
-//
-// dtor
-//
-//----------------------------------------------------------------------------
-
-CEditSessionBase::~CEditSessionBase()
-{
-    _pContext->Release();
-    _pTextService->Release();
-}
-
-//+---------------------------------------------------------------------------
-//
-// QueryInterface
-//
-//----------------------------------------------------------------------------
-
-STDAPI CEditSessionBase::QueryInterface(REFIID riid, _Outptr_ void **ppvObj)
-{
-    if (ppvObj == nullptr)
-    {
-        return E_INVALIDARG;
-    }
-
-    *ppvObj = nullptr;
-
-    if (IsEqualIID(riid, IID_IUnknown) ||
-        IsEqualIID(riid, IID_ITfEditSession))
-    {
-        *ppvObj = (ITfLangBarItemButton *)this;
-    }
-
-    if (*ppvObj)
-    {
-        AddRef();
-        return S_OK;
-    }
-
-    return E_NOINTERFACE;
-}
-
-//+---------------------------------------------------------------------------
-//
-// AddRef
-//
-//----------------------------------------------------------------------------
-
-STDAPI_(ULONG) CEditSessionBase::AddRef(void)
-{
-    return ++_refCount;
-}
-
-//+---------------------------------------------------------------------------
-//
-// Release
-//
-//----------------------------------------------------------------------------
-
-STDAPI_(ULONG) CEditSessionBase::Release(void)
-{
-    LONG cr = --_refCount;
-
-    assert(_refCount >= 0);
-
-    if (_refCount == 0)
-    {
-        delete this;
-    }
-
-    return cr;
+    wil::com_ptr<ITfEditSession> editSession;
+    RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CEditSessionTask>(&editSession, editSesisonTask));
+    HRESULT hr;
+    RETURN_IF_FAILED(context->RequestEditSession(_tfClientId, editSession.get(), tfEsFlags, &hr));
+    return hr;
 }

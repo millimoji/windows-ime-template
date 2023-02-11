@@ -8,24 +8,7 @@
 #include "Private.h"
 #include "Globals.h"
 #include "EditSession.h"
-#include "SampleIME.h"
-
-//+---------------------------------------------------------------------------
-//
-// CStartCompositinoEditSession
-//
-//----------------------------------------------------------------------------
-
-class CStartCompositionEditSession : public CEditSessionBase
-{
-public:
-    CStartCompositionEditSession(_In_ CSampleIME *pTextService, _In_ ITfContext *pContext) : CEditSessionBase(pTextService, pContext)
-    {
-    }
-
-    // ITfEditSession
-    STDMETHODIMP DoEditSession(TfEditCookie ec);
-};
+#include "WindowsIME.h"
 
 //+---------------------------------------------------------------------------
 //
@@ -33,101 +16,45 @@ public:
 //
 //----------------------------------------------------------------------------
 
-STDAPI CStartCompositionEditSession::DoEditSession(TfEditCookie ec)
+HRESULT CompositionBuffer::_StartComposition()
 {
-    ITfInsertAtSelection* pInsertAtSelection = nullptr;
-    ITfRange* pRangeInsert = nullptr;
-    ITfContextComposition* pContextComposition = nullptr;
-    ITfComposition* pComposition = nullptr;
+    wil::com_ptr<CEditSessionTask> task;
+    RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CEditSessionTask>(&task,
+        [this](TfEditCookie ec) -> HRESULT
+        {
+            wil::com_ptr<ITfInsertAtSelection> pInsertAtSelection;
+            RETURN_IF_FAILED(m_workingContext->QueryInterface(IID_PPV_ARGS(&pInsertAtSelection)));
 
-    if (FAILED(_pContext->QueryInterface(IID_ITfInsertAtSelection, (void **)&pInsertAtSelection)))
-    {
-        goto Exit;
-    }
+            wil::com_ptr<ITfRange> pRangeInsert;
+            RETURN_IF_FAILED(pInsertAtSelection->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, NULL, 0, &pRangeInsert));
 
-    if (FAILED(pInsertAtSelection->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, NULL, 0, &pRangeInsert)))
-    {
-        goto Exit;
-    }
+            wil::com_ptr<ITfContextComposition> pContextComposition;
+            RETURN_IF_FAILED(m_workingContext->QueryInterface(IID_PPV_ARGS(&pContextComposition)));
 
-    if (FAILED(_pContext->QueryInterface(IID_ITfContextComposition, (void **)&pContextComposition)))
-    {
-        goto Exit;
-    }
+            wil::com_ptr<ITfComposition> pComposition;
+            RETURN_IF_FAILED(pContextComposition->StartComposition(ec, pRangeInsert.get(), m_framework->GetCompositionSink(), &pComposition));
+            RETURN_HR_IF(S_OK /* ? */, !pComposition);
 
-    if (SUCCEEDED(pContextComposition->StartComposition(ec, pRangeInsert, _pTextService, &pComposition)) && (nullptr != pComposition))
-    {
-        _pTextService->_SetComposition(pComposition);
+            // set selection to the adjusted range
+            TF_SELECTION tfSelection = {};
+            tfSelection.range = pRangeInsert.get();
+            tfSelection.style.ase = TF_AE_NONE;
+            tfSelection.style.fInterimChar = FALSE;
 
-        // set selection to the adjusted range
-        TF_SELECTION tfSelection;
-        tfSelection.range = pRangeInsert;
-        tfSelection.style.ase = TF_AE_NONE;
-        tfSelection.style.fInterimChar = FALSE;
+            RETURN_IF_FAILED(m_workingContext->SetSelection(ec, 1, &tfSelection));
 
-        _pContext->SetSelection(ec, 1, &tfSelection);
-        _pTextService->_SaveCompositionContext(_pContext);
-    }
+            _SaveCompositionAndContext(pComposition.get(), m_workingContext.get());
 
-Exit:
-    if (nullptr != pContextComposition)
-    {
-        pContextComposition->Release();
-    }
-
-    if (nullptr != pRangeInsert)
-    {
-        pRangeInsert->Release();
-    }
-
-    if (nullptr != pInsertAtSelection)
-    {
-        pInsertAtSelection->Release();
-    }
-
+            LOG_IF_FAILED(m_framework->_StartLayoutTracking(m_workingContext.get(), ec, pRangeInsert.get()));
+            return S_OK;
+        }));
+    m_listTasks.emplace_back(task);
+    m_isComposing = true;
     return S_OK;
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-// CSampleIME class
+// CWindowsIME class
 //
 //////////////////////////////////////////////////////////////////////
-
-//+---------------------------------------------------------------------------
-//
-// _StartComposition
-//
-// this starts the new (std::nothrow) composition at the selection of the current 
-// focus context.
-//----------------------------------------------------------------------------
-
-void CSampleIME::_StartComposition(_In_ ITfContext *pContext)
-{
-    CStartCompositionEditSession* pStartCompositionEditSession = new (std::nothrow) CStartCompositionEditSession(this, pContext);
-
-    if (nullptr != pStartCompositionEditSession)
-    {
-        HRESULT hr = S_OK;
-        pContext->RequestEditSession(_tfClientId, pStartCompositionEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hr);
-
-        pStartCompositionEditSession->Release();
-    }
-}
-
-//+---------------------------------------------------------------------------
-//
-// _SaveCompositionContext
-//
-// this saves the context _pComposition belongs to; we need this to clear
-// text attribute in case composition has not been terminated on 
-// deactivation
-//----------------------------------------------------------------------------
-
-void CSampleIME::_SaveCompositionContext(_In_ ITfContext *pContext)
-{
-    assert(_pContext == nullptr);
-
-    pContext->AddRef();
-    _pContext = pContext;
-} 

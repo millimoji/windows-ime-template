@@ -6,8 +6,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #include "Private.h"
-#include "globals.h"
-#include "SampleIME.h"
+#include "Globals.h"
+#include "WindowsIME.h"
+
+BOOL _IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest, _In_ ITfRange *pRangeCover)
+{
+    LONG lResult = 0;
+    if (FAILED(pRangeCover->CompareStart(ec, pRangeTest, TF_ANCHOR_START, &lResult)) || (lResult > 0)) {
+        return FALSE;
+    }
+    if (FAILED(pRangeCover->CompareEnd(ec, pRangeTest, TF_ANCHOR_END, &lResult)) || (lResult < 0)) {
+        return FALSE;
+    }
+    return TRUE;
+}
 
 //+---------------------------------------------------------------------------
 //
@@ -16,8 +28,10 @@
 // Called by the system whenever anyone releases a write-access document lock.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnEndEdit(__RPC__in_opt ITfContext *pContext, TfEditCookie ecReadOnly, __RPC__in_opt ITfEditRecord *pEditRecord)
+STDAPI CWindowsIME::OnEndEdit(__RPC__in_opt ITfContext *pContext, TfEditCookie ecReadOnly, __RPC__in_opt ITfEditRecord *pEditRecord)
 {
+    auto activity = WindowsImeLibTelemetry::ITfTextEditSink_OnEndEdit();
+
     BOOL isSelectionChanged;
 
     //
@@ -36,7 +50,7 @@ STDAPI CSampleIME::OnEndEdit(__RPC__in_opt ITfContext *pContext, TfEditCookie ec
         // If the selection is moved to out side of the current composition,
         // we terminate the composition. This TextService supports only one
         // composition in one context object.
-        if (_IsComposing())
+        if (m_compositionBuffer->_IsComposing())
         {
             TF_SELECTION tfSelection;
             ULONG fetched = 0;
@@ -50,12 +64,13 @@ STDAPI CSampleIME::OnEndEdit(__RPC__in_opt ITfContext *pContext, TfEditCookie ec
                 return S_FALSE;
             }
 
+            auto _pComposition = m_compositionBuffer->GetComposition();
             ITfRange* pRangeComposition = nullptr;
             if (SUCCEEDED(_pComposition->GetRange(&pRangeComposition)))
             {
                 if (!_IsRangeCovered(ecReadOnly, tfSelection.range, pRangeComposition))
                 {
-                    _EndComposition(pContext);
+                    LOG_IF_FAILED(m_compositionBuffer->_TerminateCompositionInternal());
                 }
 
                 pRangeComposition->Release();
@@ -65,6 +80,7 @@ STDAPI CSampleIME::OnEndEdit(__RPC__in_opt ITfContext *pContext, TfEditCookie ec
         }
     }
 
+    activity.Stop();
     return S_OK;
 }
 
@@ -76,7 +92,7 @@ STDAPI CSampleIME::OnEndEdit(__RPC__in_opt ITfContext *pContext, TfEditCookie ec
 // Always release any previous sink.
 //----------------------------------------------------------------------------
 
-BOOL CSampleIME::_InitTextEditSink(_In_ ITfDocumentMgr *pDocMgr)
+BOOL CWindowsIME::_InitTextEditSink(_In_ ITfDocumentMgr *pDocMgr)
 {
     ITfSource* pSource = nullptr;
     BOOL ret = TRUE;
@@ -90,8 +106,9 @@ BOOL CSampleIME::_InitTextEditSink(_In_ ITfDocumentMgr *pDocMgr)
             pSource->Release();
         }
 
-        _pTextEditSinkContext->Release();
-        _pTextEditSinkContext = nullptr;
+//        _pTextEditSinkContext->Release();
+//        _pTextEditSinkContext = nullptr;
+        _pTextEditSinkContext.reset();
         _textEditSinkCookie = TF_INVALID_COOKIE;
     }
 
@@ -105,7 +122,7 @@ BOOL CSampleIME::_InitTextEditSink(_In_ ITfDocumentMgr *pDocMgr)
         return FALSE;
     }
 
-    if (_pTextEditSinkContext == nullptr)
+    if (!_pTextEditSinkContext)
     {
         return TRUE; // empty document, no sink possible
     }
@@ -126,8 +143,9 @@ BOOL CSampleIME::_InitTextEditSink(_In_ ITfDocumentMgr *pDocMgr)
 
     if (ret == FALSE)
     {
-        _pTextEditSinkContext->Release();
-        _pTextEditSinkContext = nullptr;
+//        _pTextEditSinkContext->Release();
+//        _pTextEditSinkContext = nullptr;
+        _pTextEditSinkContext.reset();
     }
 
     return ret;

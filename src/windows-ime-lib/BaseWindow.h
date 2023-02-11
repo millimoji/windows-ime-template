@@ -17,8 +17,6 @@
 #define RECT_TOO_TALL    (0x0040)
 #define RECT_ERROR       (0x0080)
 
-class CStringRange;
-
 //+---------------------------------------------------------------------------
 //
 // CBaseWindow

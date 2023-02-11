@@ -7,7 +7,7 @@
 
 #include "Private.h"
 #include "Globals.h"
-#include "SampleIME.h"
+#include "WindowsIME.h"
 #include "CandidateListUIPresenter.h"
 
 //+---------------------------------------------------------------------------
@@ -18,9 +18,10 @@
 // a document.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnInitDocumentMgr(_In_ ITfDocumentMgr *pDocMgr)
+STDAPI CWindowsIME::OnInitDocumentMgr(_In_ ITfDocumentMgr*)
 {
-    pDocMgr;
+    auto activity = WindowsImeLibTelemetry::ITfThreadMgrEventSink_OnInitDocumentMgr();
+    activity.Stop();
     return E_NOTIMPL;
 }
 
@@ -32,9 +33,10 @@ STDAPI CSampleIME::OnInitDocumentMgr(_In_ ITfDocumentMgr *pDocMgr)
 // document.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnUninitDocumentMgr(_In_ ITfDocumentMgr *pDocMgr)
+STDAPI CWindowsIME::OnUninitDocumentMgr(_In_ ITfDocumentMgr*)
 {
-    pDocMgr;
+    auto activity = WindowsImeLibTelemetry::ITfThreadMgrEventSink_OnUninitDocumentMgr();
+    activity.Stop();
     return E_NOTIMPL;
 }
 
@@ -47,9 +49,9 @@ STDAPI CSampleIME::OnUninitDocumentMgr(_In_ ITfDocumentMgr *pDocMgr)
 // focus document, or now no document holds the input focus.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocumentMgr *pDocMgrPrevFocus)
+STDAPI CWindowsIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocumentMgr*)
 {
-    pDocMgrPrevFocus;
+    auto activity = WindowsImeLibTelemetry::ITfThreadMgrEventSink_OnSetFocus();
 
     _InitTextEditSink(pDocMgrFocus);
 
@@ -59,38 +61,29 @@ STDAPI CSampleIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocumen
     // We have to hide/unhide candidate list depending on whether they are 
     // associated with pDocMgrFocus.
     //
-    if (_pCandidateListUIPresenter)
+    // if (m_candidateListView->IsCreated())
     {
-        ITfDocumentMgr* pCandidateListDocumentMgr = nullptr;
-        ITfContext* pTfContext = _pCandidateListUIPresenter->_GetContextDocument();
-        if ((nullptr != pTfContext) && SUCCEEDED(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr)))
+        wil::com_ptr<ITfDocumentMgr> pCandidateListDocumentMgr;
+        auto pTfContext = m_textLayoutSink._pContextDocument.get();
+
+        if (pTfContext && SUCCEEDED_LOG(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr)))
         {
-            if (pCandidateListDocumentMgr != pDocMgrFocus)
+            if (pCandidateListDocumentMgr.get() != pDocMgrFocus)
             {
-                _pCandidateListUIPresenter->OnKillThreadFocus();
+                // m_candidateListView->OnKillThreadFocus();
+                m_singletonProcessor->CandidateListViewInternal_OnKillThreadFocus();
             }
-            else 
+            else
             {
-                _pCandidateListUIPresenter->OnSetThreadFocus();
+                // m_candidateListView->OnSetThreadFocus();
+                m_singletonProcessor->CandidateListViewInternal_OnSetThreadFocus();
             }
-
-            pCandidateListDocumentMgr->Release();
         }
-    }
-
-    if (_pDocMgrLastFocused)
-    {
-        _pDocMgrLastFocused->Release();
-		_pDocMgrLastFocused = nullptr;
     }
 
     _pDocMgrLastFocused = pDocMgrFocus;
 
-    if (_pDocMgrLastFocused)
-    {
-        _pDocMgrLastFocused->AddRef();
-    }
-
+    activity.Stop();
     return S_OK;
 }
 
@@ -101,10 +94,10 @@ STDAPI CSampleIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocumen
 // Sink called by the framework when a context is pushed.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnPushContext(_In_ ITfContext *pContext)
+STDAPI CWindowsIME::OnPushContext(_In_ ITfContext*)
 {
-    pContext;
-
+    auto activity = WindowsImeLibTelemetry::ITfThreadMgrEventSink_OnPushContext();
+    activity.Stop();
     return E_NOTIMPL;
 }
 
@@ -115,10 +108,10 @@ STDAPI CSampleIME::OnPushContext(_In_ ITfContext *pContext)
 // Sink called by the framework when a context is popped.
 //----------------------------------------------------------------------------
 
-STDAPI CSampleIME::OnPopContext(_In_ ITfContext *pContext)
+STDAPI CWindowsIME::OnPopContext(_In_ ITfContext*)
 {
-    pContext;
-
+    auto activity = WindowsImeLibTelemetry::ITfThreadMgrEventSink_OnPopContext();
+    activity.Stop();
     return E_NOTIMPL;
 }
 
@@ -129,7 +122,7 @@ STDAPI CSampleIME::OnPopContext(_In_ ITfContext *pContext)
 // Advise our sink.
 //----------------------------------------------------------------------------
 
-BOOL CSampleIME::_InitThreadMgrEventSink()
+BOOL CWindowsIME::_InitThreadMgrEventSink()
 {
     ITfSource* pSource = nullptr;
     BOOL ret = FALSE;
@@ -159,7 +152,7 @@ Exit:
 // Unadvise our sink.
 //----------------------------------------------------------------------------
 
-void CSampleIME::_UninitThreadMgrEventSink()
+void CWindowsIME::_UninitThreadMgrEventSink()
 {
     ITfSource* pSource = nullptr;
 
@@ -175,4 +168,50 @@ void CSampleIME::_UninitThreadMgrEventSink()
     }
 
     _threadMgrEventSinkCookie = TF_INVALID_COOKIE;
+}
+
+
+//+---------------------------------------------------------------------------
+//
+// CWindowsIME::_UpdateLanguageBarOnSetFocus
+//
+//----------------------------------------------------------------------------
+
+void CWindowsIME::_UpdateLanguageBarOnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus)
+{
+    BOOL needDisableButtons = FALSE;
+
+    if (!pDocMgrFocus) 
+    {
+        needDisableButtons = TRUE;
+    } 
+    else
+    {
+        wil::com_ptr<IEnumTfContexts> pEnumContext;
+        if (FAILED(pDocMgrFocus->EnumContexts(&pEnumContext)) || !pEnumContext) 
+        {
+            needDisableButtons = TRUE;
+        } 
+        else 
+        {
+            ULONG fetched = 0;
+            wil::com_ptr<ITfContext> pContext;
+
+            if (FAILED(pEnumContext->Next(1, &pContext, &fetched)) || fetched != 1) 
+            {
+                needDisableButtons = TRUE;
+            }
+
+            if (!pContext) 
+            {
+                // context is not associated
+                needDisableButtons = TRUE;
+            }
+        }
+    }
+
+    if (m_inprocClient)
+    {
+        m_inprocClient->SetLanguageBarStatus(TF_LBI_STATUS_DISABLED, needDisableButtons);
+    }
 }

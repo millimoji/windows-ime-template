@@ -6,15 +6,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #include "Private.h"
-#include "SampleIME.h"
-#include "CandidateWindow.h"
+#include "Globals.h"
 #include "CandidateListUIPresenter.h"
-#include "CompositionProcessorEngine.h"
-#include "SampleIMEBaseStructure.h"
+#include "CandidateListView.h"
 
 //////////////////////////////////////////////////////////////////////
 //
-// CSampleIME candidate key handler methods
+// CWindowsIME candidate key handler methods
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -22,290 +20,69 @@ const int MOVEUP_ONE = -1;
 const int MOVEDOWN_ONE = 1;
 const int MOVETO_TOP = 0;
 const int MOVETO_BOTTOM = -1;
-//+---------------------------------------------------------------------------
-//
-// _HandleCandidateFinalize
-//
-//----------------------------------------------------------------------------
 
-HRESULT CSampleIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext *pContext)
-{
-    HRESULT hr = S_OK;
-    DWORD_PTR candidateLen = 0;
-    const WCHAR* pCandidateString = nullptr;
-    CStringRange candidateString;
+// //+---------------------------------------------------------------------------
+// //
+// // _HandleCandidateConvert
+// //
+// //----------------------------------------------------------------------------
+// 
+// HRESULT CompositionBuffer::_HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext *pContext)
+// {
+//     return _HandleCandidateWorker(ec, pContext);
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // _HandleCandidateArrowKey
+// //
+// //----------------------------------------------------------------------------
+// 
+// HRESULT CompositionBuffer::_HandleCandidateArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction)
+// {
+//     ec;
+//     pContext;
+// 
+//     _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
+// 
+//     return S_OK;
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // _HandleCandidateSelectByNumber
+// //
+// //----------------------------------------------------------------------------
+// 
+// inline int FindVkInVector(const std::vector<DWORD>& srcVkList, UINT vk)
+// {
+//     bool isVkNumpad = (VK_NUMPAD0 <= vk) && (vk <= VK_NUMPAD9);
+// 
+//     for (auto it = srcVkList.begin(); it != srcVkList.end(); ++it)
+//     {
+//         if ((*it == vk) || (isVkNumpad && (*it == (vk - VK_NUMPAD0))))
+//         {
+//             return static_cast<int>(std::distance(srcVkList.begin(), it));
+//         }
+//     }
+//     return -1;
+// }
 
-    if (nullptr == _pCandidateListUIPresenter)
-    {
-        goto NoPresenter;
-    }
-
-    candidateLen = _pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
-
-    candidateString.Set(pCandidateString, candidateLen);
-
-    if (candidateLen)
-    {
-        hr = _AddComposingAndChar(ec, pContext, &candidateString);
-
-        if (FAILED(hr))
-        {
-            return hr;
-        }
-    }
-
-NoPresenter:
-
-    _HandleComplete(ec, pContext);
-
-    return hr;
-}
-
-//+---------------------------------------------------------------------------
-//
-// _HandleCandidateConvert
-//
-//----------------------------------------------------------------------------
-
-HRESULT CSampleIME::_HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext *pContext)
-{
-    return _HandleCandidateWorker(ec, pContext);
-}
-
-//+---------------------------------------------------------------------------
-//
-// _HandleCandidateWorker
-//
-//----------------------------------------------------------------------------
-
-HRESULT CSampleIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext)
-{
-    HRESULT hrReturn = E_FAIL;
-    DWORD_PTR candidateLen = 0;
-    const WCHAR* pCandidateString = nullptr;
-    BSTR pbstr = nullptr;
-    CStringRange candidateString;
-    BOOL fMakePhraseFromText = FALSE;
-    CSampleImeArray<CCandidateListItem> candidatePhraseList;
-    CANDIDATE_MODE tempCandMode = CANDIDATE_NONE;
-    CCandidateListUIPresenter* pTempCandListUIPresenter = nullptr;
-    ITfDocumentMgr* pDocumentMgr = nullptr;
-    HRESULT hrStartCandidateList = E_FAIL;
-
-    if (nullptr == _pCandidateListUIPresenter)
-    {
-        hrReturn = S_OK;
-        goto Exit;
-    }
-
-    candidateLen = _pCandidateListUIPresenter->_GetSelectedCandidateString(&pCandidateString);
-    if (0 == candidateLen)
-    {
-        hrReturn = S_FALSE;
-        goto Exit;
-    }
-
-    candidateString.Set(pCandidateString, candidateLen);
-
-    fMakePhraseFromText = _pCompositionProcessorEngine->IsMakePhraseFromText();
-    if (fMakePhraseFromText)
-    {
-        _pCompositionProcessorEngine->GetCandidateStringInConverted(candidateString, &candidatePhraseList);
-        LCID locale = _pCompositionProcessorEngine->GetLocale();
-
-        _pCandidateListUIPresenter->RemoveSpecificCandidateFromList(locale, candidatePhraseList, candidateString);
-    }
-
-    // We have a candidate list if candidatePhraseList.Cnt is not 0
-    // If we are showing reverse conversion, use CCandidateListUIPresenter
-    if (candidatePhraseList.Count())
-    {
-        tempCandMode = CANDIDATE_WITH_NEXT_COMPOSITION;
-
-        pTempCandListUIPresenter = new (std::nothrow) CCandidateListUIPresenter(this, Global::AtomCandidateWindow,
-            CATEGORY_CANDIDATE,
-            _pCompositionProcessorEngine->GetCandidateListIndexRange(),
-            FALSE);
-        if (nullptr == pTempCandListUIPresenter)
-        {
-            hrReturn = E_OUTOFMEMORY;
-            goto Exit;
-        }
-    }
-
-    // call _Start*Line for CCandidateListUIPresenter or CReadingLine
-    // we don't cache the document manager object so get it from pContext.
-    if (pContext->GetDocumentMgr(&pDocumentMgr) == S_OK)
-    {
-        ITfRange* pRange = nullptr;
-        if (_pComposition->GetRange(&pRange) == S_OK)
-        {
-            if (pTempCandListUIPresenter)
-            {
-                hrStartCandidateList = pTempCandListUIPresenter->_StartCandidateList(_tfClientId, pDocumentMgr, pContext, ec, pRange, _pCompositionProcessorEngine->GetCandidateWindowWidth());
-            } 
-
-            pRange->Release();
-        }
-        pDocumentMgr->Release();
-    }
-
-    // set up candidate list if it is being shown
-    if (SUCCEEDED(hrStartCandidateList))
-    {
-        pTempCandListUIPresenter->_SetTextColor(RGB(0, 0x80, 0), GetSysColor(COLOR_WINDOW));    // Text color is green
-        pTempCandListUIPresenter->_SetFillColor((HBRUSH)(COLOR_WINDOW+1));    // Background color is window
-        pTempCandListUIPresenter->_SetText(&candidatePhraseList, FALSE);
-
-        // Add composing character
-        hrReturn = _AddComposingAndChar(ec, pContext, &candidateString);
-
-        // close candidate list
-        if (_pCandidateListUIPresenter)
-        {
-            _pCandidateListUIPresenter->_EndCandidateList();
-            delete _pCandidateListUIPresenter;
-            _pCandidateListUIPresenter = nullptr;
-
-            _candidateMode = CANDIDATE_NONE;
-            _isCandidateWithWildcard = FALSE;
-        }
-
-        if (hrReturn == S_OK)
-        {
-            // copy temp candidate
-            _pCandidateListUIPresenter = pTempCandListUIPresenter;
-
-            _candidateMode = tempCandMode;
-            _isCandidateWithWildcard = FALSE;
-        }
-    }
-    else
-    {
-        hrReturn = _HandleCandidateFinalize(ec, pContext);
-    }
-
-    if (pbstr)
-    {
-        SysFreeString(pbstr);
-    }
-
-Exit:
-    return hrReturn;
-}
-
-//+---------------------------------------------------------------------------
-//
-// _HandleCandidateArrowKey
-//
-//----------------------------------------------------------------------------
-
-HRESULT CSampleIME::_HandleCandidateArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction)
-{
-    ec;
-    pContext;
-
-    _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
-
-    return S_OK;
-}
-
-//+---------------------------------------------------------------------------
-//
-// _HandleCandidateSelectByNumber
-//
-//----------------------------------------------------------------------------
-
-HRESULT CSampleIME::_HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode)
-{
-    int iSelectAsNumber = _pCompositionProcessorEngine->GetCandidateListIndexRange()->GetIndex(uCode);
-    if (iSelectAsNumber == -1)
-    {
-        return S_FALSE;
-    }
-
-    if (_pCandidateListUIPresenter)
-    {
-        if (_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
-        {
-            return _HandleCandidateConvert(ec, pContext);
-        }
-    }
-
-    return S_FALSE;
-}
-
-//+---------------------------------------------------------------------------
-//
-// _HandlePhraseFinalize
-//
-//----------------------------------------------------------------------------
-
-HRESULT CSampleIME::_HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext *pContext)
-{
-    HRESULT hr = S_OK;
-
-    DWORD phraseLen = 0;
-    const WCHAR* pPhraseString = nullptr;
-
-    phraseLen = (DWORD)_pCandidateListUIPresenter->_GetSelectedCandidateString(&pPhraseString);
-
-    CStringRange phraseString;
-    phraseString.Set(pPhraseString, phraseLen);
-
-    if (phraseLen)
-    {
-        if ((hr = _AddCharAndFinalize(ec, pContext, &phraseString)) != S_OK)
-        {
-            return hr;
-        }
-    }
-
-    _HandleComplete(ec, pContext);
-
-    return S_OK;
-}
-
-//+---------------------------------------------------------------------------
-//
-// _HandlePhraseArrowKey
-//
-//----------------------------------------------------------------------------
-
-HRESULT CSampleIME::_HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction)
-{
-    ec;
-    pContext;
-
-    _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
-
-    return S_OK;
-}
-
-//+---------------------------------------------------------------------------
-//
-// _HandlePhraseSelectByNumber
-//
-//----------------------------------------------------------------------------
-
-HRESULT CSampleIME::_HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode)
-{
-    int iSelectAsNumber = _pCompositionProcessorEngine->GetCandidateListIndexRange()->GetIndex(uCode);
-    if (iSelectAsNumber == -1)
-    {
-        return S_FALSE;
-    }
-
-    if (_pCandidateListUIPresenter)
-    {
-        if (_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
-        {
-            return _HandlePhraseFinalize(ec, pContext);
-        }
-    }
-
-    return S_FALSE;
-}
+// //+---------------------------------------------------------------------------
+// //
+// // _HandlePhraseArrowKey
+// //
+// //----------------------------------------------------------------------------
+// 
+// HRESULT CompositionBuffer::_HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction)
+// {
+//     ec;
+//     pContext;
+// 
+//     _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
+// 
+//     return S_OK;
+// }
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -319,7 +96,8 @@ HRESULT CSampleIME::_HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext
 //
 //----------------------------------------------------------------------------
 
-CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ CSampleIME *pTextService, ATOM atom, KEYSTROKE_CATEGORY Category, _In_ CCandidateRange *pIndexRange, BOOL hideWindow) : CTfTextLayoutSink(pTextService)
+HRESULT CCandidateListUIPresenter::RuntimeClassInitialize(_In_ ICandidateListViewOwner* pTextService, const std::shared_ptr<std::vector<DWORD>>& pIndexRange, ATOM atom, BOOL hideWindow)
+    // : CTfTextLayoutSink(pTextService)
 {
     _atom = atom;
 
@@ -328,8 +106,6 @@ CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ CSampleIME *pTextServi
     _parentWndHandle = nullptr;
     _pCandidateWnd = nullptr;
 
-    _Category = Category;
-
     _updatedFlags = 0;
 
     _uiElementId = (DWORD)-1;
@@ -337,9 +113,10 @@ CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ CSampleIME *pTextServi
     _hideWindow = hideWindow;     // Hide window flag from [Configuration] CandidateList.Phrase.HideWindow
 
     _pTextService = pTextService;
-    _pTextService->AddRef();
+//    _pTextService->AddRef();
 
-    _refCount = 1;
+    // _refCount = 1;
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -351,86 +128,87 @@ CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ CSampleIME *pTextServi
 CCandidateListUIPresenter::~CCandidateListUIPresenter()
 {
     _EndCandidateList();
-    _pTextService->Release();
+//    _pTextService->Release();
 }
 
-//+---------------------------------------------------------------------------
-//
-// ITfCandidateListUIElement::IUnknown::QueryInterface
-//
-//----------------------------------------------------------------------------
-
-STDAPI CCandidateListUIPresenter::QueryInterface(REFIID riid, _Outptr_ void **ppvObj)
-{
-    if (CTfTextLayoutSink::QueryInterface(riid, ppvObj) == S_OK)
-    {
-        return S_OK;
-    }
-
-    if (ppvObj == nullptr)
-    {
-        return E_INVALIDARG;
-    }
-
-    *ppvObj = nullptr;
-
-    if (IsEqualIID(riid, IID_ITfUIElement) ||
-        IsEqualIID(riid, IID_ITfCandidateListUIElement))
-    {
-        *ppvObj = (ITfCandidateListUIElement*)this;
-    }
-    else if (IsEqualIID(riid, IID_IUnknown) || 
-        IsEqualIID(riid, IID_ITfCandidateListUIElementBehavior)) 
-    {
-        *ppvObj = (ITfCandidateListUIElementBehavior*)this;
-    }
-    else if (IsEqualIID(riid, __uuidof(ITfIntegratableCandidateListUIElement))) 
-    {
-        *ppvObj = (ITfIntegratableCandidateListUIElement*)this;
-    }
-
-    if (*ppvObj)
-    {
-        AddRef();
-        return S_OK;
-    }
-
-    return E_NOINTERFACE;
-}
-
-//+---------------------------------------------------------------------------
-//
-// ITfCandidateListUIElement::IUnknown::AddRef
-//
-//----------------------------------------------------------------------------
-
-STDAPI_(ULONG) CCandidateListUIPresenter::AddRef()
-{
-    CTfTextLayoutSink::AddRef();
-    return ++_refCount;
-}
-
-//+---------------------------------------------------------------------------
-//
-// ITfCandidateListUIElement::IUnknown::Release
-//
-//----------------------------------------------------------------------------
-
-STDAPI_(ULONG) CCandidateListUIPresenter::Release()
-{
-    CTfTextLayoutSink::Release();
-
-    LONG cr = --_refCount;
-
-    assert(_refCount >= 0);
-
-    if (_refCount == 0)
-    {
-        delete this;
-    }
-
-    return cr;
-}
+// //+---------------------------------------------------------------------------
+// //
+// // ITfCandidateListUIElement::IUnknown::QueryInterface
+// //
+// //----------------------------------------------------------------------------
+// 
+// STDAPI CCandidateListUIPresenter::QueryInterface(REFIID riid, _Outptr_ void **ppvObj)
+// {
+//     if (CTfTextLayoutSink::QueryInterface(riid, ppvObj) == S_OK)
+//     {
+//         return S_OK;
+//     }
+// 
+//     if (ppvObj == nullptr)
+//     {
+//         return E_INVALIDARG;
+//     }
+// 
+//     *ppvObj = nullptr;
+// 
+//     if (IsEqualIID(riid, IID_ITfUIElement) ||
+//         IsEqualIID(riid, IID_ITfCandidateListUIElement))
+//     {
+//         *ppvObj = (ITfCandidateListUIElement*)this;
+//     }
+//     else if (IsEqualIID(riid, IID_IUnknown) || 
+//         IsEqualIID(riid, IID_ITfCandidateListUIElementBehavior)) 
+//     {
+//         *ppvObj = (ITfCandidateListUIElementBehavior*)this;
+//     }
+//     else if (IsEqualIID(riid, __uuidof(ITfIntegratableCandidateListUIElement))) 
+//     {
+//         *ppvObj = (ITfIntegratableCandidateListUIElement*)this;
+//     }
+// 
+//     if (*ppvObj)
+//     {
+//         AddRef();
+//         return S_OK;
+//     }
+// 
+//     return E_NOINTERFACE;
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // ITfCandidateListUIElement::IUnknown::AddRef
+// //
+// //----------------------------------------------------------------------------
+// 
+// STDAPI_(ULONG) CCandidateListUIPresenter::AddRef()
+// {
+//     return CTfTextLayoutSink::AddRef();
+//     // return ++_refCount;
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // ITfCandidateListUIElement::IUnknown::Release
+// //
+// //----------------------------------------------------------------------------
+// 
+// STDAPI_(ULONG) CCandidateListUIPresenter::Release()
+// {
+//     return CTfTextLayoutSink::Release();
+// 
+// // Bug?? double free
+// //    LONG cr = --_refCount;
+// //
+// //    assert(_refCount >= 0);
+// //
+// //    if (_refCount == 0)
+// //    {
+// //        delete this;
+// //    }
+// //
+// //    return cr;
+// }
 
 //+---------------------------------------------------------------------------
 //
@@ -455,7 +233,7 @@ STDAPI CCandidateListUIPresenter::GetDescription(BSTR *pbstr)
 
 STDAPI CCandidateListUIPresenter::GetGUID(GUID *pguid)
 {
-    *pguid = Global::SampleIMEGuidCandUIElement;
+    *pguid = WindowsImeLib::g_processorFactory->GetConstantProvider()->CandUIElement();
     return S_OK;
 }
 
@@ -496,10 +274,10 @@ HRESULT CCandidateListUIPresenter::ToShowCandidateWindow()
 
 HRESULT CCandidateListUIPresenter::ToHideCandidateWindow()
 {
-	if (_pCandidateWnd)
-	{
-		_pCandidateWnd->_Show(FALSE);
-	}
+    if (_pCandidateWnd)
+    {
+        _pCandidateWnd->_Show(FALSE);
+    }
 
     _updatedFlags = TF_CLUIE_SELECTION | TF_CLUIE_CURRENTPAGE;
     _UpdateUIElement();
@@ -595,14 +373,19 @@ STDAPI CCandidateListUIPresenter::GetString(UINT uIndex, BSTR *pbstr)
         return E_FAIL;
     }
 
-    DWORD candidateLen = 0;
-    const WCHAR* pCandidateString = nullptr;
+    const auto candidateString = _pCandidateWnd->_GetCandidateString(uIndex);
 
-    candidateLen = _pCandidateWnd->_GetCandidateString(uIndex, &pCandidateString);
-
-    *pbstr = (candidateLen == 0) ? nullptr : SysAllocStringLen(pCandidateString, candidateLen);
+    *pbstr = candidateString->empty() ? nullptr : SysAllocStringLen(candidateString->c_str(), static_cast<UINT>(candidateString->length()));
 
     return S_OK;
+//    DWORD candidateLen = 0;
+//    const WCHAR* pCandidateString = nullptr;
+//
+//    candidateLen = _pCandidateWnd->_GetCandidateString(uIndex, &pCandidateString);
+//
+//    *pbstr = (candidateLen == 0) ? nullptr : SysAllocStringLen(pCandidateString, candidateLen);
+//
+//    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -763,39 +546,21 @@ STDAPI CCandidateListUIPresenter::FinalizeExactCompositionString()
 //
 //----------------------------------------------------------------------------
 
-HRESULT CCandidateListUIPresenter::_StartCandidateList(TfClientId tfClientId, _In_ ITfDocumentMgr *pDocumentMgr, _In_ ITfContext *pContextDocument, TfEditCookie ec, _In_ ITfRange *pRangeComposition, UINT wndWidth)
+HRESULT CCandidateListUIPresenter::_StartCandidateList(UINT wndWidth)
 {
-	pDocumentMgr;tfClientId;
+    HWND hwnd;
+    RECT rcTextExt;
+    RETURN_IF_FAILED(_pTextService->_GetLastTextExt(&hwnd, &rcTextExt));
 
-    HRESULT hr = E_FAIL;
+    RETURN_IF_FAILED(BeginUIElement());
 
-    if (FAILED(_StartLayout(pContextDocument, ec, pRangeComposition)))
-    {
-        goto Exit;
-    }
-
-    BeginUIElement();
-
-    hr = MakeCandidateWindow(pContextDocument, wndWidth);
-    if (FAILED(hr))
-    {
-        goto Exit;
-    }
+    RETURN_IF_FAILED(MakeCandidateWindow(wndWidth, hwnd));
 
     Show(_isShowMode);
 
-    RECT rcTextExt;
-    if (SUCCEEDED(_GetTextExt(&rcTextExt)))
-    {
-        _LayoutChangeNotification(&rcTextExt);
-    }
+    _LayoutChangeNotification(&rcTextExt);
 
-Exit:
-    if (FAILED(hr))
-    {
-        _EndCandidateList();
-    }
-    return hr;
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -810,7 +575,7 @@ void CCandidateListUIPresenter::_EndCandidateList()
 
     DisposeCandidateWindow();
 
-    _EndLayout();
+//    _pTextService->_EndLayoutTracking();
 }
 
 //+---------------------------------------------------------------------------
@@ -819,9 +584,9 @@ void CCandidateListUIPresenter::_EndCandidateList()
 //
 //----------------------------------------------------------------------------
 
-void CCandidateListUIPresenter::_SetText(_In_ CSampleImeArray<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode)
+void CCandidateListUIPresenter::_SetText(const std::vector<shared_wstring>& pCandidateList)
 {
-    AddCandidateToCandidateListUI(pCandidateList, isAddFindKeyCode);
+    AddCandidateToCandidateListUI(pCandidateList);
 
     SetPageIndexWithScrollInfo(pCandidateList);
 
@@ -840,18 +605,18 @@ void CCandidateListUIPresenter::_SetText(_In_ CSampleImeArray<CCandidateListItem
     }
 }
 
-void CCandidateListUIPresenter::AddCandidateToCandidateListUI(_In_ CSampleImeArray<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode)
+void CCandidateListUIPresenter::AddCandidateToCandidateListUI(const std::vector<shared_wstring>& pCandidateList)
 {
-    for (UINT index = 0; index < pCandidateList->Count(); index++)
+    for (UINT index = 0; index < pCandidateList.size(); index++)
     {
-        _pCandidateWnd->_AddString(pCandidateList->GetAt(index), isAddFindKeyCode);
+        _pCandidateWnd->_AddString(pCandidateList.at(index));
     }
 }
 
-void CCandidateListUIPresenter::SetPageIndexWithScrollInfo(_In_ CSampleImeArray<CCandidateListItem> *pCandidateList)
+void CCandidateListUIPresenter::SetPageIndexWithScrollInfo(const std::vector<shared_wstring>& pCandidateList)
 {
-    UINT candCntInPage = _pIndexRange->Count();
-    UINT bufferSize = pCandidateList->Count() / candCntInPage + 1;
+    UINT candCntInPage = static_cast<UINT>(_pIndexRange->size());
+    UINT bufferSize = static_cast<UINT>(pCandidateList.size() / candCntInPage + 1);
     UINT* puPageIndex = new (std::nothrow) UINT[ bufferSize ];
     if (puPageIndex != nullptr)
     {
@@ -863,7 +628,7 @@ void CCandidateListUIPresenter::SetPageIndexWithScrollInfo(_In_ CSampleImeArray<
         _pCandidateWnd->_SetPageIndex(puPageIndex, bufferSize);
         delete [] puPageIndex;
     }
-    _pCandidateWnd->_SetScrollInfo(pCandidateList->Count(), candCntInPage);  // nMax:range of max, nPage:number of items in page
+    _pCandidateWnd->_SetScrollInfo(static_cast<int>(pCandidateList.size()), candCntInPage);  // nMax:range of max, nPage:number of items in page
 
 }
 //+---------------------------------------------------------------------------
@@ -901,9 +666,9 @@ void CCandidateListUIPresenter::_SetFillColor(HBRUSH hBrush)
 //
 //----------------------------------------------------------------------------
 
-DWORD_PTR CCandidateListUIPresenter::_GetSelectedCandidateString(_Outptr_result_maybenull_ const WCHAR **ppwchCandidateString)
+shared_wstring CCandidateListUIPresenter::_GetSelectedCandidateString()
 {
-    return _pCandidateWnd->_GetSelectedCandidateString(ppwchCandidateString);
+    return _pCandidateWnd->_GetSelectedCandidateString();
 }
 
 //+---------------------------------------------------------------------------
@@ -988,9 +753,10 @@ BOOL CCandidateListUIPresenter::_MovePage(_In_ int offSet)
 
 void CCandidateListUIPresenter::_MoveWindowToTextExt()
 {
+    HWND hwnd;
     RECT rc;
 
-    if (FAILED(_GetTextExt(&rc)))
+    if (FAILED(_pTextService->_GetLastTextExt(&hwnd, &rc)))
     {
         return;
     }
@@ -1013,16 +779,16 @@ VOID CCandidateListUIPresenter::_LayoutChangeNotification(_In_ RECT *lpRect)
     _pCandidateWnd->_Move(ptCandidate.x, ptCandidate.y);
 }
 
-//+---------------------------------------------------------------------------
-//
-// _LayoutDestroyNotification
-//
-//----------------------------------------------------------------------------
-
-VOID CCandidateListUIPresenter::_LayoutDestroyNotification()
-{
-    _EndCandidateList();
-}
+// //+---------------------------------------------------------------------------
+// //
+// // _LayoutDestroyNotification
+// //
+// //----------------------------------------------------------------------------
+// 
+// VOID CCandidateListUIPresenter::_LayoutDestroyNotification()
+// {
+//     _EndCandidateList();
+// }
 
 //+---------------------------------------------------------------------------
 //
@@ -1032,60 +798,11 @@ VOID CCandidateListUIPresenter::_LayoutDestroyNotification()
 
 HRESULT CCandidateListUIPresenter::_CandidateChangeNotification(_In_ enum CANDWND_ACTION action)
 {
-    HRESULT hr = E_FAIL;
+    RETURN_HR_IF(S_OK, CAND_ITEM_SELECT != action);
 
-    TfClientId tfClientId = _pTextService->_GetClientId();
-    ITfThreadMgr* pThreadMgr = nullptr;
-    ITfDocumentMgr* pDocumentMgr = nullptr;
-    ITfContext* pContext = nullptr;
+    _pTextService->NotifyFinalizeCandidateList();
 
-    _KEYSTROKE_STATE KeyState = {};
-    KeyState.Category = _Category;
-    KeyState.Function = FUNCTION_FINALIZE_CANDIDATELIST;
-
-    if (CAND_ITEM_SELECT != action)
-    {
-        goto Exit;
-    }
-
-    pThreadMgr = _pTextService->_GetThreadMgr();
-    if (nullptr == pThreadMgr)
-    {
-        goto Exit;
-    }
-
-    hr = pThreadMgr->GetFocus(&pDocumentMgr);
-    if (FAILED(hr))
-    {
-        goto Exit;
-    }
-
-    hr = pDocumentMgr->GetTop(&pContext);
-    if (FAILED(hr))
-    {
-        pDocumentMgr->Release();
-        goto Exit;
-    }
-
-    {
-        CKeyHandlerEditSession* pEditSession = new (std::nothrow) CKeyHandlerEditSession(_pTextService, pContext, 0, 0, KeyState);
-        if (nullptr != pEditSession)
-        {
-            HRESULT hrSession = S_OK;
-            hr = pContext->RequestEditSession(tfClientId, pEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hrSession);
-            if (hrSession == TF_E_SYNCHRONOUS || hrSession == TS_E_READONLY)
-            {
-                hr = pContext->RequestEditSession(tfClientId, pEditSession, TF_ES_ASYNC | TF_ES_READWRITE, &hrSession);
-            }
-            pEditSession->Release();
-        }
-    }
-
-    pContext->Release();
-    pDocumentMgr->Release();
-
-Exit:
-    return hr;
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -1112,8 +829,8 @@ HRESULT CCandidateListUIPresenter::_UpdateUIElement()
 {
     HRESULT hr = S_OK;
 
-    ITfThreadMgr* pThreadMgr = _pTextService->_GetThreadMgr();
-    if (nullptr == pThreadMgr)
+    auto pThreadMgr = _pTextService->_GetThreadMgr();
+    if (!pThreadMgr)
     {
         return S_OK;
     }
@@ -1160,52 +877,36 @@ HRESULT CCandidateListUIPresenter::OnKillThreadFocus()
     return S_OK;
 }
 
-void CCandidateListUIPresenter::RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ CSampleImeArray<CCandidateListItem> &candidateList, _In_ CStringRange &candidateString)
-{
-    for (UINT index = 0; index < candidateList.Count();)
-    {
-        CCandidateListItem* pLI = candidateList.GetAt(index);
-
-        if (CStringRange::Compare(Locale, &candidateString, &pLI->_ItemString) == CSTR_EQUAL)
-        {
-            candidateList.RemoveAt(index);
-            continue;
-        }
-
-        index++;
-    }
-}
-
-void CCandidateListUIPresenter::AdviseUIChangedByArrowKey(_In_ KEYSTROKE_FUNCTION arrowKey)
+void CCandidateListUIPresenter::AdviseUIChangedByArrowKey(_In_ WindowsImeLib::CANDIDATELIST_FUNCTION arrowKey)
 {
     switch (arrowKey)
     {
-    case FUNCTION_MOVE_UP:
+    case WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_UP:
         {
             _MoveSelection(MOVEUP_ONE);
             break;
         }
-    case FUNCTION_MOVE_DOWN:
+    case WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_DOWN:
         {
             _MoveSelection(MOVEDOWN_ONE);
             break;
         }
-    case FUNCTION_MOVE_PAGE_UP:
+    case WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_PAGE_UP:
         {
             _MovePage(MOVEUP_ONE);
             break;
         }
-    case FUNCTION_MOVE_PAGE_DOWN:
+    case WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_PAGE_DOWN:
         {
             _MovePage(MOVEDOWN_ONE);
             break;
         }
-    case FUNCTION_MOVE_PAGE_TOP:
+    case WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_PAGE_TOP:
         {
             _SetSelection(MOVETO_TOP);
             break;
         }
-    case FUNCTION_MOVE_PAGE_BOTTOM:
+    case WindowsImeLib::CANDIDATELIST_FUNCTION::MOVE_PAGE_BOTTOM:
         {
             _SetSelection(MOVETO_BOTTOM);
             break;
@@ -1219,10 +920,10 @@ HRESULT CCandidateListUIPresenter::BeginUIElement()
 {
     HRESULT hr = S_OK;
 
-    ITfThreadMgr* pThreadMgr = _pTextService->_GetThreadMgr();
-    if (nullptr ==pThreadMgr)
+    auto pThreadMgr = _pTextService->_GetThreadMgr();
+    if (!pThreadMgr)
     {
-        hr = E_FAIL;
+        hr = S_OK; // E_FAIL;
         goto Exit;
     }
 
@@ -1231,7 +932,9 @@ HRESULT CCandidateListUIPresenter::BeginUIElement()
         hr = pThreadMgr->QueryInterface(IID_ITfUIElementMgr, (void**)&pUIElementMgr);
         if (hr == S_OK)
         {
-            pUIElementMgr->BeginUIElement(this, &_isShowMode, &_uiElementId);
+            wil::com_ptr<ITfUIElement> uiElement;
+            RETURN_IF_FAILED(QueryInterface(IID_PPV_ARGS(&uiElement)));
+            pUIElementMgr->BeginUIElement(uiElement.get(), &_isShowMode, &_uiElementId);
             pUIElementMgr->Release();
         }
     }
@@ -1244,10 +947,10 @@ HRESULT CCandidateListUIPresenter::EndUIElement()
 {
     HRESULT hr = S_OK;
 
-    ITfThreadMgr* pThreadMgr = _pTextService->_GetThreadMgr();
-    if ((nullptr == pThreadMgr) || (-1 == _uiElementId))
+    auto pThreadMgr = _pTextService->_GetThreadMgr();
+    if (!pThreadMgr || (-1 == _uiElementId))
     {
-        hr = E_FAIL;
+        hr = S_OK; // E_FAIL;
         goto Exit;
     }
 
@@ -1265,7 +968,7 @@ Exit:
     return hr;
 }
 
-HRESULT CCandidateListUIPresenter::MakeCandidateWindow(_In_ ITfContext *pContextDocument, _In_ UINT wndWidth)
+HRESULT CCandidateListUIPresenter::MakeCandidateWindow(UINT wndWidth, HWND parentWndHandle)
 {
     HRESULT hr = S_OK;
 
@@ -1282,12 +985,12 @@ HRESULT CCandidateListUIPresenter::MakeCandidateWindow(_In_ ITfContext *pContext
     }
 
     {
-        HWND parentWndHandle = nullptr;
-        ITfContextView* pView = nullptr;
-        if (SUCCEEDED(pContextDocument->GetActiveView(&pView)))
-        {
-            pView->GetWnd(&parentWndHandle);
-        }
+//        HWND parentWndHandle = nullptr;
+//        ITfContextView* pView = nullptr;
+//        if (SUCCEEDED(pContextDocument->GetActiveView(&pView)))
+//        {
+//            pView->GetWnd(&parentWndHandle);
+//        }
 
         if (!_pCandidateWnd->_Create(_atom, wndWidth, parentWndHandle))
         {
