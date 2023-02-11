@@ -6,6 +6,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #pragma once
+#include <wrl/module.h>
+#include <wrl/implements.h>
 
 class CCompartment
 {
@@ -22,43 +24,36 @@ public:
 
     BOOL GetCompartmentBOOL() { BOOL value; THROW_IF_FAILED(_GetCompartmentBOOL(value)); return value; }
     DWORD GetCompartmentDWORD() { DWORD value; THROW_IF_FAILED(_GetCompartmentDWORD(value)); return value; }
-
-    VOID _GetGUID(GUID *pguid)
-    {
-        *pguid = _guidCompartment;
-    }
+    VOID _GetGUID(GUID *pguid) { *pguid = _guidCompartment; }
 
 private:
     GUID _guidCompartment;
-    IUnknown* _punk;
+    wil::com_ptr<IUnknown> _punk;
     TfClientId _tfClientId;
 };
 
 typedef HRESULT (*CESCALLBACK)(void *pv, REFGUID guidCompartment);
 
-class CCompartmentEventSink : public ITfCompartmentEventSink
+class CCompartmentEventSink :
+    public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
+                                        ITfCompartmentEventSink,
+                                        Microsoft::WRL::FtmBase>
 {
 public:
-    CCompartmentEventSink(_In_ CESCALLBACK pfnCallback, _In_ void *pv);
+    CCompartmentEventSink() {}
     ~CCompartmentEventSink();
-
-    // IUnknown
-    STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);
-    STDMETHODIMP_(ULONG) AddRef(void);
-    STDMETHODIMP_(ULONG) Release(void);
+    HRESULT RuntimeClassInitialize(_In_ CESCALLBACK pfnCallback, _In_ void *pv);
 
     // ITfCompartmentEventSink
-    STDMETHODIMP OnChange(_In_ REFGUID guid);
+    STDMETHODIMP OnChange(_In_ REFGUID guid) override;
 
     // function
     HRESULT _Advise(_In_ IUnknown *punk, _In_ REFGUID guidCompartment);
     HRESULT _Unadvise();
 
 private:
-    ITfCompartment* _pCompartment = {};
+    wil::com_ptr<ITfCompartment> _pCompartment;
     DWORD _dwCookie = {};
     CESCALLBACK _pfnCallback;
     void *_pv;
-
-    LONG _refCount;
 };

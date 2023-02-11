@@ -6,38 +6,40 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 #pragma once
+#include <wrl/module.h>
+#include <wrl/implements.h>
 
 class CCompartment;
 class CCompartmentEventSink;
 
-class CLangBarItemButton : public ITfLangBarItemButton,
-    public ITfSource
+class CLangBarItemButton :
+    public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
+                                        ITfSource,
+                                        ITfLangBarItem,
+                                        ITfLangBarItemButton,
+                                        Microsoft::WRL::FtmBase>
 {
 public:
-    CLangBarItemButton(REFGUID guidLangBar, LPCWSTR description, LPCWSTR tooltip, DWORD onIconIndex, DWORD offIconIndex, BOOL isSecureMode);
+    CLangBarItemButton() {}
     ~CLangBarItemButton();
-
-    // IUnknown
-    STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);
-    STDMETHODIMP_(ULONG) AddRef(void);
-    STDMETHODIMP_(ULONG) Release(void);
+    HRESULT RuntimeClassInitialize(REFGUID guidLangBar, LPCWSTR description, LPCWSTR tooltip, DWORD onIconIndex, DWORD offIconIndex, BOOL isSecureMode);
 
     // ITfLangBarItem
-    STDMETHODIMP GetInfo(_Out_ TF_LANGBARITEMINFO *pInfo);
-    STDMETHODIMP GetStatus(_Out_ DWORD *pdwStatus);
-    STDMETHODIMP Show(BOOL fShow);
-    STDMETHODIMP GetTooltipString(_Out_ BSTR *pbstrToolTip);
+    STDMETHODIMP GetInfo(_Out_ TF_LANGBARITEMINFO *pInfo) override;
+    STDMETHODIMP GetStatus(_Out_ DWORD *pdwStatus) override;
+    STDMETHODIMP Show(BOOL fShow) override;
+    STDMETHODIMP GetTooltipString(_Out_ BSTR *pbstrToolTip) override;
 
     // ITfLangBarItemButton
-    STDMETHODIMP OnClick(TfLBIClick click, POINT pt, _In_ const RECT *prcArea);
-    STDMETHODIMP InitMenu(_In_ ITfMenu *pMenu);
-    STDMETHODIMP OnMenuSelect(UINT wID);
-    STDMETHODIMP GetIcon(_Out_ HICON *phIcon);
-    STDMETHODIMP GetText(_Out_ BSTR *pbstrText);
+    STDMETHODIMP OnClick(TfLBIClick click, POINT pt, _In_ const RECT *prcArea) override;
+    STDMETHODIMP InitMenu(_In_ ITfMenu *pMenu) override;
+    STDMETHODIMP OnMenuSelect(UINT wID) override;
+    STDMETHODIMP GetIcon(_Out_ HICON *phIcon) override;
+    STDMETHODIMP GetText(_Out_ BSTR *pbstrText) override;
 
     // ITfSource
-    STDMETHODIMP AdviseSink(__RPC__in REFIID riid, __RPC__in_opt IUnknown *punk, __RPC__out DWORD *pdwCookie);
-    STDMETHODIMP UnadviseSink(DWORD dwCookie);
+    STDMETHODIMP AdviseSink(__RPC__in REFIID riid, __RPC__in_opt IUnknown *punk, __RPC__out DWORD *pdwCookie) override;
+    STDMETHODIMP UnadviseSink(DWORD dwCookie) override;
 
     // Add/Remove languagebar item
     HRESULT _AddItem(_In_ ITfThreadMgr *pThreadMgr);
@@ -48,14 +50,13 @@ public:
     BOOL _UnregisterCompartment(_In_ ITfThreadMgr *pThreadMgr);
 
     void CleanUp();
-
     void SetStatus(DWORD dwStatus, BOOL fSet);
 
 private:
-    ITfLangBarItemSink* _pLangBarItemSink;
+    wil::com_ptr<ITfLangBarItemSink> _pLangBarItemSink;
 
     TF_LANGBARITEMINFO _tfLangBarItemInfo;
-    LPCWSTR _pTooltipText;
+    std::wstring _pTooltipText;
     DWORD _onIconIndex;
     DWORD _offIconIndex;
 
@@ -63,12 +64,10 @@ private:
     BOOL _isSecureMode;
     DWORD _status;
 
-    CCompartment* _pCompartment;
-    CCompartmentEventSink* _pCompartmentEventSink;
+    std::unique_ptr<CCompartment> _pCompartment;
+    wil::com_ptr<CCompartmentEventSink> _pCompartmentEventSink;
     static HRESULT _CompartmentCallback(_In_ void *pv, REFGUID guidCompartment);
 
     // The cookie for the sink to CLangBarItemButton.
     static const DWORD _cookie = 0;
-
-    LONG _refCount;
 };

@@ -7,6 +7,8 @@
 
 #include "pch.h"
 #include "../WindowsImeLib.h"
+#include "../Compartment.h"
+#include "../LanguageBar.h"
 #include "SampleIMEBaseStructure.h"
 #include "SampleIMEDefine.h"
 #include "SampleIMEGlobals.h"
@@ -156,9 +158,8 @@ private:
         {
             const auto compartment = std::make_shared<CCompartment>(m_threadMgr.get(), m_tfClientId, compartmentGuid);
             wil::com_ptr<CCompartmentEventSink> eventCallback;
-            eventCallback.attach(new CCompartmentEventSink(CompartmentCallback, this));
+            THROW_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CCompartmentEventSink>(&eventCallback, CompartmentCallback, this));
             THROW_IF_FAILED(eventCallback->_Advise(m_threadMgr.get(), compartmentGuid));
-
             m_listCompartment.emplace_back(compartment);
             m_listCompartmentEventSink.emplace_back(eventCallback);
         }
@@ -219,9 +220,12 @@ private:
     {
         for (const auto& langBarItemData: s_langBarItems)
         {
-            m_listLanguageBarItem.emplace_back(wil::com_ptr<CLangBarItemButton>());
-            m_listLanguageBarItem.back().attach(new CLangBarItemButton(langBarItemData.langBarItemGuid,
-                    langBarItemData.description, langBarItemData.toolTip, langBarItemData.onIconResourceId, langBarItemData.offIconResourceId, isSecureMode));
+            wil::com_ptr<CLangBarItemButton> langBarItemButton;
+            THROW_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CLangBarItemButton>(&langBarItemButton,
+                langBarItemData.langBarItemGuid, langBarItemData.description, langBarItemData.toolTip,
+                langBarItemData.onIconResourceId, langBarItemData.offIconResourceId, isSecureMode));
+
+            m_listLanguageBarItem.emplace_back(langBarItemButton);
             THROW_IF_FAILED(m_listLanguageBarItem.back()->_AddItem(m_threadMgr.get()));
             THROW_HR_IF(E_FAIL, !m_listLanguageBarItem.back()->_RegisterCompartment(m_threadMgr.get(), m_tfClientId, langBarItemData.compartmentGuid));
         }

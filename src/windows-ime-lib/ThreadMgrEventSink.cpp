@@ -169,3 +169,49 @@ void CWindowsIME::_UninitThreadMgrEventSink()
 
     _threadMgrEventSinkCookie = TF_INVALID_COOKIE;
 }
+
+
+//+---------------------------------------------------------------------------
+//
+// CWindowsIME::_UpdateLanguageBarOnSetFocus
+//
+//----------------------------------------------------------------------------
+
+void CWindowsIME::_UpdateLanguageBarOnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus)
+{
+    BOOL needDisableButtons = FALSE;
+
+    if (!pDocMgrFocus) 
+    {
+        needDisableButtons = TRUE;
+    } 
+    else
+    {
+        wil::com_ptr<IEnumTfContexts> pEnumContext;
+        if (FAILED(pDocMgrFocus->EnumContexts(&pEnumContext)) || !pEnumContext) 
+        {
+            needDisableButtons = TRUE;
+        } 
+        else 
+        {
+            ULONG fetched = 0;
+            wil::com_ptr<ITfContext> pContext;
+
+            if (FAILED(pEnumContext->Next(1, &pContext, &fetched)) || fetched != 1) 
+            {
+                needDisableButtons = TRUE;
+            }
+
+            if (!pContext) 
+            {
+                // context is not associated
+                needDisableButtons = TRUE;
+            }
+        }
+    }
+
+    if (m_inprocClient)
+    {
+        m_inprocClient->SetLanguageBarStatus(TF_LBI_STATUS_DISABLED, needDisableButtons);
+    }
+}

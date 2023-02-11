@@ -1,16 +1,13 @@
 // Copyright (c) millimoji@gmail.com
 #pragma once
 
-#include <windows.h>
-#include <ctffunc.h>
-#include <cassert>
 #include <memory>
 #include <string>
 #include <vector>
 
-// TODO: will remove
-#include "Compartment.h"
-#include "LanguageBar.h"
+// remove windows specific header dependency
+struct threadMgr;
+typedef unsigned long tfClientId;
 
 typedef std::shared_ptr<const std::wstring> shared_wstring;
 

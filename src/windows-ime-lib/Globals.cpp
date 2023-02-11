@@ -19,7 +19,7 @@ HINSTANCE dllInstanceHandle;
 LONG dllRefCount = -1;
 
 CRITICAL_SECTION CS;
-HFONT defaultlFontHandle;               // Global font object we use everywhere
+HFONT defaultlFontHandle = nullptr; // Global font object we use everywhere
 
 //---------------------------------------------------------------------
 // PreserveKey GUID

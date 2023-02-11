@@ -236,7 +236,6 @@ LRESULT CALLBACK CCandidateWindow::_WindowProcCallback(_In_ HWND wndHandle, UINT
     case WM_CREATE:
         {
             HDC dcHandle = nullptr;
-
             dcHandle = GetDC(wndHandle);
             if (dcHandle)
             {
@@ -324,10 +323,8 @@ LRESULT CALLBACK CCandidateWindow::_WindowProcCallback(_In_ HWND wndHandle, UINT
 
     case WM_PAINT:
         {
-            HDC dcHandle = nullptr;
             PAINTSTRUCT ps;
-
-            dcHandle = BeginPaint(wndHandle, &ps);
+            HDC dcHandle = BeginPaint(wndHandle, &ps);
             _OnPaint(dcHandle, &ps);
             _DrawBorder(wndHandle, CANDWND_BORDER_WIDTH*2);
             EndPaint(wndHandle, &ps);
