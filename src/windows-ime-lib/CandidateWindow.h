@@ -89,6 +89,8 @@ private:
     void _DeleteShadowWnd();
     void _DeleteVScrollBarWnd();
 
+    void SetDefaultCandidateTextFont();
+
 private:
     UINT _currentSelection;
     std::vector<shared_wstring> _candidateList;

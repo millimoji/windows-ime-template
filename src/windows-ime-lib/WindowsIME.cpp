@@ -558,7 +558,7 @@ HRESULT CWindowsIME::GetComModuleName(REFGUID rclsid, _Out_writes_(cchPath)WCHAR
     return hr;
 }
 
-void CandidateListView::SetDefaultCandidateTextFont()
+void CCandidateWindow::SetDefaultCandidateTextFont()
 {
     // Candidate Text Font
     if (Global::defaultlFontHandle == nullptr)

@@ -18,6 +18,8 @@
 
 CCandidateWindow::CCandidateWindow(_In_ CANDWNDCALLBACK pfnCallback, _In_ void *pv, _In_ std::vector<DWORD> *pIndexRange, _In_ BOOL isStoreAppMode)
 {
+    SetDefaultCandidateTextFont();
+
     _currentSelection = 0;
 
     _SetTextColor(CANDWND_ITEM_COLOR, GetSysColor(COLOR_WINDOW));    // text color is black

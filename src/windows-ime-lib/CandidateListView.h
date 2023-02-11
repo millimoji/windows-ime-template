@@ -37,7 +37,6 @@ public:
     CandidateListView(ICandidateListViewOwner* framework) :
         m_framework(framework)
     {
-        SetDefaultCandidateTextFont();
     }
 private:
     // WindowsImeLib::IWindowsIMECandidateListView
@@ -146,7 +145,6 @@ private:
         });
         return S_OK;
     }
-    void SetDefaultCandidateTextFont();
 
 private:
     ICandidateListViewOwner* m_framework;
