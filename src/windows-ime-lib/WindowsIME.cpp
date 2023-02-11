@@ -139,7 +139,7 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
 
     try
     {
-        m_inprocClient = WindowsImeLib::g_processorFactory->CreateIMEInprocClient(this);
+        m_inprocClient = WindowsImeLib::g_processorFactory->CreateIMEInProcClient(this);
         m_inprocClient->Initialize(pThreadMgr, tfClientId, _IsSecureMode());
     }
     catch (...)

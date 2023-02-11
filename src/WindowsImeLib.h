@@ -126,7 +126,7 @@ struct IProcessorFactory
         const std::shared_ptr<IWindowsIMECompositionBuffer>& compositionBuffer,
         const std::shared_ptr<IWindowsIMECandidateListView>& candidateListView) = 0;
     virtual std::shared_ptr<IConstantProvider> GetConstantProvider() = 0;
-    virtual std::shared_ptr<IWindowsIMEInProcClient> CreateIMEInprocClient(IWindowsIMEInProcFramework* framework) = 0;
+    virtual std::shared_ptr<IWindowsIMEInProcClient> CreateIMEInProcClient(IWindowsIMEInProcFramework* framework) = 0;
 };
 
 // TODO: re-design how to inject factory

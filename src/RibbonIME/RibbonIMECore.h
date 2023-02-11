@@ -18,15 +18,6 @@ public:
 
     void GetCandidateList(std::vector<shared_wstring>& pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) override;
 
-//     // Preserved key handler
-//     void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
-
-    // Language bar control
-//     void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) override;
-
-//    // Compartment
-//    HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept override;
-//    void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
     void FinalizeCandidateList() override {}
     VOID CancelCompositioon() override {}
 
@@ -108,41 +99,4 @@ class RibbonIMEConstants : public WindowsImeLib::IConstantProvider
     {
         return IDS_DEFAULT_FONT;
     }
-};
-
-class RibbonIMEInprocClient :
-    public WindowsImeLib::IWindowsIMEInProcClient,
-    public std::enable_shared_from_this<RibbonIMEInprocClient>
-{
-public:
-    RibbonIMEInprocClient(WindowsImeLib::IWindowsIMEInProcFramework* framework) : m_framework(framework) {}
-    ~RibbonIMEInprocClient() {}
-
-private:
-    void Initialize(_In_ ITfThreadMgr* threadMgr, TfClientId tfClientId, BOOL isSecureMode) override
-    {
-        (void)threadMgr; (void)tfClientId; (void)isSecureMode;
-    }
-    void Deinitialize() override
-    {
-    }
-    std::string EncodeCustomState() override
-    {
-        return "";
-    }
-    void OnPreservedKey(REFGUID rguid, _Out_ BOOL* pIsEaten, _In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId) override
-    {
-        *pIsEaten = FALSE;
-        (void)rguid; (void)pThreadMgr; (void)tfClientId;
-    }
-    void SetLanguageBarStatus(DWORD status, BOOL isSet) override
-    {
-        (void)status; (void)isSet;
-    }
-    void ConversionModeCompartmentUpdated() override
-    {
-    }
-
-private:
-    WindowsImeLib::IWindowsIMEInProcFramework* m_framework;
 };

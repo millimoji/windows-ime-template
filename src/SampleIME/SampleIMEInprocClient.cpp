@@ -417,7 +417,7 @@ private:
 namespace WindowsImeLib
 {
 
-std::shared_ptr<IWindowsIMEInProcClient> ProcessorFactory_CreateIMEInprocClient(IWindowsIMEInProcFramework* framework)
+std::shared_ptr<IWindowsIMEInProcClient> ProcessorFactory_CreateIMEInProcClient(IWindowsIMEInProcFramework* framework)
 {
     auto inprocClient = std::make_shared<SampleIMEInprocClient>(framework);
     return std::static_pointer_cast<IWindowsIMEInProcClient>(inprocClient);

@@ -160,6 +160,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RibbonIMECore.h" />
+    <ClInclude Include="RibbonIMEInProcClient.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
@@ -170,6 +171,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="RibbonIMECore.cpp" />
+    <ClCompile Include="RibbonIMEInProcClient.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\windows-ime-lib\windows-ime-lib.vcxproj">

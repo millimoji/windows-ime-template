@@ -4,6 +4,7 @@
 #include "resource.h"
 #include "../WindowsImeLib.h"
 #include "RibbonIMECore.h"
+#include "RibbonIMEInProcClient.h"
 
 #pragma comment(lib, "RuntimeObject.lib")
 
@@ -67,10 +68,8 @@ namespace WindowsImeLib
             return constantProvider;
         }
 
-        std::shared_ptr<IWindowsIMEInProcClient> CreateIMEInprocClient(IWindowsIMEInProcFramework* framework) override
-        {
-            auto inprocClient = std::make_shared<RibbonIMEInprocClient>(framework);
-            return std::static_pointer_cast<IWindowsIMEInProcClient>(inprocClient);
+        std::shared_ptr<IWindowsIMEInProcClient> CreateIMEInProcClient(IWindowsIMEInProcFramework* framework) override {
+            return RibbonIMEInProcClient_CreateInstance(framework);
         }
     };
 
