@@ -82,7 +82,6 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert()
 
     // call _Start*Line for CCandidateListUIPresenter or CReadingLine
     LOG_IF_FAILED(m_candidateListView->_StartCandidateList(
-            _pCompositionProcessorEngine->GetCandidateListIndexRange(),
             WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth()));
 
     // set up candidate list if it is being shown. Text color is green, Background color is window.
@@ -139,7 +138,7 @@ inline int FindVkInVector(const std::vector<DWORD>& srcVkList, UINT vk)
 
 HRESULT CKeyStateCategory::_HandleCandidateSelectByNumber(UINT keyCode)
 {
-    int iSelectAsNumber = FindVkInVector(*_pCompositionProcessorEngine->GetCandidateListIndexRange(), keyCode);
+    int iSelectAsNumber = FindVkInVector(*m_candidateListView->GetCandidateListRange(), keyCode);
 
     if (iSelectAsNumber == -1)
     {
@@ -199,7 +198,7 @@ HRESULT CKeyStateCategory::_HandlePhraseArrowKey(const KeyHandlerEditSessionDTO&
 
 HRESULT CKeyStateCategory::_HandlePhraseSelectByNumber(UINT uCode)
 {
-    int iSelectAsNumber = FindVkInVector(*_pCompositionProcessorEngine->GetCandidateListIndexRange(), uCode);
+    int iSelectAsNumber = FindVkInVector(*m_candidateListView->GetCandidateListRange(), uCode);
     if (iSelectAsNumber == -1)
     {
         return S_FALSE;

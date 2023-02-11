@@ -96,7 +96,7 @@ const int MOVETO_BOTTOM = -1;
 //
 //----------------------------------------------------------------------------
 
-HRESULT CCandidateListUIPresenter::RuntimeClassInitialize(_In_ ICandidateListViewOwner* pTextService, ATOM atom, _In_ std::vector<DWORD>* pIndexRange, BOOL hideWindow)
+HRESULT CCandidateListUIPresenter::RuntimeClassInitialize(_In_ ICandidateListViewOwner* pTextService, const std::shared_ptr<std::vector<DWORD>>& pIndexRange, ATOM atom, BOOL hideWindow)
     // : CTfTextLayoutSink(pTextService)
 {
     _atom = atom;

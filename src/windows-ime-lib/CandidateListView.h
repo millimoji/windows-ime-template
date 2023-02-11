@@ -37,20 +37,25 @@ public:
     CandidateListView(ICandidateListViewOwner* framework) :
         m_framework(framework)
     {
+        m_indexRange = std::make_shared<std::vector<DWORD>>();
     }
 private:
     // WindowsImeLib::IWindowsIMECandidateListView
     bool IsCreated() override {
         return !!m_presenter;
     }
-    HRESULT _StartCandidateList(_In_ std::vector<DWORD> *pIndexRange, UINT wndWidth) override
+    HRESULT _StartCandidateList(UINT wndWidth) override
     {
         auto activity = WindowsImeLibTelemetry::CandidateListView_StartCandidateList::Start();
+
+        m_indexRange->clear();
+        for (DWORD i = 1; i <= 10; ++i) { m_indexRange->emplace_back(i % 10); };
+
         m_taskRunner.RunOnThread([&]()
         {
             m_presenter.reset();
             LOG_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CCandidateListUIPresenter>(
-                &m_presenter, m_framework, Global::AtomCandidateWindow, pIndexRange, FALSE /*hideWindow*/));
+                &m_presenter, m_framework, m_indexRange, Global::AtomCandidateWindow, FALSE /*hideWindow*/));
 
             LOG_IF_FAILED(m_presenter->_StartCandidateList(wndWidth));
         });
@@ -94,6 +99,9 @@ private:
     }
     shared_wstring _GetSelectedCandidateString() override {
         return m_presenter->_GetSelectedCandidateString();
+    }
+    std::shared_ptr<std::vector<DWORD>> GetCandidateListRange() override {
+        return m_indexRange;
     }
     BOOL _SetSelectionInPage(int nPos) override {
         return m_presenter->_SetSelectionInPage(nPos);
@@ -147,6 +155,7 @@ private:
     }
 
 private:
+    std::shared_ptr<std::vector<DWORD>> m_indexRange;
     ICandidateListViewOwner* m_framework;
     wil::com_ptr<CCandidateListUIPresenter> m_presenter;
     UIThreadTaskRunner m_taskRunner;

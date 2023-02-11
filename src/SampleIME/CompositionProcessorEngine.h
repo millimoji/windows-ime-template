@@ -62,7 +62,7 @@ public:
     // Language bar control
 //    void ConversionModeCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr) override;
 
-    inline std::vector<DWORD> *GetCandidateListIndexRange() { return &_candidateListIndexRange; }
+//    inline std::vector<DWORD> *GetCandidateListIndexRange() { return &_candidateListIndexRange; }
 
 //    HRESULT CompartmentCallback(REFGUID guidCompartment) noexcept override;
 //    void ClearCompartment(ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;

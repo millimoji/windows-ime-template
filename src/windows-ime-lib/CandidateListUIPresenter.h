@@ -38,11 +38,7 @@ class CCandidateListUIPresenter :
 public:
     CCandidateListUIPresenter() {}
     virtual ~CCandidateListUIPresenter();
-    HRESULT RuntimeClassInitialize(
-        _In_ ICandidateListViewOwner* pTextService,
-        ATOM atom,
-        _In_ std::vector<DWORD>* pIndexRange,
-        BOOL hideWindow);
+    HRESULT RuntimeClassInitialize(_In_ ICandidateListViewOwner* pTextService, const std::shared_ptr<std::vector<DWORD>>& _pIndexRange, ATOM atom, BOOL hideWindow);
 
 private:
     // ITfUIElement
@@ -128,7 +124,7 @@ protected:
 private:
     HWND _parentWndHandle = {};
     ATOM _atom = {};
-    std::vector<DWORD>* _pIndexRange = {};
+    std::shared_ptr<std::vector<DWORD>> _pIndexRange;
     DWORD _updatedFlags = {};
     DWORD _uiElementId = {};
     ICandidateListViewOwner* _pTextService = {};

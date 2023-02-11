@@ -222,21 +222,7 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate()
 //    if (m_candidateListView == nullptr)
     if (!m_candidateListView->IsCreated())
     {
-//        m_candidateListView->CreateView(_pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
-//
-//        m_candidateListView = new (std::nothrow) CCandidateListUIPresenter(
-//            reinterpret_cast<CWindowsIME*>(_textService->GetTextService()),
-//            Global::AtomCandidateWindow,
-//            CATEGORY_CANDIDATE,
-//            pCompositionProcessorEngine->GetCandidateListIndexRange(),
-//            FALSE);
-//        if (!m_candidateListView)
-//        {
-//            return E_OUTOFMEMORY;
-//        }
-
         LOG_IF_FAILED(m_candidateListView->_StartCandidateList(
-                _pCompositionProcessorEngine->GetCandidateListIndexRange(),
                 WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth()));
 
         _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_INCREMENTAL);
@@ -313,15 +299,7 @@ HRESULT CKeyStateCategory::_HandleCompositionConvert(BOOL isWildcardSearch)
         // 
         // create an instance of the candidate list class.
         // 
-//        if (!m_candidateListView->IsCreated())
-//        {
-//            m_candidateListView->CreateView(pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
-//            _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_ORIGINAL);
-//        }
-
-
         LOG_IF_FAILED(m_candidateListView->_StartCandidateList(
-                pCompositionProcessorEngine->GetCandidateListIndexRange(),
                 WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth()));
 
         _pCompositionProcessorEngine->SetIsCandidateWithWildcard(isWildcardSearch);

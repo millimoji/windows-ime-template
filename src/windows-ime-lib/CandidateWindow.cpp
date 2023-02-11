@@ -16,7 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-CCandidateWindow::CCandidateWindow(_In_ CANDWNDCALLBACK pfnCallback, _In_ void *pv, _In_ std::vector<DWORD> *pIndexRange, _In_ BOOL isStoreAppMode)
+CCandidateWindow::CCandidateWindow(_In_ CANDWNDCALLBACK pfnCallback, _In_ void *pv, const std::shared_ptr<std::vector<DWORD>>& pIndexRange, _In_ BOOL isStoreAppMode)
 {
     SetDefaultCandidateTextFont();
 

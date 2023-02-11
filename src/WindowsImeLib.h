@@ -57,13 +57,14 @@ struct IWindowsIMECandidateListView
 {
     virtual ~IWindowsIMECandidateListView() {}
 
-    virtual HRESULT _StartCandidateList(_In_ std::vector<DWORD> *pIndexRange, UINT wndWidth) = 0;
+    virtual HRESULT _StartCandidateList(UINT wndWidth) = 0;
     virtual void _EndCandidateList() = 0;
     virtual void _SetText(const std::vector<shared_wstring>& pCandidateList) = 0;
     virtual VOID _SetTextColorAndFillColor(CANDIDATE_COLOR_STYLE colorStyle) = 0;
 
     virtual bool IsCreated() = 0;
     virtual shared_wstring _GetSelectedCandidateString() = 0;
+    virtual std::shared_ptr<std::vector<DWORD>> GetCandidateListRange() = 0;
     virtual BOOL _SetSelectionInPage(int nPos) = 0;
     virtual void AdviseUIChangedByArrowKey(_In_ WindowsImeLib::CANDIDATELIST_FUNCTION arrowKey) = 0;
 };
