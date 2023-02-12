@@ -156,9 +156,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="RibbonIMEConstants.h" />
     <ClInclude Include="RibbonIMECore.h" />
     <ClInclude Include="RibbonIMEInProcClient.h" />
   </ItemGroup>
@@ -170,6 +170,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="RibbonIMEConstants.cpp" />
     <ClCompile Include="RibbonIMECore.cpp" />
     <ClCompile Include="RibbonIMEInProcClient.cpp" />
   </ItemGroup>

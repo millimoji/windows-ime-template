@@ -3,6 +3,7 @@
 #include "pch.h"
 #include "resource.h"
 #include "../WindowsImeLib.h"
+#include "RibbonIMEConstants.h"
 #include "RibbonIMECore.h"
 #include "RibbonIMEInProcClient.h"
 
@@ -59,8 +60,7 @@ namespace WindowsImeLib
             return std::static_pointer_cast<ICompositionProcessorEngine>(engine);
         }
         std::shared_ptr<IConstantProvider> GetConstantProvider() override {
-            static std::shared_ptr<IConstantProvider> constantProvider = std::make_shared<RibbonIMEConstants>();
-            return constantProvider;
+            return RibbonIMEConstants_CreateInstance();
         }
         std::shared_ptr<IWindowsIMEInProcClient> CreateIMEInProcClient(IWindowsIMEInProcFramework* framework) override {
             return RibbonIMEInProcClient_CreateInstance(framework);

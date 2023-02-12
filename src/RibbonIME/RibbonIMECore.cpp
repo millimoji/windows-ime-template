@@ -1,4 +1,4 @@
-// 
+// Copyright (c) millimoji@gmail.com
 #include "pch.h"
 
 #include "RibbonIMECore.h"

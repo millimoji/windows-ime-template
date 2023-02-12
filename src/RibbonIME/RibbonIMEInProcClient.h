@@ -1,3 +1,5 @@
+// Copyright (c) millimoji@gmail.com
+#pragma once
 
 extern std::shared_ptr<WindowsImeLib::IWindowsIMEInProcClient> RibbonIMEInProcClient_CreateInstance(WindowsImeLib::IWindowsIMEInProcFramework* framework);
 
