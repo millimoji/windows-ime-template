@@ -34,19 +34,3 @@
 #pragma warning(pop)
 
 #pragma warning(disable: 4463)
-
-inline HMODULE GetCurrentModuleHandle() {
-    static HMODULE currentModule = ([]() {
-        HMODULE moduleHandle = {};
-        GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-                          reinterpret_cast<LPCWSTR>(GetCurrentModuleHandle), &moduleHandle);
-        return moduleHandle;
-    })();
-    return currentModule;
-}
-
-inline std::wstring GetStringFromResource(int resId) {
-    const wchar_t* textInResource = {};
-    auto textLength = LoadString(GetCurrentModuleHandle(), resId, reinterpret_cast<LPWSTR>(&textInResource), 0);
-    return std::wstring(textInResource, textLength);
-}

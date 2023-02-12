@@ -77,6 +77,7 @@ class ConstantProvider :
             { 0xbc, 0xf3, 0xf2, 0xb9, 0x8e, 0x11, 0xee, 0x8b } };
         return SampleIMEGuidProfile;
     }
+#if 0
     const GUID& DisplayAttributeInput() noexcept override
     {
         // {4C802E2C-8140-4436-A5E5-F7C544EBC9CD}
@@ -97,6 +98,7 @@ class ConstantProvider :
             { 0x9c, 0x6e, 0x2d, 0xa6, 0x9a, 0x5c, 0xd4, 0x74 } };
         return SampleIMEGuidDisplayAttributeConverted;
     }
+#endif
     const GUID& CandUIElement() noexcept override
     {
         // {84B0749F-8DE7-4732-907A-3BCB150A01A8}
@@ -147,6 +149,23 @@ class ConstantProvider :
 };
 
 extern const WCHAR FullWidthCharTable[];
+} // Global
+
+inline HMODULE GetCurrentModuleHandle() {
+    static HMODULE currentModule = ([]() {
+        HMODULE moduleHandle = {};
+        GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                          reinterpret_cast<LPCWSTR>(GetCurrentModuleHandle), &moduleHandle);
+        return moduleHandle;
+    })();
+    return currentModule;
 }
+
+inline shared_wstring GetStringFromResource(int resId) {
+    const wchar_t* textInResource = {};
+    auto textLength = LoadString(GetCurrentModuleHandle(), resId, reinterpret_cast<LPWSTR>(&textInResource), 0);
+    return std::make_shared<std::wstring>(textInResource, textLength);
 }
+
+} // SampleIMENS
 using namespace SampleIMENS;

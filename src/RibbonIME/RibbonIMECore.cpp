@@ -18,7 +18,7 @@ RibbonIMECore::~RibbonIMECore()
 void RibbonIMECore::UpdateCustomState(const std::string_view customStateJson)
 {
     const auto json = nlohmann::json::parse(customStateJson);
-    const auto customData = json[c_customData];
+    const auto customData = json[c_jsonKeyCustomData];
     m_isImeOpen = customData[c_imeOpen].get<bool>();
     m_isSecure = customData[c_imeSecure].get<bool>();
     m_isStoreApp = customData[c_imeStoreApp].get<bool>();

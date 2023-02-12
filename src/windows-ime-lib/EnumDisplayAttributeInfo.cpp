@@ -8,92 +8,97 @@
 #include "Private.h"
 #include "Globals.h"
 #include "WindowsIME.h"
-#include "DisplayAttributeInfo.h"
+#include "../DisplayAttributeInfo.h"
 #include "EnumDisplayAttributeInfo.h"
 
-//+---------------------------------------------------------------------------
-//
-// ctor
-//
-//----------------------------------------------------------------------------
+// //+---------------------------------------------------------------------------
+// //
+// // ctor
+// //
+// //----------------------------------------------------------------------------
+// 
+// CEnumDisplayAttributeInfo::CEnumDisplayAttributeInfo()
+// {
+//     DllAddRef();
+// 
+//     _index = 0;
+//     _refCount = 1;
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // dtor
+// //
+// //----------------------------------------------------------------------------
+// 
+// CEnumDisplayAttributeInfo::~CEnumDisplayAttributeInfo()
+// {
+//     DllRelease();
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // QueryInterface
+// //
+// //----------------------------------------------------------------------------
+// 
+// STDAPI CEnumDisplayAttributeInfo::QueryInterface(REFIID riid, _Outptr_ void **ppvObj)
+// {
+//     if (ppvObj == nullptr)
+//         return E_INVALIDARG;
+// 
+//     *ppvObj = nullptr;
+// 
+//     if (IsEqualIID(riid, IID_IUnknown) ||
+//         IsEqualIID(riid, IID_IEnumTfDisplayAttributeInfo))
+//     {
+//         *ppvObj = (IEnumTfDisplayAttributeInfo *)this;
+//     }
+// 
+//     if (*ppvObj)
+//     {
+//         AddRef();
+//         return S_OK;
+//     }
+// 
+//     return E_NOINTERFACE;
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // AddRef
+// //
+// //----------------------------------------------------------------------------
+// 
+// STDAPI_(ULONG) CEnumDisplayAttributeInfo::AddRef()
+// {
+//     return ++_refCount;
+// }
+// 
+// //+---------------------------------------------------------------------------
+// //
+// // Release
+// //
+// //----------------------------------------------------------------------------
+// 
+// STDAPI_(ULONG) CEnumDisplayAttributeInfo::Release()
+// {
+//     LONG cr = --_refCount;
+// 
+//     assert(_refCount >= 0);
+// 
+//     if (_refCount == 0)
+//     {
+//         delete this;
+//     }
+// 
+//     return cr;
+// }
 
-CEnumDisplayAttributeInfo::CEnumDisplayAttributeInfo()
+HRESULT CEnumDisplayAttributeInfo::RuntimeClassInitialize(const std::shared_ptr<std::vector<std::pair<TfGuidAtom, wil::com_ptr<ITfDisplayAttributeInfo>>>>& list)
 {
-    DllAddRef();
-
-    _index = 0;
-    _refCount = 1;
-}
-
-//+---------------------------------------------------------------------------
-//
-// dtor
-//
-//----------------------------------------------------------------------------
-
-CEnumDisplayAttributeInfo::~CEnumDisplayAttributeInfo()
-{
-    DllRelease();
-}
-
-//+---------------------------------------------------------------------------
-//
-// QueryInterface
-//
-//----------------------------------------------------------------------------
-
-STDAPI CEnumDisplayAttributeInfo::QueryInterface(REFIID riid, _Outptr_ void **ppvObj)
-{
-    if (ppvObj == nullptr)
-        return E_INVALIDARG;
-
-    *ppvObj = nullptr;
-
-    if (IsEqualIID(riid, IID_IUnknown) ||
-        IsEqualIID(riid, IID_IEnumTfDisplayAttributeInfo))
-    {
-        *ppvObj = (IEnumTfDisplayAttributeInfo *)this;
-    }
-
-    if (*ppvObj)
-    {
-        AddRef();
-        return S_OK;
-    }
-
-    return E_NOINTERFACE;
-}
-
-
-//+---------------------------------------------------------------------------
-//
-// AddRef
-//
-//----------------------------------------------------------------------------
-
-STDAPI_(ULONG) CEnumDisplayAttributeInfo::AddRef()
-{
-    return ++_refCount;
-}
-
-//+---------------------------------------------------------------------------
-//
-// Release
-//
-//----------------------------------------------------------------------------
-
-STDAPI_(ULONG) CEnumDisplayAttributeInfo::Release()
-{
-    LONG cr = --_refCount;
-
-    assert(_refCount >= 0);
-
-    if (_refCount == 0)
-    {
-        delete this;
-    }
-
-    return cr;
+    m_list = list;
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -105,25 +110,34 @@ STDAPI_(ULONG) CEnumDisplayAttributeInfo::Release()
 
 STDAPI CEnumDisplayAttributeInfo::Clone(_Out_ IEnumTfDisplayAttributeInfo **ppEnum)
 {
-    CEnumDisplayAttributeInfo* pClone = nullptr;
+    RETURN_HR_IF(E_INVALIDARG, ppEnum == nullptr);
 
-    if (ppEnum == nullptr)
-    {
-        return E_INVALIDARG;
-    }
+    wil::com_ptr<CEnumDisplayAttributeInfo> clone;
+    RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CEnumDisplayAttributeInfo>(&clone, m_list));
 
-    *ppEnum = nullptr;
+    clone->_index = _index;
 
-    pClone = new (std::nothrow) CEnumDisplayAttributeInfo();
-    if ((pClone) == nullptr)
-    {
-        return E_OUTOFMEMORY;
-    }
+    RETURN_IF_FAILED(clone->QueryInterface(IID_PPV_ARGS(ppEnum)));
 
-    // the clone should match this object's state
-    pClone->_index = _index;
-
-    *ppEnum = pClone;
+//    CEnumDisplayAttributeInfo* pClone = nullptr;
+//
+//    if (ppEnum == nullptr)
+//    {
+//        return E_INVALIDARG;
+//    }
+//
+//    *ppEnum = nullptr;
+//
+//    pClone = new (std::nothrow) CEnumDisplayAttributeInfo();
+//    if ((pClone) == nullptr)
+//    {
+//        return E_OUTOFMEMORY;
+//    }
+//
+//    // the clone should match this object's state
+//    pClone->_index = _index;
+//
+//    *ppEnum = pClone;
 
     return S_OK;
 }
@@ -135,63 +149,81 @@ STDAPI CEnumDisplayAttributeInfo::Clone(_Out_ IEnumTfDisplayAttributeInfo **ppEn
 // Returns an array of display attribute info objects supported by this service.
 //----------------------------------------------------------------------------
 
-const int MAX_DISPLAY_ATTRIBUTE_INFO = 2;
+// const int MAX_DISPLAY_ATTRIBUTE_INFO = 2;
 
 STDAPI CEnumDisplayAttributeInfo::Next(ULONG ulCount, __RPC__out_ecount_part(ulCount, *pcFetched) ITfDisplayAttributeInfo **rgInfo, __RPC__out ULONG *pcFetched)
 {
-    ULONG fetched;
-
-    fetched = 0;
-
-    if (ulCount == 0)
-    {
-        return S_OK;
-    }
-    if (rgInfo == nullptr)
-    {
-        return E_INVALIDARG;
-    }
-    *rgInfo = nullptr;
-
-    while (fetched < ulCount)
-    {
-        ITfDisplayAttributeInfo* pDisplayAttributeInfo = nullptr;
-
-        if (_index == 0)
-        {   
-            pDisplayAttributeInfo = new (std::nothrow) CDisplayAttributeInfoInput();
-            if ((pDisplayAttributeInfo) == nullptr)
-            {
-                return E_OUTOFMEMORY;
-            }
+    *pcFetched = 0;
+    for (ULONG fetched = 0; fetched < ulCount; ++fetched, ++_index) {
+        if (_index >= m_list->size()) {
+            return S_FALSE;
         }
-        else if (_index == 1)
-        {
-            pDisplayAttributeInfo = new (std::nothrow) CDisplayAttributeInfoConverted();
-            if ((pDisplayAttributeInfo) == nullptr)
-            {
-                return E_OUTOFMEMORY;
-            }
-
-        }
-        else
-        {
-            break;
-        }
-
-        *rgInfo = pDisplayAttributeInfo;
-        rgInfo++;
-        fetched++;
-        _index++;
+        LOG_IF_FAILED(m_list->at(_index).second->QueryInterface(IID_PPV_ARGS(&rgInfo[fetched])));
+        ++(*pcFetched);
     }
+    return S_OK;
 
-    if (pcFetched != nullptr)
-    {
-        // technically this is only legal if ulCount == 1, but we won't check
-        *pcFetched = fetched;
-    }
-
-    return (fetched == ulCount) ? S_OK : S_FALSE;
+//    ULONG fetched;
+//
+//    fetched = 0;
+//
+//    if (ulCount == 0)
+//    {
+//        return S_OK;
+//    }
+//    if (rgInfo == nullptr)
+//    {
+//        return E_INVALIDARG;
+//    }
+//    *rgInfo = nullptr;
+//
+//    while (fetched < ulCount)
+//    {
+//        wil::com_ptr<ITfDisplayAttributeInfo> pDisplayAttributeInfo;
+//
+//        if (_index == 0) {
+//          RETURN_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CDisplayAttributeInfo>(
+//              &pDisplayAttributeInfo,
+//              WindowsImeLib::g_processorFactory->GetConstantProvider()->DisplayAttributeInput(),
+//              
+//              
+//              
+//            [this](TfEditCookie ec) -> HRESULT
+//
+//
+//            pDisplayAttributeInfo = new (std::nothrow) CDisplayAttributeInfoInput();
+//            if ((pDisplayAttributeInfo) == nullptr)
+//            {
+//                return E_OUTOFMEMORY;
+//            }
+//        }
+//        else if (_index == 1)
+//        {
+//            pDisplayAttributeInfo = new (std::nothrow) CDisplayAttributeInfoConverted();
+//            if ((pDisplayAttributeInfo) == nullptr)
+//            {
+//                return E_OUTOFMEMORY;
+//            }
+//
+//        }
+//        else
+//        {
+//            break;
+//        }
+//
+//        *rgInfo = pDisplayAttributeInfo;
+//        rgInfo++;
+//        fetched++;
+//        _index++;
+//    }
+//
+//    if (pcFetched != nullptr)
+//    {
+//        // technically this is only legal if ulCount == 1, but we won't check
+//        *pcFetched = fetched;
+//    }
+//
+//    return (fetched == ulCount) ? S_OK : S_FALSE;
 }
 
 //+---------------------------------------------------------------------------
@@ -216,11 +248,18 @@ STDAPI CEnumDisplayAttributeInfo::Reset()
 
 STDAPI CEnumDisplayAttributeInfo::Skip(ULONG ulCount)
 {
-    if ((ulCount + _index) > MAX_DISPLAY_ATTRIBUTE_INFO || (ulCount + _index) < ulCount)
-    {
-        _index = MAX_DISPLAY_ATTRIBUTE_INFO;
-        return S_FALSE;
+    for (ULONG fetched = 0; fetched < ulCount; ++fetched, ++_index) {
+        if (_index >= m_list->size()) {
+            return S_FALSE;
+        }
     }
-    _index += ulCount;
     return S_OK;
+
+//    if ((ulCount + _index) > MAX_DISPLAY_ATTRIBUTE_INFO || (ulCount + _index) < ulCount)
+//    {
+//        _index = MAX_DISPLAY_ATTRIBUTE_INFO;
+//        return S_FALSE;
+//    }
+//    _index += ulCount;
+//    return S_OK;
 }

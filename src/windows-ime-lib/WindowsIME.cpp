@@ -138,11 +138,6 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
         goto ExitError;
     }
 
-    if (!_InitDisplayAttributeGuidAtom())
-    {
-        goto ExitError;
-    }
-
     if (!_InitFunctionProviderSink())
     {
         goto ExitError;
@@ -166,9 +161,9 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
 
     m_compositionBuffer = std::make_shared<CompositionBuffer>(
         this,
-        nullptr, // nullptm_candidateListView->GetClientInterface(),
-        _tfClientId,
-        _gaDisplayAttributeInput);
+        nullptr, // m_candidateListView->GetClientInterface(),
+        m_inprocClient,
+        _tfClientId);
 
     if (!_AddTextProcessorEngine())
     {

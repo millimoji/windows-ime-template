@@ -9,6 +9,7 @@
 #include "../WindowsImeLib.h"
 #include "../Compartment.h"
 #include "../LanguageBar.h"
+#include "../DisplayAttributeInfo.h"
 #include "SampleIMEBaseStructure.h"
 #include "SampleIMEDefine.h"
 #include "SampleIMEGlobals.h"
@@ -22,7 +23,8 @@ public:
     ~SampleIMEInprocClient() {}
 
 private:
-    void Initialize(_In_ ITfThreadMgr *threadMgr, TfClientId tfClientId) override {
+    void Initialize(_In_ ITfThreadMgr *threadMgr, TfClientId tfClientId) override
+    {
         try {
             m_threadMgr = threadMgr;
             m_tfClientId = tfClientId;
@@ -39,6 +41,7 @@ private:
             InitCompartments();
             InitLanguageBar(isSecureMode);
             InitPreservedKeys();
+            InitDisplayAttributeInfo();
         }
         catch (...)
         {
@@ -50,6 +53,7 @@ private:
 
     void Uninitialize() override try
     {
+        DeinitDisplayAttributeInfo();
         DeinitPreservedKeys();
         DeinitLanguageBar();
         DeinitCompartments();
@@ -101,10 +105,8 @@ private:
 
     void SetLanguageBarStatus(DWORD status, BOOL isSet) override
     {
-        for (auto&& item: m_listLanguageBarItem)
-        {
-            if (item)
-            {
+        for (auto&& item: m_listLanguageBarItem) {
+            if (item) {
                 item->SetStatus(status, isSet);
             }
         }
@@ -118,32 +120,28 @@ private:
         const auto isDouble = m_compartmentDoubleSingleByte->GetCompartmentBOOL();
         const auto isPunctuation = m_compartmentPunctuation->GetCompartmentBOOL();
 
-        if (!isDouble && (conversionMode & TF_CONVERSIONMODE_FULLSHAPE))
-        {
+        if (!isDouble && (conversionMode & TF_CONVERSIONMODE_FULLSHAPE)) {
             m_compartmentDoubleSingleByte->_SetCompartmentBOOL(TRUE);
-        }
-        else if (isDouble && !(conversionMode & TF_CONVERSIONMODE_FULLSHAPE))
-        {
+        } else if (isDouble && !(conversionMode & TF_CONVERSIONMODE_FULLSHAPE)) {
             m_compartmentDoubleSingleByte->_SetCompartmentBOOL(FALSE);
         }
 
-        if (!isPunctuation && (conversionMode & TF_CONVERSIONMODE_SYMBOL))
-        {
+        if (!isPunctuation && (conversionMode & TF_CONVERSIONMODE_SYMBOL)) {
             m_compartmentPunctuation->_SetCompartmentBOOL(TRUE);
-        }
-        else if (isPunctuation && !(conversionMode & TF_CONVERSIONMODE_SYMBOL))
-        {
+        } else if (isPunctuation && !(conversionMode & TF_CONVERSIONMODE_SYMBOL)) {
             m_compartmentPunctuation->_SetCompartmentBOOL(FALSE);
         }
 
-        if (isOpen && !(conversionMode & TF_CONVERSIONMODE_NATIVE))
-        {
+        if (isOpen && !(conversionMode & TF_CONVERSIONMODE_NATIVE)) {
             m_compartmentKeyboardOpenClose->_SetCompartmentBOOL(FALSE);
-        }
-        else
-        {
+        } else {
             m_compartmentKeyboardOpenClose->_SetCompartmentBOOL(TRUE);
         }
+    }
+
+    std::shared_ptr<std::vector<std::pair<TfGuidAtom, wil::com_ptr<ITfDisplayAttributeInfo>>>> GetDisplayAttributeInfoList() override
+    {
+        return m_listDisplayAttributeInfo;
     }
 
     std::string EncodeCustomState() override
@@ -154,7 +152,7 @@ private:
         customData["isPunctuation"] = !!m_compartmentPunctuation->GetCompartmentBOOL();
 
         nlohmann::json json;
-        json[c_customData] = customData;
+        json[c_jsonKeyCustomData] = customData;
         return json.dump();
     }
 
@@ -169,8 +167,7 @@ private:
 
     void InitCompartments()
     {
-        for (const auto& compartmentGuid: s_compartmentGuids)
-        {
+        for (const auto& compartmentGuid: s_compartmentGuids) {
             const auto compartment = std::make_shared<CCompartment>(m_threadMgr.get(), m_tfClientId, compartmentGuid);
             wil::com_ptr<CCompartmentEventSink> eventCallback;
             THROW_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CCompartmentEventSink>(&eventCallback, CompartmentCallback, this));
@@ -196,8 +193,7 @@ private:
 
     void DeinitCompartments()
     {
-        for (auto&& compartment: m_listCompartment)
-        {
+        for (auto&& compartment: m_listCompartment) {
             LOG_IF_FAILED(compartment->_ClearCompartment());
         }
         m_listCompartment.clear();
@@ -208,8 +204,7 @@ private:
         m_compartmentDoubleSingleByte.reset();
         m_compartmentPunctuation.reset();
 
-        for (auto&& eventShink: m_listCompartmentEventSink)
-        {
+        for (auto&& eventShink: m_listCompartmentEventSink) {
             LOG_IF_FAILED(eventShink->_Unadvise());
         }
         m_listCompartmentEventSink.clear();
@@ -233,8 +228,7 @@ private:
 
     void InitLanguageBar(BOOL isSecureMode)
     {
-        for (const auto& langBarItemData: s_langBarItems)
-        {
+        for (const auto& langBarItemData: s_langBarItems) {
             wil::com_ptr<CLangBarItemButton> langBarItemButton;
             THROW_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CLangBarItemButton>(&langBarItemButton,
                 langBarItemData.langBarItemGuid, langBarItemData.description, langBarItemData.toolTip,
@@ -248,8 +242,7 @@ private:
 
     void DeinitLanguageBar()
     {
-        for (auto&& langBarItem: m_listLanguageBarItem)
-        {
+        for (auto&& langBarItem: m_listLanguageBarItem) {
             langBarItem->_UnregisterCompartment(m_threadMgr.get());
             langBarItem->CleanUp();
         }
@@ -269,8 +262,7 @@ private:
     void InitPreservedKeys()
     {
         const auto tfKeystrokeMgr = m_threadMgr.query<ITfKeystrokeMgr>();
-        for (const auto& preservedKey: s_preservedKeys)
-        {
+        for (const auto& preservedKey: s_preservedKeys) {
             TF_PRESERVEDKEY tfPreservedKey = {};
             tfPreservedKey.uVKey = preservedKey.tfPreservedKey.uVKey;
             tfPreservedKey.uModifiers = preservedKey.tfPreservedKey.uModifiers & 0xffff; // clear extended bits
@@ -282,8 +274,7 @@ private:
     void DeinitPreservedKeys()
     {
         const auto tfKeystrokeMgr = m_threadMgr.query<ITfKeystrokeMgr>();
-        for (const auto& preservedKey: s_preservedKeys)
-        {
+       for (const auto& preservedKey: s_preservedKeys) {
             TF_PRESERVEDKEY tfPreservedKey = {};
             tfPreservedKey.uVKey = preservedKey.tfPreservedKey.uVKey;
             tfPreservedKey.uModifiers = preservedKey.tfPreservedKey.uModifiers & 0xffff; // clear extended bits
@@ -293,8 +284,7 @@ private:
 
     const PRESERVEDKEYDATA* FindPreservedKey(REFGUID guidPreservedKey)
     {
-        for (const auto& preservedKey: s_preservedKeys)
-        {
+        for (const auto& preservedKey: s_preservedKeys) {
             if (preservedKey.preservedKeyGuid == guidPreservedKey)
             {
                 return &preservedKey;
@@ -409,6 +399,62 @@ private:
         }
     }
 
+    static const inline struct DISPLAYATTRIBUTEDATA {
+        GUID guid;
+        TF_DISPLAYATTRIBUTE tfDisplayAttribute;
+        int valueNameResId;
+        int descriptionResId;
+    } c_listDisplayAttributeData[] = {
+        {
+            GUID { 0x437ed84, 0x7948, 0x4e19, { 0xb3, 0x95, 0x8a, 0x5e, 0x43, 0x16, 0xde, 0xe3 } }, // {0437ED84-7948-4E19-B395-8A5E4316DEE3}
+            TF_DISPLAYATTRIBUTE {
+                { TF_CT_COLORREF, RGB(0, 103,206) },    // text color
+                { TF_CT_NONE, 0 },                      // background color (TF_CT_NONE => app default)
+                TF_LS_DOT,                              // underline style
+                FALSE,                                  // underline boldness
+                { TF_CT_COLORREF, RGB(0, 103,206) },    // underline color
+                TF_ATTR_INPUT                           // attribute info
+            },
+            IDS_DISPATTRINFO_INPUT_NAME, IDS_DISPATTRINFO_INPUT_DESC
+        },
+        {
+            GUID { 0x9b18b8ea, 0xbf09, 0x486c, { 0xad, 0x47, 0x9c, 0x69, 0x87, 0x89, 0x34, 0x6c } }, // {9B18B8EA-BF09-486C-AD47-9C698789346C}
+            TF_DISPLAYATTRIBUTE {
+                { TF_CT_COLORREF, RGB(255, 255, 255) }, // text color
+                { TF_CT_COLORREF, RGB(  0, 255, 255) }, // background color (TF_CT_NONE => app default)
+                TF_LS_NONE,                             // underline style
+                FALSE,                                  // underline boldness
+                { TF_CT_NONE, 0 },                      // underline color
+                TF_ATTR_TARGET_CONVERTED                // attribute info
+            },
+            IDS_DISPATTRINFO_CONVERTED_NAME, IDS_DISPATTRINFO_CONVERTED_DESC
+        },
+    };
+
+    void InitDisplayAttributeInfo()
+    {
+        const auto pCategoryMgr = wil::CoCreateInstance<ITfCategoryMgr>(CLSID_TF_CategoryMgr);
+
+        m_listDisplayAttributeInfo = std::make_shared<std::vector<std::pair<TfGuidAtom, wil::com_ptr<ITfDisplayAttributeInfo>>>>();
+
+        for (const auto& displayAttributeData: c_listDisplayAttributeData) {
+            TfGuidAtom tfGuidAtom;
+            LOG_IF_FAILED(pCategoryMgr->RegisterGUID(displayAttributeData.guid, &tfGuidAtom));
+
+            const auto description = GetStringFromResource(displayAttributeData.descriptionResId);
+            wil::com_ptr<CDisplayAttributeInfo> displayAttributeInfo;
+            LOG_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CDisplayAttributeInfo>(&displayAttributeInfo,
+                    displayAttributeData.guid, displayAttributeData.tfDisplayAttribute, description, tfGuidAtom));
+
+            m_listDisplayAttributeInfo->emplace_back(std::make_pair(tfGuidAtom, displayAttributeInfo.query<ITfDisplayAttributeInfo>()));
+        }
+    }
+
+    void DeinitDisplayAttributeInfo()
+    {
+        m_listDisplayAttributeInfo.reset();
+    }
+
 private:
     WindowsImeLib::IWindowsIMEInProcFramework* m_framework;
     wil::com_ptr<ITfThreadMgr> m_threadMgr;
@@ -428,6 +474,8 @@ private:
     std::vector<wil::com_ptr<CCompartmentEventSink>> m_listCompartmentEventSink;
 
     std::vector<wil::com_ptr<CLangBarItemButton>> m_listLanguageBarItem;
+
+    std::shared_ptr<std::vector<std::pair<TfGuidAtom, wil::com_ptr<ITfDisplayAttributeInfo>>>> m_listDisplayAttributeInfo;
 };
 
 namespace WindowsImeLib

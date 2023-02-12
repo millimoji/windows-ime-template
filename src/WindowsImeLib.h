@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 // remove windows specific header dependency
@@ -51,6 +52,7 @@ struct IWindowsIMEInProcClient
 
     virtual void SetLanguageBarStatus(DWORD status, BOOL isSet) = 0;
     virtual void ConversionModeCompartmentUpdated() = 0;
+    virtual std::shared_ptr<std::vector<std::pair<TfGuidAtom, wil::com_ptr<ITfDisplayAttributeInfo>>>> GetDisplayAttributeInfoList() = 0;
     virtual std::string EncodeCustomState() = 0;
 };
 
@@ -113,8 +115,6 @@ struct IConstantProvider
 {
     virtual const CLSID& IMECLSID() noexcept = 0;
     virtual const GUID& IMEProfileGuid() noexcept = 0;
-    virtual const GUID& DisplayAttributeInput() noexcept = 0;
-    virtual const GUID& DisplayAttributeConverted() noexcept = 0;
     virtual const GUID& CandUIElement() noexcept = 0;
     virtual const LANGID GetLangID() noexcept = 0;
     virtual const LCID GetLocale() noexcept = 0;
@@ -151,6 +151,24 @@ extern void TraceLog(const wchar_t* format, ...);
 }
 
 // json
-constexpr char c_customData[] = "customData";
+constexpr char c_jsonKeyCustomData[] = "customData";
+constexpr char c_jsonKeyComposition[] = "composition";
+constexpr char c_jsonKeyDetermined[] = "determined";
+constexpr char c_jsonKeyText[] = "text";
+constexpr char c_jsonKeyAttribute[] = "attr";
+constexpr char c_jsonKeyStart[] = "s";
+constexpr char c_jsonKeyEnd[] = "e";
 
 
+#if 0
+{
+    customData: { isOpen: true },
+    composition: {
+        determined: "determined",
+        text: "compsition text",
+        attr: [
+            { s:0, e:10, langid:1041, 
+        ],
+    }
+}
+#endif

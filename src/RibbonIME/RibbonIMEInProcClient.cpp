@@ -7,6 +7,22 @@
 #include "../LanguageBar.h"
 #include "RibbonIMEInProcClient.h"
 
+inline HMODULE GetCurrentModuleHandle() {
+    static HMODULE currentModule = ([]() {
+        HMODULE moduleHandle = {};
+        GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                          reinterpret_cast<LPCWSTR>(GetCurrentModuleHandle), &moduleHandle);
+        return moduleHandle;
+    })();
+    return currentModule;
+}
+
+inline shared_wstring GetStringFromResource(int resId) {
+    const wchar_t* textInResource = {};
+    auto textLength = LoadString(GetCurrentModuleHandle(), resId, reinterpret_cast<LPWSTR>(&textInResource), 0);
+    return std::make_shared<std::wstring>(textInResource, textLength);
+}
+
 #define TF_MOD_ALLALT     (TF_MOD_RALT | TF_MOD_LALT | TF_MOD_ALT)
 #define TF_MOD_ALLCONTROL (TF_MOD_RCONTROL | TF_MOD_LCONTROL | TF_MOD_CONTROL)
 #define TF_MOD_ALLSHIFT   (TF_MOD_RSHIFT | TF_MOD_LSHIFT | TF_MOD_SHIFT)
@@ -56,7 +72,7 @@ private:
         customData[c_imeStoreApp] = (m_tfTmfActiveFlags & TF_TMF_IMMERSIVEMODE) ? true : false;
         customData[c_imeConsole] = (m_tfTmfActiveFlags & TF_TMF_CONSOLE) ? true : false;
         nlohmann::json json;
-        json[c_customData] = customData;
+        json[c_jsonKeyCustomData] = customData;
         return json.dump();
     }
 
@@ -100,6 +116,9 @@ private:
         (void)status; (void)isSet;
     }
     void ConversionModeCompartmentUpdated() override {
+    }
+    std::shared_ptr<std::vector<std::pair<TfGuidAtom, wil::com_ptr<ITfDisplayAttributeInfo>>>> GetDisplayAttributeInfoList() override {
+        return std::make_shared<std::vector<std::pair<TfGuidAtom, wil::com_ptr<ITfDisplayAttributeInfo>>>>();
     }
 
 private:
@@ -155,7 +174,7 @@ private:
         for (const auto& langBarItemData: c_langBarItems) {
             wil::com_ptr<CLangBarItemButton> langBarItemButton;
             THROW_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CLangBarItemButton>(&langBarItemButton, langBarItemData.langBarItemGuid,
-                GetStringFromResource(langBarItemData.descriptionResId).c_str(), GetStringFromResource(langBarItemData.toolTipResId).c_str(),
+                GetStringFromResource(langBarItemData.descriptionResId)->c_str(), GetStringFromResource(langBarItemData.toolTipResId)->c_str(),
                 langBarItemData.onIconResourceId, langBarItemData.offIconResourceId, isSecureMode));
 
             m_listLanguageBarItem.emplace_back(langBarItemButton);
@@ -194,7 +213,7 @@ private:
             tfPreservedKey.uModifiers = preservedKey.tfPreservedKey.uModifiers & 0xffff; // clear extended bits
             const auto description = GetStringFromResource(preservedKey.descriptionResId);
             THROW_IF_FAILED(tfKeystrokeMgr->PreserveKey(m_tfClientId,
-                preservedKey.preservedKeyGuid, &tfPreservedKey, description.c_str(), static_cast<ULONG>(description.length())));
+                preservedKey.preservedKeyGuid, &tfPreservedKey, description->c_str(), static_cast<ULONG>(description->length())));
         }
     }
 

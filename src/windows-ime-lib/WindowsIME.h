@@ -112,9 +112,6 @@ private:
     // Invoke key handler edit session
     HRESULT _SubmitEditSessionTask(_In_ ITfContext* context, const std::function<HRESULT(TfEditCookie ec)>& editSesisonTask, DWORD tfEsFlags) override;
 
-    // function for the display attribute
-    BOOL _InitDisplayAttributeGuidAtom();
-
     BOOL _InitThreadMgrEventSink();
     void _UninitThreadMgrEventSink();
 
@@ -192,10 +189,6 @@ private:
 
     // Composition Processor Engine object.
     wil::com_ptr<ITextInputProcessor> m_singletonProcessor;
-
-    // guidatom for the display attibute.
-    TfGuidAtom _gaDisplayAttributeInput = {};
-    TfGuidAtom _gaDisplayAttributeConverted = {};
 
     wil::com_ptr<ITfDocumentMgr> _pDocMgrLastFocused;
 

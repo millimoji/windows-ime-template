@@ -15,6 +15,10 @@
 #define IDS_PUNCTUATION                 26
 #define IDI_PUNCTUATION_ON              27
 #define IDI_PUNCTUATION_OFF             28
+#define IDS_DISPATTRINFO_INPUT_NAME     29
+#define IDS_DISPATTRINFO_INPUT_DESC     30
+#define IDS_DISPATTRINFO_CONVERTED_NAME 31
+#define IDS_DISPATTRINFO_CONVERTED_DESC 32
 #define IDR_VERSION2                    107
 
 // Next default values for new objects

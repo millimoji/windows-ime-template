@@ -73,43 +73,43 @@ BOOL CompositionBuffer::_SetCompositionDisplayAttributes(TfEditCookie ec, _In_ I
     return (hr == S_OK);
 }
 
-//+---------------------------------------------------------------------------
-//
-// _InitDisplayAttributeGuidAtom
-//
-// Because it's expensive to map our display attribute GUID to a TSF
-// TfGuidAtom, we do it once when Activate is called.
-//----------------------------------------------------------------------------
-
-BOOL CWindowsIME::_InitDisplayAttributeGuidAtom()
-{
-    ITfCategoryMgr* pCategoryMgr = nullptr;
-    HRESULT hr = CoCreateInstance(CLSID_TF_CategoryMgr, nullptr, CLSCTX_INPROC_SERVER, IID_ITfCategoryMgr, (void**)&pCategoryMgr);
-
-    if (FAILED(hr))
-    {
-        return FALSE;
-    }
-
-    // register the display attribute for input text.
-    hr = pCategoryMgr->RegisterGUID(
-        WindowsImeLib::g_processorFactory->GetConstantProvider()->DisplayAttributeInput(),
-        &_gaDisplayAttributeInput);
-    if (FAILED(hr))
-    {
-        goto Exit;
-    }
-    // register the display attribute for the converted text.
-    hr = pCategoryMgr->RegisterGUID(
-        WindowsImeLib::g_processorFactory->GetConstantProvider()->DisplayAttributeConverted(),
-        &_gaDisplayAttributeConverted);
-    if (FAILED(hr))
-    {
-        goto Exit;
-    }
-
-Exit:
-    pCategoryMgr->Release();
-
-    return (hr == S_OK);
-}
+// //+---------------------------------------------------------------------------
+// //
+// // _InitDisplayAttributeGuidAtom
+// //
+// // Because it's expensive to map our display attribute GUID to a TSF
+// // TfGuidAtom, we do it once when Activate is called.
+// //----------------------------------------------------------------------------
+// 
+// BOOL CWindowsIME::_InitDisplayAttributeGuidAtom()
+// {
+//     ITfCategoryMgr* pCategoryMgr = nullptr;
+//     HRESULT hr = CoCreateInstance(CLSID_TF_CategoryMgr, nullptr, CLSCTX_INPROC_SERVER, IID_ITfCategoryMgr, (void**)&pCategoryMgr);
+// 
+//     if (FAILED(hr))
+//     {
+//         return FALSE;
+//     }
+// 
+//     // register the display attribute for input text.
+//     hr = pCategoryMgr->RegisterGUID(
+//         WindowsImeLib::g_processorFactory->GetConstantProvider()->DisplayAttributeInput(),
+//         &_gaDisplayAttributeInput);
+//     if (FAILED(hr))
+//     {
+//         goto Exit;
+//     }
+//     // register the display attribute for the converted text.
+//     hr = pCategoryMgr->RegisterGUID(
+//         WindowsImeLib::g_processorFactory->GetConstantProvider()->DisplayAttributeConverted(),
+//         &_gaDisplayAttributeConverted);
+//     if (FAILED(hr))
+//     {
+//         goto Exit;
+//     }
+// 
+// Exit:
+//     pCategoryMgr->Release();
+// 
+//     return (hr == S_OK);
+// }

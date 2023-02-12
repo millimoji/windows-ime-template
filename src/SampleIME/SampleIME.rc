@@ -104,6 +104,10 @@ BEGIN
     IDS_IME_MODE            "Chinese/English input (Shift)"
     IDS_DOUBLE_SINGLE_BYTE  "Double/Single byte (Shift+Space)"
     IDS_PUNCTUATION         "Chinese/English punctuation (Ctrl+.)"
+    IDS_DISPATTRINFO_INPUT_NAME     "DisplayAttributeInput"
+    IDS_DISPATTRINFO_INPUT_DESC     "Sample IME Text Service Display Attribute Input"
+    IDS_DISPATTRINFO_CONVERTED_NAME "DisplayAttributeConverted"
+    IDS_DISPATTRINFO_CONVERTED_DESC "Sample IME Text Service Display Attribute Converted"
 END
 
 #endif    // English (United States) resources

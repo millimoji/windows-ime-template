@@ -43,13 +43,13 @@ public:
     CompositionBuffer(
         ICompositionBufferOwner* framework,
         const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& candidateListView,
-        const TfClientId& tfClientId,
-        const TfGuidAtom& gaDisplayAttributeInput
+        const std::shared_ptr<WindowsImeLib::IWindowsIMEInProcClient>& inprocClient,
+        const TfClientId& tfClientId
     ) :
         m_framework(framework),
         _pCandidateListUIPresenter(candidateListView),
-        _tfClientId(tfClientId),
-        _gaDisplayAttributeInput(gaDisplayAttributeInput)
+        m_inprocClient(inprocClient),
+        _tfClientId(tfClientId)
     {}
     virtual ~CompositionBuffer() {}
 
@@ -91,9 +91,9 @@ private:
 private:
     ICompositionBufferOwner* m_framework = nullptr;
     std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> _pCandidateListUIPresenter;
+    std::shared_ptr<WindowsImeLib::IWindowsIMEInProcClient> m_inprocClient;
 
     TfClientId _tfClientId = TF_CLIENTID_NULL;
-    TfGuidAtom _gaDisplayAttributeInput = {};
     bool m_isComposing = false;
 
     std::list<wil::com_ptr<CEditSessionTask>> m_listTasks;

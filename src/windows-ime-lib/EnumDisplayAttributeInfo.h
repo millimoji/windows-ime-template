@@ -13,16 +13,15 @@
 //
 //----------------------------------------------------------------------------
 
-class CEnumDisplayAttributeInfo : public IEnumTfDisplayAttributeInfo
+class CEnumDisplayAttributeInfo :
+    public Microsoft::WRL::RuntimeClass<Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>,
+                                        IEnumTfDisplayAttributeInfo,
+                                        Microsoft::WRL::FtmBase>
 {
 public:
-    CEnumDisplayAttributeInfo();
-    ~CEnumDisplayAttributeInfo();
-
-    // IUnknown
-    STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);
-    STDMETHODIMP_(ULONG) AddRef(void);
-    STDMETHODIMP_(ULONG) Release(void);
+    CEnumDisplayAttributeInfo() {}
+    ~CEnumDisplayAttributeInfo() {}
+    HRESULT RuntimeClassInitialize(const std::shared_ptr<std::vector<std::pair<TfGuidAtom, wil::com_ptr<ITfDisplayAttributeInfo>>>>& list);
 
     // IEnumTfDisplayAttributeInfo
     STDMETHODIMP Clone(_Out_ IEnumTfDisplayAttributeInfo **ppEnum);
@@ -31,6 +30,6 @@ public:
     STDMETHODIMP Skip(ULONG ulCount);
 
 private:
-    LONG _index;    // next display attribute to enum
-    LONG _refCount; // COM ref count
+    LONG _index = 0; // next display attribute to enum
+    std::shared_ptr<std::vector<std::pair<TfGuidAtom, wil::com_ptr<ITfDisplayAttributeInfo>>>> m_list;
 };

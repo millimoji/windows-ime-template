@@ -67,7 +67,7 @@ public:
     void UpdateCustomState(std::string_view stateJson) override
     {
         const auto json = nlohmann::json::parse(stateJson);
-        const auto customData = json[c_customData];
+        const auto customData = json[c_jsonKeyCustomData];
         m_compartmentIsOpen = customData["isOpen"].get<bool>();
         m_compartmentIsDoubleSingleByte = customData["isDouble"].get<bool>();
         m_compartmentIsPunctuation = customData["isPunctuation"].get<bool>();
