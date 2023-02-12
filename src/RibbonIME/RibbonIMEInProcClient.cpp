@@ -7,7 +7,9 @@
 #include "../LanguageBar.h"
 #include "RibbonIMEInProcClient.h"
 
-
+#define TF_MOD_ALLALT     (TF_MOD_RALT | TF_MOD_LALT | TF_MOD_ALT)
+#define TF_MOD_ALLCONTROL (TF_MOD_RCONTROL | TF_MOD_LCONTROL | TF_MOD_CONTROL)
+#define TF_MOD_ALLSHIFT   (TF_MOD_RSHIFT | TF_MOD_LSHIFT | TF_MOD_SHIFT)
 
 class RibbonIMEInProcClient :
     public WindowsImeLib::IWindowsIMEInProcClient,
@@ -56,17 +58,40 @@ private:
         return json.dump();
     }
 
+    // TODO: re-consider parameter
+    // wch: converted character from VK and keyboard state
+    // vkPackSource: estimated VK from wch for VK_PACKET
+    void OnKeyEvent(WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled, DWORD modifiers, bool isTest, bool isDown) override
+    {
+        if (!isDown) { return; }
+
+        // copy modifier state
+        bool isShiftKeyDownOnly   = !!(modifiers & TF_MOD_ALLSHIFT)   && !(modifiers & ~TF_MOD_ALLSHIFT);
+        bool isControlKeyDownOnly = !!(modifiers & TF_MOD_ALLCONTROL) && !(modifiers & ~TF_MOD_ALLCONTROL);
+        bool isAltKeyDownOnly     = !!(modifiers & TF_MOD_ALLALT)     && !(modifiers & ~TF_MOD_ALLALT);
+        DWORD uniqueModifiers = (isShiftKeyDownOnly ? TF_MOD_SHIFT : 0) |
+                                (isControlKeyDownOnly ? TF_MOD_CONTROL : 0) |
+                                (isAltKeyDownOnly ? TF_MOD_ALT : 0);
+
+        if (vkPackSource == VK_KANJI && !!(uniqueModifiers & TF_MOD_ALT)) {
+            const auto isOpen = m_compartmentKeyboardOpenClose->GetCompartmentBOOL();
+            m_compartmentKeyboardOpenClose->_SetCompartmentBOOL(isOpen ? FALSE : TRUE);
+            *pIsEaten = TRUE;
+        }
+    }
+
     // {864AAE3D-D116-4A20-9B16-81B7F4EFE124}
     static inline const GUID c_imeModeVkKanjiGuid = { 0x864aae3d, 0xd116, 0x4a20, { 0x9b, 0x16, 0x81, 0xb7, 0xf4, 0xef, 0xe1, 0x24 } };
     // {4789C3ED-35A5-45AE-A726-EC4AA2A12D4F}
     static inline const GUID c_imeModeAltTildaGuid = { 0x4789c3ed, 0x35a5, 0x45ae, { 0xa7, 0x26, 0xec, 0x4a, 0xa2, 0xa1, 0x2d, 0x4f } };
 
-
-    void OnPreservedKey(REFGUID rguid, _Out_ BOOL* pIsEaten, _In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId) override {
+    void OnPreservedKey(REFGUID rguid, _Out_ BOOL* pIsEaten, _In_ ITfThreadMgr* /*pThreadMgr*/, TfClientId /*tfClientId*/) override {
         *pIsEaten = FALSE;
+#if 0 // TODO: investigate how to use preserved key for IME On/Off
         if (IsEqualGUID(rguid, c_imeModeVkKanjiGuid) ||
             IsEqualGUID(rguid, c_imeModeAltTildaGuid)) {
         }
+#endif
     }
 
     void SetLanguageBarStatus(DWORD status, BOOL isSet) override {
@@ -102,6 +127,11 @@ private:
             LOG_IF_FAILED(compartment->_ClearCompartment());
         }
         m_listCompartment.clear();
+
+        for (auto&& compartmentEventSink: m_listCompartmentEventSink) {
+            LOG_IF_FAILED(compartmentEventSink->_Unadvise());
+        }
+        m_listCompartmentEventSink.clear();
 
         m_compartmentKeyboardOpenClose.reset();
         m_compartmentKeyboardInputModeConversion.reset();
@@ -145,7 +175,13 @@ private:
         int descriptionResId;
     } c_preservedKeys[] = {
         { TF_PRESERVEDKEY { VK_KANJI, 0             }, c_imeModeVkKanjiGuid, IDS_IME_MODE },
+#if 0 // TODO: investigate how to set preserved key to IME On/Off
         { TF_PRESERVEDKEY { VK_OEM_3, TF_MOD_ALT    }, c_imeModeAltTildaGuid, IDS_IME_MODE },
+        { TF_PRESERVEDKEY { VK_IME_ON, 0    }, c_imeModeAltTildaGuid, IDS_IME_MODE },
+        { TF_PRESERVEDKEY { VK_IME_ON, TF_MOD_ALT    }, c_imeModeAltTildaGuid, IDS_IME_MODE },
+        { TF_PRESERVEDKEY { VK_IME_OFF, 0    }, c_imeModeAltTildaGuid, IDS_IME_MODE },
+        { TF_PRESERVEDKEY { VK_IME_OFF, TF_MOD_ALT    }, c_imeModeAltTildaGuid, IDS_IME_MODE },
+#endif
     };
 
     void InitializePreservedKeys() {

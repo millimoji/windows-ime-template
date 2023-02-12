@@ -92,7 +92,7 @@ struct SingletonProcessorBridge :
 
     // ICompositionProcessorEngine
     IFACEMETHODIMP OnKeyEvent(DWORD wParam, DWORD lParam, WCHAR wch, UINT vkPackSource,
-                        BOOL isKbdDisabled, DWORD modifiers, DWORD uniqueModifiers, BOOL isTest, BOOL isDown,
+                        BOOL isKbdDisabled, DWORD modifiers, BOOL isTest, BOOL isDown,
                         _Outptr_ BSTR* result, _Out_ BOOL *pIsEaten) override
     {
         EnsureInitialized();
@@ -101,7 +101,7 @@ struct SingletonProcessorBridge :
         if (m_threadTaskRunner)
         {
             m_threadTaskRunner->RunOnThread([&]() {
-                hr = m_engine->OnKeyEvent(wParam, lParam, wch, vkPackSource, isKbdDisabled, modifiers, uniqueModifiers, isTest, isDown, result, pIsEaten); });
+                hr = m_engine->OnKeyEvent(wParam, lParam, wch, vkPackSource, isKbdDisabled, modifiers, isTest, isDown, result, pIsEaten); });
         }
         return hr;
     }
@@ -281,13 +281,13 @@ private:
 
     // ICompositionProcessorEngine
     IFACEMETHODIMP OnKeyEvent(DWORD wParam, DWORD lParam, WCHAR wch, UINT vkPackSource,
-                        BOOL isKbdDisabled, DWORD modifiers, DWORD uniqueModifiers, BOOL isTest, BOOL isDown,
+                        BOOL isKbdDisabled, DWORD modifiers, BOOL isTest, BOOL isDown,
                         _Outptr_ BSTR* result, _Out_ BOOL *pIsEaten) override
     {
         m_compositionBufferProxy->m_jsonCmdArray.clear();
 
         m_processor->OnKeyEvent(static_cast<WPARAM>(wParam),  static_cast<LPARAM>(lParam), pIsEaten, wch, vkPackSource,
-                                                !!isKbdDisabled, modifiers, uniqueModifiers, !!isTest, !!isDown);
+                                                !!isKbdDisabled, modifiers, !!isTest, !!isDown);
 
         nlohmann::json jsonComposition;
         jsonComposition["cmds"] = m_compositionBufferProxy->m_jsonCmdArray;

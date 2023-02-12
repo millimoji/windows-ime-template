@@ -94,142 +94,147 @@ BOOL RegisterWindowClass()
 //  [31]    Transition state
 //----------------------------------------------------------------------------
 
-// USHORT ModifiersValue = 0;
-// BOOL   IsShiftKeyDownOnly = FALSE;
-// BOOL   IsControlKeyDownOnly = FALSE;
-// BOOL   IsAltKeyDownOnly = FALSE;
-
-BOOL UpdateModifiers(WPARAM wParam, LPARAM lParam)
+DWORD UpdateModifiers()
 {
     // high-order bit : key down
     // low-order bit  : toggled
-    SHORT sksMenu = GetKeyState(VK_MENU);
-    SHORT sksCtrl = GetKeyState(VK_CONTROL);
-    SHORT sksShft = GetKeyState(VK_SHIFT);
+    return  ((GetKeyState(VK_MENU)  & 0x8000) ? TF_MOD_ALT : 0) |
+            ((GetKeyState(VK_LMENU) & 0x8000) ? (TF_MOD_LALT | TF_MOD_ALT) : 0) |
+            ((GetKeyState(VK_RMENU) & 0x8000) ? (TF_MOD_RALT | TF_MOD_ALT) : 0) |
+            ((GetKeyState(VK_CONTROL)  & 0x8000) ? TF_MOD_CONTROL : 0) |
+            ((GetKeyState(VK_LCONTROL) & 0x8000) ? (TF_MOD_LCONTROL | TF_MOD_CONTROL) : 0) |
+            ((GetKeyState(VK_RCONTROL) & 0x8000) ? (TF_MOD_RCONTROL | TF_MOD_CONTROL) : 0) |
+            ((GetKeyState(VK_SHIFT)  & 0x8000) ? TF_MOD_SHIFT : 0) |
+            ((GetKeyState(VK_LSHIFT) & 0x8000) ? (TF_MOD_LSHIFT | TF_MOD_SHIFT) : 0) |
+            ((GetKeyState(VK_RSHIFT) & 0x8000) ? (TF_MOD_RSHIFT | TF_MOD_SHIFT) : 0);
 
-    switch (wParam & 0xff)
-    {
-    case VK_MENU:
-        // is VK_MENU down?
-        if (sksMenu & 0x8000)
-        {
-            // is extended key?
-            if (lParam & 0x01000000)
-            {
-                Global::ModifiersValue |= (TF_MOD_RALT | TF_MOD_ALT);
-            }
-            else
-            {
-                Global::ModifiersValue |= (TF_MOD_LALT | TF_MOD_ALT);
-            }
-
-            // is previous key state up?
-            if (!(lParam & 0x40000000))
-            {
-                // is VK_CONTROL and VK_SHIFT up?
-                if (!(sksCtrl & 0x8000) && !(sksShft & 0x8000))
-                {
-                    Global::IsAltKeyDownOnly = TRUE;
-                }
-                else
-                {
-                    Global::IsShiftKeyDownOnly = FALSE;
-                    Global::IsControlKeyDownOnly = FALSE;
-                    Global::IsAltKeyDownOnly = FALSE;
-                }
-            }
-        }
-        break;
-
-    case VK_CONTROL:
-        // is VK_CONTROL down?
-        if (sksCtrl & 0x8000)    
-        {
-            // is extended key?
-            if (lParam & 0x01000000)
-            {
-                Global::ModifiersValue |= (TF_MOD_RCONTROL | TF_MOD_CONTROL);
-            }
-            else
-            {
-                Global::ModifiersValue |= (TF_MOD_LCONTROL | TF_MOD_CONTROL);
-            }
-
-            // is previous key state up?
-            if (!(lParam & 0x40000000))
-            {
-                // is VK_SHIFT and VK_MENU up?
-                if (!(sksShft & 0x8000) && !(sksMenu & 0x8000))
-                {
-                    Global::IsControlKeyDownOnly = TRUE;
-                }
-                else
-                {
-                    Global::IsShiftKeyDownOnly = FALSE;
-                    Global::IsControlKeyDownOnly = FALSE;
-                    Global::IsAltKeyDownOnly = FALSE;
-                }
-            }
-        }
-        break;
-
-    case VK_SHIFT:
-        // is VK_SHIFT down?
-        if (sksShft & 0x8000)    
-        {
-            // is scan code 0x36(right shift)?
-            if (((lParam >> 16) & 0x00ff) == 0x36)
-            {
-                Global::ModifiersValue |= (TF_MOD_RSHIFT | TF_MOD_SHIFT);
-            }
-            else
-            {
-                Global::ModifiersValue |= (TF_MOD_LSHIFT | TF_MOD_SHIFT);
-            }
-
-            // is previous key state up?
-            if (!(lParam & 0x40000000))
-            {
-                // is VK_MENU and VK_CONTROL up?
-                if (!(sksMenu & 0x8000) && !(sksCtrl & 0x8000))
-                {
-                    Global::IsShiftKeyDownOnly = TRUE;
-                }
-                else
-                {
-                    Global::IsShiftKeyDownOnly = FALSE;
-                    Global::IsControlKeyDownOnly = FALSE;
-                    Global::IsAltKeyDownOnly = FALSE;
-                }
-            }
-        }
-        break;
-
-    default:
-        Global::IsShiftKeyDownOnly = FALSE;
-        Global::IsControlKeyDownOnly = FALSE;
-        Global::IsAltKeyDownOnly = FALSE;
-        break;
-    }
-
-    if (!(sksMenu & 0x8000))
-    {
-        Global::ModifiersValue &= ~TF_MOD_ALLALT;
-    }
-    if (!(sksCtrl & 0x8000))
-    {
-        Global::ModifiersValue &= ~TF_MOD_ALLCONTROL;
-    }
-    if (!(sksShft & 0x8000))
-    {
-        Global::ModifiersValue &= ~TF_MOD_ALLSHIFT;
-    }
-
-    Global::UniqueModifiersValue = (Global::IsShiftKeyDownOnly ? TF_MOD_SHIFT : 0) |
-                                   (Global::IsControlKeyDownOnly ? TF_MOD_CONTROL : 0) |
-                                   (Global::IsAltKeyDownOnly ? TF_MOD_ALT : 0);
-
-    return TRUE;
+//    SHORT sksMenu = GetKeyState(VK_MENU);
+//    SHORT sksCtrl = GetKeyState(VK_CONTROL);
+//    SHORT sksShft = GetKeyState(VK_SHIFT);
+//
+//    switch (wParam & 0xff)
+//    {
+//    case VK_MENU:
+//        // is VK_MENU down?
+//        if (sksMenu & 0x8000)
+//        {
+//            // is extended key?
+//            if (lParam & 0x01000000)
+//            {
+//                Global::ModifiersValue |= (TF_MOD_RALT | TF_MOD_ALT);
+//            }
+//            else
+//            {
+//                Global::ModifiersValue |= (TF_MOD_LALT | TF_MOD_ALT);
+//            }
+//
+//            // is previous key state up?
+//            if (!(lParam & 0x40000000))
+//            {
+//                // is VK_CONTROL and VK_SHIFT up?
+//                if (!(sksCtrl & 0x8000) && !(sksShft & 0x8000))
+//                {
+//                    Global::IsAltKeyDownOnly = TRUE;
+//                }
+//                else
+//                {
+//                    Global::IsShiftKeyDownOnly = FALSE;
+//                    Global::IsControlKeyDownOnly = FALSE;
+//                    Global::IsAltKeyDownOnly = FALSE;
+//                }
+//            }
+//        }
+//        break;
+//
+//    case VK_CONTROL:
+//        // is VK_CONTROL down?
+//        if (sksCtrl & 0x8000)
+//        {
+//            // is extended key?
+//            if (lParam & 0x01000000)
+//            {
+//                Global::ModifiersValue |= (TF_MOD_RCONTROL | TF_MOD_CONTROL);
+//            }
+//            else
+//            {
+//                Global::ModifiersValue |= (TF_MOD_LCONTROL | TF_MOD_CONTROL);
+//            }
+//
+//            // is previous key state up?
+//            if (!(lParam & 0x40000000))
+//            {
+//                // is VK_SHIFT and VK_MENU up?
+//                if (!(sksShft & 0x8000) && !(sksMenu & 0x8000))
+//                {
+//                    Global::IsControlKeyDownOnly = TRUE;
+//                }
+//                else
+//                {
+//                    Global::IsShiftKeyDownOnly = FALSE;
+//                    Global::IsControlKeyDownOnly = FALSE;
+//                    Global::IsAltKeyDownOnly = FALSE;
+//                }
+//            }
+//        }
+//        break;
+//
+//    case VK_SHIFT:
+//        // is VK_SHIFT down?
+//        if (sksShft & 0x8000)
+//        {
+//            // is scan code 0x36(right shift)?
+//            if (((lParam >> 16) & 0x00ff) == 0x36)
+//            {
+//                Global::ModifiersValue |= (TF_MOD_RSHIFT | TF_MOD_SHIFT);
+//            }
+//            else
+//            {
+//                Global::ModifiersValue |= (TF_MOD_LSHIFT | TF_MOD_SHIFT);
+//            }
+//
+//            // is previous key state up?
+//            if (!(lParam & 0x40000000))
+//            {
+//                // is VK_MENU and VK_CONTROL up?
+//                if (!(sksMenu & 0x8000) && !(sksCtrl & 0x8000))
+//                {
+//                    Global::IsShiftKeyDownOnly = TRUE;
+//                }
+//                else
+//                {
+//                    Global::IsShiftKeyDownOnly = FALSE;
+//                    Global::IsControlKeyDownOnly = FALSE;
+//                    Global::IsAltKeyDownOnly = FALSE;
+//                }
+//            }
+//        }
+//        break;
+//
+//    default:
+//        Global::IsShiftKeyDownOnly = FALSE;
+//        Global::IsControlKeyDownOnly = FALSE;
+//        Global::IsAltKeyDownOnly = FALSE;
+//        break;
+//    }
+//
+//    if (!(sksMenu & 0x8000))
+//    {
+//        Global::ModifiersValue &= ~TF_MOD_ALLALT;
+//    }
+//    if (!(sksCtrl & 0x8000))
+//    {
+//        Global::ModifiersValue &= ~TF_MOD_ALLCONTROL;
+//    }
+//    if (!(sksShft & 0x8000))
+//    {
+//        Global::ModifiersValue &= ~TF_MOD_ALLSHIFT;
+//    }
+//
+//    Global::UniqueModifiersValue = (Global::IsShiftKeyDownOnly ? TF_MOD_SHIFT : 0) |
+//                                   (Global::IsControlKeyDownOnly ? TF_MOD_CONTROL : 0) |
+//                                   (Global::IsAltKeyDownOnly ? TF_MOD_ALT : 0);
+//#endif
+//    return TRUE;
 }
 
 } // Global

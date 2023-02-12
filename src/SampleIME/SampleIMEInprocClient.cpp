@@ -59,6 +59,11 @@ private:
     }
     CATCH_LOG()
 
+    // TODO: re-consider parameter
+    // wch: converted character from VK and keyboard state
+    // vkPackSource: estimated VK from wch for VK_PACKET
+    void OnKeyEvent(WPARAM, LPARAM, BOOL*, wchar_t, UINT, bool, DWORD, bool, bool) override { }
+
     void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr* /*pThreadMgr*/, TfClientId /*tfClientId*/) override
     {
         *pIsEaten = FALSE;

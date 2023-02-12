@@ -29,7 +29,7 @@ public:
 private:
     BOOL Initialize();
 
-	void OnKeyEvent(WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled, DWORD modifiers, DWORD uniqueModifiers, bool isTest, bool isUp) override;
+	void OnKeyEvent(WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled, DWORD modifiers, bool isTest, bool isUp) override;
 
 private:
 	// in KeyHandlerEditSession.cpp
@@ -45,9 +45,6 @@ public:
     void GetReadingStrings(_Inout_ std::vector<CStringRange> *pReadingStrings, _Out_ BOOL *pIsWildcardIncluded);
     void GetCandidateList(_Inout_ std::vector<shared_wstring>& pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) override;
     void GetCandidateStringInConverted(const shared_wstring& searchString, _In_ std::vector<CCandidateListItem> *pCandidateList);
-
-//    // Preserved key handler
-//    void OnPreservedKey(REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId) override;
 
     // Punctuation
     BOOL IsPunctuation(WCHAR wch);

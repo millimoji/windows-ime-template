@@ -19,6 +19,10 @@
 //
 //////////////////////////////////////////////////////////////////////
 
+#define TF_MOD_ALLALT     (TF_MOD_RALT | TF_MOD_LALT | TF_MOD_ALT)
+#define TF_MOD_ALLCONTROL (TF_MOD_RCONTROL | TF_MOD_LCONTROL | TF_MOD_CONTROL)
+#define TF_MOD_ALLSHIFT   (TF_MOD_RSHIFT | TF_MOD_LSHIFT | TF_MOD_SHIFT)
+
 //+---------------------------------------------------------------------------
 //
 // ctor
@@ -940,14 +944,16 @@ void CompositionProcessorEngine::SetInitialCandidateListRange()
 //////////////////////////////////////////////////////////////////////
 
 void CompositionProcessorEngine::OnKeyEvent(WPARAM wParam, LPARAM lParam, BOOL *pIsEaten,
-        wchar_t wch, UINT vkPackSource, bool isKbdDisabled, DWORD modifiers, DWORD uniqueModifiers, bool isTest, bool isDown)
+        wchar_t wch, UINT vkPackSource, bool isKbdDisabled, DWORD modifiers, bool isTest, bool isDown)
 {
     // copy modifier state
     Global::ModifiersValue = static_cast<USHORT>(modifiers);
-    Global::UniqueModifiersValue = static_cast<USHORT>(uniqueModifiers);
-    Global::IsShiftKeyDownOnly = (uniqueModifiers & TF_MOD_SHIFT) ? TRUE : FALSE;
-    Global::IsControlKeyDownOnly = (uniqueModifiers & TF_MOD_CONTROL) ? TRUE : FALSE;
-    Global::IsAltKeyDownOnly = (uniqueModifiers & TF_MOD_ALT) ? TRUE : FALSE;
+    Global::IsShiftKeyDownOnly   = !!(modifiers & TF_MOD_ALLSHIFT)   && !(modifiers & ~TF_MOD_ALLSHIFT);
+    Global::IsControlKeyDownOnly = !!(modifiers & TF_MOD_ALLCONTROL) && !(modifiers & ~TF_MOD_ALLCONTROL);
+    Global::IsAltKeyDownOnly     = !!(modifiers & TF_MOD_ALLALT)     && !(modifiers & ~TF_MOD_ALLALT);
+    Global::UniqueModifiersValue = (Global::IsShiftKeyDownOnly ? TF_MOD_SHIFT : 0) |
+                                   (Global::IsControlKeyDownOnly ? TF_MOD_CONTROL : 0) |
+                                   (Global::IsAltKeyDownOnly ? TF_MOD_ALT : 0);
 
     if (isTest)
     {

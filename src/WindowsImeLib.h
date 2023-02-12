@@ -42,6 +42,13 @@ struct IWindowsIMEInProcClient
     virtual void Initialize(_In_ ITfThreadMgr* threadMgr, TfClientId tfClientId) = 0;
     virtual void Uninitialize() = 0;
     virtual void OnPreservedKey(REFGUID rguid, _Out_ BOOL* pIsEaten, _In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId) = 0;
+
+    // TODO: re-consider parameter
+    // wch: converted character from VK and keyboard state
+    // vkPackSource: estimated VK from wch for VK_PACKET
+    virtual void OnKeyEvent(WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled,
+        DWORD modifiers, bool isTest, bool isDown) = 0;
+
     virtual void SetLanguageBarStatus(DWORD status, BOOL isSet) = 0;
     virtual void ConversionModeCompartmentUpdated() = 0;
     virtual std::string EncodeCustomState() = 0;
@@ -90,10 +97,11 @@ struct ICompositionProcessorEngine
     virtual void UpdateCustomState(const std::string_view customStateJson) = 0;
     virtual void OnSetFocus(bool isGotten, const std::wstring_view applicationName, GUID clientId) = 0;
 
+    // TODO: re-consider parameter
     // wch: converted character from VK and keyboard state
     // vkPackSource: estimated VK from wch for VK_PACKET
     virtual void OnKeyEvent(WPARAM wParam, LPARAM lParam, BOOL *pIsEaten, wchar_t wch, UINT vkPackSource, bool isKbdDisabled,
-        DWORD modifiers, DWORD uniqueModifiers, bool isTest, bool isDown) = 0;
+        DWORD modifiers, bool isTest, bool isDown) = 0;
 
     virtual void GetCandidateList(std::vector<shared_wstring>& pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) = 0;
 

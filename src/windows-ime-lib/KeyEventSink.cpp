@@ -94,40 +94,24 @@ wchar_t CWindowsIME::ConvertVKey(UINT code)
 
 bool CWindowsIME::_IsKeyboardDisabled()
 {
-    ITfDocumentMgr* pDocMgrFocus = nullptr;
-    ITfContext* pContext = nullptr;
+    wil::com_ptr<ITfDocumentMgr> pDocMgrFocus;
+    wil::com_ptr<ITfContext> pContext;
     BOOL isDisabled = FALSE;
 
-    if ((_pThreadMgr->GetFocus(&pDocMgrFocus) != S_OK) ||
-        (pDocMgrFocus == nullptr))
-    {
-        // if there is no focus document manager object, the keyboard 
-        // is disabled.
+    if ((_pThreadMgr->GetFocus(&pDocMgrFocus) != S_OK) || !pDocMgrFocus) {
+        // if there is no focus document manager object, the keyboard  is disabled.
         isDisabled = TRUE;
-    }
-    else if ((pDocMgrFocus->GetTop(&pContext) != S_OK) ||
-        (pContext == nullptr))
-    {
+    } else if ((pDocMgrFocus->GetTop(&pContext) != S_OK) || !pContext)  {
         // if there is no context object, the keyboard is disabled.
         isDisabled = TRUE;
-    }
-    else
-    {
+    } else {
         CCompartment CompartmentKeyboardDisabled(_pThreadMgr.get(), _tfClientId, GUID_COMPARTMENT_KEYBOARD_DISABLED);
         CompartmentKeyboardDisabled._GetCompartmentBOOL(isDisabled);
 
-        CCompartment CompartmentEmptyContext(_pThreadMgr.get(), _tfClientId, GUID_COMPARTMENT_EMPTYCONTEXT);
-        CompartmentEmptyContext._GetCompartmentBOOL(isDisabled);
-    }
-
-    if (pContext)
-    {
-        pContext->Release();
-    }
-
-    if (pDocMgrFocus)
-    {
-        pDocMgrFocus->Release();
+        if (!isDisabled) {
+            CCompartment CompartmentEmptyContext(_pThreadMgr.get(), _tfClientId, GUID_COMPARTMENT_EMPTYCONTEXT);
+            CompartmentEmptyContext._GetCompartmentBOOL(isDisabled);
+        }
     }
 
     return !!isDisabled;
@@ -155,9 +139,22 @@ CATCH_RETURN()
 // Called by the system to query this service wants a potential keystroke.
 //----------------------------------------------------------------------------
 
-STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten) 
+STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
     auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnTestKeyDown();
+    *pIsEaten = FALSE;
+
+    const auto modifiers = Global::UpdateModifiers();
+    WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
+    UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
+    bool isKbdDisabled = _IsKeyboardDisabled();
+
+    if (m_inprocClient) {
+        m_inprocClient->OnKeyEvent(wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled, modifiers, true /*test*/, true /*down*/);
+        if (*pIsEaten) {
+            return S_OK;
+        }
+    }
 
     m_compositionBuffer->SaveWorkingContext(pContext);
     auto resetWorkingContext = wil::scope_exit([&]()
@@ -166,33 +163,13 @@ STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
         m_compositionBuffer->SaveWorkingContext(nullptr);
     });
 
-    Global::UpdateModifiers(wParam, lParam);
-
     if (m_singletonProcessor)
     {
-        WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
-        UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
-        bool isKbdDisabled = _IsKeyboardDisabled();
         wil::unique_bstr bstrResult;
-        m_singletonProcessor->OnKeyEvent(static_cast<DWORD>(wParam), static_cast<DWORD>(lParam), wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, true /*test*/, true /*down*/, &bstrResult, pIsEaten);
+        m_singletonProcessor->OnKeyEvent(static_cast<DWORD>(wParam), static_cast<DWORD>(lParam), wch, vkPackSource, isKbdDisabled, modifiers, true /*test*/, true /*down*/, &bstrResult, pIsEaten);
         m_compositionBuffer->HandleCrossProcJson(reinterpret_cast<const char*>(bstrResult.get()));
     }
 
-//    _KEYSTROKE_STATE KeystrokeState;
-//    WCHAR wch = '\0';
-//    UINT code = 0;
-//    *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, &KeystrokeState);
-//
-//    if (KeystrokeState.Category == CATEGORY_INVOKE_COMPOSITION_EDIT_SESSION)
-//    {
-//        //
-//        // Invoke key handler edit session
-//        //
-//        KeystrokeState.Category = CATEGORY_COMPOSING;
-//
-//        _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
-//    }
-//
     activity.Stop();
     return S_OK;
 }
@@ -208,6 +185,19 @@ STDAPI CWindowsIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
 STDAPI CWindowsIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
     auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnKeyDown();
+    *pIsEaten = FALSE;
+
+    const auto modifiers = Global::UpdateModifiers();
+    WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
+    UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
+    bool isKbdDisabled = _IsKeyboardDisabled();
+
+    if (m_inprocClient) {
+        m_inprocClient->OnKeyEvent(wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled, modifiers, false /*test*/, true /*down*/);
+        if (*pIsEaten) {
+            return S_OK;
+        }
+    }
 
     m_compositionBuffer->SaveWorkingContext(pContext);
     auto resetWorkingContext = wil::scope_exit([&]()
@@ -216,15 +206,10 @@ STDAPI CWindowsIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam
         m_compositionBuffer->SaveWorkingContext(nullptr);
     });
 
-    Global::UpdateModifiers(wParam, lParam);
-
     if (m_singletonProcessor)
     {
-        WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
-        UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
-        bool isKbdDisabled = _IsKeyboardDisabled();
         wil::unique_bstr bstrResult;
-        m_singletonProcessor->OnKeyEvent(static_cast<DWORD>(wParam), static_cast<DWORD>(lParam), wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, false /*test*/, true /*down*/, &bstrResult, pIsEaten);
+        m_singletonProcessor->OnKeyEvent(static_cast<DWORD>(wParam), static_cast<DWORD>(lParam), wch, vkPackSource, isKbdDisabled, modifiers, false /*test*/, true /*down*/, &bstrResult, pIsEaten);
         m_compositionBuffer->HandleCrossProcJson(reinterpret_cast<const char*>(bstrResult.get()));
     }
 
@@ -277,6 +262,19 @@ STDAPI CWindowsIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam
 STDAPI CWindowsIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
     auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnTestKeyUp();
+    *pIsEaten = FALSE;
+
+    const auto modifiers = Global::UpdateModifiers();
+    WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
+    UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
+    bool isKbdDisabled = _IsKeyboardDisabled();
+
+    if (m_inprocClient) {
+        m_inprocClient->OnKeyEvent(wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled, modifiers, true /*test*/, false /*down*/);
+        if (*pIsEaten) {
+            return S_OK;
+        }
+    }
 
     m_compositionBuffer->SaveWorkingContext(pContext);
     auto resetWorkingContext = wil::scope_exit([&]()
@@ -285,15 +283,10 @@ STDAPI CWindowsIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lPar
         m_compositionBuffer->SaveWorkingContext(nullptr);
     });
 
-    Global::UpdateModifiers(wParam, lParam);
-
     if (m_singletonProcessor)
     {
-        WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
-        UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
-        bool isKbdDisabled = _IsKeyboardDisabled();
         wil::unique_bstr bstrResult;
-        m_singletonProcessor->OnKeyEvent(static_cast<DWORD>(wParam), static_cast<DWORD>(lParam), wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, true /*test*/, false /*down*/, &bstrResult, pIsEaten);
+        m_singletonProcessor->OnKeyEvent(static_cast<DWORD>(wParam), static_cast<DWORD>(lParam), wch, vkPackSource, isKbdDisabled, modifiers, true /*test*/, false /*down*/, &bstrResult, pIsEaten);
         m_compositionBuffer->HandleCrossProcJson(reinterpret_cast<const char*>(bstrResult.get()));
     }
 
@@ -324,23 +317,29 @@ STDAPI CWindowsIME::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lPar
 STDAPI CWindowsIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
     auto activity = WindowsImeLibTelemetry::ITfKeyEventSink_OnKeyUp();
+    *pIsEaten = FALSE;
+
+    const auto modifiers = Global::UpdateModifiers();
+    WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
+    UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
+    bool isKbdDisabled = _IsKeyboardDisabled();
+
+    if (m_inprocClient) {
+        m_inprocClient->OnKeyEvent(wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled, modifiers, false /*test*/, false /*down*/);
+        if (*pIsEaten) {
+            return S_OK;
+        }
+    }
 
     m_compositionBuffer->SaveWorkingContext(pContext);
-    auto resetWorkingContext = wil::scope_exit([&]()
-    {
+    auto resetWorkingContext = wil::scope_exit([&]() {
         m_compositionBuffer->FlushTasks();
         m_compositionBuffer->SaveWorkingContext(nullptr);
     });
 
-    Global::UpdateModifiers(wParam, lParam);
-
-    if (m_singletonProcessor)
-    {
-        WCHAR wch = ConvertVKey(static_cast<UINT>(wParam));
-        UINT vkPackSource = VKeyFromVKPacketAndWchar(static_cast<UINT>(wParam), wch);
-        bool isKbdDisabled = _IsKeyboardDisabled();
+    if (m_singletonProcessor) {
         wil::unique_bstr bstrResult;
-        m_singletonProcessor->OnKeyEvent(static_cast<DWORD>(wParam), static_cast<DWORD>(lParam), wch, vkPackSource, isKbdDisabled, Global::ModifiersValue, Global::UniqueModifiersValue, false /*test*/, false /*down*/, &bstrResult, pIsEaten);
+        m_singletonProcessor->OnKeyEvent(static_cast<DWORD>(wParam), static_cast<DWORD>(lParam), wch, vkPackSource, isKbdDisabled, modifiers, false /*test*/, false /*down*/, &bstrResult, pIsEaten);
         m_compositionBuffer->HandleCrossProcJson(reinterpret_cast<const char*>(bstrResult.get()));
     }
 

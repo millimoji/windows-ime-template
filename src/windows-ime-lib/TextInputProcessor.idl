@@ -24,7 +24,7 @@ interface ITextInputProcessor : IUnknown
     HRESULT UpdateCustomState([in] LPCSTR customState);
 
     HRESULT OnKeyEvent([in] DWORD wParam, [in] DWORD lParam, [in] WCHAR wch, [in] UINT vkPackSource,
-                        [in] BOOL isKbdDisabled, [in] DWORD modifiers, [in] DWORD uniqueModifiers, [in] BOOL isTest, [in] BOOL isDown,
+                        [in] BOOL isKbdDisabled, [in] DWORD modifiers, [in] BOOL isTest, [in] BOOL isDown,
                         [out] BSTR* result, [out] BOOL *pIsEaten);
 
     HRESULT GetCandidateList([in] BOOL isIncrementalWordSearch, [in] BOOL isWildcardSearch, [in] BSTR* candidateList);
