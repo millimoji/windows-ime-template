@@ -149,3 +149,8 @@ extern HRESULT DllRegisterServer(int textServiceIconIndex);
 extern void TraceLog(const char* format, ...);
 extern void TraceLog(const wchar_t* format, ...);
 }
+
+// json
+constexpr char c_customData[] = "customData";
+
+

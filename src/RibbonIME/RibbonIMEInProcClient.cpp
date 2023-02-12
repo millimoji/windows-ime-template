@@ -50,11 +50,13 @@ private:
     }
 
     std::string EncodeCustomState() override {
+        nlohmann::json customData;
+        customData[c_imeOpen] = !!m_compartmentKeyboardOpenClose->GetCompartmentBOOL();
+        customData[c_imeSecure] = (m_tfTmfActiveFlags & TF_TMF_SECUREMODE) ? true : false;
+        customData[c_imeStoreApp] = (m_tfTmfActiveFlags & TF_TMF_IMMERSIVEMODE) ? true : false;
+        customData[c_imeConsole] = (m_tfTmfActiveFlags & TF_TMF_CONSOLE) ? true : false;
         nlohmann::json json;
-        json[c_imeOpen] = !!m_compartmentKeyboardOpenClose->GetCompartmentBOOL();
-        json[c_imeSecure] = (m_tfTmfActiveFlags & TF_TMF_SECUREMODE) ? true : false;
-        json[c_imeStoreApp] = (m_tfTmfActiveFlags & TF_TMF_IMMERSIVEMODE) ? true : false;
-        json[c_imeConsole] = (m_tfTmfActiveFlags & TF_TMF_CONSOLE) ? true : false;
+        json[c_customData] = customData;
         return json.dump();
     }
 

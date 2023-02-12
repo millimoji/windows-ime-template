@@ -67,9 +67,10 @@ public:
     void UpdateCustomState(std::string_view stateJson) override
     {
         const auto json = nlohmann::json::parse(stateJson);
-        m_compartmentIsOpen = json["isOpen"].get<bool>();
-        m_compartmentIsDoubleSingleByte = json["isDouble"].get<bool>();
-        m_compartmentIsPunctuation = json["isPunctuation"].get<bool>();
+        const auto customData = json[c_customData];
+        m_compartmentIsOpen = customData["isOpen"].get<bool>();
+        m_compartmentIsDoubleSingleByte = customData["isDouble"].get<bool>();
+        m_compartmentIsPunctuation = customData["isPunctuation"].get<bool>();
     }
     void OnSetFocus(bool isGotten, const std::wstring_view applicationName, GUID clientId) override
     {

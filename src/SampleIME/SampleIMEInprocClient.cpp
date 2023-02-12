@@ -148,10 +148,13 @@ private:
 
     std::string EncodeCustomState() override
     {
+        nlohmann::json customData;
+        customData["isOpen"] = !!m_compartmentKeyboardOpenClose->GetCompartmentBOOL();
+        customData["isDouble"] = !!m_compartmentDoubleSingleByte->GetCompartmentBOOL();
+        customData["isPunctuation"] = !!m_compartmentPunctuation->GetCompartmentBOOL();
+
         nlohmann::json json;
-        json["isOpen"] = !!m_compartmentKeyboardOpenClose->GetCompartmentBOOL();
-        json["isDouble"] = !!m_compartmentDoubleSingleByte->GetCompartmentBOOL();
-        json["isPunctuation"] = !!m_compartmentPunctuation->GetCompartmentBOOL();
+        json[c_customData] = customData;
         return json.dump();
     }
 
