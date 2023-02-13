@@ -15,9 +15,10 @@ public:
 
     virtual ~RibbonIMECore();
 
-    void OnKeyEvent(WPARAM, LPARAM, BOOL*, wchar_t, UINT, bool, DWORD, bool, bool) override { }
+    void OnKeyEvent(WPARAM, LPARAM, BOOL*, wchar_t, UINT, bool, DWORD, bool, bool) override;
 
-    void GetCandidateList(std::vector<shared_wstring>& pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) override;
+    void GetCandidateList(std::vector<shared_wstring>& pCandidateList, BOOL isIncrementalWordSearch, BOOL isWildcardSearch) override {
+        (void)pCandidateList; (void)isIncrementalWordSearch; (void)isWildcardSearch; }
 
     void FinalizeCandidateList() override {}
     VOID CancelCompositioon() override {}
@@ -28,6 +29,8 @@ public:
 private:
     const std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> m_compositionBuffer;
     const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> m_candidateListView;
+
+    std::wstring m_composition;
 
     bool m_isImeOpen = {};
     bool m_isSecure = {};

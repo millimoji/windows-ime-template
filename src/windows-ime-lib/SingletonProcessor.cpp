@@ -284,6 +284,8 @@ private:
                         BOOL isKbdDisabled, DWORD modifiers, BOOL isTest, BOOL isDown,
                         _Outptr_ BSTR* result, _Out_ BOOL *pIsEaten) override
     {
+        m_compositionBufferProxy->m_compositionState.clear();
+
         m_processor->OnKeyEvent(static_cast<WPARAM>(wParam),  static_cast<LPARAM>(lParam), pIsEaten, wch, vkPackSource,
                                                 !!isKbdDisabled, modifiers, !!isTest, !!isDown);
 
