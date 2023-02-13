@@ -81,15 +81,7 @@ struct IWindowsIMECandidateListView
 struct IWindowsIMECompositionBuffer
 {
     virtual ~IWindowsIMECompositionBuffer() {}
-
-    // functions for the composition object.
-    virtual HRESULT _StartComposition() = 0;
-    virtual HRESULT _TerminateComposition() = 0;
-    virtual HRESULT _AddComposingAndChar(const shared_wstring& pstrAddString) = 0;
-    virtual HRESULT _AddCharAndFinalize(const shared_wstring& pstrAddString) = 0;
-    virtual HRESULT _RemoveDummyCompositionForComposing() = 0;
-
-    virtual bool _IsComposing() = 0;
+    virtual void SetCompositionState(const std::string& compositionInJson) = 0;
 };
 
 struct ICompositionProcessorEngine
@@ -121,7 +113,6 @@ struct IConstantProvider
     virtual const GUID& ServerCLSID() noexcept = 0;
     virtual const GUID& ServerAppID() noexcept = 0;
     virtual const wchar_t* ServerName() noexcept = 0;
-    virtual UINT GetCandidateWindowWidth() noexcept = 0;
     virtual const int GetDefaultCandidateTextFontResourceID() = 0;
     virtual void GetPreferredTouchKeyboardLayout(_Out_ TKBLayoutType* layoutType, _Out_ WORD* preferredLayoutId) = 0;
 };
@@ -158,7 +149,9 @@ constexpr char c_jsonKeyText[] = "text";
 constexpr char c_jsonKeyAttribute[] = "attr";
 constexpr char c_jsonKeyStart[] = "s";
 constexpr char c_jsonKeyEnd[] = "e";
-
+constexpr char c_jsonKeyLangId[] = "langId";
+constexpr char c_jsonKeyAttrId[] = "attrId";
+constexpr char c_jsonKeyIP[] = "ip";
 
 #if 0
 {
@@ -167,8 +160,9 @@ constexpr char c_jsonKeyEnd[] = "e";
         determined: "determined",
         text: "compsition text",
         attr: [
-            { s:0, e:10, langid:1041, 
+            { s:0, e:10, langId:1041, attrId:0 },
         ],
+        ip: 10,
     }
 }
 #endif

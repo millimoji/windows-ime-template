@@ -27,7 +27,7 @@ CKeyStateCategoryFactory* CKeyStateCategoryFactory::Instance()
 
 CKeyStateCategory* CKeyStateCategoryFactory::MakeKeyStateCategory(
     KEYSTROKE_CATEGORY keyCategory,
-    _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
+    const std::shared_ptr<CompositionBufferClientProxy>& pTextService,
     const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
     const std::shared_ptr<CompositionProcessorEngine>& pCompositionProcessorEngine)
 {
@@ -71,7 +71,7 @@ void CKeyStateCategoryFactory::Release()
 class CKeyStateCategory
 */
 CKeyStateCategory::CKeyStateCategory(
-        _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
+        const std::shared_ptr<CompositionBufferClientProxy>& pTextService,
         const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
         const std::shared_ptr<CompositionProcessorEngine>& pCompositionProcessorEngine) :
         m_compositionBuffer(pTextService),
@@ -232,7 +232,7 @@ HRESULT CKeyStateCategory::HandleKeySelectByNumber(UINT /*code*/)
 class CKeyStateComposing
 */
 CKeyStateComposing::CKeyStateComposing(
-    _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
+    const std::shared_ptr<CompositionBufferClientProxy>& pTextService,
     const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
     const std::shared_ptr<CompositionProcessorEngine>& pCompositionProcessorEngine) :
     CKeyStateCategory(pTextService, pCandidateListUIPresenter, pCompositionProcessorEngine)
@@ -305,7 +305,7 @@ HRESULT CKeyStateComposing::HandleKeyPunctuation(KeyHandlerEditSessionDTO dto)
 class CKeyStateCandidate
 */
 CKeyStateCandidate::CKeyStateCandidate(
-    _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
+    const std::shared_ptr<CompositionBufferClientProxy>& pTextService,
     const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
     const std::shared_ptr<CompositionProcessorEngine>& pCompositionProcessorEngine) :
     CKeyStateCategory(pTextService, pCandidateListUIPresenter, pCompositionProcessorEngine)
@@ -354,7 +354,7 @@ class CKeyStatePhrase
 */
 
 CKeyStatePhrase::CKeyStatePhrase(
-    _In_ WindowsImeLib::IWindowsIMECompositionBuffer* pTextService,
+    const std::shared_ptr<CompositionBufferClientProxy>& pTextService,
     const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& pCandidateListUIPresenter,
     const std::shared_ptr<CompositionProcessorEngine>& pCompositionProcessorEngine) :
     CKeyStateCategory(pTextService, pCandidateListUIPresenter, pCompositionProcessorEngine)

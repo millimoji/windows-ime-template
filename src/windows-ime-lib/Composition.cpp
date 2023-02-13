@@ -347,25 +347,31 @@ void CompositionBuffer::FlushTasks()
 
 void CompositionBuffer::HandleCrossProcJson(const char* jsonText) try
 {
-    const auto json = nlohmann::json::parse(jsonText);
-    const auto jsonComposition = json["composition"];
-    const auto jsonCommands = jsonComposition["cmds"];
+    m_listTasks.clear();
 
-    for (auto it = jsonCommands.begin(); it != jsonCommands.end(); ++it)
-    {
-        auto commandText = it.value()["cmd"];
-        if (commandText == "StartComposition") {
-            LOG_IF_FAILED(_StartComposition());
-        } else if (commandText == "TerminateComposition") {
+    const auto json = nlohmann::json::parse(jsonText);
+    const auto jsonComposition = json[c_jsonKeyComposition];
+
+    auto determinedText = std::make_shared<std::wstring>(jsonComposition[c_jsonKeyDetermined].get<std::wstring>());
+    if (determinedText->length() > 0) {
+        if (!m_isComposing) {
+            LOG_IF_FAILED(_AddCharAndFinalize(determinedText));
+        } else {
+            LOG_IF_FAILED(_AddComposingAndChar(determinedText));
             LOG_IF_FAILED(_TerminateComposition());
-        } else if (commandText == "AddComposingAndChar") {
-            auto str = it.value()["str"].get<std::wstring>();
-            LOG_IF_FAILED(_AddComposingAndChar(std::make_shared<const std::wstring>(std::move(str))));
-        } else if (commandText == "AddCharAndFinalize") {
-            auto str = it.value()["str"].get<std::wstring>();
-            LOG_IF_FAILED(_AddComposingAndChar(std::make_shared<const std::wstring>(std::move(str))));
-        } else if (commandText == "RemoveDummyCompositionForComposing") {
+        }
+    }
+
+    auto compositionText = std::make_shared<std::wstring>(jsonComposition[c_jsonKeyText].get<std::wstring>());
+    if (compositionText->length() > 0) {
+        if (!m_isComposing) {
+            LOG_IF_FAILED(_StartComposition());
+        }
+        LOG_IF_FAILED(_AddComposingAndChar(compositionText));
+    } else {
+        if (m_isComposing) {
             LOG_IF_FAILED(_RemoveDummyCompositionForComposing());
+            LOG_IF_FAILED(_TerminateComposition());
         }
     }
 }

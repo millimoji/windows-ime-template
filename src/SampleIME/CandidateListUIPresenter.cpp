@@ -81,9 +81,7 @@ HRESULT CKeyStateCategory::_HandleCandidateConvert()
     }
 
     // call _Start*Line for CCandidateListUIPresenter or CReadingLine
-    LOG_IF_FAILED(m_candidateListView->_StartCandidateList(
-            WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth()));
-
+    LOG_IF_FAILED(m_candidateListView->_StartCandidateList(CAND_WIDTH));
     // set up candidate list if it is being shown. Text color is green, Background color is window.
     m_candidateListView->_SetTextColorAndFillColor(WindowsImeLib::CANDIDATE_COLOR_STYLE::GREEN);
 

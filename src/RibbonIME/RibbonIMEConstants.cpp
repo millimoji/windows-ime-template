@@ -55,10 +55,6 @@ class RibbonIMEConstants : public WindowsImeLib::IConstantProvider
         *layoutType = TKBLT_OPTIMIZED;
         *preferredLayoutId = TKBL_OPT_JAPANESE_ABC;
     }
-    UINT GetCandidateWindowWidth() noexcept override
-    {
-        return 13; // CAND_WIDTH
-    }
     const int GetDefaultCandidateTextFontResourceID()  override
     {
         return IDS_DEFAULT_FONT;

@@ -138,10 +138,6 @@ class ConstantProvider :
         *layoutType = TKBLT_OPTIMIZED;
         *preferredLayoutId = TKBL_OPT_SIMPLIFIED_CHINESE_PINYIN;
     }
-    UINT GetCandidateWindowWidth() noexcept override
-    {
-        return CAND_WIDTH;
-    }
     const int GetDefaultCandidateTextFontResourceID()  override
     {
         return IDS_DEFAULT_FONT;

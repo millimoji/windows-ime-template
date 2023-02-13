@@ -15,6 +15,7 @@
 #include "FileMapping.h"
 #include "SampleIMEDefine.h"
 #include "SampleIMEGlobals.h"
+#include "CompositionBufferClientProxy.h"
 
 class CompositionProcessorEngine :
     public WindowsImeLib::ICompositionProcessorEngine,
@@ -135,7 +136,8 @@ private:
 private:
     std::wstring m_applicationName;
     GUID m_clientId;
-    const std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> m_compositionBuffer;
+    const std::shared_ptr<CompositionBufferClientProxy> m_compositionBuffer;
+    const std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer> m_compositionBufferOrg;;
     const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView> m_candidateListView;
 
     struct _KEYSTROKE

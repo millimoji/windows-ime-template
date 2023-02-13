@@ -284,18 +284,11 @@ private:
                         BOOL isKbdDisabled, DWORD modifiers, BOOL isTest, BOOL isDown,
                         _Outptr_ BSTR* result, _Out_ BOOL *pIsEaten) override
     {
-        m_compositionBufferProxy->m_jsonCmdArray.clear();
-
         m_processor->OnKeyEvent(static_cast<WPARAM>(wParam),  static_cast<LPARAM>(lParam), pIsEaten, wch, vkPackSource,
                                                 !!isKbdDisabled, modifiers, !!isTest, !!isDown);
 
-        nlohmann::json jsonComposition;
-        jsonComposition["cmds"] = m_compositionBufferProxy->m_jsonCmdArray;
-        nlohmann::json jsonResult;
-        jsonResult["composition"] = jsonComposition;
-        const auto resultText = jsonResult.dump();
-
-        *result = SysAllocStringLen(reinterpret_cast<const wchar_t*>(resultText.c_str()), static_cast<UINT>((resultText.length() + 1) / 2));
+        *result = SysAllocStringLen(reinterpret_cast<const wchar_t*>(m_compositionBufferProxy->m_compositionState.c_str()),
+                                static_cast<UINT>((m_compositionBufferProxy->m_compositionState.length() + 1) / 2));
         return S_OK;
     }
 

@@ -55,11 +55,12 @@ public:
 
 private:
     // IWindowsIMECompositionBuffer
-    HRESULT _StartComposition() override;
-    HRESULT _TerminateComposition() override;
-    HRESULT _AddComposingAndChar(const shared_wstring& pstrAddString) override;
-    HRESULT _AddCharAndFinalize(const shared_wstring& pstrAddString) override;
-    HRESULT _RemoveDummyCompositionForComposing() override;
+    HRESULT _StartComposition();
+    HRESULT _TerminateComposition();
+    HRESULT _AddComposingAndChar(const shared_wstring& pstrAddString);
+    HRESULT _AddCharAndFinalize(const shared_wstring& pstrAddString);
+    HRESULT _RemoveDummyCompositionForComposing();
+    void SetCompositionState(const std::string& /*composition*/) override {}
 
 private: // ICompositionBufferInternal
     void HandleCrossProcJson(const char* json) override;
@@ -111,55 +112,9 @@ public:
     CompositionBufferProxy() {}
     ~CompositionBufferProxy() {}
 
-    HRESULT _StartComposition() override
-    {
-        nlohmann::json json;
-        json["cmd"] = "StartComposition";
-        m_jsonCmdArray.emplace_back(json);
-        m_isComposing = true;
-        return S_OK;
+    void SetCompositionState(const std::string& compositionInJson) override {
+        m_compositionState = compositionInJson;
     }
 
-    HRESULT _TerminateComposition() override
-    {
-        nlohmann::json json;
-        json["cmd"] = "TerminateComposition";
-        m_jsonCmdArray.emplace_back(json);
-        m_isComposing = false;
-        return S_OK;
-    }
-
-    HRESULT _AddComposingAndChar(const shared_wstring& pstrAddString) override
-    {
-        nlohmann::json json;
-        json["cmd"] = "AddComposingAndChar";
-        json["str"] = *pstrAddString;
-        m_jsonCmdArray.emplace_back(json);
-        return S_OK;
-    }
-
-    HRESULT _AddCharAndFinalize(const shared_wstring& pstrAddString) override
-    {
-        nlohmann::json json;
-        json["cmd"] = "AddCharAndFinalize";
-        json["str"] = *pstrAddString;
-        m_jsonCmdArray.emplace_back(json);
-        return S_OK;
-    }
-
-    HRESULT _RemoveDummyCompositionForComposing() override
-    {
-        nlohmann::json json;
-        json["cmd"] = "RemoveDummyCompositionForComposing";
-        m_jsonCmdArray.emplace_back(json);
-        return S_OK;
-    }
-
-    bool _IsComposing() override
-    {
-        return m_isComposing;
-    }
-
-    nlohmann::json m_jsonCmdArray;
-    bool m_isComposing = false;
+    std::string m_compositionState;
 };

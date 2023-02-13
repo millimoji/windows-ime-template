@@ -12,6 +12,7 @@
 // #include "TfInputProcessorProfile.h"
 #include "SampleIMEGlobals.h"
 // #include "RegKey.h"
+#include "CompositionBufferClientProxy.h"
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -32,7 +33,8 @@
 CompositionProcessorEngine::CompositionProcessorEngine(
     const std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer>& compositionBuffer,
     const std::shared_ptr<WindowsImeLib::IWindowsIMECandidateListView>& candidateListView) :
-    m_compositionBuffer(compositionBuffer), m_candidateListView(candidateListView)
+    m_compositionBufferOrg(compositionBuffer), m_candidateListView(candidateListView),
+    m_compositionBuffer(std::make_shared<CompositionBufferClientProxy>(m_compositionBufferOrg))
 {
     _pTableDictionaryEngine = nullptr;
     _pDictionaryFile = nullptr;
@@ -976,6 +978,12 @@ void CompositionProcessorEngine::OnKeyEvent(WPARAM wParam, LPARAM lParam, BOOL *
         {
             OnKeyUp(wParam, lParam, pIsEaten, wch, vkPackSource, isKbdDisabled);
         }
+    }
+
+    {
+        nlohmann::json json;
+        m_compositionBuffer->dumpToJson(json);
+        m_compositionBufferOrg->SetCompositionState(json.dump());
     }
 }
 

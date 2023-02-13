@@ -222,9 +222,7 @@ HRESULT CKeyStateCategory::_CreateAndStartCandidate()
 //    if (m_candidateListView == nullptr)
     if (!m_candidateListView->IsCreated())
     {
-        LOG_IF_FAILED(m_candidateListView->_StartCandidateList(
-                WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth()));
-
+        LOG_IF_FAILED(m_candidateListView->_StartCandidateList(CAND_WIDTH));
         _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_INCREMENTAL);
         _pCompositionProcessorEngine->SetIsCandidateWithWildcard(false);
 
@@ -299,9 +297,7 @@ HRESULT CKeyStateCategory::_HandleCompositionConvert(BOOL isWildcardSearch)
         // 
         // create an instance of the candidate list class.
         // 
-        LOG_IF_FAILED(m_candidateListView->_StartCandidateList(
-                WindowsImeLib::g_processorFactory->GetConstantProvider()->GetCandidateWindowWidth()));
-
+        LOG_IF_FAILED(m_candidateListView->_StartCandidateList(CAND_WIDTH));
         _pCompositionProcessorEngine->SetIsCandidateWithWildcard(isWildcardSearch);
         _pCompositionProcessorEngine->SetCandidateMode(CANDIDATE_ORIGINAL);
 
@@ -414,7 +410,9 @@ HRESULT CKeyStateCategory::_HandleCompositionDoubleSingleByte(const KeyHandlerEd
     fullWidthString.Set(&fullWidth, 1);
     const auto sharedFullWidthString = fullWidthString.ToSharedWstring();
 
+    LOG_IF_FAILED(_HandleCancel());
+
     RETURN_IF_FAILED(m_compositionBuffer->_AddCharAndFinalize(sharedFullWidthString));
 
-    return _HandleCancel();
+    return S_OK;
 }

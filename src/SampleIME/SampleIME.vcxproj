@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseDictionaryEngine.h" />
+    <ClInclude Include="CompositionBufferClientProxy.h" />
     <ClInclude Include="DictionaryParser.h" />
     <ClInclude Include="DictionarySearch.h" />
     <ClInclude Include="File.h" />
