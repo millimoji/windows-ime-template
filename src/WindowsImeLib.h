@@ -40,7 +40,7 @@ struct IWindowsIMEInProcClient
 {
     virtual ~IWindowsIMEInProcClient() {}
 
-    virtual void Initialize(_In_ ITfThreadMgr* threadMgr, TfClientId tfClientId) = 0;
+    virtual void Initialize(_In_ ITfThreadMgr* threadMgr, TfClientId tfClientId, _In_ ITfCategoryMgr* categoryMgr) = 0;
     virtual void Uninitialize() = 0;
     virtual void OnPreservedKey(REFGUID rguid, _Out_ BOOL* pIsEaten, _In_ ITfThreadMgr* pThreadMgr, TfClientId tfClientId) = 0;
 

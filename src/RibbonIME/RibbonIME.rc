@@ -44,7 +44,7 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", "Millimo"
-            VALUE "FileDescription", "The Sample code of Windows 8 IME"
+            VALUE "FileDescription", "Windows IME"
             VALUE "FileVersion", "1.0.0.0"
             VALUE "InternalName", "RibbonIME.dll"
             VALUE "LegalCopyright", "Copyright (C)"
@@ -95,6 +95,10 @@ BEGIN
     IDS_RIBBON_IME          "Japanese Another IME"
     IDS_DEFAULT_FONT        "Yu Gothic UI"
     IDS_IME_MODE            "Japanese/English input"
+    IDS_DISPATTRINFO_INPUT_NAME     "DisplayAttributeInput"
+    IDS_DISPATTRINFO_INPUT_DESC     "Ribbon IME Text Service Display Attribute Input"
+    IDS_DISPATTRINFO_CONVERTED_NAME "DisplayAttributeConverted"
+    IDS_DISPATTRINFO_CONVERTED_DESC "Ribbon IME Text Service Display Attribute Converted"
 END
 
 #endif    // English (United States) resources

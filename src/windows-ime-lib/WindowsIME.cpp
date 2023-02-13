@@ -89,7 +89,7 @@ CWindowsIME::~CWindowsIME()
 //
 //----------------------------------------------------------------------------
 
-STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, DWORD dwFlags)
+STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, DWORD dwFlags) try
 {
     auto activity = WindowsImeLibTelemetry::ITfTextInputProcessorEx_ActivateEx();
 
@@ -146,7 +146,14 @@ STDAPI CWindowsIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClientId, 
     try
     {
         m_inprocClient = WindowsImeLib::g_processorFactory->CreateIMEInProcClient(this);
-        m_inprocClient->Initialize(pThreadMgr, tfClientId);
+
+        HINSTANCE loadedInstance = nullptr;
+        const auto autoDecrementDllRef = wil::scope_exit([&]() { if (loadedInstance != nullptr) FreeLibrary(loadedInstance); });
+
+        wil::com_ptr<ITfCategoryMgr> tfCategoryMgr;
+        THROW_IF_FAILED(CoCreateInstanceHelper(CLSID_TF_CategoryMgr, IID_PPV_ARGS(&tfCategoryMgr), &loadedInstance, (m_dwActiveFlags & TF_TMF_COMLESS) ? TRUE : FALSE));
+
+        m_inprocClient->Initialize(pThreadMgr, tfClientId, tfCategoryMgr.get());
     }
     catch (...)
     {
@@ -177,6 +184,7 @@ ExitError:
     Deactivate();
     return E_FAIL;
 }
+CATCH_RETURN()
 
 //+---------------------------------------------------------------------------
 //
@@ -237,15 +245,6 @@ STDAPI CWindowsIME::Deactivate()
 
     _UninitThreadMgrEventSink();
 
-//    CCompartment CompartmentKeyboardOpen(_pThreadMgr, _tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
-//    CompartmentKeyboardOpen._ClearCompartment();
-//
-//    CCompartment CompartmentDoubleSingleByte(_pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentDoubleSingleByte);
-//    CompartmentDoubleSingleByte._ClearCompartment();
-//
-//    CCompartment CompartmentPunctuation(_pThreadMgr, _tfClientId, Global::SampleIMEGuidCompartmentPunctuation);
-//    CompartmentDoubleSingleByte._ClearCompartment();
-
 //    if (_pThreadMgr != nullptr)
 //    {
 //        _pThreadMgr->Release();
@@ -259,6 +258,7 @@ STDAPI CWindowsIME::Deactivate()
 //        _pDocMgrLastFocused->Release();
 //        _pDocMgrLastFocused = nullptr;
 //    }
+
     _pDocMgrLastFocused.reset();
 
     activity.Stop();
@@ -431,11 +431,11 @@ BOOL CWindowsIME::_AddTextProcessorEngine()
 
 //+---------------------------------------------------------------------------
 //
-// CWindowsIME::CreateInstance 
+// CWindowsIME::CoCreateInstanceHelper
 //
 //----------------------------------------------------------------------------
 
-HRESULT CWindowsIME::CreateInstance(REFCLSID rclsid, REFIID riid, _Outptr_result_maybenull_ LPVOID* ppv, _Out_opt_ HINSTANCE* phInst, BOOL isComLessMode)
+HRESULT CWindowsIME::CoCreateInstanceHelper(REFCLSID rclsid, REFIID riid, _Outptr_result_maybenull_ LPVOID* ppv, _Out_opt_ HINSTANCE* phInst, BOOL isComLessMode)
 {
     HRESULT hr = S_OK;
     if (phInst == nullptr)
@@ -470,7 +470,7 @@ HRESULT CWindowsIME::CreateInstance(REFCLSID rclsid, REFIID riid, _Outptr_result
 HRESULT CWindowsIME::ComLessCreateInstance(REFGUID rclsid, REFIID riid, _Outptr_result_maybenull_ void **ppv, _Out_opt_ HINSTANCE *phInst)
 {
     HRESULT hr = S_OK;
-    HINSTANCE sampleIMEDllHandle = nullptr;
+    HINSTANCE windowsIMEDllHandle = nullptr;
     WCHAR wchPath[MAX_PATH] = {'\0'};
     WCHAR szExpandedPath[MAX_PATH] = {'\0'};
     DWORD dwCnt = 0;
@@ -487,12 +487,12 @@ HRESULT CWindowsIME::ComLessCreateInstance(REFGUID rclsid, REFIID riid, _Outptr_
             hr = (0 < dwCnt && dwCnt <= ARRAYSIZE(szExpandedPath)) ? S_OK : E_FAIL;
             if (SUCCEEDED(hr))
             {
-                sampleIMEDllHandle = LoadLibraryEx(szExpandedPath, NULL, 0);
-                hr = sampleIMEDllHandle ? S_OK : E_FAIL;
+                windowsIMEDllHandle = LoadLibraryEx(szExpandedPath, NULL, 0);
+                hr = windowsIMEDllHandle ? S_OK : E_FAIL;
                 if (SUCCEEDED(hr))
                 {
-                    *phInst = sampleIMEDllHandle;
-                    FARPROC pfn = GetProcAddress(sampleIMEDllHandle, "DllGetClassObject");
+                    *phInst = windowsIMEDllHandle;
+                    FARPROC pfn = GetProcAddress(windowsIMEDllHandle, "DllGetClassObject");
                     hr = pfn ? S_OK : E_FAIL;
                     if (SUCCEEDED(hr))
                     {

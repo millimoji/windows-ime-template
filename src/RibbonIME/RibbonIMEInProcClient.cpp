@@ -5,6 +5,7 @@
 #include "../WindowsImeLib.h"
 #include "../Compartment.h"
 #include "../LanguageBar.h"
+#include "../DisplayAttributeInfo.h"
 #include "RibbonIMEInProcClient.h"
 
 inline HMODULE GetCurrentModuleHandle() {
@@ -36,7 +37,7 @@ public:
     ~RibbonIMEInProcClient() {}
 
 private:
-    void Initialize(_In_ ITfThreadMgr* threadMgr, TfClientId tfClientId) override try {
+    void Initialize(_In_ ITfThreadMgr* threadMgr, TfClientId tfClientId, _In_ ITfCategoryMgr* categoryMgr) override try {
         m_threadMgr = threadMgr;
         m_tfClientId = tfClientId;
 
@@ -52,10 +53,12 @@ private:
         InitializeCompartments();
         InitializeLanguageBar(isSecureMode);
         InitializePreservedKeys();
+        InitializeDisplayAttributeInfo(categoryMgr);
     }
     CATCH_LOG()
 
     void Uninitialize() override {
+        UninitializeDisplayAttributeInfo();
         UninitializePreservedKeys();
         UninitializeLanguageBar();
         UnitializeCompartments();
@@ -94,7 +97,7 @@ private:
         if (vkPackSource == VK_KANJI && !!(uniqueModifiers & TF_MOD_ALT)) {
             const auto isOpen = m_compartmentKeyboardOpenClose->GetCompartmentBOOL();
             m_compartmentKeyboardOpenClose->_SetCompartmentBOOL(isOpen ? FALSE : TRUE);
-            *pIsEaten = TRUE;
+            // *pIsEaten = TRUE;
         }
     }
 
@@ -118,7 +121,7 @@ private:
     void ConversionModeCompartmentUpdated() override {
     }
     std::shared_ptr<std::vector<std::pair<TfGuidAtom, wil::com_ptr<ITfDisplayAttributeInfo>>>> GetDisplayAttributeInfoList() override {
-        return std::make_shared<std::vector<std::pair<TfGuidAtom, wil::com_ptr<ITfDisplayAttributeInfo>>>>();
+        return m_listDisplayAttributeInfo;
     }
 
 private:
@@ -196,6 +199,7 @@ private:
         int descriptionResId;
     } c_preservedKeys[] = {
         { TF_PRESERVEDKEY { VK_KANJI, 0             }, c_imeModeVkKanjiGuid, IDS_IME_MODE },
+        { TF_PRESERVEDKEY { VK_KANJI, TF_MOD_ALT    }, c_imeModeVkKanjiGuid, IDS_IME_MODE },
 #if 0 // TODO: investigate how to set preserved key to IME On/Off
         { TF_PRESERVEDKEY { VK_OEM_3, TF_MOD_ALT    }, c_imeModeAltTildaGuid, IDS_IME_MODE },
         { TF_PRESERVEDKEY { VK_IME_ON, 0    }, c_imeModeAltTildaGuid, IDS_IME_MODE },
@@ -226,6 +230,85 @@ private:
             LOG_IF_FAILED(tfKeystrokeMgr->UnpreserveKey(preservedKey.preservedKeyGuid, &tfPreservedKey));
         }
     }
+
+    static const inline struct DISPLAYATTRIBUTEDATA {
+        GUID guid;
+        TF_DISPLAYATTRIBUTE tfDisplayAttribute;
+        int valueNameResId;
+        int descriptionResId;
+    } c_listDisplayAttributeData[] = {
+        {
+            GUID { 0x4192edb6, 0x90cc, 0x44bc, { 0xbc, 0x2d, 0x4c, 0x51, 0xe0, 0x27, 0x1a, 0x80 } }, // {4192EDB6-90CC-44BC-BC2D-4C51E0271A80}
+            TF_DISPLAYATTRIBUTE {
+                { TF_CT_COLORREF, RGB(0, 103,206) },    // text color
+                { TF_CT_NONE, 0 },                      // background color (TF_CT_NONE => app default)
+                TF_LS_DOT,                              // underline style
+                FALSE,                                  // underline boldness
+                { TF_CT_COLORREF, RGB(0, 103,206) },    // underline color
+                TF_ATTR_INPUT                           // attribute info
+            },
+            IDS_DISPATTRINFO_INPUT_NAME, IDS_DISPATTRINFO_INPUT_DESC
+        },
+        {
+            GUID { 0xa01dad16, 0x7aee, 0x47e8, { 0xaa, 0x1d, 0x72, 0x7d, 0xe5, 0xc4, 0x5f, 0xf4 } }, // {A01DAD16-7AEE-47E8-AA1D-727DE5C45FF4}
+            TF_DISPLAYATTRIBUTE {
+                { TF_CT_COLORREF, RGB(255, 255, 255) }, // text color
+                { TF_CT_COLORREF, RGB(  0, 255, 255) }, // background color (TF_CT_NONE => app default)
+                TF_LS_NONE,                             // underline style
+                FALSE,                                  // underline boldness
+                { TF_CT_NONE, 0 },                      // underline color
+                TF_ATTR_TARGET_CONVERTED                // attribute info
+            },
+            IDS_DISPATTRINFO_CONVERTED_NAME, IDS_DISPATTRINFO_CONVERTED_DESC
+        },
+        {
+            GUID { 0x7c87af9c, 0xc10d, 0x4a86, { 0xbc, 0x9b, 0x30, 0xc0, 0x13, 0x3b, 0x7d, 0x44 } }, // {7C87AF9C-C10D-4A86-BC9B-30C0133B7D44}
+            TF_DISPLAYATTRIBUTE {
+                { TF_CT_COLORREF, RGB(0, 103,206) },    // text color
+                { TF_CT_NONE, 0 },                      // background color (TF_CT_NONE => app default)
+                TF_LS_DOT,                              // underline style
+                FALSE,                                  // underline boldness
+                { TF_CT_COLORREF, RGB(0, 103,206) },    // underline color
+                TF_ATTR_CONVERTED                       // attribute info
+            },
+            IDS_DISPATTRINFO_INPUT_NAME, IDS_DISPATTRINFO_INPUT_DESC
+        },
+        {
+            GUID { 0x8993fdc6, 0x1e39, 0x40d6, { 0x81, 0xd8, 0xb, 0xf0, 0xad, 0xf5, 0x11, 0xa } }, // {8993FDC6-1E39-40D6-81D8-0BF0ADF5110A}
+            TF_DISPLAYATTRIBUTE {
+                { TF_CT_COLORREF, RGB(255, 255, 255) }, // text color
+                { TF_CT_COLORREF, RGB(  0, 255, 255) }, // background color (TF_CT_NONE => app default)
+                TF_LS_NONE,                             // underline style
+                FALSE,                                  // underline boldness
+                { TF_CT_NONE, 0 },                      // underline color
+                TF_ATTR_TARGET_NOTCONVERTED             // attribute info
+            },
+            IDS_DISPATTRINFO_CONVERTED_NAME, IDS_DISPATTRINFO_CONVERTED_DESC
+        },
+    };
+
+    void InitializeDisplayAttributeInfo(_In_ ITfCategoryMgr* categoryMgr)
+    {
+        m_listDisplayAttributeInfo = std::make_shared<std::vector<std::pair<TfGuidAtom, wil::com_ptr<ITfDisplayAttributeInfo>>>>();
+
+        for (const auto& displayAttributeData: c_listDisplayAttributeData) {
+            TfGuidAtom tfGuidAtom;
+            LOG_IF_FAILED(categoryMgr->RegisterGUID(displayAttributeData.guid, &tfGuidAtom));
+
+            const auto description = GetStringFromResource(displayAttributeData.descriptionResId);
+            wil::com_ptr<CDisplayAttributeInfo> displayAttributeInfo;
+            LOG_IF_FAILED(Microsoft::WRL::MakeAndInitialize<CDisplayAttributeInfo>(&displayAttributeInfo,
+                    displayAttributeData.guid, displayAttributeData.tfDisplayAttribute, description, tfGuidAtom));
+
+            m_listDisplayAttributeInfo->emplace_back(std::make_pair(tfGuidAtom, displayAttributeInfo.query<ITfDisplayAttributeInfo>()));
+        }
+    }
+
+    void UninitializeDisplayAttributeInfo()
+    {
+        m_listDisplayAttributeInfo.reset();
+    }
+
 
     static HRESULT CompartmentCallback(void* pv, REFGUID guidCompartment) {
         auto* _this = reinterpret_cast<RibbonIMEInProcClient*>(pv);
@@ -272,6 +355,8 @@ private:
     std::shared_ptr<CCompartment> m_compartmentKeyboardInputModeSentence;
 
     std::vector<wil::com_ptr<CLangBarItemButton>> m_listLanguageBarItem;
+
+    std::shared_ptr<std::vector<std::pair<TfGuidAtom, wil::com_ptr<ITfDisplayAttributeInfo>>>> m_listDisplayAttributeInfo;
 
     struct CustomState {
         bool isOpen = false;

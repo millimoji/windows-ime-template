@@ -36,13 +36,13 @@ HFONT defaultlFontHandle = nullptr; // Global font object we use everywhere
 //---------------------------------------------------------------------
 // windows class / titile / atom
 //---------------------------------------------------------------------
-extern const WCHAR CandidateClassName[] = L"SampleIME.CandidateWindow";
+extern const WCHAR CandidateClassName[] = L"WindowsIME.CandidateWindow";
 ATOM AtomCandidateWindow;
 
-extern const WCHAR ShadowClassName[] = L"SampleIME.ShadowWindow";
+extern const WCHAR ShadowClassName[] = L"WindowsIME.ShadowWindow";
 ATOM AtomShadowWindow;
 
-extern const WCHAR ScrollBarClassName[] = L"SampleIME.ScrollBarWindow";
+extern const WCHAR ScrollBarClassName[] = L"WindowsIME.ScrollBarWindow";
 ATOM AtomScrollBarWindow;
 
 BOOL RegisterWindowClass()

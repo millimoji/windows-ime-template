@@ -23,7 +23,7 @@ public:
     ~SampleIMEInprocClient() {}
 
 private:
-    void Initialize(_In_ ITfThreadMgr *threadMgr, TfClientId tfClientId) override
+    void Initialize(_In_ ITfThreadMgr* threadMgr, TfClientId tfClientId, _In_ ITfCategoryMgr* categoryMgr)
     {
         try {
             m_threadMgr = threadMgr;
@@ -41,7 +41,7 @@ private:
             InitCompartments();
             InitLanguageBar(isSecureMode);
             InitPreservedKeys();
-            InitDisplayAttributeInfo();
+            InitDisplayAttributeInfo(categoryMgr);
         }
         catch (...)
         {
@@ -431,15 +431,13 @@ private:
         },
     };
 
-    void InitDisplayAttributeInfo()
+    void InitDisplayAttributeInfo(_In_ ITfCategoryMgr* categoryMgr)
     {
-        const auto pCategoryMgr = wil::CoCreateInstance<ITfCategoryMgr>(CLSID_TF_CategoryMgr);
-
         m_listDisplayAttributeInfo = std::make_shared<std::vector<std::pair<TfGuidAtom, wil::com_ptr<ITfDisplayAttributeInfo>>>>();
 
         for (const auto& displayAttributeData: c_listDisplayAttributeData) {
             TfGuidAtom tfGuidAtom;
-            LOG_IF_FAILED(pCategoryMgr->RegisterGUID(displayAttributeData.guid, &tfGuidAtom));
+            LOG_IF_FAILED(categoryMgr->RegisterGUID(displayAttributeData.guid, &tfGuidAtom));
 
             const auto description = GetStringFromResource(displayAttributeData.descriptionResId);
             wil::com_ptr<CDisplayAttributeInfo> displayAttributeInfo;

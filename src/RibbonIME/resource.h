@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by SampleIME.rc
+// Used by RibbonIME.rc
 
 #define SUBLANG_ENGLISH_US              0x01
 #define LANG_ENGLISH                    0x09
@@ -10,6 +10,10 @@
 #define IDS_DEFAULT_FONT                21
 #define IDS_RIBBON_IME                  22
 #define IDS_IME_MODE                    23
+#define IDS_DISPATTRINFO_INPUT_NAME     24
+#define IDS_DISPATTRINFO_INPUT_DESC     25
+#define IDS_DISPATTRINFO_CONVERTED_NAME 26
+#define IDS_DISPATTRINFO_CONVERTED_DESC 27
 #define IDR_VERSION2                    101
 
 // Next default values for new objects
