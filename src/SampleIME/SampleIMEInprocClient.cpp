@@ -13,6 +13,98 @@
 #include "SampleIMEDefine.h"
 #include "SampleIMEGlobals.h"
 
+class CaretMarker
+{
+public:
+    CaretMarker() {
+        RegisterWindowClass();
+        CreateCaretWindow();
+
+        SetWindowAtCaretPosition();
+        ShowWindow(m_hwnd, SW_SHOWNOACTIVATE);
+    }
+    ~CaretMarker() {
+        DestroyWindow(m_hwnd);
+    }
+
+private:
+    void RegisterWindowClass() {
+        if (s_atom == 0) {
+            WNDCLASS wc;
+            wc.style = CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW | CS_IME;
+            wc.lpfnWndProc = _WindowProc;
+            wc.cbClsExtra = 0;
+            wc.cbWndExtra = 0;
+            wc.hInstance = nullptr;
+            wc.hIcon = nullptr;
+            wc.hCursor = nullptr;
+            wc.hbrBackground = nullptr;
+            wc.lpszMenuName = nullptr;
+            wc.lpszClassName = L"IMECaretClass";
+            s_atom = RegisterClass(&wc);
+        }
+    }
+    void CreateCaretWindow() {
+        m_hwnd = CreateWindowEx(WS_EX_TOPMOST | WS_EX_TOOLWINDOW,
+            (LPCTSTR)s_atom,
+            nullptr,
+            WS_BORDER | WS_POPUP,
+            0, 0,
+            32, 32,
+            nullptr,
+            nullptr,
+            nullptr, // Global::dllInstanceHandle,
+            this);   // lpParam
+    }
+    void SetWindowAtCaretPosition() {
+        GUITHREADINFO info;
+        info.cbSize = sizeof(GUITHREADINFO);
+        if (GetGUIThreadInfo(0, &info)) {
+            POINT pt{ (info.rcCaret.left + info.rcCaret.right) / 2 - 16, info.rcCaret.bottom - 32 };
+            ClientToScreen(info.hwndFocus, &pt);
+            if (m_ptLast.x != pt.x || m_ptLast.y != pt.y) {
+                MoveWindow(m_hwnd, pt.x, pt.y, 32, 32, TRUE);
+                m_ptLast = pt;
+            }
+        }
+    }
+
+    /* static */
+    static LRESULT CALLBACK _WindowProc(_In_ HWND hwnd, UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam) {
+        if (uMsg == WM_CREATE) {
+            SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(((CREATESTRUCT*)lParam)->lpCreateParams));
+            SetTimer(hwnd, 1, 500, nullptr);
+        }
+        CaretMarker* _this = reinterpret_cast<CaretMarker*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+        if (!_this) {
+            return DefWindowProc(hwnd, uMsg, wParam, lParam);
+        }
+        switch (uMsg) {
+        case WM_PAINT: {
+            PAINTSTRUCT ps;
+            /*HDC dcHandle = */BeginPaint(hwnd, &ps);
+            RECT rc;
+            GetClientRect(hwnd, &rc);
+            FillRect(ps.hdc, &rc, static_cast<HBRUSH>(GetStockObject(DKGRAY_BRUSH)));
+            EndPaint(hwnd, &ps);
+            return TRUE;
+        }
+        case WM_TIMER: {
+            _this->SetWindowAtCaretPosition();
+            SetTimer(hwnd, 1, 500, nullptr);
+            return TRUE;
+        }
+        }
+        return DefWindowProc(hwnd, uMsg, wParam, lParam);
+    }
+
+private:
+    static inline ATOM s_atom = 0;
+    HWND m_hwnd;
+    POINT m_ptLast;
+};
+
+
 class SampleIMEInprocClient :
     public WindowsImeLib::IWindowsIMEInProcClient,
     public std::enable_shared_from_this<SampleIMEInprocClient>
@@ -412,6 +504,8 @@ private:
     std::vector<wil::com_ptr<CCompartmentEventSink>> m_listCompartmentEventSink;
 
     std::vector<wil::com_ptr<CLangBarItemButton>> m_listLanguageBarItem;
+
+    CaretMarker m_caretMarker;
 };
 
 namespace WindowsImeLib
