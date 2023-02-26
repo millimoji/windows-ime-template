@@ -3,6 +3,7 @@
 
 #include "RibbonIMECore.h"
 #include "RibbonIMEInProcClient.h"
+#include "../CoreLogic.h"
 
 RibbonIMECore::RibbonIMECore(
     const std::shared_ptr<WindowsImeLib::IWindowsIMECompositionBuffer>& compositionBuffer,

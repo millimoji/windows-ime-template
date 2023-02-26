@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _RIBBON_DECODER_H_
 #define _RIBBON_DECODER_H_
-#include "pch.h"
+#include <pch.h>
 #include "DictionaryReader.h"
 
 namespace Ribbon { namespace Transliteration {

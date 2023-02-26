@@ -56,19 +56,19 @@ void textrev(T* src) {
 
 inline std::string to_text(int n) {
 	char buf[64];
-	sprintf(buf, "%d", n);
+	sprintf_s(buf, "%d", n);
 	return std::string(buf);
 }
 
 inline std::string to_text(uint64_t n) {
 	char buf[64];
-	sprintf(buf, "%lld", n);
+	sprintf_s(buf, "%lld", n);
 	return std::string(buf);
 }
 
 inline std::string to_text(double f) {
 	char buf[64];
-	sprintf(buf, "%f", f);
+	sprintf_s(buf, "%f", f);
 	return std::string(buf);
 }
 

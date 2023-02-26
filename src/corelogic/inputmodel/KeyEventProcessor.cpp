@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "InputModel.h"
+#include "../../CoreLogic.h"
 #include "KeyEventProcessor.h"
 #include "EditFunctions.h"
 

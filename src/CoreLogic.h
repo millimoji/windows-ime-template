@@ -1,6 +1,12 @@
 #pragma once
 #ifndef _RIBBON_EDITINGMODEL_H_
 #define _RIBBON_EDITINGMODEL_H_
+#include "corelogic/corelib/interface.h"
+#include "corelogic/corelib/exception.h"
+#include "corelogic/corelib/refstring.h"
+#include "corelogic/corelib/containers.h"
+#include "corelogic/corelib/sipkeydef.h"
+#include "corelogic/corelib/textutils.h"
 
 namespace Ribbon {
 

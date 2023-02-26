@@ -2,7 +2,7 @@
 #include "EditLine.h"
 #include "EditFunctions.h"
 #include "history\HistoryManager.h"
-#include "InputModel.h"
+#include "../../CoreLogic.h"
 #include "IEditContext.h"
 #include "KeyEventProcessor.h"
 #include "LiteralConvert.h"
@@ -255,9 +255,8 @@ struct JsonInputModel :
     
 	void JsonCommand(const char* json) noexcept override try
 	{
-		std::string error;
-		auto jsonData = json11::Json::parse(json, error);
-		auto commandText = jsonData["command"].string_value();
+		auto jsonData = nlohmann::json::parse(json);
+		auto commandText = jsonData["command"].get<std::string>();
 
 		BaseEvent::EventType eventType = BaseEvent::EventType::Unknown;
 		if (commandText == "keydown") {
@@ -274,15 +273,15 @@ struct JsonInputModel :
 
 		if (eventType == BaseEvent::EventType::KeyDown || eventType == BaseEvent::EventType::KeyUp) {
 			auto keyEvent = KeyEvent::Create(eventType);
-			keyEvent->label = RefString(to_utf16(jsonData["label"].string_value()));
-			keyEvent->keyId = RefString(to_utf16(jsonData["keyId"].string_value()));
-			keyEvent->sipKeyCode = jsonData["keyCode"].int_value();
-			keyEvent->osKeyCode = jsonData["osKey"].int_value();
+			keyEvent->label = RefString(to_utf16(jsonData["label"].get<std::string>()));
+			keyEvent->keyId = RefString(to_utf16(jsonData["keyId"].get<std::string>()));
+			keyEvent->sipKeyCode = jsonData["keyCode"].get<int>();
+			keyEvent->osKeyCode = jsonData["osKey"].get<int>();
 			baseEvent = std::static_pointer_cast<BaseEvent>(keyEvent);
 		}
 		else if (eventType == BaseEvent::EventType::CandidateChosen) {
 			auto candEvent = CandidateEvent::Create(eventType);
-			candEvent->candidateIndex = jsonData["candIdx"].int_value();
+			candEvent->candidateIndex = jsonData["candIdx"].get<int>();
 			baseEvent = std::static_pointer_cast<BaseEvent>(candEvent);
 		}
 		else {
@@ -306,12 +305,12 @@ struct JsonInputModel :
 
 		int passThoughKey = m_inputModel->GetPassThroughEvent();
 
-		json11::Json json = json11::Json::object {
-			{ "composition", json11::Json::array {
-				json11::Json::object{
+		auto json = nlohmann::json {
+			{ "composition", nlohmann::json::array({
+				nlohmann::json {
 					{ "display", compositionText }
 				}
-			} },
+			}) },
 			{ "caret", m_inputModel->CarretPosition() },
 			{ "commit", commitText },
 			{ "through", passThoughKey }
@@ -324,16 +323,16 @@ struct JsonInputModel :
 	std::string CandidateState() noexcept override try
 	{
 		std::shared_ptr<IPhraseList> phraseList = m_inputModel->CandidateList();
-		json11::Json::array candidateList;
+		auto candidateList = nlohmann::json::array();
 
 		if (phraseList) {
 			int phraseCount = phraseList->PhraseCount();
 			for (int idx = 0; idx < phraseCount; ++idx) {
 				std::shared_ptr<IPhrase> phrase = phraseList->Phrase(idx);
-				candidateList.emplace_back(json11::Json(phrase->Display().u8str()));
+				candidateList.emplace_back(nlohmann::json(phrase->Display().u8str()));
 			}
 		}
-		json11::Json json = json11::Json::object {
+		auto json = nlohmann::json {
 			{ "candidates", candidateList }
 		};
 		return json.dump();
@@ -342,7 +341,7 @@ struct JsonInputModel :
 
 	std::string KeyboardState() noexcept override {
 		const char* keyboardState = (m_inputModel->KeyboardState() == ToKeyboard::Quit) ? "quit" : "none";
-		json11::Json json = json11::Json::object{
+		auto json = nlohmann::json {
 			{ "keyboard", keyboardState }
 		};
 		return json.dump();

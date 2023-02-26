@@ -5,8 +5,6 @@
 
 namespace Ribbon {
 
-const uint32_t ERROR_BASE = 0x80000000;
-
 class rbnexception : public std::exception
 {
 public:
@@ -34,6 +32,7 @@ public:
 #define THROW_IF_NULL(_p) \
 	if ((_p) == nullptr) { throw Ribbon::rbnexception(__FILE__, __LINE__, #_p); }
 
+#ifndef CATCH_LOG
 #define CATCH_LOG() \
 	catch (const Ribbon::rbnexception& e) { \
 		Platform->Error("rbnexception: %s(%d): %s\n", e.m_fileName.c_str(), e.m_lineNo, e.what()); \
@@ -42,6 +41,7 @@ public:
 	} catch (...) { \
 		Platform->Error("unknown exception\n"); \
 	}
+#endif
 
 } // Ribbon
 #endif // _RIBBON_EXCEPTION_H_

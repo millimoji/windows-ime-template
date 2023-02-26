@@ -1,0 +1,242 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="corelib\containers.cpp">
+      <Filter>corelib</Filter>
+    </ClCompile>
+    <ClCompile Include="corelib\corelib.cpp">
+      <Filter>corelib</Filter>
+    </ClCompile>
+    <ClCompile Include="corelib\refstring.cpp">
+      <Filter>corelib</Filter>
+    </ClCompile>
+    <ClCompile Include="corelib\settings.cpp">
+      <Filter>corelib</Filter>
+    </ClCompile>
+    <ClCompile Include="corelib\sipkeydef.cpp">
+      <Filter>corelib</Filter>
+    </ClCompile>
+    <ClCompile Include="corelib\textutils.cpp">
+      <Filter>corelib</Filter>
+    </ClCompile>
+    <ClCompile Include="dictionary\Complementer.cpp">
+      <Filter>dictionary</Filter>
+    </ClCompile>
+    <ClCompile Include="dictionary\Decoder.cpp">
+      <Filter>dictionary</Filter>
+    </ClCompile>
+    <ClCompile Include="dictionary\DictionaryReader.cpp">
+      <Filter>dictionary</Filter>
+    </ClCompile>
+    <ClCompile Include="dictionary\Transliterator.cpp">
+      <Filter>dictionary</Filter>
+    </ClCompile>
+    <ClCompile Include="dictionary\compiler\DictionaryCompiler.cpp">
+      <Filter>dictionary\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="dictionary\compiler\DictionaryConstructor.cpp">
+      <Filter>dictionary\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="dictionary\compiler\DoubleArray.cpp">
+      <Filter>dictionary\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="dictionary\compiler\LangModelCalc.cpp">
+      <Filter>dictionary\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="dictionary\compiler\LexiconReader.cpp">
+      <Filter>dictionary\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="dictionary\compiler\LinearKmeans.cpp">
+      <Filter>dictionary\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="dictionary\compiler\PredictionCache.cpp">
+      <Filter>dictionary\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="dictionary\dumper\DictionaryDumper.cpp">
+      <Filter>dictionary\dumper</Filter>
+    </ClCompile>
+    <ClCompile Include="dictionary\phraselist\PhraseCounter.cpp">
+      <Filter>dictionary\phraselist</Filter>
+    </ClCompile>
+    <ClCompile Include="dictionary\phraselist\PhraseListMain.cpp">
+      <Filter>dictionary\phraselist</Filter>
+    </ClCompile>
+    <ClCompile Include="history\HistoryClass.cpp">
+      <Filter>history</Filter>
+    </ClCompile>
+    <ClCompile Include="history\HistoryManager.cpp">
+      <Filter>history</Filter>
+    </ClCompile>
+    <ClCompile Include="history\HistoryReuser.cpp">
+      <Filter>history</Filter>
+    </ClCompile>
+    <ClCompile Include="history\HistoryStore.cpp">
+      <Filter>history</Filter>
+    </ClCompile>
+    <ClCompile Include="inputmodel\EditFunctions.cpp">
+      <Filter>inputmodel</Filter>
+    </ClCompile>
+    <ClCompile Include="inputmodel\EditLine.cpp">
+      <Filter>inputmodel</Filter>
+    </ClCompile>
+    <ClCompile Include="inputmodel\en.LiteralUtility.cpp">
+      <Filter>inputmodel</Filter>
+    </ClCompile>
+    <ClCompile Include="inputmodel\InputModel.cpp">
+      <Filter>inputmodel</Filter>
+    </ClCompile>
+    <ClCompile Include="inputmodel\ja.LiteralConvert.cpp">
+      <Filter>inputmodel</Filter>
+    </ClCompile>
+    <ClCompile Include="inputmodel\KeyEventProcessor.cpp">
+      <Filter>inputmodel</Filter>
+    </ClCompile>
+    <ClCompile Include="inputmodel\SymEmojiList.cpp">
+      <Filter>inputmodel</Filter>
+    </ClCompile>
+    <ClCompile Include="inputmodel\TransliterationAdapter.cpp">
+      <Filter>inputmodel</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="corelib\containers.h">
+      <Filter>corelib</Filter>
+    </ClInclude>
+    <ClInclude Include="corelib\exception.h">
+      <Filter>corelib</Filter>
+    </ClInclude>
+    <ClInclude Include="corelib\flexiblebin.h">
+      <Filter>corelib</Filter>
+    </ClInclude>
+    <ClInclude Include="corelib\interface.h">
+      <Filter>corelib</Filter>
+    </ClInclude>
+    <ClInclude Include="corelib\platformlib.h">
+      <Filter>corelib</Filter>
+    </ClInclude>
+    <ClInclude Include="corelib\refstring.h">
+      <Filter>corelib</Filter>
+    </ClInclude>
+    <ClInclude Include="corelib\settings.h">
+      <Filter>corelib</Filter>
+    </ClInclude>
+    <ClInclude Include="corelib\sipkeydef.h">
+      <Filter>corelib</Filter>
+    </ClInclude>
+    <ClInclude Include="corelib\textutils.h">
+      <Filter>corelib</Filter>
+    </ClInclude>
+    <ClInclude Include="corelib\threadpool.h">
+      <Filter>corelib</Filter>
+    </ClInclude>
+    <ClInclude Include="corelib\uuid.h">
+      <Filter>corelib</Filter>
+    </ClInclude>
+    <ClInclude Include="corelib\wcharconst.h">
+      <Filter>corelib</Filter>
+    </ClInclude>
+    <ClInclude Include="dictionary\Complementer.h">
+      <Filter>dictionary</Filter>
+    </ClInclude>
+    <ClInclude Include="dictionary\Decoder.h">
+      <Filter>dictionary</Filter>
+    </ClInclude>
+    <ClInclude Include="dictionary\DictionaryFormat.h">
+      <Filter>dictionary</Filter>
+    </ClInclude>
+    <ClInclude Include="dictionary\DictionaryReader.h">
+      <Filter>dictionary</Filter>
+    </ClInclude>
+    <ClInclude Include="dictionary\Transliterator.h">
+      <Filter>dictionary</Filter>
+    </ClInclude>
+    <ClInclude Include="dictionary\compiler\DictionaryCompiler.h">
+      <Filter>dictionary\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="dictionary\compiler\DictionaryConstructor.h">
+      <Filter>dictionary\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="dictionary\compiler\DoubleArray.h">
+      <Filter>dictionary\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="dictionary\compiler\LangModelCalc.h">
+      <Filter>dictionary\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="dictionary\compiler\LexiconReader.h">
+      <Filter>dictionary\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="dictionary\compiler\LinearKmeans.h">
+      <Filter>dictionary\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="dictionary\compiler\PredictionCache.h">
+      <Filter>dictionary\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="dictionary\phraselist\PhraseCounter.h">
+      <Filter>dictionary\phraselist</Filter>
+    </ClInclude>
+    <ClInclude Include="history\HistoryClass.h">
+      <Filter>history</Filter>
+    </ClInclude>
+    <ClInclude Include="history\HistoryManager.h">
+      <Filter>history</Filter>
+    </ClInclude>
+    <ClInclude Include="history\HistoryReuser.h">
+      <Filter>history</Filter>
+    </ClInclude>
+    <ClInclude Include="history\HistoryStore.h">
+      <Filter>history</Filter>
+    </ClInclude>
+    <ClInclude Include="history\HistoryStruct.h">
+      <Filter>history</Filter>
+    </ClInclude>
+    <ClInclude Include="inputmodel\EditFunctions.h">
+      <Filter>inputmodel</Filter>
+    </ClInclude>
+    <ClInclude Include="inputmodel\EditLine.h">
+      <Filter>inputmodel</Filter>
+    </ClInclude>
+    <ClInclude Include="inputmodel\IEditContext.h">
+      <Filter>inputmodel</Filter>
+    </ClInclude>
+    <ClInclude Include="inputmodel\KeyEventProcessor.h">
+      <Filter>inputmodel</Filter>
+    </ClInclude>
+    <ClInclude Include="inputmodel\LiteralConvert.h">
+      <Filter>inputmodel</Filter>
+    </ClInclude>
+    <ClInclude Include="inputmodel\SymEmojiList.h">
+      <Filter>inputmodel</Filter>
+    </ClInclude>
+    <ClInclude Include="inputmodel\TransliterationAdapter.h">
+      <Filter>inputmodel</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="corelib">
+      <UniqueIdentifier>{86f29310-0be7-460c-9d59-99cba22911f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dictionary">
+      <UniqueIdentifier>{bafea75b-df66-4ba7-a441-14d0aa3dc9e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dictionary\compiler">
+      <UniqueIdentifier>{5d1c6ed9-3388-4c50-b93e-2e3ee24eb116}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dictionary\dumper">
+      <UniqueIdentifier>{a6b11923-c108-4e15-bada-db74695f5632}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dictionary\phraselist">
+      <UniqueIdentifier>{623f0787-6165-4711-ad28-c746463b87fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="history">
+      <UniqueIdentifier>{da9ca5aa-c767-4559-86fd-8a2a5039ab1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inputmodel">
+      <UniqueIdentifier>{641a6e6c-0d26-4d56-902a-ab4079ce418d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>

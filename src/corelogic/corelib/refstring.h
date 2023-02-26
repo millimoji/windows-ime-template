@@ -1,6 +1,8 @@
 #pragma once
 #ifndef _RIBBON_REFSTRING_H_
 #define _RIBBON_REFSTRING_H_
+#include "textutils.h"
+
 namespace Ribbon {
 
 namespace RefStringInternal {

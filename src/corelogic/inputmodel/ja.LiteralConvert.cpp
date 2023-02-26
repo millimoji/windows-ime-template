@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "LiteralConvert.h"
-#include "InputModel.h"
+#include "../../CoreLogic.h"
 #include "EditLine.h"
 
 namespace Ribbon {

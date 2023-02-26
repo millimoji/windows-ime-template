@@ -2,7 +2,7 @@
 #include "EditFunctions.h"
 #include "IEditContext.h"
 #include "EditLine.h"
-#include "InputModel.h"
+#include "../../CoreLogic.h"
 #include "KeyEventProcessor.h"
 #include "SymEmojiList.h"
 #include "TransliterationAdapter.h"
