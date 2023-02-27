@@ -4,24 +4,19 @@
 // However, files listed here are ALL re-compiled if any one of them is updated between builds.
 // Do not add files here that you will be updating frequently as this negates the performance advantage.
 
+#pragma once
 #ifndef PCH_H
 #define PCH_H
 
-#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
-
 // add headers that you want to pre-compile here
+#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+// Windows Header Files
 #include <windows.h>
 
-#include <winrt/Windows.AI.MachineLearning.h>
-#include <winrt/Windows.Foundation.Collections.h>
-#include <winrt/Windows.Storage.h>
-
-#include <algorithm>
-#include <chrono>
-#include <fstream>
 #include <memory>
-#include <stdexcept>
 #include <string>
 #include <vector>
+
+#include <wil/result.h>
 
 #endif //PCH_H

@@ -3,18 +3,23 @@
 
 #include "pch.h"
 #include "../PredictionEngine.h"
-#include "SentencePieceHelper.h"
+#include "../PlatformService.h"
 #include "OnnxRuntimeHelper.h"
 
 namespace Ribbon::Prediction {
 
-    constexpr auto c_tokenizerModel = L"C:\\TEMP\\rinna-xsmall-optimum\\spiece.model";
-    constexpr auto c_onnxModel = L"C:\\TEMP\\rinna-xsmall-optimum\\model.onnx";
+#if 1
+    constexpr auto c_tokenizerModel = L"C:\\TEMP\\rinna-xsmall-default\\spiece.model";
+    constexpr auto c_onnxModel = L"C:\\TEMP\\rinna-xsmall-default\\model.onnx";
+#else
+    constexpr auto c_tokenizerModel = L"D:\\TEMP\\ConsoleApplication1\\ConsoleApplication1\\model\\spiece.model";
+    constexpr auto c_onnxModel = L"D:\\TEMP\\ConsoleApplication1\\ConsoleApplication1\\model\\model.onnx";
+#endif
 
 struct PredictionEngineImpl : public PredictionEngine, public std::enable_shared_from_this<PredictionEngineImpl>
 {
 private:
-    std::wstring GetPredictionText(int tokenCount, std::wstring_view preceeding) noexcept override
+    std::wstring GetPredictionText(int tokenCount, const wchar_t* preceeding) noexcept override
     {
         EnsureInitialized();
 
@@ -35,7 +40,8 @@ private:
 private:
     void EnsureInitialized() {
         if (!m_spiece) {
-            m_spiece = SentencePieceHelper::CreateInstance();
+            const auto platformService = PlatformService::GetInstance();
+            m_spiece = platformService->CreateSentencePieceHelper();
             m_spiece->Initialize(c_tokenizerModel);
         }
         if (!m_onnx) {
@@ -43,7 +49,6 @@ private:
             m_onnx->Initialize(c_onnxModel);
         }
     }
-
 
 private:
     std::shared_ptr<SentencePieceHelper> m_spiece;
@@ -61,7 +66,11 @@ catch (...) {
 
 int PredictionEngine::TestMain(const std::vector<std::wstring>& args) {
     const auto predictionEngine = PredictionEngine::CreateInstance();
-    const auto predictedText = predictionEngine->GetPredictionText(20, L"今年の冬はとても寒い");
+    // const auto sampleText = L"今年の冬はとても寒い";
+    // const auto sampleText = L"吾輩は猫である。名前はまだない。";
+    // const auto sampleText = L"今日の東京はとても寒かったけど、そちらの天気はどうですか？";
+    const auto sampleText = L"今日の東京はとても寒かったけど、そちらの天気はどうですか？";
+    const auto predictedText = predictionEngine->GetPredictionText(100, sampleText);
     wprintf(L"Predicted: %s\n", predictedText.c_str());
     return 0;
 }

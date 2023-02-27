@@ -13,39 +13,35 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="OnnxProto">
-      <UniqueIdentifier>{5a65812f-46d0-45c9-8213-c62a37d5744c}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OnnxRuntimeHelper.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MemAlignedTensor.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OnnxProto\onnx.proto3.pb.h">
-      <Filter>OnnxProto</Filter>
+    <ClInclude Include="SentencePieceProcessor.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="PredictionEngine.cpp">
+    <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OnnxRuntimeHelper.cpp">
+    <ClCompile Include="SentencePieceProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OnnxProto\OnnxProtoInclude.cpp">
-      <Filter>OnnxProto</Filter>
-    </ClCompile>
-    <ClCompile Include="MemAlignedTensor.cpp">
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="SentencePiece.idl">
       <Filter>Source Files</Filter>
-    </ClCompile>
+    </Midl>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SentencePiece.def">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

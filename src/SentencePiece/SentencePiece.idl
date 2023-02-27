@@ -1,0 +1,30 @@
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+    uuid(170D4971-C7C4-4BDA-BD9A-A1EAFD1BD000),
+    helpstring("ISentencePieceProcessor interface"),
+    pointer_default(unique)
+]
+interface ISentencePieceProcessor : IUnknown
+{
+    HRESULT Load([in] LPCWSTR fileName);
+    HRESULT Encode64([in] LPCWSTR text, [out] UINT* tokenLen, [out, size_is(, *tokenLen)] __int64** tokens);
+    HRESULT Decode64([in] UINT tokenLen, [in, size_is(tokenLen)] __int64* tokens, [out] BSTR* text);
+
+    HRESULT unk_id([out, retval] INT* id);
+    HRESULT bos_id([out, retval] INT* id);
+    HRESULT eos_id([out, retval] INT* id);
+    HRESULT pad_id([out, retval] INT* id);
+};
+
+[uuid(5DAB31E6-9DFC-48C7-A384-3C1A32F6E078), version(1.0)]
+library SentencePieceProcessorLib
+{
+    [uuid(740FEEAF-FD36-42C8-B134-C6A67CCA5E20), version(1.0)]
+    coclass SentencePieceProcessor
+    {
+        [default] interface ISentencePieceProcessor;
+    }
+};
+

@@ -3,7 +3,7 @@
 
 struct PredictionEngine
 {
-    virtual std::wstring GetPredictionText(int minTextLen, std::wstring_view preceeding) noexcept = 0;
+    virtual std::wstring GetPredictionText(int minTextLen, const wchar_t* preceeding) noexcept = 0;
 
     virtual ~PredictionEngine() {};
     static std::shared_ptr<PredictionEngine> CreateInstance() noexcept;

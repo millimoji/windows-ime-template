@@ -1,0 +1,6 @@
+﻿LIBRARY Internal.SentencePiece.dll
+
+EXPORTS
+        DllGetActivationFactory PRIVATE
+        DllGetClassObject       PRIVATE
+        DllCanUnloadNow         PRIVATE
