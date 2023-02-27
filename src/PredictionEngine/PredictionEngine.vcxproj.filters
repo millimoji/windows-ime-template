@@ -18,51 +18,28 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RibbonIMECore.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="SentencePieceHelper.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="OnnxRuntimeHelper.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="RibbonIMEInProcClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RibbonIMEConstants.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="MemAlignedTensor.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dllmain.cpp">
+    <ClCompile Include="PredictionEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RibbonIMECore.cpp">
+    <ClCompile Include="SentencePieceHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RibbonIMEInProcClient.cpp">
+    <ClCompile Include="OnnxRuntimeHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RibbonIMEConstants.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WindowsPlatformGlue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="RibbonIME.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-    <None Include="RibbonIME.def">
-      <Filter>Source Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Natvis Include="$(MSBuildThisFileDirectory)..\..\natvis\wil.natvis" />
   </ItemGroup>
 </Project>

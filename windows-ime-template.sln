@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RibbonIME", "src\RibbonIME\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CoreLogic", "src\CoreLogic\CoreLogic.vcxproj", "{B1CFCA20-8D2E-42FA-9F5C-8F574BF78B68}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PredictionEngine", "src\PredictionEngine\PredictionEngine.vcxproj", "{7A7DCA39-867D-4BA5-AA01-900AE4C6ECBE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -51,6 +53,14 @@ Global
 		{B1CFCA20-8D2E-42FA-9F5C-8F574BF78B68}.Release|x64.Build.0 = Release|x64
 		{B1CFCA20-8D2E-42FA-9F5C-8F574BF78B68}.Release|x86.ActiveCfg = Release|Win32
 		{B1CFCA20-8D2E-42FA-9F5C-8F574BF78B68}.Release|x86.Build.0 = Release|Win32
+		{7A7DCA39-867D-4BA5-AA01-900AE4C6ECBE}.Debug|x64.ActiveCfg = Debug|x64
+		{7A7DCA39-867D-4BA5-AA01-900AE4C6ECBE}.Debug|x64.Build.0 = Debug|x64
+		{7A7DCA39-867D-4BA5-AA01-900AE4C6ECBE}.Debug|x86.ActiveCfg = Debug|Win32
+		{7A7DCA39-867D-4BA5-AA01-900AE4C6ECBE}.Debug|x86.Build.0 = Debug|Win32
+		{7A7DCA39-867D-4BA5-AA01-900AE4C6ECBE}.Release|x64.ActiveCfg = Release|x64
+		{7A7DCA39-867D-4BA5-AA01-900AE4C6ECBE}.Release|x64.Build.0 = Release|x64
+		{7A7DCA39-867D-4BA5-AA01-900AE4C6ECBE}.Release|x86.ActiveCfg = Release|Win32
+		{7A7DCA39-867D-4BA5-AA01-900AE4C6ECBE}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

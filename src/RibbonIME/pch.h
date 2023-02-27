@@ -17,6 +17,7 @@
 #include <msctf.h>
 #include <olectl.h>
 #include <sal.h>
+#include <shellapi.h>
 #include <strsafe.h>
 
 #include <functional>
