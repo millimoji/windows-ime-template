@@ -1,8 +1,5 @@
 // (C) 2023 millimoji@gmail.com
 #pragma once
-#include <cstdlib>
-#include <stdexcept>
-#include <immintrin.h>
 
 class MemAlignedTensor
 {
@@ -28,9 +25,6 @@ public:
 	}
 	std::tuple<float*, int, int> GetBuffer() {
 		return std::make_tuple(m_body, m_row, m_column);
-	}
-	winrt::array_view<float> GetArrayView() {
-		return winrt::array_view<float>(m_body, m_body + m_row * m_column);
 	}
 	float* Reserve(int64_t row, int64_t column) {
 		if ((row * column) != (m_row * m_column)) {

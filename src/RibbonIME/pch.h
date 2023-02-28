@@ -20,10 +20,14 @@
 #include <shellapi.h>
 #include <strsafe.h>
 
+#include <cassert>
+#include <cstdlib>
+#include <fstream>
 #include <functional>
 #include <memory>
+#include <stdexcept>
+#include <tuple>
 #include <vector>
-#include <cassert>
 
 #include <wil/com.h>
 #include <wil/resource.h>

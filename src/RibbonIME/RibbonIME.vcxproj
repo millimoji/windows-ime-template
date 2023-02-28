@@ -95,6 +95,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -116,6 +117,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -137,6 +139,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -159,6 +162,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -172,6 +176,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="PredictionEngine\MemAlignedTensor.h" />
+    <ClInclude Include="PredictionEngine\OnnxRuntimeHelper.h" />
+    <ClInclude Include="PredictionEngine\SentencePieceHelper.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RibbonIMEConstants.h" />
     <ClInclude Include="RibbonIMECore.h" />
@@ -185,15 +192,17 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="PlatformService.cpp" />
+    <ClCompile Include="PredictionEngine\MemAlignedTensor.cpp" />
+    <ClCompile Include="PredictionEngine\OnnxProtoInclude.cpp" />
+    <ClCompile Include="PredictionEngine\OnnxRuntimeHelper.cpp" />
+    <ClCompile Include="PredictionEngine\PredictionEngine.cpp" />
+    <ClCompile Include="PredictionEngine\SentencePieceHelper.cpp" />
     <ClCompile Include="RibbonIMEConstants.cpp" />
     <ClCompile Include="RibbonIMECore.cpp" />
     <ClCompile Include="RibbonIMEInProcClient.cpp" />
-    <ClCompile Include="WindowsPlatformGlue.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PredictionEngine\PredictionEngine.vcxproj">
-      <Project>{7a7dca39-867d-4ba5-aa01-900ae4c6ecbe}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\windows-ime-lib\windows-ime-lib.vcxproj">
       <Project>{91c729c5-721d-4c60-92d1-b5dc43dfdbaa}</Project>
     </ProjectReference>

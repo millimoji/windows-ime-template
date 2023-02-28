@@ -2,9 +2,9 @@
 //
 
 #include "pch.h"
-#include "../PredictionEngine.h"
-#include "../PlatformService.h"
+#include "../../PredictionEngine.h"
 #include "OnnxRuntimeHelper.h"
+#include "SentencePieceHelper.h"
 
 namespace Ribbon::Prediction {
 
@@ -40,8 +40,7 @@ private:
 private:
     void EnsureInitialized() {
         if (!m_spiece) {
-            const auto platformService = PlatformService::GetInstance();
-            m_spiece = platformService->CreateSentencePieceHelper();
+            m_spiece = SentencePieceHelper::CreateInstance();
             m_spiece->Initialize(c_tokenizerModel);
         }
         if (!m_onnx) {
@@ -70,7 +69,7 @@ int PredictionEngine::TestMain(const std::vector<std::wstring>& args) {
     // const auto sampleText = L"吾輩は猫である。名前はまだない。";
     // const auto sampleText = L"今日の東京はとても寒かったけど、そちらの天気はどうですか？";
     const auto sampleText = L"今日の東京はとても寒かったけど、そちらの天気はどうですか？";
-    const auto predictedText = predictionEngine->GetPredictionText(100, sampleText);
+    const auto predictedText = predictionEngine->GetPredictionText(10, sampleText);
     wprintf(L"Predicted: %s\n", predictedText.c_str());
     return 0;
 }

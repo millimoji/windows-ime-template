@@ -1,7 +1,12 @@
 // (C) 2023 millimoji@gmail.com
 #include "pch.h"
+
+#include <winrt/Windows.AI.MachineLearning.h>
+#include <winrt/Windows.Foundation.Collections.h>
+#include <winrt/Windows.Storage.h>
+
 #include "OnnxRuntimeHelper.h"
-#include "OnnxProto/onnx.proto3.pb.h"
+#include "onnx.proto3.pb.h"
 #include "MemAlignedTensor.h"
 
 namespace winrt {
@@ -47,11 +52,15 @@ private:
         const auto& outputShape = resultOutput.Shape();
         if (outputShape.Size() != 3) throw std::runtime_error("unexpected shape");
 
-        m_tokenVector.Reserve(1, outputShape.GetAt(2));
-        const auto targetVectorOffset = (outputShape.GetAt(1) - 1) * outputShape.GetAt(2);
-        resultOutput.GetAsVectorView().GetMany(static_cast<uint32_t>(targetVectorOffset), m_tokenVector.GetArrayView());
+        //const auto batchCount = outputShape.GetAt(0);
+        const auto sequenceCount = outputShape.GetAt(1);
+        const auto embedingSize = outputShape.GetAt(2);
 
-        m_tokenVector.SubstractPosition(m_positionEmbedding, static_cast<int>(outputShape.GetAt(1) - 1));
+        const auto targetVectorOffset = (sequenceCount - 1) * embedingSize;
+        resultOutput.GetAsVectorView().GetMany(static_cast<uint32_t>(targetVectorOffset), 
+            GetToekVectorArrayView(1, static_cast<int>(embedingSize)));
+
+        m_tokenVector.SubstractPosition(m_positionEmbedding, static_cast<int>(sequenceCount - 1));
         const auto foundToken = m_tokenVector.FindToken(m_wordEmbedding);
 
         const auto foundTokenTime = std::chrono::system_clock::now();
@@ -125,7 +134,11 @@ private:
         return std::make_tuple(std::move(wte), std::move(wpe));
     }
 
-
+    winrt::array_view<float> GetToekVectorArrayView(int row, int column) {
+        m_tokenVector.Reserve(row, column);
+        const auto buffer = m_tokenVector.GetBuffer();
+        return winrt::array_view<float>(std::get<0>(buffer), std::get<0>(buffer) + row * column);
+    }
 
 private:
     std::wstring m_modelFileName;

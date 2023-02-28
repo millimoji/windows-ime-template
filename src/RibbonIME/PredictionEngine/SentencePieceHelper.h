@@ -12,15 +12,6 @@ struct SentencePieceHelper
     virtual int eos_id() = 0;
     virtual int pad_id() = 0;
 
+    static std::shared_ptr<SentencePieceHelper> CreateInstance();
     virtual ~SentencePieceHelper() {};
-};
-
-
-struct PlatformService
-{
-    virtual std::shared_ptr<SentencePieceHelper> CreateSentencePieceHelper() = 0;
-
-
-    static std::shared_ptr<PlatformService> GetInstance();
-    virtual ~PlatformService() {}
 };

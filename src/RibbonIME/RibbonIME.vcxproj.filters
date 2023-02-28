@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="PredictionEngine">
+      <UniqueIdentifier>{3fea7ff9-50f8-4cce-b016-90ef38cb7ff8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -29,6 +32,15 @@
     </ClInclude>
     <ClInclude Include="RibbonIMEConstants.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PredictionEngine\MemAlignedTensor.h">
+      <Filter>PredictionEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="PredictionEngine\OnnxRuntimeHelper.h">
+      <Filter>PredictionEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="PredictionEngine\SentencePieceHelper.h">
+      <Filter>PredictionEngine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -47,7 +59,22 @@
     <ClCompile Include="RibbonIMEConstants.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WindowsPlatformGlue.cpp">
+    <ClCompile Include="PredictionEngine\MemAlignedTensor.cpp">
+      <Filter>PredictionEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="PredictionEngine\OnnxProtoInclude.cpp">
+      <Filter>PredictionEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="PredictionEngine\OnnxRuntimeHelper.cpp">
+      <Filter>PredictionEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="PredictionEngine\PredictionEngine.cpp">
+      <Filter>PredictionEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="PredictionEngine\SentencePieceHelper.cpp">
+      <Filter>PredictionEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="PlatformService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

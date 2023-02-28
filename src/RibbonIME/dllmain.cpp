@@ -6,6 +6,8 @@
 #include "RibbonIMEConstants.h"
 #include "RibbonIMECore.h"
 #include "RibbonIMEInProcClient.h"
+#include "PlatformService.h"
+#include "../PredictionEngine.h"
 
 #pragma comment(lib, "RuntimeObject.lib")
 
@@ -70,3 +72,13 @@ namespace WindowsImeLib
     std::shared_ptr<IProcessorFactory> g_processorFactory = std::static_pointer_cast<IProcessorFactory>(std::make_shared<ProcessorFactory>());
 }
 
+extern "C" {
+    STDAPI_(void) TestPrediction(HWND, HINSTANCE, LPSTR, int) {
+        try {
+            const auto platformService = PlatformService::GetInstance();
+            const auto consoleConnection = platformService->StartConsole();
+            PredictionEngine::TestMain(platformService->CommandLine());
+        }
+        CATCH_LOG();
+    }
+} // extern "C"

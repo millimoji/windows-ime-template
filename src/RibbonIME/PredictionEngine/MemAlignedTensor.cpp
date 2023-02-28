@@ -1,8 +1,9 @@
 // (C) 2023 millimoji@gmail.com
 #include "pch.h"
 #include "MemAlignedTensor.h"
+#include <immintrin.h>
 
-#pragma optimize("" on)
+#pragma optimize("", on)
 
 void MemAlignedTensor::SubstractPosition(const MemAlignedTensor& wpe, int position) {
 	assert(wpe.m_column == m_column);
@@ -12,20 +13,26 @@ void MemAlignedTensor::SubstractPosition(const MemAlignedTensor& wpe, int positi
 
 std::tuple<int64_t, float> MemAlignedTensor::FindToken(const MemAlignedTensor& wte) {
 	assert(wte.m_column == m_column);
-	float simCosVal = InnerProduct(m_body, wte.m_body, m_column);
-	int simCosIdx = 0;
 
-	float sumExp = expf(simCosVal);
-	const float* wordEmbedding = wte.m_body + m_column;
-	for (int wordIdx = 1; wordIdx < wte.m_row; ++wordIdx, wordEmbedding += m_column) {
-		const auto curCosSim = InnerProduct(m_body, wordEmbedding, m_column);
-		sumExp += expf(curCosSim);
-		if (simCosVal < curCosSim) {
-			simCosVal = curCosSim;
-			simCosIdx = wordIdx;
+	const float* wordEmbedding = wte.m_body;
+	float simCosVal = -FLT_MAX;
+	int simCosIdx = -1;
+	auto sumExpVec = _mm256_setzero_ps();
+
+	for (int wordIdx = 0; wordIdx < wte.m_row; wordIdx += 8) {
+		__m256 cosValStore;
+		for (int i = 0; i < 8; ++i, wordEmbedding += m_column) {
+			const auto curCosSim = cosValStore.m256_f32[i] = InnerProduct(m_body, wordEmbedding, m_column);
+			if (simCosVal < curCosSim) {
+				simCosVal = curCosSim;
+				simCosIdx = wordIdx + i;
+			}
 		}
+		const auto v = _mm256_exp_ps(cosValStore);
+		sumExpVec = _mm256_add_ps(sumExpVec, v);
 	}
-	const auto prob = expf(simCosVal) / sumExp;
+	const auto sumExp = HorizontalAdd(sumExpVec);
+	const auto prob = static_cast<float>(exp(simCosVal) / sumExp);
 	return std::make_tuple(static_cast<int64_t>(simCosIdx), prob);
 }
 
