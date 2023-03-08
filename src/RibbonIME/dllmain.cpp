@@ -75,6 +75,7 @@ namespace WindowsImeLib
 extern "C" {
     STDAPI_(void) TestPrediction(HWND, HINSTANCE, LPSTR, int) {
         try {
+            const auto coInit = wil::CoInitializeEx(COINIT_MULTITHREADED);
             const auto platformService = PlatformService::GetInstance();
             const auto consoleConnection = platformService->StartConsole();
             PredictionEngine::TestMain(platformService->CommandLine());

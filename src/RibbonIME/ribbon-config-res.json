@@ -1,0 +1,9 @@
+{
+    "prediction": {
+        "onnxModel": "${BINDIR}\\spiece.model",
+        "spieceModel": "${BINDIR}\\model.onnx"
+    },
+    "conversion": {
+        "dictinoary": "${BINDIR}\\ribbon.dic"
+    }
+}

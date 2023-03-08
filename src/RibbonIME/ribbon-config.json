@@ -1,0 +1,9 @@
+{
+    "prediction": {
+        "spieceModel": "F:\\Git\\PrivateIME\\data\\spiece.model",
+        "onnxModel": "F:\\Git\\PrivateIME\\data\\model.onnx"
+    },
+    "conversion": {
+        "dictinoary": "F:\\Git\\PrivateIME\\data\\ribbon.dic"
+    }
+}

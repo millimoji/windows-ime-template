@@ -3,18 +3,11 @@
 
 #include "pch.h"
 #include "../../PredictionEngine.h"
+#include "../PlatformService.h"
 #include "OnnxRuntimeHelper.h"
 #include "SentencePieceHelper.h"
 
 namespace Ribbon::Prediction {
-
-#if 1
-    constexpr auto c_tokenizerModel = L"C:\\TEMP\\rinna-xsmall-default\\spiece.model";
-    constexpr auto c_onnxModel = L"C:\\TEMP\\rinna-xsmall-default\\model.onnx";
-#else
-    constexpr auto c_tokenizerModel = L"D:\\TEMP\\ConsoleApplication1\\ConsoleApplication1\\model\\spiece.model";
-    constexpr auto c_onnxModel = L"D:\\TEMP\\ConsoleApplication1\\ConsoleApplication1\\model\\model.onnx";
-#endif
 
 struct PredictionEngineImpl : public PredictionEngine, public std::enable_shared_from_this<PredictionEngineImpl>
 {
@@ -39,13 +32,21 @@ private:
 
 private:
     void EnsureInitialized() {
-        if (!m_spiece) {
-            m_spiece = SentencePieceHelper::CreateInstance();
-            m_spiece->Initialize(c_tokenizerModel);
-        }
-        if (!m_onnx) {
-            m_onnx = OnnxRuntimeHelper::CreateInstance();
-            m_onnx->Initialize(c_onnxModel);
+        if (!m_spiece || !m_onnx) {
+            const auto platformSvc = PlatformService::GetInstance();
+            const auto config = platformSvc->GetConfig();
+            const auto configPrediction = config->get("prediction");
+            const auto spieceModel = configPrediction->GetPath("spieceModel");
+            const auto onnxModel = configPrediction->GetPath("onnxModel");
+
+            if (!m_spiece) {
+                m_spiece = SentencePieceHelper::CreateInstance();
+                m_spiece->Initialize(spieceModel.c_str());
+            }
+            if (!m_onnx) {
+                m_onnx = OnnxRuntimeHelper::CreateInstance();
+                m_onnx->Initialize(onnxModel.c_str());
+            }
         }
     }
 

@@ -1,6 +1,0 @@
-{
-    prediction: {
-        onnxModel: "c:\\temp\\rinna-xsmall-default\\spiece.model",
-        spieceModel: "c:\\temp\\rinna-xsmall-default\\model.onnx"
-    }
-}
