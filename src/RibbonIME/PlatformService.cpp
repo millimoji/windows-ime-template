@@ -30,60 +30,6 @@ struct ConsoleConnection : public AutoDestructor, public std::enable_shared_from
     FILE* m_pfErr = {};
 };
 
-struct ConfigAccessorImpl : public ConfigAccessor, public std::enable_shared_from_this<ConfigAccessorImpl> {
-    ConfigAccessorImpl(const std::shared_ptr<nlohmann::json>& json) : m_json(json) {
-    }
-    std::shared_ptr<ConfigAccessor> get(std::string_view key) override {
-        const auto value = m_json->at(key);
-        THROW_HR_IF(E_INVALIDARG, !value.is_object());
-        const auto jsonPtr = std::make_shared<nlohmann::json>(value);
-        return std::make_shared<ConfigAccessorImpl>(jsonPtr);
-    }
-    std::wstring getText(std::string_view key) override {
-        const auto value = m_json->at(key);
-        THROW_HR_IF(E_INVALIDARG, !value.is_string());
-        const auto utf8 = value.get<std::string>();
-        const auto platformService = PlatformService::GetInstance();
-        return platformService->ToUtf16(utf8);
-    }
-    std::string getTextUtf8(std::string_view key) override {
-        const auto value = m_json->at(key);
-        THROW_HR_IF(E_INVALIDARG, !value.is_string());
-        return value.get<std::string>();
-    }
-    std::wstring GetPath(std::string_view key) override {
-        const auto srcData = getText(key);
-        if (srcData.starts_with(m_binDirMacro)) {
-            const auto platformService = PlatformService::GetInstance();
-            const auto [pathPart, filePart] = platformService->SplitPathAndFile(platformService->GetThisModulePath().c_str());
-            const auto realPath = platformService->CombinePath(pathPart.c_str(), srcData.c_str() + m_binDirMacro.length());
-            return realPath;
-        }
-        if (srcData.starts_with(m_userDirMacro)) {
-            const auto platformService = PlatformService::GetInstance();
-            const auto userPath = platformService->GetAndEnsureUserPath();
-            const auto realPath = platformService->CombinePath(userPath.c_str(), srcData.c_str() + m_userDirMacro.length());
-            return realPath;
-        }
-        return srcData;
-    }
-    int getInt(std::string_view key) override {
-        THROW_HR_IF(E_INVALIDARG, m_json->contains(key));
-        if (m_json->contains(key)) {
-            const auto value = m_json->at(key);
-            if (value.is_number()) {
-                return value.get<int>();
-            }
-        }
-        return -1;
-    }
-
-    static inline const auto m_binDirMacro = std::wstring(L"${BINDIR}");
-    static inline const auto m_userDirMacro = std::wstring(L"${USERDIR}");
-
-    std::shared_ptr<nlohmann::json> m_json;
-};
-
 struct MemoryMappedFileImpl : public MemoryMappedFile, std::enable_shared_from_this<MemoryMappedFileImpl> {
     MemoryMappedFileImpl(const wchar_t* fileName) {
         wil::unique_handle hFile(CreateFile(fileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0));
@@ -185,32 +131,53 @@ struct PlatformServiceImpl : public PlatformService, std::enable_shared_from_thi
     std::shared_ptr<MemoryMappedFile> OpenFile(const wchar_t* fileName) override {
         return std::make_shared<MemoryMappedFileImpl>(fileName);
     }
-    std::shared_ptr<ConfigAccessor> GetConfig(bool reload) override {
+    std::shared_ptr<nlohmann::json> GetConfig(bool reload) override {
         if (!reload && m_config) {
             return m_config;
         }
 
-        auto root = nlohmann::json::object();
+        auto root = std::make_shared<nlohmann::json>(nlohmann::json::object());
         try {
             const auto inBinRsrc = LoadResource(L"ribbon-config.json", RT_RCDATA);
             const auto binRsrcJson = nlohmann::json::parse(std::string_view(&inBinRsrc[0], inBinRsrc.size()));
-            root.merge_patch(binRsrcJson);
+            root->merge_patch(binRsrcJson);
         } catch (...) {}
         try {
             const auto userPath = GetAndEnsureUserPath();
             const auto userConfig = CombinePath(userPath.c_str(), L"ribbon-config.json");
             const auto memFile = OpenFile(userConfig.c_str());
             const auto userJson = nlohmann::json::parse(std::string_view(reinterpret_cast<const char*>(memFile->Addr()), memFile->Size()));
-            root.merge_patch(userJson);
+            root->merge_patch(userJson);
         } catch (...) {}
         try {
             // current directoy
             const auto memFile = OpenFile(L"ribbon-config.json");
             const auto userJson = nlohmann::json::parse(std::string_view(reinterpret_cast<const char*>(memFile->Addr()), memFile->Size()));
-            root.merge_patch(userJson);
+            root->merge_patch(userJson);
         } catch (...) {}
 
-        return std::make_shared<ConfigAccessorImpl>(std::make_shared<nlohmann::json>(std::move(root)));
+        m_config = root;
+        return m_config;
+    }
+
+    static inline const auto m_binDirMacro = std::wstring(L"${BINDIR}");
+    static inline const auto m_userDirMacro = std::wstring(L"${USERDIR}");
+
+    std::wstring DecodePath(const wchar_t* srcPath) {
+        const auto& srcData = std::wstring_view(srcPath);
+        if (srcData.starts_with(m_binDirMacro)) {
+            const auto platformService = PlatformService::GetInstance();
+            const auto [pathPart, filePart] = platformService->SplitPathAndFile(platformService->GetThisModulePath().c_str());
+            const auto realPath = platformService->CombinePath(pathPart.c_str(), srcPath + m_binDirMacro.length());
+            return realPath;
+        }
+        if (srcData.starts_with(m_userDirMacro)) {
+            const auto platformService = PlatformService::GetInstance();
+            const auto userPath = platformService->GetAndEnsureUserPath();
+            const auto realPath = platformService->CombinePath(userPath.c_str(), srcPath + m_userDirMacro.length());
+            return realPath;
+        }
+        return std::wstring(srcPath);
     }
 
 private:
@@ -239,7 +206,7 @@ private:
         return loadBuf;
     }
 
-    std::shared_ptr<ConfigAccessor> m_config;
+    std::shared_ptr<nlohmann::json> m_config;
 };
 
 std::shared_ptr<PlatformService> PlatformService::GetInstance() {

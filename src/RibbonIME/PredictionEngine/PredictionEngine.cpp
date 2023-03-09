@@ -35,9 +35,9 @@ private:
         if (!m_spiece || !m_onnx) {
             const auto platformSvc = PlatformService::GetInstance();
             const auto config = platformSvc->GetConfig();
-            const auto configPrediction = config->get("prediction");
-            const auto spieceModel = configPrediction->GetPath("spieceModel");
-            const auto onnxModel = configPrediction->GetPath("onnxModel");
+            const auto configPrediction = config->at("prediction");
+            const auto spieceModel = platformSvc->DecodePath(platformSvc->ToUtf16(configPrediction["spieceModel"].get<std::string>()).c_str());
+            const auto onnxModel = platformSvc->DecodePath(platformSvc->ToUtf16(configPrediction["onnxModel"].get<std::string>()).c_str());
 
             if (!m_spiece) {
                 m_spiece = SentencePieceHelper::CreateInstance();

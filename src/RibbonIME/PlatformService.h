@@ -5,14 +5,6 @@ struct AutoDestructor {
     virtual ~AutoDestructor() {}
 };
 
-struct ConfigAccessor {
-    virtual std::shared_ptr<ConfigAccessor> get(std::string_view) = 0;
-    virtual std::wstring getText(std::string_view) = 0;
-    virtual std::string getTextUtf8(std::string_view) = 0;
-    virtual std::wstring GetPath(std::string_view key) = 0;
-    virtual int getInt(std::string_view) = 0;
-};
-
 struct MemoryMappedFile {
     virtual const void* Addr() = 0;
     virtual size_t Size() = 0;
@@ -33,7 +25,8 @@ struct PlatformService
     virtual std::shared_ptr<AutoDestructor> StartConsole() = 0;
     virtual std::vector<std::wstring> CommandLine() = 0;
     virtual std::shared_ptr<MemoryMappedFile> OpenFile(const wchar_t* fileName) = 0;
-    virtual std::shared_ptr<ConfigAccessor> GetConfig(bool reload = false) = 0;
+    virtual std::shared_ptr<nlohmann::json> GetConfig(bool reload = false) = 0;
+    virtual std::wstring DecodePath(const wchar_t* srcPath) = 0;
 
     static std::shared_ptr<PlatformService> GetInstance();
     virtual ~PlatformService() {}
